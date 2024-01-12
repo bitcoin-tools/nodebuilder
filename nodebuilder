@@ -53,7 +53,8 @@ clear
 sudo apt-get -qq update
 echo -n "Performing a system upgrade... "
 sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes
-if [ -f /var/run/reboot-required ]; then
+
+if [ "${CI:-false}" = false ] && [ -f /var/run/reboot-required ]; then
   echo -en "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
   read -rsn1 && echo
   echo "Rebooting."
