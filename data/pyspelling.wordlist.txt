@@ -27,7 +27,6 @@ ci
 conf
 dr
 enpdJIY
-epiccurious
 fsSL
 github
 guix

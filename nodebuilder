@@ -38,7 +38,7 @@ target_bitcoin_architecture="$(uname -m)"
 temp_directory="$(mktemp -d)"
 bitcoin_core_data_dir="${HOME}/.bitcoin"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
-shortcut_image_source="https://github.com/epiccurious/bitcoin-core-node-builder/raw/master/data/bitcoin.png"
+shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 
 (timeout --preserve-status 0.1 nc -z 1.1.1.1 53 &&

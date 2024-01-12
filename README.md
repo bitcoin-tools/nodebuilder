@@ -2,7 +2,7 @@
 
 Create a secure Bitcoin Core node with ease.
 
-NOTE: This code is still under development and not yet ready. Test at your own risk. You can track progress under [the Minimum Viable Product milestone](https://github.com/epiccurious/bitcoin-core-node-builder/milestone/1).
+NOTE: This code is still under development and not yet ready. Test at your own risk.
 
 ## Table of Contents
 
@@ -26,10 +26,10 @@ This script **does not** support macOS, 32-bit operating systems, or Arm-based h
 
 Open the Terminal and run the following command:
 ```
-/bin/bash -c "$(curl -fsSL https://github.com/epiccurious/bitcoin-core-node-builder/raw/master/nodebuilder)"
+/bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
 ```
 
-NOTE: This code is still under development and not yet ready. Test at your own risk. You can track progress under [the Minimum Viable Product milestone](https://github.com/epiccurious/bitcoin-core-node-builder/milestone/1).
+NOTE: This code is still under development and not yet ready. Test at your own risk.
 
 ## What Does This Script Do?
 
