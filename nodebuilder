@@ -5,6 +5,21 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+set_bitcoin_core_option() {
+  echo "param1 is $1"
+  echo "param2 is $2"
+  sed -i.bak '/^$1=/d' "${bitcoin_core_config_file:?}"
+  rm "${bitcoin_core_config_file:?}.bak"
+  echo "$1=$2" >> "${bitcoin_core_config_file:?}"
+}
+
+set_if_unset_bitcoin_core_option() {
+  printf "param1 is $1\nparam2 is $2"
+  if [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
+    echo "$1=$2" >> "${bitcoin_core_data_dir:?}"
+  fi
+}
+
 log_error() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
@@ -244,31 +259,30 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
 fi
 
 physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
 physical_memory_free_in_mib=$(awk '/MemFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
 memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
 
 echo "Detected ${memory_total_in_mib} MiB of memory, with ${memory_free_in_mib} MiB free."
 if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
   echo -n "Setting minimal memory usage..."
-  echo "dbcache=4" >> "${bitcoin_core_config_file}"
-  echo "maxmempool=5" >> "${bitcoin_core_config_file}"
-  echo "maxconnections=4" >> "${bitcoin_core_config_file}"
+  set_if_unset_bitcoin_core_option "dbcache" "4"
+  set_if_unset_bitcoin_core_option "maxmempool" "5"
+  set_if_unset_bitcoin_core_option "maxconnections" "4"
   [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
 elif [ "${memory_total_in_mib}" -le $((4 * 1024)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
   echo -n "Setting reduced memory usage..."
-  echo "dbcache=100" >> "${bitcoin_core_config_file}"
-  echo "maxmempool=50" >> "${bitcoin_core_config_file}"
-  #set -maxconnections to __
+  set_if_unset_bitcoin_core_option "dbcache" "100"
+  set_if_unset_bitcoin_core_option "maxmempool" "50"
+  set_if_unset_bitcoin_core_option "maxconnections" "10"
   [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
   echo "ok."
 elif [ "${memory_total_in_mib}" -le $((8 * 1024)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
   echo -n "Setting conservative memory usage..."
-  echo "dbcache=225" >> "${bitcoin_core_config_file}"
-  echo "maxmempool=150" >> "${bitcoin_core_config_file}"
-  #set -maxconnections to __
+  set_if_unset_bitcoin_core_option "dbcache" "225"
+  set_if_unset_bitcoin_core_option "maxmempool" "150"
   echo "ok."
 fi
 
