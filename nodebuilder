@@ -253,7 +253,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
   ## The higher this number is, the more likely a node will be to prune.
   ## The sweet spot is about 50 to 100 GB more than the size of blocks/ + chainstate/,
   ## which, as of June 2023, is around 522 GiB.
-  archival_node_required_disk_in_gib="600"
+  archival_node_required_disk_in_gib="686"
 
   archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * 1024))
 
