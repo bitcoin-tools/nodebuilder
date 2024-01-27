@@ -259,7 +259,7 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
 fi
 
 physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-physical_memory_free_in_mib=$(awk '/MemFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+physical_memory_free_in_mib=$(awk '/MemAvailable/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
