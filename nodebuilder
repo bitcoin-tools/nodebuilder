@@ -35,20 +35,20 @@ trap 'handle_error ${LINENO:-}' ERR
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
 case "$(uname -s)" in
-  Linux)
-    target_bitcoin_operating_system="linux-gnu"
-    ;;
-  Darwin)
-    target_bitcoin_operating_system="apple-darwin"
-    err "ERROR: macOS is not yet supported."
-    echo "Exiting"
-    exit 1
-    ;;
-  *)
-    err "ERROR: Your operating system is not supported."
-    echo "Exiting."
-    exit 1
-    ;;
+Linux)
+  target_bitcoin_operating_system="linux-gnu"
+  ;;
+Darwin)
+  target_bitcoin_operating_system="apple-darwin"
+  err "ERROR: macOS is not yet supported."
+  echo "Exiting"
+  exit 1
+  ;;
+*)
+  err "ERROR: Your operating system is not supported."
+  echo "Exiting."
+  exit 1
+  ;;
 esac
 
 temp_directory="$(mktemp -d)"
