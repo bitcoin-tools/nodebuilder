@@ -106,7 +106,7 @@ else
 
   bitcoin_tarball_filename="bitcoin-${target_bitcoin_version}-${target_bitcoin_architecture}-${target_bitcoin_operating_system}.tar.gz"
   bitcoin_tarball_destination_file="${HOME}/Downloads/${bitcoin_tarball_filename}"
-  
+
   if ! [ -f "${bitcoin_tarball_destination_file}" ]; then
     bitcoin_source="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
     bitcoin_tarball_file_source="${bitcoin_source}/${bitcoin_tarball_filename}"
