@@ -34,6 +34,22 @@ trap 'handle_error ${LINENO:-}' ERR
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
+case "$(uname -s)" in
+  Linux)
+    target_bitcoin_operating_system="linux-gnu"
+    ;;
+  Darwin)
+    target_bitcoin_operating_system="apple-darwin"
+    err "ERROR: macOS is not yet supported."
+    echo "Exiting"
+    exit 1
+    ;;
+  *)
+    err "ERROR: Your operating system is not supported."
+    echo "Exiting."
+    exit 1
+    ;;
+esac
 
 temp_directory="$(mktemp -d)"
 bitcoin_core_data_dir="${HOME}/.bitcoin"
@@ -88,7 +104,7 @@ else
   bitcoin_install_lib_destination="/usr/local/lib"
   bitcoin_install_man_destination="/usr/local/share/man/man1"
 
-  bitcoin_tarball_filename="bitcoin-${target_bitcoin_version}-${target_bitcoin_architecture}-linux-gnu.tar.gz"
+  bitcoin_tarball_filename="bitcoin-${target_bitcoin_version}-${target_bitcoin_architecture}-${target_bitcoin_operating_system}.tar.gz"
   bitcoin_tarball_destination_file="${HOME}/Downloads/${bitcoin_tarball_filename}"
 
   if ! [ -f "${bitcoin_tarball_destination_file}" ]; then
