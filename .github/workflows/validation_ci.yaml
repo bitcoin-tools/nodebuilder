@@ -40,11 +40,11 @@ jobs:
     name: Validate with markdown-link-check
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: Run markdown-link-check on Documentation
-      uses: gaurav-nelson/github-action-markdown-link-check@v1
-      with:
-        use-verbose-mode: 'yes'
+      - uses: actions/checkout@master
+      - name: Run markdown-link-check on Documentation
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-verbose-mode: 'yes'
 
   markdown-spellcheck:
     name: Validate with PySpelling
