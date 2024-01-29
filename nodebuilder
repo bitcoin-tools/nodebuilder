@@ -6,12 +6,12 @@ set -o nounset
 set -o pipefail
 
 log_error() {
-  echo "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
+  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
 
 # shellcheck disable=SC2317
 ensure_cursor_is_on_column_one() {
-  echo -en "\E[6n"
+  printf '%s' "\E[6n"
   read -rsdR cursor_position
   cursor_position="${cursor_position#*[}"
   cursor_position_column="$(echo "${cursor_position}" | cut -d ";" -f 2)"
@@ -41,12 +41,12 @@ Linux)
 Darwin)
   #target_bitcoin_operating_system="apple-darwin"
   err "ERROR: macOS is not yet supported."
-  echo "Exiting"
+  printf '%s\n' "Exiting"
   exit 1
   ;;
 *)
   err "ERROR: Your operating system is not supported."
-  echo "Exiting."
+  printf '%s\n' "Exiting."
   exit 1
   ;;
 esac
@@ -61,29 +61,29 @@ shortcut_image_file="${user_data_dir}/images/bitcoin.png"
   timeout --preserve-status 0.1 nc -z 8.8.8.8 53 &&
   timeout --preserve-status 0.5 nc -z bitcoincore.org 443) || {
   err "ERROR: Check for active internet failed."
-  echo "Exiting."
+  printf '%s\n' "Exiting."
   exit 1
 }
 
 clear
 sudo apt-get -qq update
-echo -n "Performing a system upgrade... "
+printf '%s' "Performing a system upgrade... "
 sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes
 
 if [ "${CI:-false}" = false ] && [ -f /var/run/reboot-required ]; then
-  echo -en "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
-  read -rsn1 && echo
-  echo "Rebooting."
+  printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
+  read -rsn1
+  printf '%s\n' "\nRebooting."
   sudo reboot
   exit 0
 fi
-echo "ok."
+printf '%s\n' "ok."
 
-echo -n "Checking for dependencies..."
+printf '%s' "Checking for dependencies..."
 sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends curl git gnupg jq libxcb-xinerama0
-echo "ok."
+printf '%s\n' "ok."
 
-echo -n "Checking for Bitcoin ${target_bitcoin_version}... "
+printf '%s' "Checking for Bitcoin ${target_bitcoin_version}... "
 if command -v bitcoin-qt &> /dev/null; then
   current_bitcoin_version="$(bitcoin-qt --version 2> /dev/null | head -1)"
 else
@@ -91,9 +91,9 @@ else
 fi
 
 if [[ "${current_bitcoin_version}" == *"${target_bitcoin_version}"* ]]; then
-  echo "ok."
+  printf '%s\n' "ok."
 else
-  echo
+  printf '%.0s\n'
   bitcoin_core_extract_dir="${temp_directory}/bitcoin-core"
   bitcoin_install_bin_source="${bitcoin_core_extract_dir}/bin"
   bitcoin_install_include_source="${bitcoin_core_extract_dir}/include"
@@ -122,27 +122,27 @@ else
     guix_sigs_temporary_dir="${temp_directory}/guix.sigs"
     guix_sigs_destination_dir="${HOME}/Downloads/guix.sigs"
 
-    echo -n "  Downloading Bitcoin Core... "
+    printf '%s' "  Downloading Bitcoin Core... "
     curl --silent --show-error --location --fail --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
     curl --silent --show-error --location --fail --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
     curl --silent --show-error --location --fail --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
-    echo "ok."
+    printf '%s\n' "ok."
 
-    echo -n "  Validating the checksum... "
+    printf '%s' "  Validating the checksum... "
     cd "${temp_directory}"/
     sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
     cd "${HOME}"/
     if ! [[ "${sha256_check}" == *"OK" ]]; then
       err "INVALID. The download has failed. This script cannot continue due to security concerns."
       err "Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
-      echo -en "\nPRESS ANY KEY to exit... "
-      read -rsn1 && echo
-      echo "Exiting."
+      printf '%s' "\nPRESS ANY KEY to exit... "
+      read -rsn1
+      printf '%s\n' "\nExiting."
       exit 1
     fi
-    echo "ok."
+    printf '%s\n' "ok."
 
-    echo -n "  Validating the signatures... "
+    printf '%s' "  Validating the signatures... "
     if [ -d "${guix_sigs_destination_dir}"/ ]; then
       gpg --quiet --import "${guix_sigs_destination_dir}"/builder-keys/*.gpg
     else
@@ -151,7 +151,7 @@ else
     fi
     gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
     if [[ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]]; then
-      echo "${gpg_good_signature_count} good."
+      printf '%s\n' "${gpg_good_signature_count} good."
       [ -d "$(dirname "${bitcoin_tarball_destination_file}")" ] || mkdir -p "$(dirname "${bitcoin_tarball_destination_file}")"
       mv "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_destination_file}"
       [ -d "${guix_sigs_destination_dir}"/ ] || mv "${guix_sigs_temporary_dir}" "${guix_sigs_destination_dir}"
@@ -160,29 +160,29 @@ else
     else
       err "INVALID. The download has failed. This script cannot continue due to security concerns."
       err "Please review the temporary file ${temp_directory}/${gpg_signatures_file}."
-      echo -en "\nPRESS ANY KEY to exit... "
-      read -rsn1 && echo
-      echo "Exiting."
+      printf '%s' "\nPRESS ANY KEY to exit... "
+      read -rsn1
+      printf '%s\n' "\nExiting."
       exit 1
     fi
   fi
 
-  echo -n "  Extracting Bitcoin Core... "
+  printf '%s' "  Extracting Bitcoin Core... "
   [ -d "${bitcoin_core_extract_dir}"/ ] || mkdir "${bitcoin_core_extract_dir}"
   tar -xzf "${bitcoin_tarball_destination_file}" -C "${bitcoin_core_extract_dir}"/ --strip-components=1
-  echo "ok."
+  printf '%s\n' "ok."
 
-  echo -n "  Running the unit tests... "
+  printf '%s' "  Running the unit tests... "
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin --log_level=nothing 2>&1)"
   if [[ "${unit_test_response}" != *"No errors detected"* ]]; then
-    echo -e "\n${unit_test_response}"
+    printf '%s\n' "\n${unit_test_response}"
     log_error "Unit tests failed!"
-    echo "Exiting."
+    printf '%s\n' "Exiting."
     exit 1
   fi
-  echo "ok."
+  printf '%s\n' "ok."
 
-  echo -n "  Installing Bitcoin Core... "
+  printf '%s' "  Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}"
   sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
   (cd /usr/local/lib && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
@@ -194,15 +194,15 @@ else
   sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}"/
   [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}"
   sudo install -c -m 644 "${bitcoin_install_man_source}"/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1} "${bitcoin_install_man_destination}"/
-  echo "ok."
+  printf '%s\n' "ok."
 
-  echo -n "  Removing temporary files... "
+  printf '%s' "  Removing temporary files... "
   rm -r "${bitcoin_core_extract_dir:?}"/
   rm -r "${temp_directory:?}"/
-  echo "ok."
+  printf '%s\n' "ok."
 fi
 
-echo -n "Creating application shortcuts... "
+printf '%s' "Creating application shortcuts... "
 desktop_path="${HOME}/Desktop"
 applications_path="${user_data_dir}/applications"
 shortcut_filename="bitcoin_core.desktop"
@@ -229,29 +229,29 @@ chmod u+x "${applications_path}"/"${shortcut_filename}"
 chmod u+x "${desktop_path}"/"${shortcut_filename}"
 ## Make the desktop shortcut trusted
 [ "${CI:-false}" = true ] || gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
-echo "ok."
+printf '%s\n' "ok."
 
 bitcoin_core_config_file="${bitcoin_core_data_dir}/bitcoin.conf"
 if [ ! -f "${bitcoin_core_config_file}" ]; then
-  echo -n "Setting the default node behavior... "
+  printf '%s' "Setting the default node behavior... "
   [ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
   {
-    echo "server=1"
-    echo "mempoolfullrbf=1"
-    echo "v2transport=1"
+    printf '%s\n' "server=1"
+    printf '%s\n' "mempoolfullrbf=1"
+    printf '%s\n' "v2transport=1"
   } > "${bitcoin_core_config_file}"
-  echo "ok."
+  printf '%s\n' "ok."
 fi
 
 if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
-  echo -n "Checking free space in home directory... "
+  printf '%s' "Checking free space in home directory... "
   free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
-  echo "$((free_space_in_mib / 1024)) GiB."
+  printf '%s\n' "$((free_space_in_mib / 1024)) GiB."
 
   bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
   bitcoin_core_chainstate_dir="${bitcoin_core_data_dir}/chainstate"
 
-  echo -n "Checking data already synced... "
+  printf '%s' "Checking data already synced... "
   blocks_size_in_mib="0"
   chainstate_size_in_mib="0"
   if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
@@ -261,7 +261,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
     chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
   fi
   data_already_synced_in_mib=$((blocks_size_in_mib + chainstate_size_in_mib))
-  echo "$((data_already_synced_in_mib / 1024)) GiB."
+  printf '%s\n' "$((data_already_synced_in_mib / 1024)) GiB."
 
   ## This constant will need to be adjusted over time as the chain grows
   ## or need to find how to generate this dynamically in a trustless way.
@@ -274,16 +274,16 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
   archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * 1024))
 
   if [ "${free_space_in_mib}" -ge $((archival_node_required_disk_in_mib - data_already_synced_in_mib)) ]; then
-    echo "  Your node will run as an unpruned full node."
-    echo "prune=0" >> "${bitcoin_core_config_file}"
+    printf '%s\n' "  Your node will run as an unpruned full node."
+    printf '%s\n' "prune=0" >> "${bitcoin_core_config_file}"
   elif [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 80 - data_already_synced_in_mib)) ]; then
     err "You are too low on disk space to run Bitcoin Core."
-    echo "Exiting."
+    printf '%s\n' "Exiting."
     exit 1
   else
     if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 40 - data_already_synced_in_mib)) ]; then
-      echo -e "  Your disk space is low.\n  Setting blocks-only mode and the minimum 0.55 GiB prune."
-      echo "blocksonly=1" >> "${bitcoin_core_config_file}"
+      printf '%s\n' "  Your disk space is low.\n  Setting blocks-only mode and the minimum 0.55 GiB prune."
+      printf '%s\n' "blocksonly=1" >> "${bitcoin_core_config_file}"
       prune_amount_in_mib="550"
     else
       if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 12 - data_already_synced_in_mib)) ]; then
@@ -296,48 +296,48 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
         prune_ratio=80
       fi
       prune_amount_in_mib=$((free_space_in_mib * prune_ratio / 100))
-      echo -e "  Pruning to $((prune_amount_in_mib / 1024)) GiB (${prune_ratio}% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf."
+      printf '%s\n' "  Pruning to $((prune_amount_in_mib / 1024)) GiB (${prune_ratio}% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf."
     fi
-    echo "prune=${prune_amount_in_mib}" >> "${bitcoin_core_config_file}"
+    printf '%s\n' "prune=${prune_amount_in_mib}" >> "${bitcoin_core_config_file}"
   fi
 fi
 
-echo -n "Starting Bitcoin Core... "
+printf '%s' "Starting Bitcoin Core... "
 if [ "${CI:-false}" = true ]; then
   bitcoind --daemonwait
 else
   bitcoin-qt 2> /dev/null &
   disown
 fi
-echo "ok."
-echo -n "  Checking the RPC status... "
+printf '%s\n' "ok."
+printf '%s' "  Checking the RPC status... "
 bitcoin-cli --rpcwait getrpcinfo > /dev/null
-echo "ok."
+printf '%s\n' "ok."
 
 sleep_time="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
 ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 
 if [ "${ibd_status}" = true ]; then
-  echo -n "Disabling system sleep, suspend, and hibernate... "
+  printf '%s' "Disabling system sleep, suspend, and hibernate... "
   sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
-  echo "ok."
+  printf '%s\n' "ok."
 
-  echo -en "\nClose this Terminal window by clicking on the \"X\".\nThis screen will refresh in ${sleep_time} seconds."
+  printf '%s' "\nClose this Terminal window by clicking on the \"X\".\nThis screen will refresh in ${sleep_time} seconds."
   for ((i = 1; i <= sleep_time; i++)); do
     sleep 1
     printf "."
   done
-  echo
+  printf '%.0s\n'
 else
-  echo "  Your node has already synced the blockchain."
+  printf '%s\n' "  Your node has already synced the blockchain."
 fi
 
 while [ "${ibd_status}" = true ]; do
   sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
   # Handle case of early sync by replacing scientific notation with decimal
   [[ "${sync_progress}" == *"e"* ]] && sync_progress="0.000000001"
-  sync_progress_percent=$(echo "${sync_progress}*100" | bc)
+  sync_progress_percent=$(printf '%s\n' "${sync_progress}*100" | bc)
 
   blocks=$(jq '.blocks' <<< "${blockchain_info}")
   headers=$(jq '.headers' <<< "${blockchain_info}")
@@ -371,22 +371,22 @@ while [ "${ibd_status}" = true ]; do
     sync_status="${sync_status}${free_space_in_mib} MiB\n"
   fi
   clear
-  echo -en "${sync_status}\n"
+  printf '%s' "${sync_status}\n"
 
   if [ "${CI:-false}" = true ] && [ "${size_on_disk_in_mib}" -ge 1 ]; then
-    echo "Exiting the script for CI runners."
+    printf '%s\n' "Exiting the script for CI runners."
     exit 0
   fi
 
-  echo -e "Synchronizing can take weeks on a slow connection.\n"
-  echo -e "Close this Terminal window by clicking on the \"X\"."
-  echo -n "This screen will refresh in ${sleep_time} seconds."
+  printf '%s\n' "Synchronizing can take weeks on a slow connection.\n"
+  printf '%s\n' "Close this Terminal window by clicking on the \"X\"."
+  printf '%s' "This screen will refresh in ${sleep_time} seconds."
   sleep "${sleep_time}"
 
   blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
-  echo
+  printf '%.0s\n'
   ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 done
 
-echo "This script has completed successfully."
+printf '%s\n' "This script has completed successfully."
 exit 0
