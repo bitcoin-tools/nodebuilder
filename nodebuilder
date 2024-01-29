@@ -79,7 +79,7 @@ if [ "${CI:-false}" = false ] && [ -f /var/run/reboot-required ]; then
 fi
 printf '%s\n' "ok."
 
-printf '%s' "Checking for dependencies..."
+printf '%s' "Checking for dependencies... "
 sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends curl git gnupg jq libxcb-xinerama0
 printf '%s\n' "ok."
 
@@ -93,7 +93,7 @@ fi
 if [[ "${current_bitcoin_version}" == *"${target_bitcoin_version}"* ]]; then
   printf '%s\n' "ok."
 else
-  printf '%.0s\n'
+  printf '\n'
   bitcoin_core_extract_dir="${temp_directory}/bitcoin-core"
   bitcoin_install_bin_source="${bitcoin_core_extract_dir}/bin"
   bitcoin_install_include_source="${bitcoin_core_extract_dir}/include"
@@ -328,7 +328,7 @@ if [ "${ibd_status}" = true ]; then
     sleep 1
     printf "."
   done
-  printf '%.0s\n'
+  printf '\n'
 else
   printf '%s\n' "  Your node has already synced the blockchain."
 fi
@@ -384,7 +384,7 @@ while [ "${ibd_status}" = true ]; do
   sleep "${sleep_time}"
 
   blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
-  printf '%.0s\n'
+  printf '\n'
   ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 done
 
