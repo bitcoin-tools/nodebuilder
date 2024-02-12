@@ -6,15 +6,12 @@ set -o nounset
 set -o pipefail
 
 set_bitcoin_core_option() {
-  echo "param1 is $1"
-  echo "param2 is $2"
-  sed -i.bak '/^$1=/d' "${bitcoin_core_config_file:?}"
+  sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
   rm "${bitcoin_core_config_file:?}.bak"
   printf '%s\n' "$1=$2" >> "${bitcoin_core_config_file:?}"
 }
 
 set_if_unset_bitcoin_core_option() {
-  printf "param1 is $1\nparam2 is $2"
   if [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
     printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
   fi
