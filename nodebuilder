@@ -6,8 +6,10 @@ set -o nounset
 set -o pipefail
 
 set_bitcoin_core_option() {
-  sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
-  rm "${bitcoin_core_config_file:?}.bak"
+  if [ -f "${bitcoin_core_config_file:?}" ]; then
+    sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
+    rm "${bitcoin_core_config_file:?}.bak"
+  fi
   printf '%s\n' "$1=$2" >> "${bitcoin_core_config_file:?}"
 }
 
