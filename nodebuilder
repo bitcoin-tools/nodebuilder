@@ -250,11 +250,9 @@ bitcoin_core_config_file="${bitcoin_core_data_dir}/bitcoin.conf"
 if [ ! -f "${bitcoin_core_config_file}" ]; then
   echo -n "Setting the default node behavior... "
   [ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
-  {
-    echo "server=1"
-    echo "mempoolfullrbf=1"
-    echo "v2transport=1"
-  } > "${bitcoin_core_config_file}"
+  set_bitcoin_core_option "server" "1"
+  set_bitcoin_core_option "mempoolfullrbf" "1"
+  set_bitcoin_core_option "v2transport" "1"
   echo "ok."
 fi
 
@@ -318,7 +316,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
 
   if [ "${free_space_in_mib}" -ge $((archival_node_required_disk_in_mib - data_already_synced_in_mib)) ]; then
     echo "  Your node will run as an unpruned full node."
-    echo "prune=0" >> "${bitcoin_core_config_file}"
+    set_bitcoin_core_option "prune" "0"
   elif [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 80 - data_already_synced_in_mib)) ]; then
     err "You are too low on disk space to run Bitcoin Core."
     echo "Exiting."
@@ -326,7 +324,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
   else
     if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 40 - data_already_synced_in_mib)) ]; then
       echo -e "  Your disk space is low.\n  Setting blocks-only mode and the minimum 0.55 GiB prune."
-      echo "blocksonly=1" >> "${bitcoin_core_config_file}"
+      set_bitcoin_core_option "blocksonly" "1"
       prune_amount_in_mib="550"
     else
       if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 12 - data_already_synced_in_mib)) ]; then
@@ -341,7 +339,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
       prune_amount_in_mib=$((free_space_in_mib * prune_ratio / 100))
       echo -e "  Pruning to $((prune_amount_in_mib / 1024)) GiB (${prune_ratio}% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf."
     fi
-    echo "prune=${prune_amount_in_mib}" >> "${bitcoin_core_config_file}"
+    set_bitcoin_core_option "prune" "${prune_amount_in_mib}"
   fi
 fi
 
