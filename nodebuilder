@@ -192,7 +192,7 @@ else
   sudo install -c "${bitcoin_install_bin_source}"/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin} "${bitcoin_install_bin_destination}"/
   [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}"/
   sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}"/
-  [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}"
+  [ -d "${bitcoin_install_man_destination}" ] || sudo mkdir -p "${bitcoin_install_man_destination}"
   sudo install -c -m 644 "${bitcoin_install_man_source}"/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1} "${bitcoin_install_man_destination}"/
   printf '%s\n' "ok."
 
