@@ -5,6 +5,20 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+set_bitcoin_core_option() {
+  if [ -f "${bitcoin_core_config_file:?}" ]; then
+    sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
+    rm "${bitcoin_core_config_file:?}.bak"
+  fi
+  printf '%s\n' "$1=$2" >> "${bitcoin_core_config_file:?}"
+}
+
+set_if_unset_bitcoin_core_option() {
+  if [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
+    printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
+  fi
+}
+
 log_error() {
   printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
@@ -235,12 +249,38 @@ bitcoin_core_config_file="${bitcoin_core_data_dir}/bitcoin.conf"
 if [ ! -f "${bitcoin_core_config_file}" ]; then
   printf '%s' "Setting the default node behavior... "
   [ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
-  {
-    printf '%s\n' "server=1"
-    printf '%s\n' "mempoolfullrbf=1"
-    printf '%s\n' "v2transport=1"
-  } > "${bitcoin_core_config_file}"
-  printf '%s\n' "ok."
+  set_bitcoin_core_option "server" "1"
+  set_bitcoin_core_option "mempoolfullrbf" "1"
+  set_bitcoin_core_option "v2transport" "1"
+  echo "ok."
+fi
+
+physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+physical_memory_free_in_mib=$(awk '/MemAvailable/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
+memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
+
+echo "Detected ${memory_total_in_mib} MiB of memory, with ${memory_free_in_mib} MiB free."
+if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
+  echo -n "Setting minimal memory usage..."
+  set_if_unset_bitcoin_core_option "dbcache" "4"
+  set_if_unset_bitcoin_core_option "maxmempool" "5"
+  set_if_unset_bitcoin_core_option "maxconnections" "4"
+  [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
+elif [ "${memory_total_in_mib}" -le $((4 * 1024)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
+  echo -n "Setting reduced memory usage..."
+  set_if_unset_bitcoin_core_option "dbcache" "100"
+  set_if_unset_bitcoin_core_option "maxmempool" "50"
+  set_if_unset_bitcoin_core_option "maxconnections" "10"
+  [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
+  echo "ok."
+elif [ "${memory_total_in_mib}" -le $((8 * 1024)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
+  echo -n "Setting conservative memory usage..."
+  set_if_unset_bitcoin_core_option "dbcache" "225"
+  set_if_unset_bitcoin_core_option "maxmempool" "150"
+  echo "ok."
 fi
 
 if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
@@ -275,7 +315,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
 
   if [ "${free_space_in_mib}" -ge $((archival_node_required_disk_in_mib - data_already_synced_in_mib)) ]; then
     printf '%s\n' "  Your node will run as an unpruned full node."
-    printf '%s\n' "prune=0" >> "${bitcoin_core_config_file}"
+    set_bitcoin_core_option "prune" "0"
   elif [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 80 - data_already_synced_in_mib)) ]; then
     err "You are too low on disk space to run Bitcoin Core."
     printf '%s\n' "Exiting."
@@ -283,7 +323,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
   else
     if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 40 - data_already_synced_in_mib)) ]; then
       printf '%s\n' "  Your disk space is low.\n  Setting blocks-only mode and the minimum 0.55 GiB prune."
-      printf '%s\n' "blocksonly=1" >> "${bitcoin_core_config_file}"
+      set_bitcoin_core_option "blocksonly" "1"
       prune_amount_in_mib="550"
     else
       if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 12 - data_already_synced_in_mib)) ]; then
@@ -298,7 +338,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
       prune_amount_in_mib=$((free_space_in_mib * prune_ratio / 100))
       printf '%s\n' "  Pruning to $((prune_amount_in_mib / 1024)) GiB (${prune_ratio}% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf."
     fi
-    printf '%s\n' "prune=${prune_amount_in_mib}" >> "${bitcoin_core_config_file}"
+    set_bitcoin_core_option "prune" "${prune_amount_in_mib}"
   fi
 fi
 
