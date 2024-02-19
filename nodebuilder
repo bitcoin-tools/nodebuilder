@@ -227,7 +227,9 @@ EOF
 chmod u+x "${applications_path}"/"${shortcut_filename}"
 chmod u+x "${desktop_path}"/"${shortcut_filename}"
 ## Make the desktop shortcut trusted
-[ "${CI:-false}" = true ] || gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
+if [ "${CI:-false}" = false ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
+  gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
+fi
 printf '%s\n' "ok."
 
 bitcoin_core_config_file="${bitcoin_core_data_dir}/bitcoin.conf"
@@ -326,7 +328,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ]; then
+if [ "${CI:-false}" = true ] || [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -ne 0 ]; then
   bitcoind --daemonwait
 else
   bitcoin-qt 2> /dev/null &
@@ -341,7 +343,7 @@ sleep_time="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
 ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 
-if [ "${ibd_status}" = true ]; then
+if [ "${ibd_status}" = true ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
   printf '%s' "Disabling system sleep, suspend, and hibernate... "
   sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
   printf '%s\n' "ok."
@@ -396,7 +398,7 @@ while [ "${ibd_status}" = true ]; do
   clear
   printf '%s' "${sync_status}\n"
 
-  if [ "${CI:-false}" = true ] && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if { [ "${CI:-false}" = true ] || [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -ne 0 ]; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
     printf '%s\n' "Exiting the script for CI runners."
     exit 0
   fi
