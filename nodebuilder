@@ -101,7 +101,7 @@ else
   current_bitcoin_version=""
 fi
 
-if [[ "${current_bitcoin_version}" == *"${target_bitcoin_version}"* ]]; then
+if [ -n "${current_bitcoin_version}" ] && [[ "${current_bitcoin_version}" == *"${target_bitcoin_version}"* ]]; then
   printf '%s\n' "ok."
 else
   printf '\n'
