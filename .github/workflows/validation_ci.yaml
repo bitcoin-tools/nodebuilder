@@ -55,7 +55,7 @@ jobs:
         name: Spell Check Markdown Files
         with:
           output_file: spellcheck-output.txt
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: '!cancelled()'
         with:
           name: Spellcheck Output
