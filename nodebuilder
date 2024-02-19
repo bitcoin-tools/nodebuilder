@@ -41,6 +41,9 @@ handle_exit() {
 handle_error() {
   ensure_cursor_is_on_column_one
   log_error "Failed to run '${BASH_COMMAND}' on line $1."
+  printf '%s\n' "Exiting."
+  handle_exit
+  exit 1
 }
 
 trap handle_exit EXIT
@@ -54,14 +57,10 @@ Linux)
   ;;
 Darwin)
   #target_bitcoin_operating_system="apple-darwin"
-  err "ERROR: macOS is not yet supported."
-  printf '%s\n' "Exiting"
-  exit 1
+  handle_error "macOS is not yet supported."
   ;;
 *)
-  err "ERROR: Your operating system is not supported."
-  printf '%s\n' "Exiting."
-  exit 1
+  handle_error "Your operating system is not supported."
   ;;
 esac
 
@@ -74,9 +73,7 @@ shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 (timeout --preserve-status 1 nc -z 1.1.1.1 53 &&
   timeout --preserve-status 1 nc -z 8.8.8.8 53 &&
   timeout --preserve-status 5 nc -z bitcoincore.org 443) || {
-  err "ERROR: Check for active internet failed."
-  printf '%s\n' "Exiting."
-  exit 1
+  handle_error "Check for active internet failed."
 }
 
 clear
@@ -147,12 +144,7 @@ else
     sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
     cd "${HOME}"/
     if ! [[ "${sha256_check}" == *"OK" ]]; then
-      err "INVALID. The download has failed. This script cannot continue due to security concerns."
-      err "Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
-      printf '%s' "\nPRESS ANY KEY to exit... "
-      read -rsn1
-      printf '%s\n' "\nExiting."
-      exit 1
+      handle_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
     fi
     printf '%s\n' "ok."
 
@@ -172,12 +164,7 @@ else
       rm "${bitcoin_hash_file}"
       rm "${gpg_signatures_file}"
     else
-      err "INVALID. The download has failed. This script cannot continue due to security concerns."
-      err "Please review the temporary file ${temp_directory}/${gpg_signatures_file}."
-      printf '%s' "\nPRESS ANY KEY to exit... "
-      read -rsn1
-      printf '%s\n' "\nExiting."
-      exit 1
+      handle_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${gpg_signatures_file}."
     fi
   fi
 
@@ -190,9 +177,7 @@ else
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin --log_level=nothing 2>&1)"
   if [[ "${unit_test_response}" != *"No errors detected"* ]]; then
     printf '%s\n' "\n${unit_test_response}"
-    log_error "Unit tests failed!"
-    printf '%s\n' "Exiting."
-    exit 1
+    handle_error "Unit tests failed."
   fi
   printf '%s\n' "ok."
 
@@ -317,9 +302,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
     printf '%s\n' "  Your node will run as an unpruned full node."
     set_bitcoin_core_option "prune" "0"
   elif [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 80 - data_already_synced_in_mib)) ]; then
-    err "You are too low on disk space to run Bitcoin Core."
-    printf '%s\n' "Exiting."
-    exit 1
+    handle_error "You are too low on disk space to run Bitcoin Core."
   else
     if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 40 - data_already_synced_in_mib)) ]; then
       printf '%s\n' "  Your disk space is low.\n  Setting blocks-only mode and the minimum 0.55 GiB prune."
