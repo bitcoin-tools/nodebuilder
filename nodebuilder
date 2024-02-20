@@ -74,8 +74,13 @@ Linux)
   ;;
 Darwin)
   target_bitcoin_operating_system="apple-darwin"
-  printf '%s' "Checking for dependencies... "
+  printf '%s\n' "Checking for dependencies... "
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  printf '%s\n' "ok."
+  
+  printf '%s\n' "Checking for dependencies... "
   brew install curl git gnupg jq libxcb
+  printf '%s\n' "ok."
   ;;
 *)
   handle_error "Your operating system is not supported."
