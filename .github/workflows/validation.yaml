@@ -80,6 +80,10 @@ jobs:
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - uses: actions/checkout@v4
+      - name: Insrall brew package manager
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      - name: Install dependencies
+        run: brew install libxcb-xinerama0 timeout
       - name: Run nodebuilder
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
