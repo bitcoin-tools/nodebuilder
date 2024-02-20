@@ -141,7 +141,13 @@ else
 
     printf '%s' "  Validating the checksum... "
     cd "${temp_directory}"/
-    sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
+    if command -v sha256sum >/dev/null; then
+      sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
+    elif command -v shasum >/dev/null; then
+      sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | shasum -a 256 --check 2> /dev/null)"
+    else
+      handle_error "Either 'sha256sum' or 'shasum' must on PATH."
+    fi
     cd "${HOME}"/
     if ! [[ "${sha256_check}" == *"OK" ]]; then
       handle_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
