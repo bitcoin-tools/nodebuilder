@@ -75,7 +75,7 @@ Linux)
 Darwin)
   target_bitcoin_operating_system="apple-darwin"
   printf '%s' "Checking for dependencies... "
-  brew install curl get gnupg jq libxcb
+  brew install curl git gnupg jq libxcb
   ;;
 *)
   handle_error "Your operating system is not supported."
