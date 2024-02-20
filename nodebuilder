@@ -189,11 +189,6 @@ else
   printf '%s' "  Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}"
   sudo ls -la "${bitcoin_install_lib_source}"/
-  if linux; then
-  else if macos; then
-  else
-  fi
-
   case "$(uname -s)" in
   Linux)
     sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
