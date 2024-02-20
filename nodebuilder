@@ -300,7 +300,17 @@ esac
 
 if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   printf '%s' "Checking free space in home directory... "
-  free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  case "$(uname -s)" in
+  Linux)
+    free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+    ;;
+  Darwin)
+    free_space_in_mib=$(df -m ~ | tail -1 | awk '{ printf $4}')
+    ;;
+  *)
+    handle_error "Your operating system is not supported."
+    ;;
+  esac
   printf '%s\n' "$((free_space_in_mib / 1024)) GiB."
 
   bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
