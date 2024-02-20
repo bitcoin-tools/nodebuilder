@@ -300,6 +300,8 @@ esac
 
 if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   printf '%s' "Checking free space in home directory... "
+  uname -a
+  uname -s
   case "$(uname -s)" in
   Linux)
     free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
