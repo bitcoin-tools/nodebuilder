@@ -15,7 +15,6 @@ jobs:
 
   bash-lint:
     name: Validate with ShellCheck
-    needs: [run-nodebuilder-macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +25,6 @@ jobs:
 
   bash-format:
     name: Validate with shfmt
-    needs: [run-nodebuilder-macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +38,6 @@ jobs:
 
   markdown-links:
     name: Validate with markdown-link-check
-    needs: [run-nodebuilder-macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -51,7 +48,6 @@ jobs:
 
   markdown-spellcheck:
     name: Validate with PySpelling
-    needs: [run-nodebuilder-macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -81,6 +77,7 @@ jobs:
   run-nodebuilder-macos:
     name: Run nodebuilder on macOS
     runs-on: macos-latest
+    needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - uses: actions/checkout@v4
       - name: Install brew package manager
