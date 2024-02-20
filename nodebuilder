@@ -305,7 +305,8 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
     free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
     ;;
   Darwin)
-    free_space_in_mib=$(df -m ~ | tail -1 | awk '{ printf $4}')
+    df
+    free_space_in_mib=$(df -m "${HOME}" | tail -1 | awk '{ printf $4}')
     ;;
   *)
     handle_error "Your operating system is not supported."
