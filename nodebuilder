@@ -189,9 +189,27 @@ else
   printf '%s' "  Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}"
   sudo ls -la "${bitcoin_install_lib_source}"/
-  sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
-  (cd /usr/local/lib && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
-  (cd /usr/local/lib && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
+  if linux; then
+  else if macos; then
+  else
+  fi
+
+  case "$(uname -s)" in
+  Linux)
+    sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
+    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
+    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
+    ;;
+  Darwin)
+    sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.0.dylib "${bitcoin_install_lib_destination}"/libbitcoinconsensus.0.dylib
+    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
+    target_bitcoin_operating_system="apple-darwin"
+    ;;
+  *)
+    handle_error "Your operating system is not supported."
+    ;;
+  esac
+
   PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin" ldconfig -n "${bitcoin_install_lib_destination}"
   [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}"/
   sudo install -c "${bitcoin_install_bin_source}"/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin} "${bitcoin_install_bin_destination}"/
