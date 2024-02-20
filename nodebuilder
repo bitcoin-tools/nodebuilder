@@ -56,8 +56,7 @@ Linux)
   target_bitcoin_operating_system="linux-gnu"
   ;;
 Darwin)
-  #target_bitcoin_operating_system="apple-darwin"
-  handle_error "macOS is not yet supported."
+  target_bitcoin_operating_system="apple-darwin"
   ;;
 *)
   handle_error "Your operating system is not supported."
