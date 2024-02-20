@@ -67,7 +67,7 @@ Linux)
     exit 0
   fi
   printf '%s\n' "ok."
-  
+
   printf '%s' "Checking for dependencies... "
   sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends curl git gnupg jq libxcb-xinerama0
   printf '%s\n' "ok."
