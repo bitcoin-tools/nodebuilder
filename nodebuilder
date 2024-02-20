@@ -188,6 +188,7 @@ else
 
   printf '%s' "  Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}"
+  sudo ls -la "${bitcoin_install_lib_source}"/
   sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
   (cd /usr/local/lib && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
   (cd /usr/local/lib && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
