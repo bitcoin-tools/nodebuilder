@@ -77,7 +77,7 @@ Darwin)
   printf '%s\n' "Checking for dependencies... "
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   printf '%s\n' "ok."
-  
+
   printf '%s\n' "Checking for dependencies... "
   brew install curl git gnupg jq libxcb
   printf '%s\n' "ok."
@@ -269,7 +269,7 @@ Linux)
   swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
   memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
-  
+
   echo "Detected ${memory_total_in_mib} MiB of memory, with ${memory_free_in_mib} MiB free."
   if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
     echo -n "Setting minimal memory usage..."
@@ -291,8 +291,7 @@ Linux)
     echo "ok."
   fi
   ;;
-Darwin)
-  ;;
+Darwin) ;;
 *)
   handle_error "Your operating system is not supported."
   ;;
