@@ -83,9 +83,9 @@ jobs:
       - name: Insrall brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install dependencies
-        run: brew install libxinerama timeout
+        run: brew install coreutils libxinerama
       - name: Run nodebuilder
-        run: timeout 7200 /bin/bash -x ./nodebuilder
+        run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
   run-docker-container:
     name: Run Docker container
