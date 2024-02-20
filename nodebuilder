@@ -411,7 +411,6 @@ while [ "${ibd_status}" = true ]; do
     free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
     ;;
   Darwin)
-    df
     free_space_in_mib=$(df -m "${HOME}" | tail -1 | awk '{ printf $4}')
     ;;
   *)
