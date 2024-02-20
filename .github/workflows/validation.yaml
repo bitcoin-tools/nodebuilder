@@ -86,7 +86,7 @@ jobs:
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install runtime dependencies
-        run: brew install coreutils libxinerama
+        run: brew install coreutils git libxinerama
       - name: Run nodebuilder
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
