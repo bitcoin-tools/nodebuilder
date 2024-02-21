@@ -398,9 +398,11 @@ fi
 while [ "${ibd_status}" = true ]; do
   sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
   # Handle case of early sync by replacing scientific notation with decimal
-  { [[ "${sync_progress}" == *"e"* ]] || [[ "${sync_progress}" == *"E"* ]]; } && sync_progress="0.000000001"
-  sync_progress_percent=$(printf '%s\n' "${sync_progress}*100" | bc)
-
+  
+  if [ "$(echo "${sync_progress}" | grep --count --ignore-case --quiet "e")" -ne 0 ]; then
+    sync_progress="0.000000001"
+  fi
+  
   blocks=$(jq '.blocks' <<< "${blockchain_info}")
   headers=$(jq '.headers' <<< "${blockchain_info}")
   last_block_time=$(jq '.time' <<< "${blockchain_info}")
