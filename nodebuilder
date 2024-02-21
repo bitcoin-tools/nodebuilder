@@ -179,7 +179,8 @@ else
   printf '%s\n' "ok."
 
   printf '%s' "  Running the unit tests... "
-  unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin --log_level=nothing 2>&1)"
+  ls -la "${bitcoin_install_bin_source}"/
+  unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
   if [[ "${unit_test_response}" != *"No errors detected"* ]]; then
     printf '%s\n' "\n${unit_test_response}"
     handle_error "Unit tests failed."
@@ -409,6 +410,12 @@ while [ "${ibd_status}" = true ]; do
   last_block_time=$(jq '.time' <<< "${blockchain_info}")
   size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / 1024 / 1024))
 
+  if [ "$(uname -s)" == "Darwin" ]; then
+    free_space_in_mib=$(gdf --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  else
+    free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  fi
+
   case "$(uname -s)" in
   Linux)
     free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
@@ -430,7 +437,12 @@ while [ "${ibd_status}" = true ]; do
   else
     printf 'Sync progress:      %f\n' "$(printf '%.3f' "${sync_progress_percent}")"
     printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
-    printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
+
+    if [ "$(uname -s)" == "Darwin" ]; then
+      printf 'Current chain tip:  %s\n' "$(gdate -d @"${last_block_time}" | cut -c 5-)"
+    else
+      printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
+    fi
   fi
 
   printf '%s' 'Chain sync size:    '
