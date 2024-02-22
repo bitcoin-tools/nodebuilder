@@ -3,6 +3,7 @@ FROM ubuntu:22.04
 ENV TERM=xterm
 
 # Install app dependencies
+RUN apt-get update && apt-get dist-upgrade -y
 RUN apt-get update && apt-get install -y bc git libxcb-xinerama0 netcat sudo
 
 # Set user with sudo permissions
