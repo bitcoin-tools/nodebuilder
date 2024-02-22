@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # A minimally-interactive script for launching a Bitcoin Core node
 set -o errexit
