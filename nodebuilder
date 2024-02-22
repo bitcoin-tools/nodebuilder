@@ -263,7 +263,11 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
 fi
 
 case "$(uname -s)" in
-Linux)
+Darwin) ;; #TODO: Add macOS memory check
+MINGW*)
+  handle_error "Your operating system is not supported."
+  ;;
+*)
   physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
   physical_memory_free_in_mib=$(awk '/MemAvailable/ { printf "%d \n", $2/1024 }' /proc/meminfo)
   swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
@@ -292,25 +296,15 @@ Linux)
     echo "ok."
   fi
   ;;
-Darwin) ;;
-*)
-  handle_error "Your operating system is not supported."
-  ;;
 esac
 
 if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   printf '%s' "Checking free space in home directory... "
-  case "$(uname -s)" in
-  Linux)
+  if [ "$(uname -s)" == "Darwin" ]; then
+    free_space_in_mib=$(gdf --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  else
     free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
-    ;;
-  Darwin)
-    free_space_in_mib=$(df -m "${HOME}" | tail -1 | awk '{ printf $4}')
-    ;;
-  *)
-    handle_error "Your operating system is not supported."
-    ;;
-  esac
+  fi
   printf '%s\n' "$((free_space_in_mib / 1024)) GiB."
 
   bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
@@ -415,18 +409,6 @@ while [ "${ibd_status}" = true ]; do
   else
     free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
   fi
-
-  case "$(uname -s)" in
-  Linux)
-    free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
-    ;;
-  Darwin)
-    free_space_in_mib=$(df -m "${HOME}" | tail -1 | awk '{ printf $4}')
-    ;;
-  *)
-    handle_error "Your operating system is not supported."
-    ;;
-  esac
 
   clear
   if [ "${headers}" -eq 0 ]; then
