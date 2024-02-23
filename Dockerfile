@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 ENV TERM=xterm
 
 # Install dependencies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes git netcat sudo
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes curl git netcat sudo
 
 # Clone
 RUN printf 'Cloning nodebuilder...\n'
