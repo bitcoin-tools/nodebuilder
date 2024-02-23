@@ -13,4 +13,4 @@ RUN cd nodebuilder
 # Execute
 RUN printf 'Starting nodebuilder...\n'
 COPY nodebuilder /opt/src/scripts/nodebuilder
-RUN /bin/bash -c /opt/src/scripts/nodebuilder
+RUN /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
