@@ -248,32 +248,36 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
   echo "ok."
 fi
 
+printf '%s' "Checking the memory on your system... "
 physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 physical_memory_free_in_mib=$(awk '/MemAvailable/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
 memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
+printf '%0.1f GiB total, %0.1f GiB free.\n' \
+  "$(printf '%s\n' "${memory_total_in_mib}/1024" | bc --mathlib)" \
+  "$(printf '%s\n' "${memory_free_in_mib}/1024" | bc --mathlib)"
 
-echo "Detected ${memory_total_in_mib} MiB of memory, with ${memory_free_in_mib} MiB free."
 if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
-  echo -n "Setting minimal memory usage..."
+  printf '%s' "Configuring for minimal memory usage... "
   set_if_unset_bitcoin_core_option "dbcache" "4"
   set_if_unset_bitcoin_core_option "maxmempool" "5"
   set_if_unset_bitcoin_core_option "maxconnections" "4"
   [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
+  printf '%s\n' "ok."
 elif [ "${memory_total_in_mib}" -le $((4 * 1024)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
-  echo -n "Setting reduced memory usage..."
+  printf '%s' "Configuring for reduced memory usage... "
   set_if_unset_bitcoin_core_option "dbcache" "100"
   set_if_unset_bitcoin_core_option "maxmempool" "50"
   set_if_unset_bitcoin_core_option "maxconnections" "10"
   [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
-  echo "ok."
+  printf '%s\n' "ok."
 elif [ "${memory_total_in_mib}" -le $((8 * 1024)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
-  echo -n "Setting conservative memory usage..."
+  printf '%s' "Configuring for conservative memory usage... "
   set_if_unset_bitcoin_core_option "dbcache" "225"
   set_if_unset_bitcoin_core_option "maxmempool" "150"
-  echo "ok."
+  printf '%s\n' "ok."
 fi
 
 if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
