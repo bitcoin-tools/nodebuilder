@@ -25,11 +25,15 @@ log_error() {
 
 # shellcheck disable=SC2317
 ensure_cursor_is_on_column_one() {
-  printf '%s' "\E[6n"
-  read -rsdR cursor_position
-  cursor_position="${cursor_position#*[}"
-  cursor_position_column="$(echo "${cursor_position}" | cut -d ";" -f 2)"
-  ([ "${cursor_position_column}" -gt 1 ] && echo) || true
+  if [ "$(uname -s)" == "Darwin" ]; then
+    printf '\n'
+  else
+    printf '%s' "\E[6n"
+    read -rsdR cursor_position
+    cursor_position="${cursor_position#*[}"
+    cursor_position_column="$(echo "${cursor_position}" | cut -d ";" -f 2)"
+    ([ "${cursor_position_column}" -gt 1 ] && echo) || true
+  fi
 }
 
 # shellcheck disable=SC2317
@@ -259,7 +263,7 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
   set_bitcoin_core_option "server" "1"
   set_bitcoin_core_option "mempoolfullrbf" "1"
   set_bitcoin_core_option "v2transport" "1"
-  echo "ok."
+  printf '%s\n' "ok."
 fi
 
 case "$(uname -s)" in
@@ -275,26 +279,26 @@ MINGW*)
   memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
 
-  echo "Detected ${memory_total_in_mib} MiB of memory, with ${memory_free_in_mib} MiB free."
+  printf '%s\n' "Detected ${memory_total_in_mib} MiB of memory, with ${memory_free_in_mib} MiB free."
   if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
-    echo -n "Setting minimal memory usage..."
+    printf '%s' "Setting minimal memory usage..."
     set_if_unset_bitcoin_core_option "dbcache" "4"
     set_if_unset_bitcoin_core_option "maxmempool" "5"
     set_if_unset_bitcoin_core_option "maxconnections" "4"
     [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
+    printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((4 * 1024)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
-    echo -n "Setting reduced memory usage..."
+    printf '%s' "Setting reduced memory usage..."
     set_if_unset_bitcoin_core_option "dbcache" "100"
     set_if_unset_bitcoin_core_option "maxmempool" "50"
     set_if_unset_bitcoin_core_option "maxconnections" "10"
     [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
-    echo "ok."
+    printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((8 * 1024)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
-    echo -n "Setting conservative memory usage..."
+    printf '%s' "Setting conservative memory usage..."
     set_if_unset_bitcoin_core_option "dbcache" "225"
     set_if_unset_bitcoin_core_option "maxmempool" "150"
-    echo "ok."
-  fi
+    printf '%s\n' "ok."  fi
   ;;
 esac
 
