@@ -8,7 +8,7 @@ RUN DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get dist-upgrade --ass
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes bc git libxcb-xinerama0 netcat sudo
 
 # Clone the repository
-RUN git clone https://github.com/bitcoin-tools/nodebuilder.git
+RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git
 RUN cd nodebuilder
 
 # Run nodebuilder
