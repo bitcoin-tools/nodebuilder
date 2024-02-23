@@ -2,12 +2,15 @@
 FROM ubuntu:22.04
 ENV TERM=xterm
 
-# Install system updates and dependencies
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes git
+# Install dependencies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes git netcat
 
-# Execute the script
+# Clone the repository
+RUN printf 'Cloning nodebuilder...\n'
 RUN git clone https://github.com/bitcoin-tools/nodebuilder.git
 RUN cd nodebuilder
-RUN echo 'Starting nodebuilder'
+
+# Execute the script
+RUN printf 'Starting nodebuilder...\n'
 COPY nodebuilder /opt/src/scripts/nodebuilder
-RUN ["/bin/bash", "-c", "/opt/src/scripts/nodebuilder"]
+RUN /bin/bash -c /opt/src/scripts/nodebuilder
