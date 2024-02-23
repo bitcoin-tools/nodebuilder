@@ -255,7 +255,7 @@ swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/m
 swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
 memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
 memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
-printf '0.1%f GiB total, %0.1f GiB free.\n' \
+printf '%0.1f GiB total, %0.1f GiB free.\n' \
   "$(printf '%s\n' "${memory_total_in_mib}/1024" | bc --mathlib)" \
   "$(printf '%s\n' "${memory_free_in_mib}/1024" | bc --mathlib)"
 
