@@ -299,6 +299,7 @@ MINGW*)
     set_if_unset_bitcoin_core_option "dbcache" "225"
     set_if_unset_bitcoin_core_option "maxmempool" "150"
     printf '%s\n' "ok."
+  fi
   ;;
 esac
 
