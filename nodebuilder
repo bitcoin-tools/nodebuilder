@@ -190,7 +190,9 @@ else
   printf '%s\n' "ok."
 
   printf '%s' "  Running the unit tests... "
-  ls -la "${bitcoin_install_bin_source}"/
+  if [ "${target_bitcoin_architecture}" == "arm64" ]; then
+    codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
+  fi
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
   if [[ "${unit_test_response}" != *"No errors detected"* ]]; then
     printf '%s\n' "\n${unit_test_response}"
@@ -213,7 +215,7 @@ else
     sudo update_dyld_shared_cache
 
     if [ "${target_bitcoin_architecture}" == "arm64" ]; then
-      for bitcoin_executable in {bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,bitcoind,test_bitcoin}; do
+      for bitcoin_executable in {bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,bitcoind}; do
         codesign -s - "${bitcoin_install_bin_source}"/"${bitcoin_executable}"
       done
     fi
