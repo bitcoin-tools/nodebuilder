@@ -70,11 +70,7 @@ user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 
-(timeout --preserve-status 1 nc -z 1.1.1.1 53 &&
-  timeout --preserve-status 1 nc -z 8.8.8.8 53 &&
-  timeout --preserve-status 5 nc -z bitcoincore.org 443) || {
-  handle_error "Check for active internet failed."
-}
+(timeout --preserve-status 1 nc -z 1.1.1.1 53 && timeout --preserve-status 1 nc -z 8.8.8.8 53 && timeout --preserve-status 5 nc -z bitcoincore.org 443) || { handle_error "Check for active internet failed." }
 
 clear
 sudo apt-get -qq update
