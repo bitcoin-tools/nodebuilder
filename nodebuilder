@@ -55,6 +55,19 @@ trap 'handle_error ${LINENO:-}' ERR
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
+
+temp_directory="$(mktemp -d)"
+bitcoin_core_data_dir="${HOME}/.bitcoin"
+user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
+shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
+shortcut_image_file="${user_data_dir}/images/bitcoin.png"
+
+(timeout --preserve-status 1 nc -z 1.1.1.1 53 &&
+  timeout --preserve-status 1 nc -z 8.8.8.8 53 &&
+  timeout --preserve-status 5 nc -z bitcoincore.org 443) || {
+  handle_error "Check for active internet failed."
+}
+
 case "$(uname -s)" in
 Linux)
   target_bitcoin_operating_system="linux-gnu"
@@ -73,7 +86,7 @@ Linux)
   printf '%s\n' "ok."
 
   printf '%s' "Checking for dependencies... "
-  sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends curl git gnupg jq libxcb-xinerama0
+  sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends bc curl git gnupg jq libxcb-xinerama0
   printf '%s\n' "ok."
   ;;
 Darwin)
@@ -90,18 +103,6 @@ Darwin)
   handle_error "Your operating system is not supported."
   ;;
 esac
-
-temp_directory="$(mktemp -d)"
-bitcoin_core_data_dir="${HOME}/.bitcoin"
-user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
-shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
-shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-
-(timeout --preserve-status 1 nc -z 1.1.1.1 53 &&
-  timeout --preserve-status 1 nc -z 8.8.8.8 53 &&
-  timeout --preserve-status 5 nc -z bitcoincore.org 443) || {
-  handle_error "Check for active internet failed."
-}
 
 printf '%s' "Checking for Bitcoin ${target_bitcoin_version}... "
 if command -v bitcoin-qt &> /dev/null; then
