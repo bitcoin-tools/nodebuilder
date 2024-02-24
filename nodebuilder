@@ -150,7 +150,13 @@ else
 
     printf '%s' "  Validating the checksum... "
     cd "${temp_directory}"/
-    sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
+    if command -v sha256sum > /dev/null; then
+      sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
+    elif command -v shasum > /dev/null; then
+      sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | shasum -a 256 --check 2> /dev/null)"
+    else
+      handle_error "Either 'sha256sum' or 'shasum' must on PATH."
+    fi
     cd "${HOME}"/
     if ! [[ "${sha256_check}" == *"OK" ]]; then
       handle_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
@@ -270,30 +276,33 @@ MINGW*)
   handle_error "Your operating system is not supported."
   ;;
 *)
+  printf '%s' "Checking the memory on your system... "
   physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
   physical_memory_free_in_mib=$(awk '/MemAvailable/ { printf "%d \n", $2/1024 }' /proc/meminfo)
   swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
   swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
   memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
+  printf '%0.1f GiB total, %0.1f GiB free.\n' \
+    "$(printf '%s\n' "${memory_total_in_mib}/1024" | bc --mathlib)" \
+    "$(printf '%s\n' "${memory_free_in_mib}/1024" | bc --mathlib)"
 
-  printf '%s\n' "Detected ${memory_total_in_mib} MiB of memory, with ${memory_free_in_mib} MiB free."
   if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
-    printf '%s' "Setting minimal memory usage..."
+    printf '%s' "Configuring for minimal memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "4"
     set_if_unset_bitcoin_core_option "maxmempool" "5"
     set_if_unset_bitcoin_core_option "maxconnections" "4"
     [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((4 * 1024)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
-    printf '%s' "Setting reduced memory usage..."
+    printf '%s' "Configuring for reduced memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "100"
     set_if_unset_bitcoin_core_option "maxmempool" "50"
     set_if_unset_bitcoin_core_option "maxconnections" "10"
     [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((8 * 1024)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
-    printf '%s' "Setting conservative memory usage..."
+    printf '%s' "Configuring for conservative memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "225"
     set_if_unset_bitcoin_core_option "maxmempool" "150"
     printf '%s\n' "ok."
