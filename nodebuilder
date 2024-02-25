@@ -94,7 +94,7 @@ Linux)
 Darwin)
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s\n' "Checking for dependencies... "
+  printf '%s\n' "Checking for brew... "
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   printf '%s\n' "ok."
 
