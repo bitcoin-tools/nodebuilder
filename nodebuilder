@@ -101,7 +101,7 @@ Darwin)
   else
     printf '%s\n%s' "not found." "  Installing brew... "
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
+  fi
   printf '%s\n' "ok."
 
   printf '%s\n' "Checking for dependencies... "
