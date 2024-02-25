@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [bash-lint, bash-format]
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
       - name: Run markdown-link-check on Documentation
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
@@ -63,26 +63,38 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-  run-nodebuilder:
-    name: Run nodebuilder
+  run-nodebuilder-ubuntu:
+    name: Run nodebuilder on Ubuntu
     runs-on: ubuntu-latest
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-      - name: Install runtime dependency libxcb-xinerama0
+      - name: Install runtime dependency
         run: sudo apt-get update && sudo apt-get install -y libxcb-xinerama0
       - name: Run nodebuilder
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
+  run-nodebuilder-macos:
+    name: Run nodebuilder on macOS
+    runs-on: macos-latest
+    needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install brew package manager
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      - name: Install runtime dependencies
+        run: brew install coreutils git libxinerama
+      - name: Run nodebuilder
+        run: gtimeout 7200 /bin/bash -x ./nodebuilder
+
   run-docker-container:
-    name: Run Docker container
+    name: Run nodebuilder in Docker
     runs-on: ubuntu-latest
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Build docker images
         uses: docker/build-push-action@v5
         with:

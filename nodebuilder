@@ -25,11 +25,15 @@ log_error() {
 
 # shellcheck disable=SC2317
 ensure_cursor_is_on_column_one() {
-  printf '%s' "\E[6n"
-  read -rsdR cursor_position
-  cursor_position="${cursor_position#*[}"
-  cursor_position_column="$(echo "${cursor_position}" | cut -d ";" -f 2)"
-  ([ "${cursor_position_column}" -gt 1 ] && echo) || true
+  if [ "$(uname -s)" == "Darwin" ]; then
+    printf '\n'
+  else
+    printf '%s' "\E[6n"
+    read -rsdR cursor_position
+    cursor_position="${cursor_position#*[}"
+    cursor_position_column="$(echo "${cursor_position}" | cut -d ";" -f 2)"
+    ([ "${cursor_position_column}" -gt 1 ] && echo) || true
+  fi
 }
 
 # shellcheck disable=SC2317
@@ -51,18 +55,6 @@ trap 'handle_error ${LINENO:-}' ERR
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
-case "$(uname -s)" in
-Linux)
-  target_bitcoin_operating_system="linux-gnu"
-  ;;
-Darwin)
-  #target_bitcoin_operating_system="apple-darwin"
-  handle_error "macOS is not yet supported."
-  ;;
-*)
-  handle_error "Your operating system is not supported."
-  ;;
-esac
 
 temp_directory="$(mktemp -d)"
 bitcoin_core_data_dir="${HOME}/.bitcoin"
@@ -78,23 +70,41 @@ shortcut_image_file="${user_data_dir}/images/bitcoin.png"
   handle_error "Check for active internet failed."
 }
 
-clear
-sudo apt-get -qq update
-printf '%s' "Performing a system upgrade... "
-sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes
+case "$(uname -s)" in
+Linux)
+  target_bitcoin_operating_system="linux-gnu"
+  clear
+  sudo apt-get -qq update
+  printf '%s' "Performing a system upgrade... "
+  sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes
 
-if [ "${CI:-false}" = false ] && [ -f /var/run/reboot-required ]; then
-  printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
-  read -rsn1
-  printf '%s\n' "\nRebooting."
-  sudo reboot
-  exit 0
-fi
-printf '%s\n' "ok."
+  if [ "${CI:-false}" = false ] && [ -f /var/run/reboot-required ]; then
+    printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
+    read -rsn1
+    printf '%s\n' "\nRebooting."
+    sudo reboot
+    exit 0
+  fi
+  printf '%s\n' "ok."
 
-printf '%s' "Checking for dependencies... "
-sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends bc curl git gnupg jq libxcb-xinerama0
-printf '%s\n' "ok."
+  printf '%s' "Checking for dependencies... "
+  sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends bc curl git gnupg jq libxcb-xinerama0
+  printf '%s\n' "ok."
+  ;;
+Darwin)
+  target_bitcoin_operating_system="apple-darwin"
+  printf '%s\n' "Checking for dependencies... "
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  printf '%s\n' "ok."
+
+  printf '%s\n' "Checking for dependencies... "
+  brew install curl git gnupg jq libxcb
+  printf '%s\n' "ok."
+  ;;
+*)
+  handle_error "Your operating system is not supported."
+  ;;
+esac
 
 printf '%s' "Checking for Bitcoin ${target_bitcoin_version}... "
 if command -v bitcoin-qt &> /dev/null; then
@@ -182,7 +192,10 @@ else
   printf '%s\n' "ok."
 
   printf '%s' "  Running the unit tests... "
-  unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin --log_level=nothing 2>&1)"
+  if [ "${target_bitcoin_architecture}" == "arm64" ]; then
+    codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
+  fi
+  unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
   if [[ "${unit_test_response}" != *"No errors detected"* ]]; then
     printf '%s\n' "\n${unit_test_response}"
     handle_error "Unit tests failed."
@@ -191,10 +204,28 @@ else
 
   printf '%s' "  Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}"
-  sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
-  (cd /usr/local/lib && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
-  (cd /usr/local/lib && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
-  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin" ldconfig -n "${bitcoin_install_lib_destination}"
+  case "$(uname -s)" in
+  Linux)
+    sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
+    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
+    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin" ldconfig -n "${bitcoin_install_lib_destination}"
+    ;;
+  Darwin)
+    sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.0.dylib "${bitcoin_install_lib_destination}"/libbitcoinconsensus.0.dylib
+    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
+    sudo update_dyld_shared_cache
+
+    if [ "${target_bitcoin_architecture}" == "arm64" ]; then
+      for bitcoin_executable in {bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,bitcoind}; do
+        codesign -s - "${bitcoin_install_bin_source}"/"${bitcoin_executable}"
+      done
+    fi
+    ;;
+  *)
+    handle_error "Your operating system is not supported."
+    ;;
+  esac
   [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}"/
   sudo install -c "${bitcoin_install_bin_source}"/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin} "${bitcoin_install_bin_destination}"/
   [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}"/
@@ -247,44 +278,56 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
   set_bitcoin_core_option "server" "1"
   set_bitcoin_core_option "mempoolfullrbf" "1"
   set_bitcoin_core_option "v2transport" "1"
-  echo "ok."
-fi
-
-printf '%s' "Checking the memory on your system... "
-physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-physical_memory_free_in_mib=$(awk '/MemAvailable/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
-memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
-printf '%0.1f GiB total, %0.1f GiB free.\n' \
-  "$(printf '%s\n' "${memory_total_in_mib}/1024" | bc --mathlib)" \
-  "$(printf '%s\n' "${memory_free_in_mib}/1024" | bc --mathlib)"
-
-if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
-  printf '%s' "Configuring for minimal memory usage... "
-  set_if_unset_bitcoin_core_option "dbcache" "4"
-  set_if_unset_bitcoin_core_option "maxmempool" "5"
-  set_if_unset_bitcoin_core_option "maxconnections" "4"
-  [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
-  printf '%s\n' "ok."
-elif [ "${memory_total_in_mib}" -le $((4 * 1024)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
-  printf '%s' "Configuring for reduced memory usage... "
-  set_if_unset_bitcoin_core_option "dbcache" "100"
-  set_if_unset_bitcoin_core_option "maxmempool" "50"
-  set_if_unset_bitcoin_core_option "maxconnections" "10"
-  [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
-  printf '%s\n' "ok."
-elif [ "${memory_total_in_mib}" -le $((8 * 1024)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
-  printf '%s' "Configuring for conservative memory usage... "
-  set_if_unset_bitcoin_core_option "dbcache" "225"
-  set_if_unset_bitcoin_core_option "maxmempool" "150"
   printf '%s\n' "ok."
 fi
+
+case "$(uname -s)" in
+Darwin) ;; #TODO: Add macOS memory check
+MINGW*)
+  handle_error "Your operating system is not supported."
+  ;;
+*)
+  printf '%s' "Checking the memory on your system... "
+  physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+  physical_memory_free_in_mib=$(awk '/MemAvailable/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+  swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+  swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+  memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
+  memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
+  printf '%0.1f GiB total, %0.1f GiB free.\n' \
+    "$(printf '%s\n' "${memory_total_in_mib}/1024" | bc --mathlib)" \
+    "$(printf '%s\n' "${memory_free_in_mib}/1024" | bc --mathlib)"
+
+  if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
+    printf '%s' "Configuring for minimal memory usage... "
+    set_if_unset_bitcoin_core_option "dbcache" "4"
+    set_if_unset_bitcoin_core_option "maxmempool" "5"
+    set_if_unset_bitcoin_core_option "maxconnections" "4"
+    [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
+    printf '%s\n' "ok."
+  elif [ "${memory_total_in_mib}" -le $((4 * 1024)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
+    printf '%s' "Configuring for reduced memory usage... "
+    set_if_unset_bitcoin_core_option "dbcache" "100"
+    set_if_unset_bitcoin_core_option "maxmempool" "50"
+    set_if_unset_bitcoin_core_option "maxconnections" "10"
+    [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
+    printf '%s\n' "ok."
+  elif [ "${memory_total_in_mib}" -le $((8 * 1024)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
+    printf '%s' "Configuring for conservative memory usage... "
+    set_if_unset_bitcoin_core_option "dbcache" "225"
+    set_if_unset_bitcoin_core_option "maxmempool" "150"
+    printf '%s\n' "ok."
+  fi
+  ;;
+esac
 
 if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   printf '%s' "Checking free space in home directory... "
-  free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  if [ "$(uname -s)" == "Darwin" ]; then
+    free_space_in_mib=$(gdf --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  else
+    free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  fi
   printf '%s\n' "$((free_space_in_mib / 1024)) GiB."
 
   bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
@@ -373,14 +416,22 @@ fi
 while [ "${ibd_status}" = true ]; do
   sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
   # Handle case of early sync by replacing scientific notation with decimal
-  [[ "${sync_progress}" == *"e"* ]] && sync_progress="0.000000001"
-  sync_progress_percent=$(printf '%s\n' "${sync_progress}*100" | bc)
+
+  if [ "$(echo "${sync_progress}" | grep --count --ignore-case "e")" -gt 0 ]; then
+    sync_progress="0.000000001"
+  fi
+  sync_progress_percent="$(printf '%s\n' "${sync_progress}*100" | bc)"
 
   blocks=$(jq '.blocks' <<< "${blockchain_info}")
   headers=$(jq '.headers' <<< "${blockchain_info}")
   last_block_time=$(jq '.time' <<< "${blockchain_info}")
   size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / 1024 / 1024))
-  free_space_in_mib=$(df --output=avail --block-size="1MiB" "${bitcoin_core_data_dir}" | sed 1d)
+
+  if [ "$(uname -s)" == "Darwin" ]; then
+    free_space_in_mib=$(gdf --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  else
+    free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+  fi
 
   clear
   if [ "${headers}" -eq 0 ]; then
@@ -391,7 +442,12 @@ while [ "${ibd_status}" = true ]; do
   else
     printf 'Sync progress:      %f\n' "$(printf '%.3f' "${sync_progress_percent}")"
     printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
-    printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
+
+    if [ "$(uname -s)" == "Darwin" ]; then
+      printf 'Current chain tip:  %s\n' "$(gdate -d @"${last_block_time}" | cut -c 5-)"
+    else
+      printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
+    fi
   fi
 
   printf '%s' 'Chain sync size:    '
