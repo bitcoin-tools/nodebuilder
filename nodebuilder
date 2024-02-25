@@ -57,7 +57,6 @@ target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
 
 temp_directory="$(mktemp -d)"
-bitcoin_core_data_dir="${HOME}/.bitcoin"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
@@ -73,12 +72,13 @@ shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 case "$(uname -s)" in
 Linux)
   target_bitcoin_operating_system="linux-gnu"
+  bitcoin_core_data_dir="${HOME}/.bitcoin"
   clear
-  sudo apt-get -qq update
   printf '%s' "Performing a system upgrade... "
+  sudo apt-get -qq update
   sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes
 
-  if [ "${CI:-false}" = false ] && [ -f /var/run/reboot-required ]; then
+  if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
     printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
     read -rsn1
     printf '%s\n' "\nRebooting."
@@ -93,7 +93,8 @@ Linux)
   ;;
 Darwin)
   target_bitcoin_operating_system="apple-darwin"
-  printf '%s\n' "Checking for dependencies... "
+  bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
+  printf '%s\n' "Checking for brew... "
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   printf '%s\n' "ok."
 
