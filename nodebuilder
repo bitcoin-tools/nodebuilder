@@ -97,7 +97,7 @@ Darwin)
   printf '%s\n' "Checking for brew... "
   if command -v brew &> /dev/null; then
     printf '%s\n%s' "found." "  Updating brew... "
-    brew update
+    brew update --quiet
   else
     printf '%s\n%s' "not found." "  Installing brew... "
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
