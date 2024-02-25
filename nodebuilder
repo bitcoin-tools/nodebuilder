@@ -57,8 +57,6 @@ target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
 
 temp_directory="$(mktemp -d)"
-bitcoin_core_data_linux_dir="${HOME}/.bitcoin"
-bitcoin_core_data_macos_dir="${HOME}/.bitcoin"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
