@@ -100,7 +100,7 @@ Darwin)
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   else
     printf '%s\n%s' "found." "  Updating brew... "
-    brew update  
+    brew update
   fi
   printf '%s\n' "ok."
 
