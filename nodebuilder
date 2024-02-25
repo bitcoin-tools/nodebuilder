@@ -96,12 +96,12 @@ Darwin)
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
   printf '%s\n' "Checking for brew... "
   if command -v brew &> /dev/null; then
-    printf '%s\n%s' "found." "  Installing brew... "
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  else
     printf '%s\n%s' "found." "  Updating brew... "
     brew update
-  fi
+  else
+    printf '%s\n%s' "not found." "  Installing brew... "
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
   printf '%s\n' "ok."
 
   printf '%s\n' "Checking for dependencies... "
