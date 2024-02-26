@@ -103,7 +103,13 @@ Darwin)
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
   printf '%s\n' "Checking for brew... "
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  if command -v brew &> /dev/null; then
+    printf '%s\n%s' "found." "  Updating brew... "
+    brew update --quiet
+  else
+    printf '%s\n%s' "not found." "  Installing brew... "
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
   printf '%s\n' "ok."
 
   printf '%s\n' "Checking for dependencies... "
