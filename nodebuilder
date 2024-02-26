@@ -102,7 +102,7 @@ Darwin)
 
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
-  printf '%' "Checking for brew... "
+  printf '%s' "Checking for brew... "
   if command -v brew &> /dev/null; then
     printf '%s\n%s' "found." "  Updating brew... "
     brew update --quiet
