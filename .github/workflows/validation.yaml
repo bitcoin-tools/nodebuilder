@@ -76,6 +76,19 @@ jobs:
       - name: Run nodebuilder
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
+  run-nodebuilder-fedora:
+    name: Run nodebuilder on Fedora
+    runs-on: fedora-latest
+    needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system upgrades
+        run: sudo dnf upgrade
+      - name: Install runtime dependency
+        run: sudo install libxcb
+      - name: Run nodebuilder
+        run: timeout 7200 /bin/bash -x ./nodebuilder
+
   run-nodebuilder-macos:
     name: Run nodebuilder on macOS
     runs-on: macos-latest
