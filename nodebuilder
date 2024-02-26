@@ -108,7 +108,8 @@ Darwin)
     brew update --quiet
   else
     printf '%s\n%s' "not found." "  Installing brew... "
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" <<< "${unattended}"
+    ## TODO: might need to escalate to sudo permissions before installing bash
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   printf '%s\n' "ok."
 
