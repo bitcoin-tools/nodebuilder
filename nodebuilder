@@ -114,7 +114,7 @@ Darwin)
   printf '%s\n' "ok."
 
   printf '%s' "Checking for dependencies... "
-  brew install --quiet curl git gnupg jq libxcb
+  brew install --quiet core-utils curl git gnupg jq libxcb
   printf '%s\n' "ok."
   ;;
 *)
