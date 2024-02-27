@@ -68,6 +68,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
+      - name: Check the current Ubuntu
+        run: grep "^VERSION=" /etc/os-release
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
@@ -81,6 +83,8 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
+      - name: Check the current Ubuntu
+        run: grep "^VERSION=" /etc/os-release
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
