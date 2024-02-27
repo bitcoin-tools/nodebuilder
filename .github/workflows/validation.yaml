@@ -89,6 +89,19 @@ jobs:
       - name: Run nodebuilder
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
+  run-nodebuilder-macos-arm64:
+    name: Run nodebuilder on macOS arm64
+    runs-on: macos-latest-xlarge
+    needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install brew package manager
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      - name: Install runtime dependencies
+        run: brew install coreutils git libxinerama
+      - name: Run nodebuilder
+        run: gtimeout 7200 /bin/bash -x ./nodebuilder
+
   run-docker-container:
     name: Run nodebuilder in Docker
     runs-on: ubuntu-latest
