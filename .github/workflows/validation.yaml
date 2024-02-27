@@ -76,6 +76,19 @@ jobs:
       - name: Run nodebuilder
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
+  run-nodebuilder-ubuntu-20-04:
+    name: Run nodebuilder on Ubuntu 20.04
+    runs-on: ubuntu-20.04
+    needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system upgrades
+        run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+      - name: Install runtime dependency
+        run: sudo apt-get update && sudo apt-get install -y libxcb-xinerama0
+      - name: Run nodebuilder
+        run: timeout 7200 /bin/bash -x ./nodebuilder
+
   run-nodebuilder-macos:
     name: Run nodebuilder on macOS
     runs-on: macos-latest
