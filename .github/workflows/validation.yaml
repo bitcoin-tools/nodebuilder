@@ -79,7 +79,7 @@ jobs:
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-ubuntu-20-04:
-    name: Run nodebuilder on Ubuntu (20, Focal)
+    name: Run nodebuilder on Ubuntu (20)
     runs-on: ubuntu-20.04
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
