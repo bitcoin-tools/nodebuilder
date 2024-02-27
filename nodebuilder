@@ -102,18 +102,19 @@ Darwin)
 
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
-  printf '%' "Checking for brew... "
+  printf '%s' "Checking for brew... "
   if command -v brew &> /dev/null; then
     printf '%s\n%s' "found." "  Updating brew... "
     brew update --quiet
   else
     printf '%s\n%s' "not found." "  Installing brew... "
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ## TODO: might need to escalate to sudo permissions before installing bash
+    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   printf '%s\n' "ok."
 
-  printf '%s\n' "Checking for dependencies... "
-  brew install core-utils curl git gnupg jq libxcb
+  printf '%s' "Checking for dependencies... "
+  brew install --quiet core-utils curl git gnupg jq libxcb
   printf '%s\n' "ok."
   ;;
 *)
@@ -121,7 +122,7 @@ Darwin)
   ;;
 esac
 
-printf '%s' "Checking for Bitcoin ${target_bitcoin_version}... "
+printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
 if command -v bitcoin-qt &> /dev/null; then
   current_bitcoin_version="$(bitcoin-qt --version 2> /dev/null | head -1)"
 else
