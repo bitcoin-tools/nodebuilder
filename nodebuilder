@@ -18,7 +18,7 @@ set_bitcoin_core_option() {
 set_if_unset_bitcoin_core_option() {
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
-    printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir
+    printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
   elif [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
     printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
   fi
