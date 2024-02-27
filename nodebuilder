@@ -282,7 +282,7 @@ EOF
 chmod u+x "${applications_path}"/"${shortcut_filename}"
 chmod u+x "${desktop_path}"/"${shortcut_filename}"
 ## Make the desktop shortcut trusted
-if [ "${CI:-false}" = false ] && ( [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ] ); then
+if [ "${CI:-false}" = false ] && { [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; }; then
   gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
 fi
 printf '%s\n' "ok."
