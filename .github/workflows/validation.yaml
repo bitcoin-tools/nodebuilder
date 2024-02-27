@@ -77,10 +77,12 @@ jobs:
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos:
-    name: Run nodebuilder on macOS
+    name: Run nodebuilder on macOS (latest)
     runs-on: macos-latest
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
+      - name: Check the current macOS version
+        run: sw_vers | grep ProductVersion | awk '{printf $2}'
       - uses: actions/checkout@v4
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -90,10 +92,12 @@ jobs:
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-12:
-    name: Run nodebuilder on macOS 12
-    runs-on: macos-12
+    name: Run nodebuilder on macOS (11)
+    runs-on: macos-11
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
+      - name: Check the current macOS version
+        run: sw_vers | grep ProductVersion | awk '{printf $2}'
       - uses: actions/checkout@v4
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
