@@ -64,7 +64,7 @@ jobs:
           path: spellcheck-output.txt
 
   run-nodebuilder-ubuntu:
-    name: Run nodebuilder on Ubuntu
+    name: Run nodebuilder on Ubuntu (latest)
     runs-on: ubuntu-latest
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
@@ -79,7 +79,7 @@ jobs:
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-ubuntu-20-04:
-    name: Run nodebuilder on Ubuntu 20.04
+    name: Run nodebuilder on Ubuntu (20, Focal)
     runs-on: ubuntu-20.04
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
