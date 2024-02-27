@@ -92,7 +92,7 @@ jobs:
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-12:
-    name: Run nodebuilder on macOS (11)
+    name: Run nodebuilder on macOS (11, Big Sur)
     runs-on: macos-11
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
