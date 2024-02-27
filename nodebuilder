@@ -399,7 +399,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -ne 0 ]; then
+if [ "${CI:-false}" = true ] || { [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; }; then
   bitcoind --daemonwait
 else
   bitcoin-qt 2> /dev/null &
@@ -414,7 +414,7 @@ sleep_time="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
 ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 
-if [ "${ibd_status}" = true ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
+if [ "${ibd_status}" = true ] && { [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; }; then
   printf '%s' "Disabling system sleep, suspend, and hibernate... "
   sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
   printf '%s\n' "ok."
@@ -480,7 +480,7 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { [ "${CI:-false}" = true ] || [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -ne 0 ]; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if { [ "${CI:-false}" = true ] || { [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; }; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
     printf '%s\n' "Success, exiting the script for CI runners."
     exit 0
   fi
