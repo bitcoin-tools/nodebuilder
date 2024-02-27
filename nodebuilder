@@ -9,12 +9,17 @@ set_bitcoin_core_option() {
   if [ -f "${bitcoin_core_config_file:?}" ]; then
     sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
     rm "${bitcoin_core_config_file:?}.bak"
+  else
+    install -m 600 /dev/null "${bitcoin_core_config_file:?}"
   fi
   printf '%s\n' "$1=$2" >> "${bitcoin_core_config_file:?}"
 }
 
 set_if_unset_bitcoin_core_option() {
-  if [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
+  if [ ! -f "${bitcoin_core_config_file:?}" ]; then
+    install -m 600 /dev/null "${bitcoin_core_config_file:?}"
+    printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
+  elif [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
     printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
   fi
 }
