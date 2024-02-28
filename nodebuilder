@@ -93,7 +93,7 @@ Linux)
   printf '%s\n' "ok."
 
   printf '%s' "Checking for dependencies... "
-  sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends bc curl git gnupg jq libxcb-xinerama0
+  sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends bc curl git gnupg jq
   printf '%s\n' "ok."
   ;;
 Darwin)
