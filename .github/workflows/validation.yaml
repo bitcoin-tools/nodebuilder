@@ -14,7 +14,7 @@ env:
 jobs:
 
   bash-lint:
-    name: Validate bash with ShellCheck
+    name: Validate with ShellCheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
           ignore_names: offloadcoredata usei2p usetor
 
   bash-format:
-    name: Validate bash with shfmt
+    name: Validate with shfmt
     runs-on: ubuntu-latest
     needs: [bash-lint]
     steps:
@@ -38,7 +38,7 @@ jobs:
           sh_checker_exclude: offloadcoredata usei2p usetor
 
   markdown-links:
-    name: Validate markdown with markdown-link-check
+    name: Validate with markdown-link-check
     runs-on: ubuntu-latest
     needs: [bash-lint]
     steps:
@@ -49,7 +49,7 @@ jobs:
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
-    name: Validate markdown with PySpelling
+    name: Validate with PySpelling
     runs-on: ubuntu-latest
     needs: [bash-lint]
     steps:
@@ -65,12 +65,12 @@ jobs:
           path: spellcheck-output.txt
 
   run-nodebuilder-ubuntu:
-    name: Run nodebuilder on Ubuntu (latest)
+    name: Run on Ubuntu (latest)
     runs-on: ubuntu-latest
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check the current Ubuntu
-        run: grep "^VERSION=" /etc/os-release
+      - name: Check the current version of Ubuntu
+        run: grep "^VERSION=" /etc/os-release; uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
@@ -80,12 +80,12 @@ jobs:
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-ubuntu-20-04:
-    name: Run nodebuilder on Ubuntu 20
+    name: Run on Ubuntu 20
     runs-on: ubuntu-20.04
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check the current Ubuntu
-        run: grep "^VERSION=" /etc/os-release
+      - name: Check the current version of Ubuntu
+        run: grep "^VERSION=" /etc/os-release; uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
@@ -95,12 +95,12 @@ jobs:
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-14:
-    name: Run nodebuilder on macOS 14
+    name: Run on macOS 14
     runs-on: macos-14
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current macOS version
-        run: sw_vers | grep ProductVersion | awk '{printf $2}'
+        run: sw_vers | grep ProductVersion | awk '{printf $2}'; uname -a
       - uses: actions/checkout@v4
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -110,12 +110,12 @@ jobs:
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-12:
-    name: Run nodebuilder on macOS 12
+    name: Run on macOS 12
     runs-on: macos-12
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current macOS version
-        run: sw_vers | grep ProductVersion | awk '{printf $2}'
+        run: sw_vers | grep ProductVersion | awk '{printf $2}'; uname -a
       - uses: actions/checkout@v4
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -125,10 +125,12 @@ jobs:
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
   run-docker-container:
-    name: Run nodebuilder in Docker
+    name: Run Dockerfile
     runs-on: ubuntu-latest
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
+      - name: Check the current version of Ubuntu
+        run: grep "^VERSION=" /etc/os-release; uname -a
       - uses: actions/checkout@v4
       - name: Build docker images
         uses: docker/build-push-action@v5
