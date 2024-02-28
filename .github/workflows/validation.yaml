@@ -14,7 +14,7 @@ env:
 jobs:
 
   bash-lint:
-    name: Validate with ShellCheck
+    name: Validate bash with ShellCheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,8 +24,9 @@ jobs:
           ignore_names: offloadcoredata usei2p usetor
 
   bash-format:
-    name: Validate with shfmt
+    name: Validate bash with shfmt
     runs-on: ubuntu-latest
+    needs: [bash-lint]
     steps:
       - uses: actions/checkout@v4
       - name: Lint with shfmt
@@ -37,9 +38,9 @@ jobs:
           sh_checker_exclude: offloadcoredata usei2p usetor
 
   markdown-links:
-    name: Validate with markdown-link-check
+    name: Validate markdown with markdown-link-check
     runs-on: ubuntu-latest
-    needs: [bash-lint, bash-format]
+    needs: [bash-lint]
     steps:
       - uses: actions/checkout@v4
       - name: Run markdown-link-check on Documentation
@@ -48,7 +49,7 @@ jobs:
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
-    name: Validate with PySpelling
+    name: Validate markdown with PySpelling
     runs-on: ubuntu-latest
     needs: [bash-lint, bash-format]
     steps:
