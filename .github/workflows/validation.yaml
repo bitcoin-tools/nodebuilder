@@ -110,7 +110,7 @@ jobs:
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-13:
-    name: Run on macOS 13 (x86_64)
+    name: Run on macOS 13 (x64)
     runs-on: macos-13
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
@@ -125,7 +125,7 @@ jobs:
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-12:
-    name: Run on macOS 12 (x86_64)
+    name: Run on macOS 12 (x64)
     runs-on: macos-12
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
