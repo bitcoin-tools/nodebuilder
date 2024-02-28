@@ -70,7 +70,7 @@ jobs:
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current version of Ubuntu
-        run: grep "^VERSION=" /etc/os-release; uname -a
+        run: grep "^VERSION=" /etc/os-release && uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
@@ -85,7 +85,7 @@ jobs:
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current version of Ubuntu
-        run: grep "^VERSION=" /etc/os-release; uname -a
+        run: grep "^VERSION=" /etc/os-release && uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
@@ -115,7 +115,7 @@ jobs:
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current macOS version
-        run: sw_vers | grep ProductVersion | awk '{printf $2}'; uname -a
+        run: sw_vers | grep ProductVersion | awk '{printf $2}' && printf '\n' && uname -a
       - uses: actions/checkout@v4
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
