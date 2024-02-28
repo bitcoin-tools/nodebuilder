@@ -71,7 +71,7 @@ jobs:
     steps:
       - name: Check the current version of Ubuntu
         run: |
-          grep "^VERSION=" /etc/os-release
+          grep "VERSION" /etc/os-release
           uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
@@ -88,7 +88,7 @@ jobs:
     steps:
       - name: Check the current version of Ubuntu
         run: |
-          grep "^VERSION=" /etc/os-release
+          grep "VERSION" /etc/os-release
           uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
@@ -156,7 +156,7 @@ jobs:
     steps:
       - name: Check the current version of Ubuntu
         run: |
-          grep "^VERSION=" /etc/os-release
+          grep "VERSION" /etc/os-release
           uname -a
       - uses: actions/checkout@v4
       - name: Build docker images
