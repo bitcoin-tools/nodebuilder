@@ -124,6 +124,21 @@ jobs:
       - name: Run nodebuilder
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
+  run-nodebuilder-macos-12:
+    name: Run on macOS 12 (x86_64)
+    runs-on: macos-12
+    needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current macOS version
+        run: sw_vers | grep ProductVersion | awk '{print $2}' && uname -a
+      - uses: actions/checkout@v4
+      - name: Install brew package manager
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      - name: Install runtime dependencies
+        run: brew install coreutils git
+      - name: Run nodebuilder
+        run: gtimeout 7200 /bin/bash -x ./nodebuilder
+
   run-docker-container:
     name: Run Dockerfile
     runs-on: ubuntu-latest
