@@ -80,7 +80,7 @@ jobs:
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-ubuntu-20-04:
-    name: Run nodebuilder on Ubuntu (20)
+    name: Run nodebuilder on Ubuntu 20
     runs-on: ubuntu-20.04
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
@@ -94,9 +94,9 @@ jobs:
       - name: Run nodebuilder
         run: timeout 7200 /bin/bash -x ./nodebuilder
 
-  run-nodebuilder-macos:
-    name: Run nodebuilder on macOS (latest)
-    runs-on: macos-latest
+  run-nodebuilder-macos-14:
+    name: Run nodebuilder on macOS 14
+    runs-on: macos-14
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current macOS version
@@ -110,7 +110,7 @@ jobs:
         run: gtimeout 7200 /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-12:
-    name: Run nodebuilder on macOS (12)
+    name: Run nodebuilder on macOS 12
     runs-on: macos-12
     needs: [bash-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
