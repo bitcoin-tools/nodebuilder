@@ -424,7 +424,9 @@ ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 
 if [ "${ibd_status}" = true ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
   printf '%s' "Disabling system sleep, suspend, and hibernate... "
-  sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
+  if [ "$(uname -s)" != "Darwin" ]; then
+    sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
+  fi
   printf '%s\n' "ok."
 
   printf '%s' "\nClose this Terminal window by clicking on the \"X\".\nThis screen will refresh in ${sleep_time} seconds."
