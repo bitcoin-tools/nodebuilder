@@ -424,7 +424,9 @@ ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 
 if [ "${ibd_status}" = true ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
   printf '%s' "Disabling system sleep, suspend, and hibernate... "
-  if [ "$(uname -s)" != "Darwin" ]; then
+  if [ "$(uname -s)" == "Darwin" ]; then
+    caffeinate -sw $(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid) &
+  else
     sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
   fi
   printf '%s\n' "ok."
