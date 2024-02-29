@@ -122,7 +122,9 @@ jobs:
           uname -a
       - uses: actions/checkout@v4
       - name: Install brew package manager
-        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          eval "$(/opt/homebrew/bin/brew shellenv)"
       - name: Install runtime dependencies
         run: brew install curl gnupg jq libxcb
       - name: Run nodebuilder
@@ -140,7 +142,9 @@ jobs:
           uname -a
       - uses: actions/checkout@v4
       - name: Install brew package manager
-        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          eval "$(/opt/homebrew/bin/brew shellenv)"
       - name: Install runtime dependencies
         run: brew install curl gnupg jq libxcb
       - name: Run nodebuilder
@@ -158,7 +162,9 @@ jobs:
           uname -a
       - uses: actions/checkout@v4
       - name: Install brew package manager
-        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          eval "$(/opt/homebrew/bin/brew shellenv)"
       - name: Install runtime dependencies
         run: brew install curl gnupg jq libxcb
       - name: Run nodebuilder
