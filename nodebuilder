@@ -468,7 +468,7 @@ while [ "${ibd_status}" = true ]; do
     printf '%s\n' 'Syncing the block headers (second pass).'
     printf 'Headers synced:     %d\n' "${headers}"
   else
-    printf 'Sync progress:      %f\n' "$(printf '%.3f' "${sync_progress_percent}")"
+    printf 'Sync progress:      %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
 
     if [ "$(uname -s)" == "Darwin" ]; then
