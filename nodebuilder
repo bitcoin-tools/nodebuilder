@@ -410,7 +410,7 @@ fi
 
 printf '%s' "Starting Bitcoin Core... "
 if [ "${CI:-false}" = true ] || [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -ne 0 ]; then
-  bitcoind --daemonwait
+  bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
   disown
