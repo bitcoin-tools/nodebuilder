@@ -31,7 +31,7 @@ jobs:
       - name: Lint workflow files
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color
+          ./actionlint -color -verbose
         shell: bash
 
   bash-format:
