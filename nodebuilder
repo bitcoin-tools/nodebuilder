@@ -115,7 +115,7 @@ Darwin)
     printf '%s\n%s' "not found." "  Installing brew... "
     ## TODO: might need to escalate to sudo permissions before installing bash
     sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    (echo; echo "eval \"$(/opt/homebrew/bin/brew shellenv)\"") >> /Users/user1/.zprofile
+    printf "\neval \"\$(/opt/homebrew/bin/brew shellenv)\"\n" >> /Users/user1/.zprofile
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
   printf '%s\n' "ok."
