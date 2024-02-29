@@ -119,7 +119,7 @@ Darwin)
   printf '%s\n' "ok."
 
   printf '%s' "Checking for dependencies... "
-  brew install --quiet coreutils curl gnupg jq libxcb > /dev/null
+  brew install --quiet curl gnupg jq libxcb > /dev/null
   printf '%s\n' "ok."
   ;;
 *)
@@ -348,7 +348,7 @@ esac
 if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   printf '%s' "Checking free space in home directory... "
   if [ "$(uname -s)" == "Darwin" ]; then
-    free_space_in_mib=$(gdf --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+    free_space_in_mib=$(/bin/df -m "${HOME}" | awk '{print $4}' | sed 1d)
   else
     free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
   fi
@@ -456,7 +456,7 @@ while [ "${ibd_status}" = true ]; do
   size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / 1024 / 1024))
 
   if [ "$(uname -s)" == "Darwin" ]; then
-    free_space_in_mib=$(gdf --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
+    free_space_in_mib=$(/bin/df -m "${HOME}" | awk '{print $4}' | sed 1d)
   else
     free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
   fi
@@ -472,7 +472,7 @@ while [ "${ibd_status}" = true ]; do
     printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
 
     if [ "$(uname -s)" == "Darwin" ]; then
-      printf 'Current chain tip:  %s\n' "$(gdate -d @"${last_block_time}" | cut -c 5-)"
+      printf 'Current chain tip:  %s\n' "$(/bin/date -r "${last_block_time}" | cut -c 5-)"
     else
       printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
     fi

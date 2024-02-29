@@ -124,7 +124,7 @@ jobs:
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install runtime dependencies
-        run: brew install coreutils curl gnupg jq libxcb
+        run: brew install curl gnupg jq libxcb
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -142,7 +142,7 @@ jobs:
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install runtime dependencies
-        run: brew install coreutils curl gnupg jq libxcb
+        run: brew install curl gnupg jq libxcb
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -160,7 +160,7 @@ jobs:
       - name: Install brew package manager
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - name: Install runtime dependencies
-        run: brew install coreutils curl gnupg jq libxcb
+        run: brew install curl gnupg jq libxcb
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
