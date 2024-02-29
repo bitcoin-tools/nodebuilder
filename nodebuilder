@@ -113,8 +113,10 @@ Darwin)
     brew update --quiet > /dev/null
   else
     printf '%s\n%s' "not found." "  Installing brew... "
-    ## TODO: might need to escalate to sudo permissions before installing bash
+    ## TODO: might need to escalate to sudo permissions before installing brew
     sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> "${HOME}"/.zprofile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
   printf '%s\n' "ok."
 
