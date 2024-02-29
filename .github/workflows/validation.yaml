@@ -79,7 +79,8 @@ jobs:
       - name: Install runtime dependency
         run: sudo apt-get update && sudo apt-get install -y libxcb-xinerama0
       - name: Run nodebuilder
-        run: timeout 7200 /bin/bash -x ./nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
 
   run-nodebuilder-ubuntu-20:
     name: Run on Ubuntu 20
@@ -96,7 +97,8 @@ jobs:
       - name: Install runtime dependency
         run: sudo apt-get update && sudo apt-get install -y libxcb-xinerama0
       - name: Run nodebuilder
-        run: timeout 7200 /bin/bash -x ./nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-14:
     name: Run on macOS 14 (arm64)
@@ -113,7 +115,8 @@ jobs:
       - name: Install runtime dependencies
         run: brew install coreutils curl git gnupg jq libxcb
       - name: Run nodebuilder
-        run: gtimeout 7200 /bin/bash -x ./nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-13:
     name: Run on macOS 13 (x64)
@@ -130,7 +133,8 @@ jobs:
       - name: Install runtime dependencies
         run: brew install coreutils curl git gnupg jq libxcb
       - name: Run nodebuilder
-        run: gtimeout 7200 /bin/bash -x ./nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
 
   run-nodebuilder-macos-12:
     name: Run on macOS 12 (x64)
@@ -147,7 +151,8 @@ jobs:
       - name: Install runtime dependencies
         run: brew install coreutils curl git gnupg jq libxcb
       - name: Run nodebuilder
-        run: gtimeout 7200 /bin/bash -x ./nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
 
   run-docker-container:
     name: Run Dockerfile
@@ -160,6 +165,7 @@ jobs:
           uname -a
       - uses: actions/checkout@v4
       - name: Build docker images
+        timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
           context: .
