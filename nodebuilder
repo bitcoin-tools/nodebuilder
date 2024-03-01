@@ -496,13 +496,13 @@ while [ "${ibd_status}" = true ]; do
     else
       printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
     fi
-  fi
 
-  printf '%s' 'Chain sync size:    '
-  if [ "${size_on_disk_in_mib}" -gt 1024 ]; then
-    printf '%d GiB\n' "$((size_on_disk_in_mib / 1024))"
-  else
-    printf '%d MiB\n' "${size_on_disk_in_mib}"
+    printf '%s' 'Chain sync size:    '
+    if [ "${size_on_disk_in_mib}" -gt 1024 ]; then
+      printf '%d GiB\n' "$((size_on_disk_in_mib / 1024))"
+    else
+      printf '%d MiB\n' "${size_on_disk_in_mib}"
+    fi
   fi
 
   printf '%s' 'Disk free space:    '
