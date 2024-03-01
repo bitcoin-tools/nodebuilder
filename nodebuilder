@@ -294,17 +294,17 @@ if [ "$(uname -s)" != "Darwin" ]; then
   [ -d "${desktop_path}" ] || mkdir -p "${desktop_path}"
   [ -d "${applications_path}" ] || mkdir -p "${applications_path}"
   cat << EOF | tee "${applications_path}"/"${shortcut_filename}" > "${desktop_path}"/"${shortcut_filename}"
-  [Desktop Entry]
-  Name=Bitcoin Core
-  Comment=Launch Bitcoin Core
-  Exec=bitcoin-qt %u
-  Icon=${shortcut_image_file}
-  Terminal=false
-  StartupWMClass=Bitcoin Core
-  Type=Application
-  Categories=Application;
-  MimeType=application/bitcoin-paymentrequest;application/bitcoin-payment;application/bitcoin-paymentack;x-scheme-handler/bitcoin;
-  EOF
+[Desktop Entry]
+Name=Bitcoin Core
+Comment=Launch Bitcoin Core
+Exec=bitcoin-qt %u
+Icon=${shortcut_image_file}
+Terminal=false
+StartupWMClass=Bitcoin Core
+Type=Application
+Categories=Application;
+MimeType=application/bitcoin-paymentrequest;application/bitcoin-payment;application/bitcoin-paymentack;x-scheme-handler/bitcoin;
+EOF
   chmod u+x "${applications_path}"/"${shortcut_filename}"
   chmod u+x "${desktop_path}"/"${shortcut_filename}"
   ## Make the desktop shortcut trusted
