@@ -3,13 +3,13 @@ FROM ubuntu:22.04
 ENV TERM=xterm
 
 # Install system updates and dependencies
-RUN apt-get update
-  && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
-    bc ca-certificates git libxcb-xinerama0 netcat 'sudo'
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
+  bc ca-certificates git libxcb-xinerama0 netcat 'sudo' \
   && rm -rf /var/lib/apt/lists/*
 
 # Execute the script
-RUN update-ca-certificates
+RUN update-ca-certificates \
   && git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder
 COPY nodebuilder/nodebuilder /opt/src/scripts/nodebuilder
 RUN ["/bin/bash", "-c", "/opt/src/scripts/nodebuilder"]
