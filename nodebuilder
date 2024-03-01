@@ -5,16 +5,31 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+is_running_in_container() {
+  if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
+    return 0 #0 is true, 1 is false
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -eq 0 ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 set_bitcoin_core_option() {
   if [ -f "${bitcoin_core_config_file:?}" ]; then
     sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
     rm "${bitcoin_core_config_file:?}.bak"
+  else
+    install -m 600 /dev/null "${bitcoin_core_config_file:?}"
   fi
   printf '%s\n' "$1=$2" >> "${bitcoin_core_config_file:?}"
 }
 
 set_if_unset_bitcoin_core_option() {
-  if [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
+  if [ ! -f "${bitcoin_core_config_file:?}" ]; then
+    install -m 600 /dev/null "${bitcoin_core_config_file:?}"
+    printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
+  elif [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
     printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
   fi
 }
@@ -62,6 +77,7 @@ shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/d
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 
 clear
+is_running_in_comtainer && echo "yes container" || "no container" #THIS LINE IS FOR DEBUGGING PURPOSES
 case "$(uname -s)" in
 Linux)
   ( (timeout --preserve-status 1 nc -z 1.1.1.1 53 ||
