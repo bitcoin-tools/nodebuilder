@@ -3,8 +3,8 @@ FROM ubuntu:22.04
 ENV TERM=xterm
 
 # Install system updates and dependencies
-RUN apt-get update && \
-  DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
+RUN apt-get -qq update \
+  && DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends \
   bc ca-certificates git libxcb-xinerama0 netcat 'sudo' \
   && rm -rf /var/lib/apt/lists/*
 
