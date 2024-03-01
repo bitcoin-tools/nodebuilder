@@ -419,7 +419,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
         prune_ratio=80
       fi
       prune_amount_in_mib=$((free_space_in_mib * prune_ratio / 100))
-      printf '%s\n' "  Pruning to $((prune_amount_in_mib / 1024)) GiB (${prune_ratio}% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf."
+      printf '  Pruning to %d GiB (%d of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf.' "$((prune_amount_in_mib / 1024))" "${prune_ratio}"
     fi
     set_bitcoin_core_option "prune" "${prune_amount_in_mib}"
   fi
