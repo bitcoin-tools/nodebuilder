@@ -77,7 +77,11 @@ shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/d
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 
 clear
-is_running_in_container && echo "yes container" || "no container" #THIS LINE IS FOR DEBUGGING PURPOSES
+if [ is_running_in_container ]; then #THIS LINE IS FOR DEBUGGING PURPOSES
+  echo "yes container"
+else
+  "no container"
+fi
 case "$(uname -s)" in
 Linux)
   ( (timeout --preserve-status 1 nc -z 1.1.1.1 53 ||
