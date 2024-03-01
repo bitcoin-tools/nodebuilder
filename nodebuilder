@@ -7,11 +7,11 @@ set -o pipefail
 
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
-    true
+    return 0 #true
   elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -eq 0 ]; then
-    true
+    return 0 #true
   else
-    false
+    return 1 #false
   fi
 }
 
