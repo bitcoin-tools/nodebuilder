@@ -6,9 +6,9 @@ set -o nounset
 set -o pipefail
 
 is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
+  if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
     return 0 #true
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -eq 0 ]; then
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
     return 0 #true
   else
     return 1 #false
