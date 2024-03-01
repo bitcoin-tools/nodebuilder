@@ -286,7 +286,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
   desktop_path="${HOME}/Desktop"
   applications_path="${user_data_dir}/applications"
   shortcut_filename="bitcoin_core.desktop"
-  
+
   [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
   [ -f "${shortcut_image_file}" ] || curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}"
 
