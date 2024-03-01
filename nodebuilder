@@ -289,28 +289,30 @@ shortcut_filename="bitcoin_core.desktop"
 [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
 [ -f "${shortcut_image_file}" ] || curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}"
 
-## Create .desktop on the user's Desktop and "Show Applications" directories
-[ -d "${desktop_path}" ] || mkdir -p "${desktop_path}"
-[ -d "${applications_path}" ] || mkdir -p "${applications_path}"
-cat << EOF | tee "${applications_path}"/"${shortcut_filename}" > "${desktop_path}"/"${shortcut_filename}"
-[Desktop Entry]
-Name=Bitcoin Core
-Comment=Launch Bitcoin Core
-Exec=bitcoin-qt %u
-Icon=${shortcut_image_file}
-Terminal=false
-StartupWMClass=Bitcoin Core
-Type=Application
-Categories=Application;
-MimeType=application/bitcoin-paymentrequest;application/bitcoin-payment;application/bitcoin-paymentack;x-scheme-handler/bitcoin;
-EOF
-chmod u+x "${applications_path}"/"${shortcut_filename}"
-chmod u+x "${desktop_path}"/"${shortcut_filename}"
-## Make the desktop shortcut trusted
-if [ "${CI:-false}" = false ] && ! is_running_in_container; then
-  gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
+if [ "$(uname -s)" != "Darwin" ]; then
+  ## Create .desktop on the user's Desktop and "Show Applications" directories
+  [ -d "${desktop_path}" ] || mkdir -p "${desktop_path}"
+  [ -d "${applications_path}" ] || mkdir -p "${applications_path}"
+  cat << EOF | tee "${applications_path}"/"${shortcut_filename}" > "${desktop_path}"/"${shortcut_filename}"
+  [Desktop Entry]
+  Name=Bitcoin Core
+  Comment=Launch Bitcoin Core
+  Exec=bitcoin-qt %u
+  Icon=${shortcut_image_file}
+  Terminal=false
+  StartupWMClass=Bitcoin Core
+  Type=Application
+  Categories=Application;
+  MimeType=application/bitcoin-paymentrequest;application/bitcoin-payment;application/bitcoin-paymentack;x-scheme-handler/bitcoin;
+  EOF
+  chmod u+x "${applications_path}"/"${shortcut_filename}"
+  chmod u+x "${desktop_path}"/"${shortcut_filename}"
+  ## Make the desktop shortcut trusted
+  if [ "${CI:-false}" = false ] && ! is_running_in_container; then
+    gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
+  fi
+  printf '%s\n' "ok."
 fi
-printf '%s\n' "ok."
 
 bitcoin_core_config_file="${bitcoin_core_data_dir}/bitcoin.conf"
 if [ ! -f "${bitcoin_core_config_file}" ]; then
