@@ -77,6 +77,8 @@ shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/d
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 
 clear
+[ -f /proc/1/cgroup ] && echo "mountinfo exists" && cat /proc/1/cgroup #THIS LINE IS FOR DEBUGGING PURPOSES
+[ -f /proc/1/mountinfo ] && echo "mountinfo exists" && cat /proc/1/mountinfo #THIS LINE IS FOR DEBUGGING PURPOSES
 if is_running_in_container; then #THIS LINE IS FOR DEBUGGING PURPOSES
   echo "yes container"
 else
