@@ -107,7 +107,7 @@ Linux)
   printf '%s\n' "ok."
 
   printf '%s' "Checking for dependencies... "
-  sudo apt-get -qq update && sudo apt-get -qq install --assume-yes --no-install-recommends bc curl git gnupg jq
+  sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -o=Dpkg::Use-Pty=0 bc curl git gnupg jq
   printf '%s\n' "ok."
   ;;
 Darwin)
