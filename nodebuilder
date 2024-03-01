@@ -7,11 +7,11 @@ set -o pipefail
 
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
-    return 0 #true
+    return 0 #0=true
   elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
-    return 0 #true
+    return 0 #0=true
   else
-    return 1 #false
+    return 1 #1=false
   fi
 }
 
@@ -77,15 +77,12 @@ shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/d
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 
 clear
-[ -f /proc/1/cgroup ] && echo "mountinfo exists" && cat /proc/1/cgroup #THESE LINES ARE FOR DEBUGGING PURPOSES
-[ -f /proc/1/mountinfo ] && echo "mountinfo exists" && cat /proc/1/mountinfo
 if is_running_in_container; then
-  echo "yes container"
-else
-  echo "no container"
+  printf '%s\n' "Detected: running in a container."
 fi
 case "$(uname -s)" in
 Linux)
+  printf '%s\n' "Detected: running on Linux."
   ( (timeout --preserve-status 1 nc -z 1.1.1.1 53 ||
     timeout --preserve-status 1 nc -z 1.1.0.0 53 ||
     timeout --preserve-status 1 nc -z 9.9.9.9 53 ||
@@ -114,6 +111,7 @@ Linux)
   printf '%s\n' "ok."
   ;;
 Darwin)
+  printf '%s\n' "Detected: Running on macOS."
   ( (curl --silent --output /dev/null --connect-timeout 1 1.1.1.1 ||
     curl --silent --output /dev/null --connect-timeout 1 1.1.0.0 ||
     curl --silent --output /dev/null --connect-timeout 1 9.9.9.9 ||
