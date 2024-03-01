@@ -450,7 +450,7 @@ if [ "${ibd_status}" = true ]; then
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
     fi
     printf '%s\n' "ok."
-    printf '%s' "\nClose this Terminal window by clicking on the \"X\".\nThis screen will refresh in ${sleep_time} seconds."
+    printf '\n%s\n%s' "Close this Terminal window by clicking on the \"X\"." "This screen will refresh in ${sleep_time} seconds."
   fi
   for ((i = 1; i <= sleep_time; i++)); do
     sleep 1
