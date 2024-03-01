@@ -95,7 +95,7 @@ Linux)
   bitcoin_core_data_dir="${HOME}/.bitcoin"
   printf '%s' "Performing a system upgrade... "
   sudo apt-get -qq update
-  sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -qq dist-upgrade
 
   if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
     printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
@@ -107,7 +107,8 @@ Linux)
   printf '%s\n' "ok."
 
   printf '%s' "Checking for dependencies... "
-  sudo apt-get -qq update && sudo apt-get -qq install --no-install-recommends -o=Dpkg::Use-Pty=0 bc curl git gnupg jq
+  sudo apt-get -qq update
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends -o=Dpkg::Use-Pty=0 bc curl git gnupg jq
   printf '%s\n' "ok."
   ;;
 Darwin)
