@@ -5,6 +5,16 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+is_running_in_container() {
+  if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+    return 0 #0=true
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+    return 0 #0=true
+  else
+    return 1 #1=false
+  fi
+}
+
 set_bitcoin_core_option() {
   if [ -f "${bitcoin_core_config_file:?}" ]; then
     sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
@@ -67,8 +77,12 @@ shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/d
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 
 clear
+if is_running_in_container; then
+  printf '%s\n' "Detected: running in a container."
+fi
 case "$(uname -s)" in
 Linux)
+  printf '%s\n' "Detected: running on Linux."
   ( (timeout --preserve-status 1 nc -z 1.1.1.1 53 ||
     timeout --preserve-status 1 nc -z 1.1.0.0 53 ||
     timeout --preserve-status 1 nc -z 9.9.9.9 53 ||
@@ -97,6 +111,7 @@ Linux)
   printf '%s\n' "ok."
   ;;
 Darwin)
+  printf '%s\n' "Detected: Running on macOS."
   ( (curl --silent --output /dev/null --connect-timeout 1 1.1.1.1 ||
     curl --silent --output /dev/null --connect-timeout 1 1.1.0.0 ||
     curl --silent --output /dev/null --connect-timeout 1 9.9.9.9 ||
@@ -292,7 +307,7 @@ EOF
 chmod u+x "${applications_path}"/"${shortcut_filename}"
 chmod u+x "${desktop_path}"/"${shortcut_filename}"
 ## Make the desktop shortcut trusted
-if [ "${CI:-false}" = false ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
+if [ "${CI:-false}" = false ] && ! is_running_in_container; then
   gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
 fi
 printf '%s\n' "ok."
@@ -409,7 +424,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -ne 0 ]; then
+if [ "${CI:-false}" = true ] || is_running_in_container; then
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
@@ -424,16 +439,17 @@ sleep_time="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
 ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 
-if [ "${ibd_status}" = true ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; then
-  printf '%s' "Disabling system sleep, suspend, and hibernate... "
-  if [ "$(uname -s)" == "Darwin" ]; then
-    caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
-  else
-    sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
+if [ "${ibd_status}" = true ]; then
+  if ! is_running_in_container; then
+    printf '%s' "Disabling system sleep, suspend, and hibernate... "
+    if [ "$(uname -s)" == "Darwin" ]; then
+      caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
+    else
+      sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
+    fi
+    printf '%s\n' "ok."
+    printf '%s' "\nClose this Terminal window by clicking on the \"X\".\nThis screen will refresh in ${sleep_time} seconds."
   fi
-  printf '%s\n' "ok."
-
-  printf '%s' "\nClose this Terminal window by clicking on the \"X\".\nThis screen will refresh in ${sleep_time} seconds."
   for ((i = 1; i <= sleep_time; i++)); do
     sleep 1
     printf "."
@@ -494,8 +510,8 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { [ "${CI:-false}" = true ] || [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -ne 0 ]; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
-    printf '%s\n' "Success, exiting the script for CI runners."
+  if { [ "${CI:-false}" = true ] || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+    printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi
 
