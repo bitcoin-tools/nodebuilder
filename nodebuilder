@@ -309,7 +309,7 @@ EOF
 chmod u+x "${applications_path}"/"${shortcut_filename}"
 chmod u+x "${desktop_path}"/"${shortcut_filename}"
 ## Make the desktop shortcut trusted
-if [ "${CI:-false}" = false ] && { [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; }; then
+if [ "${CI:-false}" = false ] && ! is_running_in_container; then
   gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
 fi
 printf '%s\n' "ok."
@@ -426,7 +426,7 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || { [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; }; then
+if [ "${CI:-false}" = true ] || is_running_in_container; then
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
@@ -441,16 +441,17 @@ sleep_time="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
 ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 
-if [ "${ibd_status}" = true ] && { [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; }; then
-  printf '%s' "Disabling system sleep, suspend, and hibernate... "
-  if [ "$(uname -s)" == "Darwin" ]; then
-    caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
-  else
-    sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
+if [ "${ibd_status}" = true ]; then
+  if ! is_running_in_container; then
+    printf '%s' "Disabling system sleep, suspend, and hibernate... "
+    if [ "$(uname -s)" == "Darwin" ]; then
+      caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
+    else
+      sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
+    fi
+    printf '%s\n' "ok."
+    printf '%s' "\nClose this Terminal window by clicking on the \"X\".\nThis screen will refresh in ${sleep_time} seconds."
   fi
-  printf '%s\n' "ok."
-
-  printf '%s' "\nClose this Terminal window by clicking on the \"X\".\nThis screen will refresh in ${sleep_time} seconds."
   for ((i = 1; i <= sleep_time; i++)); do
     sleep 1
     printf "."
@@ -511,8 +512,8 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { [ "${CI:-false}" = true ] || { [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -eq 0 ]; }; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
-    printf '%s\n' "Success, exiting the script for CI runners."
+  if { [ "${CI:-false}" = true ] || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+    printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi
 
