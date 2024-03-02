@@ -380,10 +380,18 @@ if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == 
   blocks_size_in_mib="0"
   chainstate_size_in_mib="0"
   if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
-    blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_blocks_dir}" | cut -f1)
+    if [ "$(uname -s)" == "Darwin" ]; then
+      blocks_size_in_mib=$(du -d0 -m "${bitcoin_core_blocks_dir}" | cut -f1)
+    else
+      blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_blocks_dir}" | cut -f1)
+    fi
   fi
   if [ -d "${bitcoin_core_chainstate_dir}"/ ]; then
-    chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
+    if [ "$(uname -s)" == "Darwin" ]; then
+      chainstate_size_in_mib=$(du -d0 -m "${bitcoin_core_chainstate_dir}" | cut -f1)
+    else
+      chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
+    fi
   fi
   data_already_synced_in_mib=$((blocks_size_in_mib + chainstate_size_in_mib))
   printf '%s\n' "$((data_already_synced_in_mib / 1024)) GiB."
