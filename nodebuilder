@@ -17,7 +17,7 @@ is_running_in_container() {
 
 # Taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L89
 chomp() {
-    printf "%s" "${1/"$'\n'"/}"
+  printf "%s" "${1/"$'\n'"/}"
 }
 
 set_bitcoin_core_option() {
