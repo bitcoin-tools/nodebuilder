@@ -18,8 +18,8 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 
 1. An active internet connection (of course)
 3. macOS or any modern Linux distribution **based on Debian**, such as [Ubuntu Desktop LTS](https://ubuntu.com/tutorials/install-ubuntu-desktop)
-4. bash, which is already available on macOS, and most other Linux/Unix systems
-5. curl, which you can install with `sudo apt install -y curl`
+4. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
+5. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
 
 This script **does not** support 32-bit operating systems. The processor architecture must be either x86_64 or arm64.
 
