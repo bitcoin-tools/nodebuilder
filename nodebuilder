@@ -122,22 +122,31 @@ Darwin)
 
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s' "Checking for brew... "
-  if command -v brew &> /dev/null; then
-    printf '%s\n%s' "found." "  Updating brew... "
-    brew update --quiet &> /dev/null
-  else
-    printf '%s\n%s' "not found." "  Installing brew... "
-    ## TODO: might need to escalate to sudo permissions before installing bash
-    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null
-    printf "\neval \"\$(/opt/homebrew/bin/brew shellenv)\"\n" >> /Users/user1/.zprofile
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  fi
-  printf '%s\n' "ok."
 
-  printf '%s' "Checking for dependencies... "
-  brew install --quiet curl gnupg jq libxcb > /dev/null
-  printf '%s\n' "ok."
+  if ! command -v git &> /dev/null; then
+    printf '%s' "Installing git via the Xcode Command Line Tools."
+    # These steps were taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
+    # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended xcode tools installation shouldn't take 10+ lines of code
+    sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+    clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1"
+    clt_label="$(chomp "$(/bin/bash -c "${clt_label_command}")")"
+    if [[ -n "${clt_label}" ]]; then
+      sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
+      #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
+    fi
+    sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+
+    if command -v git &> /dev/null; then
+      printf '%s\n' "ok."
+    else
+      printf '%s\n' "failed."
+      printf '%s\n' "Installing the Command Line Tools (expect a GUI popup)."
+      /usr/bin/xcode-select --install
+      printf '%s\n' "Press any key when the installation has completed."
+      read -rsn1
+      #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
+    fi
+  fi
   ;;
 *)
   handle_error "Your operating system is not supported."
