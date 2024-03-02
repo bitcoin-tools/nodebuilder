@@ -125,7 +125,7 @@ Darwin)
   printf '%s' "Checking for brew... "
   if command -v brew &> /dev/null; then
     printf '%s\n%s' "found." "  Updating brew... "
-    brew update --quiet > /dev/null
+    brew update --quiet &> /dev/null
   else
     printf '%s\n%s' "not found." "  Installing brew... "
     ## TODO: might need to escalate to sudo permissions before installing bash
