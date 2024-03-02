@@ -7,7 +7,7 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [How to Run Node Builder](#how-to-run-node-builder)
+- [How to Run nodebuilder](#how-to-run-nodebuilder)
 - [What Does This Script Do?](#what-does-this-script-do)
 - [Which Files Does This Script Touch?](#which-files-does-this-script-touch)
 - [YouTube Playlist](#youtube-playlist)
@@ -17,13 +17,15 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 ## Prerequisites
 
 1. An active internet connection (of course)
-3. macOS or any modern Linux distribution **based on Debian**, such as [Ubuntu Desktop LTS](https://ubuntu.com/tutorials/install-ubuntu-desktop)
-4. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
-5. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
+2. macOS or any modern Linux distribution **based on Debian**, such as [Ubuntu Desktop LTS](https://ubuntu.com/tutorials/install-ubuntu-desktop)
+3. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
+4. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
+
+(The script will automatically install additional dependencies.)
 
 This script **does not** support 32-bit operating systems. The processor architecture must be either x86_64 or arm64.
 
-## How to Run Node Builder
+## How to Run nodebuilder
 
 Open the Terminal and run the following command:
 ```
@@ -35,7 +37,7 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 ## What Does This Script Do?
 
 The script performs the following actions:
-1. Install system updates, reboot if necessary, then install dependencies.
+1. Install system updates, reboot if required, and install dependencies.
 2. Download, validate, and extract Bitcoin Core.
 3. Set a prune for Bitcoin Core based on the disk free space.
 4. Create shortcuts for Bitcoin Core on the desktop and on the "Show Applications" list.
