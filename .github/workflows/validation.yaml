@@ -134,8 +134,6 @@ jobs:
           sw_vers | grep Version | awk '{print $2}'
           uname -a
       - uses: actions/checkout@v4
-      - name: Install Xcode
-        run: xcode-select --install
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -150,8 +148,6 @@ jobs:
           sw_vers | grep Version | awk '{print $2}'
           uname -a
       - uses: actions/checkout@v4
-      - name: Install Xcode
-        run: xcode-select --install
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -166,8 +162,6 @@ jobs:
           sw_vers | grep Version | awk '{print $2}'
           uname -a
       - uses: actions/checkout@v4
-      - name: Install Xcode
-        run: xcode-select --install
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
