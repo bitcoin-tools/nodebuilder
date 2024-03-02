@@ -1,0 +1,4 @@
+curl
+gnupg
+jq
+libxcb
