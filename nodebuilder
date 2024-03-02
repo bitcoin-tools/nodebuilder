@@ -147,10 +147,6 @@ Darwin)
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
     fi
   fi
-
-  printf '%s' "Checking for dependencies... "
-  brew install --quiet libxcb > /dev/null
-  printf '%s\n' "ok."
   ;;
 *)
   handle_error "Your operating system is not supported."
