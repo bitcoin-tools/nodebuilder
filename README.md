@@ -7,7 +7,7 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [How to Run Node Builder](#how-to-run-node-builder)
+- [How to Run nodebuilder](#how-to-run-nodebuilder)
 - [What Does This Script Do?](#what-does-this-script-do)
 - [Which Files Does This Script Touch?](#which-files-does-this-script-touch)
 - [YouTube Playlist](#youtube-playlist)
@@ -16,13 +16,16 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 
 ## Prerequisites
 
-1. An active internet connection
-2. A fresh install of any modern Linux distribution based on Debian like [Ubuntu Desktop LTS](https://ubuntu.com/tutorials/install-ubuntu-desktop)
-3. curl, which you can install with `sudo apt install -y curl`
+1. An active internet connection (of course)
+2. macOS or any modern Linux distribution **based on Debian**, such as [Ubuntu Desktop LTS](https://ubuntu.com/tutorials/install-ubuntu-desktop)
+3. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
+4. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
 
-This script **does not** support macOS, 32-bit operating systems, or Arm-based hardware.
+(The script will automatically install additional dependencies.)
 
-## How to Run Node Builder
+This script **does not** support 32-bit operating systems. The processor architecture must be either x86_64 or arm64.
+
+## How to Run nodebuilder
 
 Open the Terminal and run the following command:
 ```
@@ -34,7 +37,7 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 ## What Does This Script Do?
 
 The script performs the following actions:
-1. Install system updates, reboot if necessary, then install dependencies.
+1. Install system updates, reboot if required, and install dependencies.
 2. Download, validate, and extract Bitcoin Core.
 3. Set a prune for Bitcoin Core based on the disk free space.
 4. Create shortcuts for Bitcoin Core on the desktop and on the "Show Applications" list.
@@ -47,21 +50,27 @@ The script performs the following actions:
 
 Before launching Bitcoin Core, this script modifies the following files:
 - Any files related to installing system updates and dependencies
-- The downloaded Bitcoin Core tarball and validation files:
-  - `/tmp/*/bitcoin-*-x86_64-linux-gnu.tar.gz`
-  - `/tmp/*/SHA256SUMS`
-  - `/tmp/*/SHA256SUMS.asc`
-  - `/tmp/*/guix.sigs/`
+- Any files added by Bitcoin Core, such as the `blocks/` and `chainstate/` directories
+- The downloaded Bitcoin Core archive and validation files:
+  - `/tmp/<mktemp_directory>/bitcoin-<version>-<architecture>-linux-gnu.tar.gz`
+  - `/tmp/<mktemp_directory>/SHA256SUMS`
+  - `/tmp/<mktemp_directory>/SHA256SUMS.asc`
+  - `/tmp/<mktemp_directory>/guix.sigs/`
 - The validated Bitcoin Core tarball and PGP keys:
-  - `~/Downloads/bitcoin-*-x86_64-linux-gnu.tar.gz`
+  - `~/Downloads/bitcoin-<version>-<architecture>-linux-gnu.tar.gz`
   - `~/Downloads/guix.sigs/`
-- The Bitcoin Core tarball extract directory:
-  - `~/bitcoin/`
+- The installed binaries and other relevant files:
+  - `/usr/local/bin/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin}`
+  - `/usr/local/include/bitcoinconsensus.h`
+  - `/usr/local/lib/{libbitcoinconsensus.so,libbitcoinconsensus.so.0,libbitcoinconsensus.so.0.0.0}` (Linux)
+  - `/usr/local/lib/{libbitcoinconsensus.0.dylib}` (macOS)
+  - `/usr/local/man/man1/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1}`
 - The Bitcoin Core configuration file:
-  - `~/.bitcoin/bitcoin.conf`
+  - `~/.bitcoin/bitcoin.conf` (Linux)
+  - `~/Library/Application Support/Bitcoin/bitcoin.conf` (macOS)
 - A shortcut on the desktop and Show Applications menu:
-  - `~/Desktop/bitcoin_core.desktop`
-  - `~/.local/share/applications/bitcoin_core.desktop`
+  - `~/Desktop/bitcoin_core.desktop` (Linux)
+  - `~/.local/share/applications/bitcoin_core.desktop` (Linux)
 
 ## YouTube Playlist
 
