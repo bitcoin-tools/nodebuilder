@@ -145,6 +145,7 @@ Darwin)
       printf '%s\n' "Press any key when the installation has completed."
       read -rsn1
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
+    fi
   fi
 
   printf '%s' "Checking for dependencies... "
