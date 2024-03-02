@@ -107,7 +107,8 @@ Linux)
   printf '%s\n' "ok."
 
   printf '%s' "Checking for dependencies... "
-  sudo apt-get -qq install --no-install-recommends bc curl git gnupg jq > /dev/null
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/apt-requirements.txt"
+  sudo apt-get -qq install --no-install-recommends "$(curl -fsSL "${dependencies_url}")" > /dev/null
   printf '%s\n' "ok."
   ;;
 Darwin)
