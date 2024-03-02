@@ -139,7 +139,7 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           eval "$(/opt/homebrew/bin/brew shellenv)"
       - name: Install runtime dependencies
-        run: brew install curl gnupg jq libxcb
+        run: brew install gnupg jq libxcb
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -159,7 +159,7 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           eval "$(/opt/homebrew/bin/brew shellenv)"
       - name: Install runtime dependencies
-        run: brew install curl gnupg jq libxcb
+        run: brew install gnupg jq libxcb
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -179,7 +179,7 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           eval "$(/opt/homebrew/bin/brew shellenv)"
       - name: Install runtime dependencies
-        run: brew install curl gnupg jq libxcb
+        run: brew install gnupg jq libxcb
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
