@@ -1,6 +1,6 @@
 # Test Procedures
 
-This page outlines the procedures to test `bitcoin-core-node-builder` scripts.
+This page outlines the procedures to test changes to the `nodebuilder` repository.
 
 ## Table of Contents
 - [Automated Validation](#automated-validation)
