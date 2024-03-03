@@ -12,24 +12,22 @@ After opening a pull request, GitHub Actions will begin running [a series of aut
 
 You can view the status of these CI tests on GitHub.com under the `Checks` tab of your PR or under the `Actions` tab of the repository. If any of these checks fail, review the relevant logs, research the error, and/or and manually reproduce it on your local environment.
 
-Before merging,
-- Documentation changes must have the six verification checks passing. (No need to wait for the runtime checks.)
-- All coding changes must have all six verification checks as well as the 'Run nodebuilder' runtime checks passing.
+Documentation changes must have the six verification checks passing. (No need to wait for the runtime checks.) All changes affecting code must have all of the 'Run nodebuilder' runtime checks passing.
 
-1. [`ShellCheck`](https://shellcheck.net/) check the bash shell scripts, including:
+- [`ShellCheck`](https://shellcheck.net/) check the bash shell scripts, including:
    - typical beginner's syntax issues that cause a shell to give cryptic error messages
    - typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
    - subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
 
-2. [`actionlint`](https://github.com/rhysd/actionlint) checks the GitHub Actions `.yaml` workflow file. We like it for a variety of reasons, such as that it also enforces `ShellCheck` during `run:`
+- [`actionlint`](https://github.com/rhysd/actionlint) checks the GitHub Actions `.yaml` workflow file. We like it for a variety of reasons, such as that it also enforces `ShellCheck` during `run:`
 
-3. [`dockerfilelint`](https://github.com/replicatedhq/dockerfilelint) checks analyzes the `Dockerfile`s for common traps and mistakes. We use it to enforce best practices.
+- [`dockerfilelint`](https://github.com/replicatedhq/dockerfilelint) checks analyzes the `Dockerfile`s for common traps and mistakes. We use it to enforce best practices.
 
-4. [`shfmt`](https://github.com/mvdan/sh) formats shell programs. `shfmt`'s default shell formatting was chosen to be consistent, common, and predictable. We use it to enforce standardization.
+- [`shfmt`](https://github.com/mvdan/sh) formats shell programs. `shfmt`'s default shell formatting was chosen to be consistent, common, and predictable. We use it to enforce standardization.
 
-5. [`markdown-link-check`](https://github.com/tcort/markdown-link-check) extracts links from markdown texts and checks whether each link is alive (200 OK) or dead.
+- [`markdown-link-check`](https://github.com/tcort/markdown-link-check) extracts links from markdown texts and checks whether each link is alive (200 OK) or dead.
 
-6. [`PySpelling`](https://facelessuser.github.io/pyspelling/) which will check for typos in the markdown files. If you see any false-positives during the CI check, add the words to [our whitelist](../data/pyspelling.wordlist.txt)
+- [`PySpelling`](https://facelessuser.github.io/pyspelling/) which will check for typos in the markdown files. If you see any false-positives during the CI check, add the words to [our whitelist](../data/pyspelling.wordlist.txt)
 
 After passing those six checks, GitHub Actions will then:
 - Run `nodebuilder` on Ubuntu 22 (latest)
