@@ -19,7 +19,7 @@ Documentation changes must have the six verification checks passing. (No need to
    - typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
    - subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
 
-- [actionlint](https://github.com/rhysd/actionlint) checks the GitHub Actions `.yaml` workflow file. We like it for a variety of reasons, such as that it also enforces `ShellCheck` during `run:`
+- [actionlint](https://github.com/rhysd/actionlint) checks the GitHub Actions `.yaml` workflow file. We like that it enforces ShellCheck inside workflows.
 
 - [dockerfilelint](https://github.com/replicatedhq/dockerfilelint) checks analyzes the `Dockerfile`s for common traps and mistakes. We use it to enforce best practices.
 
