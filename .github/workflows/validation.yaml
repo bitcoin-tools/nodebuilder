@@ -148,20 +148,6 @@ jobs:
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
 
-  run-nodebuilder-macos-12:
-    name: Run on macOS 12 (x64)
-    runs-on: macos-12
-    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
-    steps:
-      - name: Check the current macOS version
-        run: |
-          sw_vers | grep Version | awk '{print $2}'
-          uname -a
-      - uses: actions/checkout@v4
-      - name: Run nodebuilder
-        timeout-minutes: 120
-        run: /bin/bash -x ./nodebuilder
-
   run-docker-container-ubuntu:
     name: Run in Ubuntu Docker
     runs-on: ubuntu-latest
