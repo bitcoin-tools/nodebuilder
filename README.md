@@ -2,15 +2,16 @@
 
 Create a secure Bitcoin Core node with ease.
 
-NOTE: This code is still under development and not yet ready. Test at your own risk.
+Run the following command in Terminal:
+```
+/bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+```
 
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [How to Run nodebuilder](#how-to-run-nodebuilder)
 - [What Does This Script Do?](#what-does-this-script-do)
 - [Which Files Does This Script Touch?](#which-files-does-this-script-touch)
-- [YouTube Playlist](#youtube-playlist)
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
 
@@ -21,16 +22,7 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 4. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
 5. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
 
-The script will automatically install additional [dependencies](./dependencies.txt).
-
-## How to Run nodebuilder
-
-Open the Terminal and run the following command:
-```
-/bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
-```
-
-NOTE: This code is still under development and not yet ready. Test at your own risk.
+During runtime, the script will install [these dependencies](./dependencies.txt).
 
 ## What Does This Script Do?
 
@@ -70,10 +62,6 @@ Before launching Bitcoin Core, this script modifies the following files:
   - `~/Desktop/bitcoin_core.desktop` (Linux)
   - `~/.local/share/applications/bitcoin_core.desktop` (Linux)
 
-## YouTube Playlist
-
-Follow the changes to this repository on [our YouTube playlist](https://youtube.com/playlist?list=PL3dr_BSAPOFSaozbtQ1wZM2enpdJIY_5T).
-
 ## Acknowledgements
 
 Inspiration for this project came from these Open Source projects:
@@ -82,12 +70,8 @@ Inspiration for this project came from these Open Source projects:
 - [Bails](https://github.com/BenWestgate/Bails) and [yeti.Bash](https://github.com/BenWestgate/yeti.Bash) by [Ben Westgate](https://github.com/BenWestgate)
 - [install-full-node.sh](https://bitnodes.io/install-full-node.sh) by [Addy Yeow](https://github.com/ayeowch/)
 - [Parmanode](https://github.com/armantheparman/parmanode) by [ArmanTheParman](https://github.com/armantheparman)
-
-And from these guides:
-- [Running A Full Node](https://bitcoin.org/en/full-node) by [Bitcoin.org contributors](https://bitcoin.org)
-- [Bitcoin & Lightning Server](https://youtube.com/watch?v=_Hrnls92TxQ) by [402 Payment Required](https://youtube.com/@402PaymentRequired)
-- [Running Bitcoin & Lightning Nodes](https://stopanddecrypt.medium.com/running-bitcoin-lightning-nodes-over-the-tor-network-2021-edition-489180297d5) by [StopAndDecrypt](https://stopanddecrypt.medium.com/)
+- And from countless online guides, such as [this one](https://bitcoin.org/en/full-node)
 
 ## License
 
-This project is licensed under the terms of [the MIT No Attribution license](./LICENSE).
+This project is licensed under the terms of [the MIT No Attribution / MIT-0 license](./LICENSE).
