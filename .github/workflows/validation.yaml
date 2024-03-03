@@ -148,12 +148,12 @@ jobs:
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
 
-  run-docker-container-ubuntu:
-    name: Run in Ubuntu Docker
+  run-docker-container-alpine:
+    name: Run in Alpine Docker
     runs-on: ubuntu-latest
     needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check the current version of Ubuntu
+      - name: Check the current version of Manjaro
         run: |
           grep "VERSION\|ID" /etc/os-release
           uname -a
@@ -163,7 +163,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./src/docker/Dockerfile_manjaro
           push: false
 
   run-docker-container-fedora:
@@ -200,4 +200,22 @@ jobs:
         with:
           context: .
           file: ./src/docker/Dockerfile_manjaro
+          push: false
+
+  run-docker-container-ubuntu:
+    name: Run in Ubuntu Docker
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current version of Ubuntu
+        run: |
+          grep "VERSION\|ID" /etc/os-release
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Build docker image
+        timeout-minutes: 120
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
           push: false
