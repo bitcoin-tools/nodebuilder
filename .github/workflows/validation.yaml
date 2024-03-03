@@ -163,7 +163,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./src/docker/Dockerfile_manjaro
+          file: ./src/docker/Dockerfile_alpine
           push: false
 
   run-docker-container-fedora:
