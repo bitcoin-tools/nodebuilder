@@ -43,7 +43,7 @@ jobs:
       - name: lint
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile src/Dockerfile_fedora src/Dockerfile_manjaro
+          target: Dockerfile src/docker/Dockerfile_fedora src/docker/Dockerfile_manjaro
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -195,7 +195,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./src/Dockerfile_fedora
+          file: ./src/docker/Dockerfile_fedora
           push: false
 
   run-docker-container-manjaro:
@@ -213,5 +213,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./src/Dockerfile_manjaro
+          file: ./src/docker/Dockerfile_manjaro
           push: false
