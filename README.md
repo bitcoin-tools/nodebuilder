@@ -17,11 +17,11 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 ## Prerequisites
 
 1. An active internet connection (of course)
-3. macOS, [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop), [Fedora](https://fedoraproject.org/workstation/download), or [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
+3. macOS, [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop), [Fedora](https://fedoraproject.org/workstation/download), [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), or any other system that can run a [Docker](https://docs.docker.com/get-started/) container.
 4. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
 5. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
 
-(The script will automatically install [dependencies](./dependencies.txt).)
+The script will automatically install additional [dependencies](./dependencies.txt).
 
 ## How to Run nodebuilder
 
