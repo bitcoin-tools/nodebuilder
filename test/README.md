@@ -4,13 +4,7 @@ This page outlines the procedures to test changes to the `nodebuilder` repositor
 
 ## Table of Contents
 - [Automated Validation](#automated-validation)
-  - [Details About the Validation Tools](#details-about-the-validation-tools)
-  - [How to Use ShellCheck](#how-to-use-shellcheck)
-  - [How to Use shfmt](#how-to-use-shfmt)
-  - [How to Use markdown-link-check](#how-to-use-markdown-link-check)
 - [Manual Testing](#manual-testing)
-  - [Major Code Changes](#major-code-changes)
-  - [Minor Code Changes](#minor-code-changes)
 
 ## Automated Validation
 
@@ -18,7 +12,9 @@ After opening a pull request, GitHub Actions will begin running [a series of aut
 
 You can view the status of these CI tests on GitHub.com under the `Checks` tab of your PR or under the `Actions` tab of the repository. If any of these checks fail, review the relevant logs, research the error, and/or and manually reproduce it on your local environment.
 
-All CI checks on the master branch should be passing.
+Before merging,
+- Documentation changes must have the six verification checks passing.
+- All coding changes must have all six verification checks as well as the 'Run nodebuilder' checks passing.
 
 1. [`ShellCheck`](https://shellcheck.net/) check the bash shell scripts, including:
   - typical beginner's syntax issues that cause a shell to give cryptic error messages
@@ -36,14 +32,14 @@ All CI checks on the master branch should be passing.
 6. [`PySpelling`](https://facelessuser.github.io/pyspelling/) which will check for typos in the markdown files. If you see any false-positives during the CI check, add the words to [our whitelist](../data/pyspelling.wordlist.txt)
 
 After passing those six checks, GitHub Actions will then:
-- run `nodebuilder` on Ubuntu 22 (latest)
-- run `nodebuilder` on Ubuntu 20
-- run `nodebuilder` on macOS 14 (arm64)
-- run `nodebuilder` on macOS 13 (x86_64)
-- run `nodebuilder` on macOS 12 (x86_64)
-- run `nodebuilder` in a Fedora Docker container
-- run `nodebuilder` in a Manjaro Docker container
-- run `nodebuilder` in an Ubuntu Docker container
+- Run `nodebuilder` on Ubuntu 22 (latest)
+- Run `nodebuilder` on Ubuntu 20
+- Run `nodebuilder` on macOS 14 (arm64)
+- Run `nodebuilder` on macOS 13 (x86_64)
+- Run `nodebuilder` on macOS 12 (x86_64)
+- Run `nodebuilder` in a Fedora Docker container
+- Run `nodebuilder` in a Manjaro Docker container
+- Run `nodebuilder` in an Ubuntu Docker container
 
 ## Manual Testing
 
