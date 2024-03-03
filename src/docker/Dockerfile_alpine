@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1
+FROM alpine:3.19
+ENV TERM=xterm
+
+# Check the current system
+RUN grep "VERSION\|ID" /etc/os-release
+
+# Install system updates and dependencies
+#RUN apk update && apk instsall git netcat
+
+# Execute the script
+RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
+  && cd nodebuilder
+COPY nodebuilder /opt/src/scripts/nodebuilder
+RUN ["/bin/bash", "-c", "/opt/src/scripts/nodebuilder"]
