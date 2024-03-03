@@ -106,14 +106,14 @@ Linux)
   bitcoin_core_data_dir="${HOME}/.bitcoin"
   printf '%s' "Performing a system upgrade... "
   case "$(get_os_release_type)" in
-  debian|ubuntu)
+  debian | ubuntu)
     sudo apt-get -qq update
     sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
     ;;
   fedora)
     sudo dnf --assumeyes --quiet upgrade > /dev/null
     ;;
-  arch|manjaro)
+  arch | manjaro)
     sudo pacman -Syu --noconfirm --quiet > /dev/null
     ;;
   *)
@@ -134,7 +134,7 @@ Linux)
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
 
   case "$(get_os_release_type)" in
-  debian|ubuntu)
+  debian | ubuntu)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
     ;;
   fedora)
