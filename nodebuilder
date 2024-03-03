@@ -135,7 +135,7 @@ Linux)
     handle_error "This version of Linux is not supported"
     ;;
   esac
-  
+
   printf '%s\n' "ok."
   ;;
 Darwin)
