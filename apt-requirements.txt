@@ -1,5 +1,0 @@
-bc
-curl
-git
-gnupg
-jq
