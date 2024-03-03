@@ -16,7 +16,7 @@ This page outlines the procedures to test changes to the `nodebuilder` repositor
 
 After opening a pull request, GitHub Actions will begin running [a series of automated checks](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/bash_validation_ci.yaml). After merging, the same CI checks will be run on the commit to `master`.
 
-You can view the status of these CI tests on GitHub.com under the `Checks` tab of your PR or under the `Actions` tab of the repo. If any of these checks fail, review the relevant logs, research the error, and/or and manually reproduce it on your local environment.
+You can view the status of these CI tests on GitHub.com under the `Checks` tab of your PR or under the `Actions` tab of the repository. If any of these checks fail, review the relevant logs, research the error, and/or and manually reproduce it on your local environment.
 
 All CI checks on the master branch should be passing.
 
