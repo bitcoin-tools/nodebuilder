@@ -195,7 +195,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./src/Dockerfile_manjaro
           file: ./src/Dockerfile_fedora
           push: false
 
