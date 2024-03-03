@@ -106,8 +106,10 @@ Linux)
     ;;
   fedora)
     sudo dnf --quiet upgrade
+    ;;
   *)
     handle_error "This version of Linux is not supported"
+    ;;
   esac
 
   if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
@@ -128,8 +130,10 @@ Linux)
     ;;
   fedora)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo dnf --quiet install --no-install-recommends > /dev/null
+    ;;
   *)
     handle_error "This version of Linux is not supported"
+    ;;
   esac
   
   printf '%s\n' "ok."
