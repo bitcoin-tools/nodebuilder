@@ -14,45 +14,37 @@ This page outlines the procedures to test `bitcoin-core-node-builder` scripts.
 
 ## Automated Validation
 
-_**Before**_ opening a pull request, you must validate your changes against three third-party static analysis tools `ShellCheck`, `shfmt`, and `markdown-link-check`.
+After opening a pull request, GitHub Actions will begin running [a series of automated checks](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/bash_validation_ci.yaml). After merging, the same CI checks will be run on the commit to `master`.
 
-_**After**_ opening a pull request, GitHub Actions CI will [automatically run these tools](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/bash_validation_ci.yaml) for you.
+You can view the status of these CI tests on GitHub.com under the `Checks` tab of your PR or under the `Actions` tab of the repo. If any of these checks fail, review the relevant logs, research the error, and/or and manually reproduce it on your local environment.
 
-### Details About the Validation Tools
+All CI checks on the master branch should be passing.
 
-[`ShellCheck`](https://shellcheck.net/) gives warnings and suggestions for bash/sh shell scripts, including:
+[`ShellCheck`](https://shellcheck.net/) check the bash shell scripts, including:
 - typical beginner's syntax issues that cause a shell to give cryptic error messages
 - typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
 - subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
 
-[`shfmt`](https://github.com/mvdan/sh) formats shell programs. `shfmt`'s default shell formatting was chosen to be consistent, common, and predictable.
+[`actionlint`](https://github.com/rhysd/actionlint) checks the GitHub Actions `.yaml` workflow file. We like it for a variety of reasons, such as that it also enforces `ShellCheck` during `run:`
+
+[`dockerfilelint`](https://github.com/replicatedhq/dockerfilelint) checks analyzes the `Dockerfile`s for common traps and mistakes. We use it to enforce best practices.
+
+[`shfmt`](https://github.com/mvdan/sh) formats shell programs. `shfmt`'s default shell formatting was chosen to be consistent, common, and predictable. We use it to enforce standardization.
 
 [`markdown-link-check`](https://github.com/tcort/markdown-link-check) extracts links from markdown texts and checks whether each link is alive (200 OK) or dead.
 
-You can add the three packages to your local environment with `sudo apt install -y shellcheck shfmt && npm install -g markdown-link-check`.
+[`PySpelling`](https://facelessuser.github.io/pyspelling/) which will check for typos in the markdown files. If you see any false-positives during the CI check, add the words to [our whitelist](../data/pyspelling.wordlist.txt)
 
-### How to Use ShellCheck
+After passing those six checks, GitHub Actions will then:
+- run `nodebuilder` on Ubuntu 22 (latest)
+- run `nodebuilder` on Ubuntu 20
+- run `nodebuilder` on macOS 14 (arm64)
+- run `nodebuilder` on macOS 13 (x86_64)
+- run `nodebuilder` on macOS 12 (x86_64)
+- run `nodebuilder` in a Fedora Docker container
+- run `nodebuilder` in a Manjaro Docker container
+- run `nodebuilder` in an Ubuntu Docker container
 
-To validate changes against `shellcheck`, run the following command:
-```bash
-shellcheck ~/Documents/GitHub/bitcoin-core-node-builder/nodebuilder
-```
-
-Alternatively, [a VSCode extension to integrate ShellCheck](https://github.com/vscode-shellcheck/vscode-shellcheck) can simplify the process.
-
-### How to Use shfmt
-
-To validate changes against `shfmt`, run the following command:
-```bash
-shfmt -i 2 -sr -d ~/Documents/GitHub/bitcoin-core-node-builder/nodebuilder
-```
-
-### How to Use markdown-link-check
-
-To validate changes against `markdown-link-check`, run the following command:
-```bash
-markdown-link-check ./README.md
-```
 
 ## Manual Testing
 
@@ -74,9 +66,9 @@ Run the following command after updating the `test_branch_name`:
 ```bash
 test_branch_name=""
 cd "${HOME}"/
-rm -rf "${HOME}"/{.bitcoin/,bitcoin/,bitcoin-*-linux-gnu.tar.gz}
-[ -d "${HOME}"/bitcoin-core-node-builder/ ] && rm -rf "${HOME}"/bitcoin-core-node-builder/
+rm -rf "${HOME}"/{.bitcoin/,bitcoin/}
+[ -d "${HOME}"/nodebuilder/ ] && rm -rf "${HOME}"/nodebuilder/
 git clone https://github.com/bitcoin-tools/nodebuilder.git -b "${test_branch_name}"
-"${HOME}"/bitcoin-core-node-builder/nodebuilder
+"${HOME}"/nodebuilder/nodebuilder
 ```
 
