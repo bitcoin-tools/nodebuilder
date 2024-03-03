@@ -3,8 +3,7 @@ FROM fedora:39
 ENV TERM=xterm
 
 # Install system updates and dependencies
-RUN dnf --assumeyes install curl git netcat 'sudo' \
-  && rm -rf /var/lib/apt/lists/*
+RUN dnf --assumeyes install curl git netcat 'sudo'
 
 # Execute the script
 RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
