@@ -105,7 +105,7 @@ Linux)
     sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
     ;;
   fedora)
-    sudo dnf --assumeyes --quiet upgrade
+    sudo dnf --assumeyes --quiet upgrade > /dev/null
     ;;
   manjaro)
     sudo pacman -Syu --noconfirm --quiet
