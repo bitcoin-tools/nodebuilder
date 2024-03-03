@@ -13,8 +13,8 @@ After opening a pull request, GitHub Actions will begin running [a series of aut
 You can view the status of these CI tests on GitHub.com under the `Checks` tab of your PR or under the `Actions` tab of the repository. If any of these checks fail, review the relevant logs, research the error, and/or and manually reproduce it on your local environment.
 
 Before merging,
-- Documentation changes must have the six verification checks passing.
-- All coding changes must have all six verification checks as well as the 'Run nodebuilder' checks passing.
+- Documentation changes must have the six verification checks passing. (No need to wait for the runtime checks.)
+- All coding changes must have all six verification checks as well as the 'Run nodebuilder' runtime checks passing.
 
 1. [`ShellCheck`](https://shellcheck.net/) check the bash shell scripts, including:
    - typical beginner's syntax issues that cause a shell to give cryptic error messages
