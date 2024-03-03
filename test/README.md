@@ -34,7 +34,6 @@ After passing those six checks, GitHub Actions will then:
 - Run `nodebuilder` on Ubuntu 20
 - Run `nodebuilder` on macOS 14 (arm64)
 - Run `nodebuilder` on macOS 13 (x86_64)
-- Run `nodebuilder` on macOS 12 (x86_64)
 - Run `nodebuilder` in a Fedora Docker container
 - Run `nodebuilder` in a Manjaro Docker container
 - Run `nodebuilder` in an Ubuntu Docker container
