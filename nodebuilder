@@ -15,6 +15,11 @@ is_running_in_container() {
   fi
 }
 
+# Taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L89
+chomp() {
+  printf "%s" "${1/"$'\n'"/}"
+}
+
 set_bitcoin_core_option() {
   if [ -f "${bitcoin_core_config_file:?}" ]; then
     sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
@@ -124,9 +129,9 @@ Darwin)
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
 
   if ! command -v git &> /dev/null; then
-    printf '%s' "Installing git via the Xcode Command Line Tools."
+    printf '%s' "Installing git via the Xcode Command Line Tools... "
     # These steps were taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
-    # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended xcode tools installation shouldn't take 10+ lines of code
+    # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended xcode tools installation shouldn't take 20+ lines of code
     sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
     clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1"
     clt_label="$(chomp "$(/bin/bash -c "${clt_label_command}")")"
@@ -139,14 +144,19 @@ Darwin)
     if command -v git &> /dev/null; then
       printf '%s\n' "ok."
     else
-      printf '%s\n' "failed."
-      printf '%s\n' "Installing the Command Line Tools (expect a GUI popup)."
+      printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
-      printf '%s\n' "Press any key when the installation has completed."
+      printf '%s\n' "PRESS ANY KEY when the installation has completed."
       read -rsn1
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
+      if ! command -v git &> /dev/null; then
+        handle_error "Failed to install git via the Xcode Command Line Tools."
+      fi
     fi
   fi
+  ;;
+MINGW*)
+  handle_error "Windows is not supported. Instead, use WSL (Windows Subsystem for Linux)."
   ;;
 *)
   handle_error "Your operating system is not supported."
@@ -250,7 +260,7 @@ else
   printf '%s\n' "ok."
 
   printf '%s' "  Installing Bitcoin Core... "
-  [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || handle_error "Unable to create directory ${bitcoin_install_lib_destination}"
+  [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || handle_error "Unable to create directory ${bitcoin_install_lib_destination}."
   case "$(uname -s)" in
   Linux)
     sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
@@ -269,18 +279,15 @@ else
       done
     fi
     ;;
-  *)
-    handle_error "Your operating system is not supported."
-    ;;
   esac
 
-  [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_bin_destination}" || handle_error "Unable to create directory ${bitcoin_install_bin_destination}"
+  [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_bin_destination}" || handle_error "Unable to create directory ${bitcoin_install_bin_destination}."
   sudo install -c "${bitcoin_install_bin_source}"/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin} "${bitcoin_install_bin_destination}"/
 
-  [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_include_destination}" || handle_error "Unable to create directory ${bitcoin_install_include_destination}"
+  [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_include_destination}" || handle_error "Unable to create directory ${bitcoin_install_include_destination}."
   sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}"/
 
-  [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}" 2> /dev/null || sudo mkdir -p "${bitcoin_install_man_destination}" || handle_error "Unable to create directory ${bitcoin_install_man_destination}"
+  [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}" 2> /dev/null || sudo mkdir -p "${bitcoin_install_man_destination}" || handle_error "Unable to create directory ${bitcoin_install_man_destination}."
   sudo install -c -m 644 "${bitcoin_install_man_source}"/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1} "${bitcoin_install_man_destination}"/
   printf '%s\n' "ok."
 
@@ -335,9 +342,6 @@ fi
 
 case "$(uname -s)" in
 Darwin) ;; #TODO: Add macOS memory check
-MINGW*)
-  handle_error "Your operating system is not supported."
-  ;;
 *)
   printf '%s' "Checking the memory on your system... "
   physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
