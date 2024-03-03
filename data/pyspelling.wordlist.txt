@@ -60,6 +60,7 @@ pyspelling
 replicatedhq
 rhysd
 rf
+runtime
 shellcheck
 shfmt
 sigs
