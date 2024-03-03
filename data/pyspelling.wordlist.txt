@@ -57,6 +57,7 @@ sudo
 tcort
 tmp
 tx
+txt
 ubuntu
 usr
 util

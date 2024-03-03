@@ -17,13 +17,11 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 ## Prerequisites
 
 1. An active internet connection (of course)
-2. macOS or any modern Linux distribution **based on Debian**, such as [Ubuntu Desktop LTS](https://ubuntu.com/tutorials/install-ubuntu-desktop)
-3. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
-4. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
+3. macOS (both newer Arm-based and older Intel-based systems) or any modern 64-bit Linux distribution **based on Debian**, such as [Ubuntu Desktop LTS](https://ubuntu.com/tutorials/install-ubuntu-desktop)
+4. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
+5. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
 
-(The script will automatically install additional dependencies.)
-
-This script **does not** support 32-bit operating systems. The processor architecture must be either x86_64 or arm64.
+(The script will automatically install additional [dependencies](./dependencies.txt).)
 
 ## How to Run nodebuilder
 
@@ -37,7 +35,7 @@ NOTE: This code is still under development and not yet ready. Test at your own r
 ## What Does This Script Do?
 
 The script performs the following actions:
-1. Install system updates, reboot if required, and install dependencies.
+1. Update the system (including reboot, if required) and install [dependencies](./dependencies.txt).
 2. Download, validate, and extract Bitcoin Core.
 3. Set a prune for Bitcoin Core based on the disk free space.
 4. Create shortcuts for Bitcoin Core on the desktop and on the "Show Applications" list.
