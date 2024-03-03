@@ -1,0 +1,217 @@
+name: Validation CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+  workflow_dispatch:
+
+env:
+  TERM: xterm
+
+jobs:
+
+  bash-lint:
+    name: Validate with ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint with shellcheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          ignore_names: offloadcoredata usei2p usetor
+
+  yaml-lint:
+    name: Validate with actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint workflow files
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color -verbose
+        shell: bash
+
+  docker-lint:
+    name: Validate with dockerfilelint
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - name: lint
+        uses: luke142367/Docker-Lint-Action@v1.0.0
+        with:
+          target: Dockerfile src/Dockerfile_fedora src/Dockerfile_manjaro
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  bash-format:
+    name: Validate with shfmt
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint with shfmt
+        uses: luizm/action-sh-checker@master
+        env:
+          SHFMT_OPTS: -i 2 -sr
+        with:
+          sh_checker_shellcheck_disable: true
+          sh_checker_exclude: offloadcoredata usei2p usetor
+
+  markdown-links:
+    name: Validate with markdown-link-check
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run markdown-link-check on Documentation
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-verbose-mode: 'yes'
+
+  markdown-spellcheck:
+    name: Validate with PySpelling
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rojopolis/spellcheck-github-actions@v0
+        name: Spell Check Markdown Files
+        with:
+          output_file: spellcheck-output.txt
+      - uses: actions/upload-artifact@v4
+        if: '!cancelled()'
+        with:
+          name: Spellcheck Output
+          path: spellcheck-output.txt
+
+  run-nodebuilder-ubuntu-latest:
+    name: Run on Ubuntu (latest)
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current version of Ubuntu
+        run: |
+          grep "VERSION\|ID" /etc/os-release
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Install system upgrades
+        run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+      - name: Run nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
+
+  run-nodebuilder-ubuntu-20:
+    name: Run on Ubuntu 20
+    runs-on: ubuntu-20.04
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current version of Ubuntu
+        run: |
+          grep "VERSION\|ID" /etc/os-release
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Install system upgrades
+        run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+      - name: Run nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
+
+  run-nodebuilder-macos-14:
+    name: Run on macOS 14 (arm64)
+    runs-on: macos-14
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current macOS version
+        run: |
+          sw_vers | grep Version | awk '{print $2}'
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Run nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
+
+  run-nodebuilder-macos-13:
+    name: Run on macOS 13 (x64)
+    runs-on: macos-13
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current macOS version
+        run: |
+          sw_vers | grep Version | awk '{print $2}'
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Run nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
+
+  run-nodebuilder-macos-12:
+    name: Run on macOS 12 (x64)
+    runs-on: macos-12
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current macOS version
+        run: |
+          sw_vers | grep Version | awk '{print $2}'
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Run nodebuilder
+        timeout-minutes: 120
+        run: /bin/bash -x ./nodebuilder
+
+  run-docker-container-ubuntu:
+    name: Run in Ubuntu Docker
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current version of Ubuntu
+        run: |
+          grep "VERSION\|ID" /etc/os-release
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Build docker image
+        timeout-minutes: 120
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+
+  run-docker-container-fedora:
+    name: Run in Fedora Docker
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current version of Ubuntu
+        run: |
+          grep "VERSION\|ID" /etc/os-release
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Build docker image
+        timeout-minutes: 120
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/Dockerfile_fedora
+          push: false
+
+  run-docker-container-manjaro:
+    name: Run in Manjaro Docker
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current version of Manjaro
+        run: |
+          grep "VERSION\|ID" /etc/os-release
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Build docker image
+        timeout-minutes: 120
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/Dockerfile_manjaro
+          push: false
