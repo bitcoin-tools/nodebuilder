@@ -100,8 +100,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-      - name: Install runtime dependency
-        run: sudo apt-get update && sudo apt-get install -y libxcb-xinerama0
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -118,8 +116,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-      - name: Install runtime dependency
-        run: sudo apt-get update && sudo apt-get install -y libxcb-xinerama0
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
