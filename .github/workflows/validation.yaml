@@ -99,9 +99,7 @@ jobs:
           uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
-        run: |
-          sudo apt-get update
-          sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+        run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -117,9 +115,7 @@ jobs:
           uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
-        run: |
-          sudo apt-get update
-          sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+        run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
