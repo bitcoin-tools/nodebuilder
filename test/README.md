@@ -66,7 +66,6 @@ Run the following command after updating the `test_branch_name`:
 ```bash
 test_branch_name=""
 cd "${HOME}"/
-rm -rf "${HOME}"/{.bitcoin/,bitcoin/}
 [ -d "${HOME}"/nodebuilder/ ] && rm -rf "${HOME}"/nodebuilder/
 git clone https://github.com/bitcoin-tools/nodebuilder.git -b "${test_branch_name}"
 "${HOME}"/nodebuilder/nodebuilder
