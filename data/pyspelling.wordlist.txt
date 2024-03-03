@@ -6,6 +6,7 @@ BenWestgate
 Hrnls
 JWWeatherman
 LTS
+Manjaro
 Parmanode
 PaymentRequired
 Proxmox
@@ -32,6 +33,7 @@ conf
 dr
 dylib
 enpdJIY
+fedoraproject
 fsSL
 github
 guix
@@ -41,12 +43,14 @@ io
 libbitcoinconsensus
 linux
 macOS
+manjaro
 md
 mktemp
 mvdan
 nodebuilder
 npm
 parmanode
+php
 rf
 shellcheck
 shfmt
