@@ -109,6 +109,7 @@ Linux)
   alpine)
     sudo apt update
     sudo apt upgrade
+    ;;
   debian | ubuntu)
     sudo apt-get -qq update
     sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
