@@ -108,7 +108,7 @@ Linux)
     sudo dnf --assumeyes --quiet upgrade > /dev/null
     ;;
   manjaro)
-    sudo pacman -Syu --noconfirm --quiet
+    sudo pacman -Syu --noconfirm --quiet > /dev/null
     ;;
   *)
     handle_error "This version of Linux is not supported"
