@@ -75,7 +75,7 @@ Inspiration for this project came from these Open Source projects:
 
 ## Contributing
 
-Please open an issue for any bug reports or feature requests. If you plan to submit a pull request, please review our [test procedures](test/README.md) first.
+Please open an issue for any bug reports or feature requests. If you plan to submit a pull request, please first review our [test procedures](test/README.md).
 
 ## License
 
