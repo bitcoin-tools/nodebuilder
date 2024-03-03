@@ -1,58 +1,43 @@
 # Test Procedures
 
-This page outlines the procedures to test `bitcoin-core-node-builder` scripts.
+This page outlines the procedures to test changes to the `nodebuilder` repository.
 
 ## Table of Contents
 - [Automated Validation](#automated-validation)
-  - [Details About the Validation Tools](#details-about-the-validation-tools)
-  - [How to Use ShellCheck](#how-to-use-shellcheck)
-  - [How to Use shfmt](#how-to-use-shfmt)
-  - [How to Use markdown-link-check](#how-to-use-markdown-link-check)
 - [Manual Testing](#manual-testing)
-  - [Major Code Changes](#major-code-changes)
-  - [Minor Code Changes](#minor-code-changes)
 
 ## Automated Validation
 
-_**Before**_ opening a pull request, you must validate your changes against three third-party static analysis tools `ShellCheck`, `shfmt`, and `markdown-link-check`.
+After opening a pull request, GitHub Actions will begin running [a series of automated checks](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/bash_validation_ci.yaml). After merging, the same CI checks will be run on the commit to `master`.
 
-_**After**_ opening a pull request, GitHub Actions CI will [automatically run these tools](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/bash_validation_ci.yaml) for you.
+You can view the status of these CI tests on GitHub.com under the `Checks` tab of your PR or under the `Actions` tab of the repository. If any of these checks fail, review the relevant logs, research the error, and/or and manually reproduce it on your local environment.
 
-### Details About the Validation Tools
+Documentation changes must have the six verification checks passing. (No need to wait for the runtime checks.) All changes affecting code must have all of the 'Run nodebuilder' runtime checks passing.
 
-[`ShellCheck`](https://shellcheck.net/) gives warnings and suggestions for bash/sh shell scripts, including:
-- typical beginner's syntax issues that cause a shell to give cryptic error messages
-- typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
-- subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
+- [`ShellCheck`](https://shellcheck.net/) check the bash shell scripts, including:
+   - typical beginner's syntax issues that cause a shell to give cryptic error messages
+   - typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
+   - subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
 
-[`shfmt`](https://github.com/mvdan/sh) formats shell programs. `shfmt`'s default shell formatting was chosen to be consistent, common, and predictable.
+- [`actionlint`](https://github.com/rhysd/actionlint) checks the GitHub Actions `.yaml` workflow file. We like it for a variety of reasons, such as that it also enforces `ShellCheck` during `run:`
 
-[`markdown-link-check`](https://github.com/tcort/markdown-link-check) extracts links from markdown texts and checks whether each link is alive (200 OK) or dead.
+- [`dockerfilelint`](https://github.com/replicatedhq/dockerfilelint) checks analyzes the `Dockerfile`s for common traps and mistakes. We use it to enforce best practices.
 
-You can add the three packages to your local environment with `sudo apt install -y shellcheck shfmt && npm install -g markdown-link-check`.
+- [`shfmt`](https://github.com/mvdan/sh) formats shell programs. `shfmt`'s default shell formatting was chosen to be consistent, common, and predictable. We use it to enforce standardization.
 
-### How to Use ShellCheck
+- [`markdown-link-check`](https://github.com/tcort/markdown-link-check) extracts links from markdown texts and checks whether each link is alive (200 OK) or dead.
 
-To validate changes against `shellcheck`, run the following command:
-```bash
-shellcheck ~/Documents/GitHub/bitcoin-core-node-builder/nodebuilder
-```
+- [`PySpelling`](https://facelessuser.github.io/pyspelling/) which will check for typos in the markdown files. If you see any false-positives during the CI check, add the words to [our whitelist](../data/pyspelling.wordlist.txt)
 
-Alternatively, [a VSCode extension to integrate ShellCheck](https://github.com/vscode-shellcheck/vscode-shellcheck) can simplify the process.
-
-### How to Use shfmt
-
-To validate changes against `shfmt`, run the following command:
-```bash
-shfmt -i 2 -sr -d ~/Documents/GitHub/bitcoin-core-node-builder/nodebuilder
-```
-
-### How to Use markdown-link-check
-
-To validate changes against `markdown-link-check`, run the following command:
-```bash
-markdown-link-check ./README.md
-```
+After passing those six checks, GitHub Actions will then:
+- Run `nodebuilder` on Ubuntu 22 (latest)
+- Run `nodebuilder` on Ubuntu 20
+- Run `nodebuilder` on macOS 14 (arm64)
+- Run `nodebuilder` on macOS 13 (x86_64)
+- Run `nodebuilder` on macOS 12 (x86_64)
+- Run `nodebuilder` in a Fedora Docker container
+- Run `nodebuilder` in a Manjaro Docker container
+- Run `nodebuilder` in an Ubuntu Docker container
 
 ## Manual Testing
 
@@ -74,9 +59,8 @@ Run the following command after updating the `test_branch_name`:
 ```bash
 test_branch_name=""
 cd "${HOME}"/
-rm -rf "${HOME}"/{.bitcoin/,bitcoin/,bitcoin-*-linux-gnu.tar.gz}
-[ -d "${HOME}"/bitcoin-core-node-builder/ ] && rm -rf "${HOME}"/bitcoin-core-node-builder/
+[ -d "${HOME}"/nodebuilder/ ] && rm -rf "${HOME}"/nodebuilder/
 git clone https://github.com/bitcoin-tools/nodebuilder.git -b "${test_branch_name}"
-"${HOME}"/bitcoin-core-node-builder/nodebuilder
+"${HOME}"/nodebuilder/nodebuilder
 ```
 
