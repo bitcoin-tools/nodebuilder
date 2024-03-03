@@ -102,10 +102,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-      - name: Install runtime dependency
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/apt-requirements.txt)"
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
@@ -124,10 +120,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-      - name: Install runtime dependency
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/apt-requirements.txt)"
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
