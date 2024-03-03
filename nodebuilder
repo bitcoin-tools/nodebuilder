@@ -108,7 +108,7 @@ Linux)
 
   printf '%s' "Checking for dependencies... "
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/apt-requirements.txt"
-  sudo apt-get -qq install --no-install-recommends "$(curl -fsSL ${dependencies_url})" > /dev/null
+  sudo apt-get -qq install --no-install-recommends $(curl -fsSL --retry 5 --retry-delay 10 ${dependencies_url} | tr '\n' ' ') > /dev/null
   printf '%s\n' "ok."
   ;;
 Darwin)
