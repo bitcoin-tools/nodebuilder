@@ -15,6 +15,11 @@ is_running_in_container() {
   fi
 }
 
+get_os_release_type() {
+  local os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
+  echo "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
+}
+
 # Taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L89
 chomp() {
   printf "%s" "${1/"$'\n'"/}"
@@ -99,15 +104,15 @@ Linux)
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
   printf '%s' "Performing a system upgrade... "
-  case "$(grep "^ID=" /etc/os-release | cut -c 4-)" in
-  ubuntu)
+  case "$(get_os_release_type)" in
+  debian|ubuntu)
     sudo apt-get -qq update
     sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
     ;;
   fedora)
     sudo dnf --assumeyes --quiet upgrade > /dev/null
     ;;
-  manjaro)
+  arch|manjaro)
     sudo pacman -Syu --noconfirm --quiet > /dev/null
     ;;
   *)
@@ -127,8 +132,8 @@ Linux)
   printf '%s' "Checking for dependencies... "
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
 
-  case "$(grep "^ID=" /etc/os-release | cut -c 4-)" in
-  ubuntu)
+  case "$(get_os_release_type)" in
+  debian|ubuntu)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
     ;;
   fedora)
