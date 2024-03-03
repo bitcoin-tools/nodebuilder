@@ -7,9 +7,9 @@ set -o pipefail
 
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
-    return 0 #0=true
+    return 0
   elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
-    return 0 #0=true
+    return 0
   else
     return 1 #1=false
   fi
@@ -99,8 +99,16 @@ Linux)
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
   printf '%s' "Performing a system upgrade... "
-  sudo apt-get -qq update
-  sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
+  case "$(grep "^ID=" /etc/os-release | cut -c 4-)" in
+  ubuntu)
+    sudo apt-get -qq update
+    sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
+    ;;
+  fedora)
+    sudo dnf --quiet upgrade
+  *)
+    handle_error "This version of Linux is not supported"
+  esac
 
   if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
     printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
@@ -113,7 +121,17 @@ Linux)
 
   printf '%s' "Checking for dependencies... "
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
-  curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
+
+  case "$(grep "^ID=" /etc/os-release | cut -c 4-)" in
+  ubuntu)
+    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
+    ;;
+  fedora)
+    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo dnf --quiet install --no-install-recommends > /dev/null
+  *)
+    handle_error "This version of Linux is not supported"
+  esac
+  
   printf '%s\n' "ok."
   ;;
 Darwin)
