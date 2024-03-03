@@ -17,9 +17,9 @@ Before merging,
 - All coding changes must have all six verification checks as well as the 'Run nodebuilder' checks passing.
 
 1. [`ShellCheck`](https://shellcheck.net/) check the bash shell scripts, including:
-  - typical beginner's syntax issues that cause a shell to give cryptic error messages
-  - typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
-  - subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
+   - typical beginner's syntax issues that cause a shell to give cryptic error messages
+   - typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
+   - subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
 
 2. [`actionlint`](https://github.com/rhysd/actionlint) checks the GitHub Actions `.yaml` workflow file. We like it for a variety of reasons, such as that it also enforces `ShellCheck` during `run:`
 
