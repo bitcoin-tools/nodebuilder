@@ -70,7 +70,7 @@ Inspiration for this project came from these Open Source projects:
 - [Bails](https://github.com/BenWestgate/Bails) and [yeti.Bash](https://github.com/BenWestgate/yeti.Bash) by [Ben Westgate](https://github.com/BenWestgate)
 - [install-full-node.sh](https://bitnodes.io/install-full-node.sh) by [Addy Yeow](https://github.com/ayeowch/)
 - [Parmanode](https://github.com/armantheparman/parmanode) by [ArmanTheParman](https://github.com/armantheparman)
-- And from countless guides, including [bitcoin.org's Running A Full Node](https://bitcoin.org/en/full-node)
+- And from countless online guides, such as [this one](https://bitcoin.org/en/full-node)
 
 ## License
 
