@@ -43,7 +43,7 @@ jobs:
       - name: lint
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile
+          target: Dockerfile src/Dockerfile_fedora
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -162,8 +162,8 @@ jobs:
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
 
-  run-docker-container:
-    name: Run Dockerfile
+  run-docker-container-ubuntu:
+    name: Run in Ubuntu Docker
     runs-on: ubuntu-latest
     needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
     steps:
@@ -178,4 +178,23 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          push: false
+
+  run-docker-container-fedora:
+    name: Run in Fedora Docker
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint, docker-lint, bash-format, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current version of Ubuntu
+        run: |
+          grep "ID" /etc/os-release
+          grep "VERSION" /etc/os-release
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Build docker images
+        timeout-minutes: 120
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./src/Dockerfile_fedora
           push: false
