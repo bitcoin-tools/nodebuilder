@@ -2,6 +2,9 @@
 FROM ubuntu:22.04
 ENV TERM=xterm
 
+# Check the current system
+RUN grep "VERSION\|ID" /etc/os-release
+
 # Install system updates and dependencies
 RUN apt-get -qq update \
   && DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends \
