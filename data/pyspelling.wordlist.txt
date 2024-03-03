@@ -3,12 +3,14 @@ ArmanTheParman
 Addy
 BSAPOFSaozbtQ
 BenWestgate
+Dockerfile
 Hrnls
 JWWeatherman
 LTS
 Parmanode
 PaymentRequired
 Proxmox
+PySpelling
 README
 ShellCheck
 StopAndDecrypt
@@ -18,6 +20,7 @@ VSCode
 Westgate
 Yeow
 acknowledgements
+actionlint
 armantheparman
 asc
 ayeowch
@@ -25,8 +28,10 @@ bitnodes
 cd
 ci
 conf
+dockerfilelint
 dr
 enpdJIY
+facelessuser
 fsSL
 github
 guix
@@ -40,6 +45,9 @@ mvdan
 nodebuilder
 npm
 parmanode
+pyspelling
+replicatedhq
+rhysd
 rf
 shellcheck
 shfmt
@@ -52,6 +60,7 @@ tmp
 ubuntu
 vscode
 wZM
+wordlist
 yaml
 yeticold
 youtube
