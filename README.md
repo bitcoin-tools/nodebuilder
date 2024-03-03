@@ -13,6 +13,7 @@ Run the following command in Terminal:
 - [What Does This Script Do?](#what-does-this-script-do)
 - [Which Files Does This Script Touch?](#which-files-does-this-script-touch)
 - [Acknowledgements](#acknowledgements)
+- [Contributing](#contributing)
 - [License](#license)
 
 ## Prerequisites
@@ -71,6 +72,10 @@ Inspiration for this project came from these Open Source projects:
 - [install-full-node.sh](https://bitnodes.io/install-full-node.sh) by [Addy Yeow](https://github.com/ayeowch/)
 - [Parmanode](https://github.com/armantheparman/parmanode) by [ArmanTheParman](https://github.com/armantheparman)
 - And from countless online guides, such as [this one](https://bitcoin.org/en/full-node)
+
+## Contributing
+
+Please open an issue for any bug reports or feature requests. If you plan to submit a pull request, please first review our [test procedures](test/README.md).
 
 ## License
 
