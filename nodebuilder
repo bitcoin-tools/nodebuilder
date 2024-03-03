@@ -129,7 +129,7 @@ Linux)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
     ;;
   fedora)
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo dnf --assumeyes --quiet install --no-install-recommends > /dev/null
+    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
     ;;
   *)
     handle_error "This version of Linux is not supported"
