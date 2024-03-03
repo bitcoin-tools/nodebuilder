@@ -95,8 +95,7 @@ jobs:
     steps:
       - name: Check the current version of Ubuntu
         run: |
-          grep "ID" /etc/os-release
-          grep "VERSION" /etc/os-release
+          grep "VERSION\|ID" /etc/os-release
           uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
@@ -112,8 +111,7 @@ jobs:
     steps:
       - name: Check the current version of Ubuntu
         run: |
-          grep "ID" /etc/os-release
-          grep "VERSION" /etc/os-release
+          grep "VERSION\|ID" /etc/os-release
           uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
@@ -171,8 +169,7 @@ jobs:
     steps:
       - name: Check the current version of Ubuntu
         run: |
-          grep "ID" /etc/os-release
-          grep "VERSION" /etc/os-release
+          grep "VERSION\|ID" /etc/os-release
           uname -a
       - uses: actions/checkout@v4
       - name: Build docker images
@@ -190,8 +187,7 @@ jobs:
     steps:
       - name: Check the current version of Manjaro
         run: |
-          grep "ID" /etc/os-release
-          grep "VERSION" /etc/os-release
+          grep "VERSION\|ID" /etc/os-release
           uname -a
       - uses: actions/checkout@v4
       - name: Build docker images
