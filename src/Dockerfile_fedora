@@ -6,7 +6,7 @@ ENV TERM=xterm
 RUN grep "VERSION\|ID" /etc/os-release
 
 # Install system updates and dependencies
-RUN dnf --assumeyes install curl git netcat 'sudo'
+RUN dnf --assumeyes install git netcat
 
 # Execute the script
 RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
