@@ -107,8 +107,8 @@ Linux)
   printf '%s' "Performing a system upgrade... "
   case "$(get_os_release_type)" in
   alpine)
-    sudo apk update
-    sudo apk upgrade
+    apk update
+    apk upgrade
     ;;
   debian | ubuntu)
     sudo apt-get -qq update
@@ -139,7 +139,7 @@ Linux)
 
   case "$(get_os_release_type)" in
   alpine)
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apk add > /dev/null
+    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk add > /dev/null
     ;;
   debian | ubuntu)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
