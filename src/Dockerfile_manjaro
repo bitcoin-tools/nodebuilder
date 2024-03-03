@@ -3,7 +3,7 @@ FROM manjarolinux/base:20240227
 ENV TERM=xterm
 
 # Install system updates and dependencies
-RUN pacman -Syu ca-certificates curl git netcat 'sudo'
+RUN pacman -Syu --noconfirm ca-certificates curl git netcat 'sudo'
 
 # Execute the script
 RUN update-ca-certificates \
