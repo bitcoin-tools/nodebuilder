@@ -3,7 +3,7 @@ FROM fedora:39
 ENV TERM=xterm
 
 # Install system updates and dependencies
-RUN dnf install ca-certificates curl git netcat 'sudo' \
+RUN dnf --assumeyes install ca-certificates curl git netcat 'sudo' \
   && rm -rf /var/lib/apt/lists/*
 
 # Execute the script
