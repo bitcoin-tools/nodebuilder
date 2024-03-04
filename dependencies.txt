@@ -3,4 +3,3 @@ curl
 git
 gnupg
 jq
-libgcc
