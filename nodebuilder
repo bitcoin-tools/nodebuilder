@@ -207,17 +207,16 @@ esac
 
 printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
 if [ "$(get_os_release_type)" == "alpine" ]; then
-  apk add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev
-  cd "${HOME}"
-  git clone https://github.com/bitcoin/bitcoin.git compile_bitcoin
-  cd compile_bitcoin/
-  git checkout "v${target_bitcoin_version}"
-  ./autogen.sh
-  ./configure --with-incompatible-bdb --with-gui=no
-  make -j "$(($(nproc) + 1))"
-  make -j "$(($(nproc) + 1))" check
-  make install
-  rm -rf "${HOME}"/compile_bitcoin/
+  apk add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev > /dev/null
+  git clone --quiet https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
+  cd "${temp_directory}"/compile_bitcoin/
+  git checkout --quiet "v${target_bitcoin_version}"
+  ./autogen.sh > /dev/null
+  ./configure --with-incompatible-bdb --with-gui=no >/dev/null
+  make --silent --jobs "$(($(nproc) + 1))"
+  make --silent --jobs "$(($(nproc) + 1))" check
+  make --silent install
+  rm -rf "${temp_directory}"/compile_bitcoin/
   current_bitcoin_version="${target_bitcoin_version}"
 elif command -v bitcoin-qt &> /dev/null; then
   current_bitcoin_version="$(bitcoin-qt --version 2> /dev/null | head -1)"
