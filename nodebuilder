@@ -208,7 +208,7 @@ esac
 printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
 if [ "$(get_os_release_type)" == "alpine" ]; then
   printf '\n%s' "  Installing tools for compiling... "
-  apk add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libzmq > /dev/null 
+  apk add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libzmq > /dev/null
   printf '%s\n%s' "ok." "  Downloading source code... "
   git clone --quiet https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
