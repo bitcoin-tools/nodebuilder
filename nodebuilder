@@ -214,7 +214,7 @@ if [ "$(get_os_release_type)" == "alpine" ]; then
   git checkout "$(git tag | sort -V | grep -v "rc\|test\|final" | tail -1)"
   cd bitcoin/
   ./autogen.sh
-  ./configure --with-incompatible-bdb --with-gui=no 
+  ./configure --with-incompatible-bdb --with-gui=no
   make -j "$(($(nproc) + 1))" check
   make -j "$(($(nproc) + 1))" check
   make install
