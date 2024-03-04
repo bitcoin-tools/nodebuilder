@@ -1,6 +1,7 @@
 bc
+binutils
+coreutils
 curl
 git
 gnupg
 jq
-libgcc
