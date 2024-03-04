@@ -43,7 +43,7 @@ jobs:
       - name: lint
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile src/docker/Dockerfile_fedora src/docker/Dockerfile_manjaro
+          target: Dockerfile src/docker/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
