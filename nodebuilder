@@ -212,7 +212,7 @@ if [ "$(get_os_release_type)" == "alpine" ]; then
   cd "${HOME}"
   git clone https://github.com/bitcoin/bitcoin.git compile_bitcoin
   cd compile_bitcoin/
-  git checkout "${target_bitcoin_version}"
+  git checkout "v${target_bitcoin_version}"
   ./autogen.sh
   ./configure --with-incompatible-bdb --with-gui=no
   make -j "$(($(nproc) + 1))"
