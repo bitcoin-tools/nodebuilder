@@ -108,7 +108,7 @@ Linux)
   case "$(get_os_release_type)" in
   alpine)
     apk update
-    apk upgrade
+    apk upgrade --quiet
     ;;
   debian | ubuntu)
     sudo apt-get -qq update
@@ -139,7 +139,7 @@ Linux)
 
   case "$(get_os_release_type)" in
   alpine)
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk add > /dev/null
+    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk --quiet add
     ;;
   debian | ubuntu)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
@@ -207,7 +207,7 @@ esac
 
 printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
 if [ "$(get_os_release_type)" == "alpine" ]; then
-  apk add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev > /dev/null
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev
   git clone --quiet https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
   git checkout --quiet "v${target_bitcoin_version}"
