@@ -9,7 +9,7 @@ RUN grep "VERSION\|ID" /etc/os-release
 RUN apk update && apk --no-cache add bash coreutils curl git
 
 # Execute the script
-RUN sudo mount -o remount,exec /tmp
+RUN mount -o remount,exec /tmp
 RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
   && cd nodebuilder
 COPY nodebuilder /opt/src/scripts/nodebuilder
