@@ -140,8 +140,6 @@ Linux)
   case "$(get_os_release_type)" in
   alpine)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk add > /dev/null
-    #apk add gcompat libgcc
-    apk add g++ git libffi musl-dev libffi-dev autoconf automake openssh-client make db-dev openssl openssl-dev boost boost-dev libtool libevent libevent-dev
     ;;
   debian | ubuntu)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
@@ -209,6 +207,7 @@ esac
 
 printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
 if [ "$(get_os_release_type)" == "alpine" ]; then
+  apk add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev
   cd "${HOME}"
   git clone https://github.com/bitcoin/bitcoin.git compile_bitcoin
   cd compile_bitcoin/
@@ -218,6 +217,7 @@ if [ "$(get_os_release_type)" == "alpine" ]; then
   make -j "$(($(nproc) + 1))"
   make -j "$(($(nproc) + 1))" check
   make install
+  rm -rf "${HOME}"/compile_bitcoin/
   current_bitcoin_version="${target_bitcoin_version}"
 elif command -v bitcoin-qt &> /dev/null; then
   current_bitcoin_version="$(bitcoin-qt --version 2> /dev/null | head -1)"
