@@ -209,7 +209,7 @@ esac
 
 printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
 if [ "$(get_os_release_type)" == "alpine" ]; then
-  cd "${temp_directory}"/
+  cd /src/
   git clone https://github.com/bitcoin/bitcoin.git
   cd bitcoin/
   git checkout "$(git tag -l --sort=v:refname | grep -iv "rc\|test\|final" | tail -1)"
