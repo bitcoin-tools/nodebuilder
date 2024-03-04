@@ -208,7 +208,7 @@ esac
 printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
 if [ "$(get_os_release_type)" == "alpine" ]; then
   printf '\n%s' "  Installing tools for compiling... "
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libzmq 2> <(grep -A2 -B1 -v "ICU with non-English" -)
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev
   printf '%s\n%s' "ok." "  Downloading source code... "
   git clone --quiet https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
@@ -219,7 +219,7 @@ if [ "$(get_os_release_type)" == "alpine" ]; then
   make -C depends NO_BOOST=1 NO_LIBEVENT=1 NO_QT=1 NO_SQLITE=1 NO_NATPMP=1 NO_UPNP=1 NO_ZMQ=1 NO_USDT=1 &> /dev/null
   BDB_PREFIX="$(pwd)/depends/x86_64-pc-linux-gnu"
   printf '%s\n%s' "ok." "  Configuring the build environment... "
-  ./configure BDB_LIBS="-L${BDB_PREFIX}/lib -ldb_cxx-4.8" BDB_CFLAGS="-I${BDB_PREFIX}/include" --with-gui=no --enable-suppress-external-warnings > /dev/null
+  ./configure BDB_LIBS="-L${BDB_PREFIX}/lib -ldb_cxx-4.8" BDB_CFLAGS="-I${BDB_PREFIX}/include" --with-gui=no --disable-zmq --enable-suppress-external-warnings > /dev/null
   printf '%s\n%s' "ok." "  Compiling (this may take a while)... "
   make --jobs "$(($(nproc) + 1))" > /dev/null
   printf '%s\n%s' "ok." "  Checking (this may take a while)... "
