@@ -6,9 +6,9 @@ set -o nounset
 set -o pipefail
 
 is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
     return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
     return 0
   else
     return 1 #1=false
@@ -40,7 +40,7 @@ set_if_unset_bitcoin_core_option() {
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
     printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
-  elif [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
+  elif [ "$(grep -c --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
     printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
   fi
 }
@@ -418,7 +418,7 @@ Darwin) ;; #TODO: Add macOS memory check
   ;;
 esac
 
-if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
+if [ "$(grep -c --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   printf '%s' "Checking free space in home directory... "
   if [ "$(uname -s)" == "Darwin" ]; then
     free_space_in_mib=$(/bin/df -m "${HOME}" | awk '{print $4}' | sed 1d)
@@ -527,7 +527,7 @@ while [ "${ibd_status}" = true ]; do
   sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
   # Handle case of early sync by replacing scientific notation with decimal
 
-  if [ "$(echo "${sync_progress}" | grep --count --ignore-case "e")" -gt 0 ]; then
+  if [ "$(echo "${sync_progress}" | grep -c --ignore-case "e")" -gt 0 ]; then
     sync_progress="0.000000001"
   fi
   sync_progress_percent="$(printf '%s\n' "${sync_progress}*100" | bc)"
