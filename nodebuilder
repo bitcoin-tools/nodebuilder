@@ -293,6 +293,7 @@ else
   if [ "${target_bitcoin_architecture}" == "arm64" ]; then
     codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
   fi
+  "${bitcoin_install_bin_source}"/test_bitcoin --log_level=all
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
   if [[ "${unit_test_response}" != *"No errors detected"* ]]; then
     printf '%s\n' "\n${unit_test_response}"
