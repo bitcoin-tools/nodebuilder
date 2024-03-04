@@ -542,7 +542,7 @@ while [ "${ibd_status}" = true ]; do
   sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
   # Handle case of early sync by replacing scientific notation with decimal
 
-  if [ "$(echo "${sync_progress}" | grep -c -i "e")" -gt 0 ]; then
+  if [ "$(echo "${sync_progress}" | grep -c --ignore-case "e")" -gt 0 ]; then
     sync_progress="0.000000001"
   fi
   sync_progress_percent="$(printf '%s\n' "${sync_progress}*100" | bc)"
