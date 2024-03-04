@@ -107,7 +107,10 @@ Linux)
   printf '%s' "Performing a system upgrade... "
   case "$(get_os_release_type)" in
   alpine)
-    apk update
+    echo
+    echo "DEBUG STEP fetching"
+    apk update --quiet
+    echo "DEBUG STEP upgrading"
     apk upgrade --quiet
     ;;
   debian | ubuntu)
