@@ -207,12 +207,14 @@ esac
 
 printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
 if [ "$(get_os_release_type)" == "alpine" ]; then
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libzmq
   git clone --quiet https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
   git checkout --quiet "v${target_bitcoin_version}"
-  ./autogen.sh > /dev/null
-  ./configure --with-incompatible-bdb --with-gui=no > /dev/null
+  ./autogen.sh > /dev/null 2> >(grep -v "build-aux" -)
+  make -C depends NO_BOOST=1 NO_LIBEVENT=1 NO_QT=1 NO_SQLITE=1 NO_NATPMP=1 NO_UPNP=1 NO_ZMQ=1 NO_USDT=1
+  BDB_PREFIX="$(pwd)/depends/x86_64-pc-linux-gnu"
+  ./configure BDB_LIBS="-L${BDB_PREFIX}/lib -ldb_cxx-4.8" BDB_CFLAGS="-I${BDB_PREFIX}/include" --with-gui=no > /dev/null
   make --jobs "$(($(nproc) + 1))" > /dev/null
   make --jobs "$(($(nproc) + 1))" check > /dev/null
   make install > /dev/null
