@@ -141,7 +141,7 @@ Linux)
   alpine)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk add > /dev/null
     #apk add gcompat libgcc
-    apk add gcc git libffi musl-dev libffi-dev autoconf automake openssh-client make db-dev openssl openssl-dev boost boost-dev libtool libevent libevent-dev
+    apk add g++ git libffi musl-dev libffi-dev autoconf automake openssh-client make db-dev openssl openssl-dev boost boost-dev libtool libevent libevent-dev
     ;;
   debian | ubuntu)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
