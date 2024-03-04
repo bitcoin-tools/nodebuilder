@@ -141,7 +141,7 @@ Linux)
   alpine)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk add > /dev/null
     #apk add gcompat libgcc
-    apk add gcc git libffi musl-dev  libffi-dev autoconf automake openssh-client make db-dev openssl openssl-dev boost boost-dev libtool libevent libevent-dev
+    apk add gcc git libffi musl-dev libffi-dev autoconf automake openssh-client make db-dev openssl openssl-dev boost boost-dev libtool libevent libevent-dev
     ;;
   debian | ubuntu)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
@@ -215,8 +215,8 @@ if [ "$(get_os_release_type)" == "alpine" ]; then
   cd bitcoin/
   ./autogen.sh
   ./configure --with-incompatible-bdb  --with-gui=no 
-  make -j "$(($(nproc)+1))" check
-  make -j "$(($(nproc)+1))" check
+  make -j "$(($(nproc) + 1))" check
+  make -j "$(($(nproc) + 1))" check
   make install
 elif command -v bitcoin-qt &> /dev/null; then
   current_bitcoin_version="$(bitcoin-qt --version 2> /dev/null | head -1)"
