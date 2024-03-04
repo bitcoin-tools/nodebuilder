@@ -16,4 +16,4 @@ RUN update-ca-certificates \
   && git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
   && cd nodebuilder
 COPY nodebuilder /opt/src/scripts/nodebuilder
-RUN ["/bin/bash", "-c", "/opt/src/scripts/nodebuilder"]
+RUN /bin/bash -c /opt/src/scripts/nodebuilder
