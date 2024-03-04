@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: lint
-        uses: luke142367/Docker-Lint-Action@v1.0.0
+        uses: luke142367/docker file-lint-Action@v1.0.0
         with:
           target: Dockerfile src/docker/Dockerfile_fedora src/docker/Dockerfile_manjaro
         env:
@@ -79,7 +79,7 @@ jobs:
   run-nodebuilder-ubuntu-latest:
     name: Run on Ubuntu (latest)
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint, docker-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, docker file-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current version of Ubuntu
         run: |
@@ -95,7 +95,7 @@ jobs:
   run-nodebuilder-ubuntu-20:
     name: Run on Ubuntu 20
     runs-on: ubuntu-20.04
-    needs: [bash-lint, yaml-lint, docker-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, docker file-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current version of Ubuntu
         run: |
@@ -111,7 +111,7 @@ jobs:
   run-nodebuilder-macos-14:
     name: Run on macOS 14 (arm64)
     runs-on: macos-14
-    needs: [bash-lint, yaml-lint, docker-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, docker file-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current macOS version
         run: |
@@ -125,7 +125,7 @@ jobs:
   run-nodebuilder-macos-13:
     name: Run on macOS 13 (x64)
     runs-on: macos-13
-    needs: [bash-lint, yaml-lint, docker-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, docker file-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current macOS version
         run: |
@@ -139,7 +139,7 @@ jobs:
   run-docker-container-ubuntu:
     name: Run in Ubuntu Docker
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint, docker-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, docker file-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current version of Ubuntu
         run: |
@@ -157,7 +157,7 @@ jobs:
   run-docker-container-fedora:
     name: Run in Fedora Docker
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint, docker-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, docker file-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current version of Ubuntu
         run: |
@@ -175,7 +175,7 @@ jobs:
   run-docker-container-manjaro:
     name: Run in Manjaro Docker
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint, docker-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, docker file-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current version of Manjaro
         run: |
