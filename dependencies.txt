@@ -1,6 +1,5 @@
 bc
 binutils
-coreutils
 curl
 git
 gnupg
