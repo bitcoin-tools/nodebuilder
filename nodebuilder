@@ -218,7 +218,7 @@ elif [ "$(get_os_release_type)" == "alpine" ]; then
   printf '\n%s' "  Installing build dependencies... "
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
   printf '%s\n%s' "ok." "  Downloading Bitcoin source code... "
-  git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
+  git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
   printf '%s\n%s' "ok." "  Analyzing hardware confgiruation... "
   ./autogen.sh > /dev/null 2> >(grep -v "build-aux" -)
