@@ -205,7 +205,7 @@ MINGW*)
   ;;
 esac
 
-printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
+printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
 if [ "$(get_os_release_type)" == "alpine" ]; then
   printf '\n%s' "  Installing tools for compiling... "
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
