@@ -220,7 +220,7 @@ if [ "$(get_os_release_type)" == "alpine" ]; then
   printf '%s\n%s' "ok." "  Building (please wait)... "
   make --jobs "$(($(nproc) + 1))" > /dev/null
   printf '%s\n%s' "ok." "  Checking (please wait)... "
-  make --jobs "$(($(nproc) + 1))" check &> /dev/null
+  make --jobs "$(($(nproc) + 1))" check > /dev/null 2> >(grep -C2 -v "Ran 3 tests in" -)
   printf '%s\n%s' "ok." "  Installing Bitcoin... "
   make install > /dev/null
   rm -rf "${temp_directory}"/compile_bitcoin/
