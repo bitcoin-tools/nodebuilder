@@ -220,7 +220,7 @@ if [ "$(get_os_release_type)" == "alpine" ]; then
   BDB_PREFIX="$(pwd)/depends/x86_64-pc-linux-gnu"
   export BDB_PREFIX
   printf '%s\n%s' "ok." "  Configuring the build environment... "
-  ./configure BDB_LIBS="-L${BDB_PREFIX}/lib -ldb_cxx-4.8" BDB_CFLAGS="-I${BDB_PREFIX}/include" --with-gui=no --disable-zmq --enable-suppress-external-warnings > /dev/null
+  ./configure BDB_LIBS="-L${BDB_PREFIX}/lib --library db_cxx-4.8" BDB_CFLAGS="-I${BDB_PREFIX}/include" --with-gui=no --disable-zmq --enable-suppress-external-warnings > /dev/null
   printf '%s\n%s' "ok." "  Compiling (this may take a while)... "
   make --jobs "$(($(nproc) + 1))" > /dev/null
   printf '%s\n%s' "ok." "  Checking (this may take a while)... "
