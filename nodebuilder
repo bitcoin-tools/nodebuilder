@@ -6,9 +6,9 @@ set -o nounset
 set -o pipefail
 
 is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
     return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep --count 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
     return 0
   else
     return 1 #1=false
@@ -40,7 +40,7 @@ set_if_unset_bitcoin_core_option() {
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
     printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
-  elif [ "$(grep --count --ignore-case "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
+  elif [ "$(grep -c -i "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
     printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
   fi
 }
@@ -106,6 +106,10 @@ Linux)
   bitcoin_core_data_dir="${HOME}/.bitcoin"
   printf '%s' "Performing a system upgrade... "
   case "$(get_os_release_type)" in
+  alpine)
+    apk update --quiet
+    apk upgrade --quiet
+    ;;
   debian | ubuntu)
     sudo apt-get -qq update
     sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
@@ -134,6 +138,9 @@ Linux)
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
 
   case "$(get_os_release_type)" in
+  alpine)
+    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk --quiet add
+    ;;
   debian | ubuntu)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
     ;;
@@ -198,15 +205,33 @@ MINGW*)
   ;;
 esac
 
-printf '%s' "Checking for Bitcoin Core version ${target_bitcoin_version}... "
-if command -v bitcoin-qt &> /dev/null; then
-  current_bitcoin_version="$(bitcoin-qt --version 2> /dev/null | head -1)"
+printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
+if command -v bitcoind &> /dev/null; then
+  current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1)"
 else
   current_bitcoin_version=""
 fi
 
 if [ -n "${current_bitcoin_version}" ] && [[ "${current_bitcoin_version}" == *"${target_bitcoin_version}"* ]]; then
   printf '%s\n' "ok."
+elif [ "$(get_os_release_type)" == "alpine" ]; then
+  printf '\n%s' "  Installing build dependencies... "
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
+  printf '%s\n%s' "ok." "  Downloading Bitcoin source code... "
+  git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
+  cd "${temp_directory}"/compile_bitcoin/
+  printf '%s\n%s' "ok." "  Analyzing hardware confgiruation... "
+  ./autogen.sh > /dev/null 2> >(grep -v "build-aux" -)
+  printf '%s\n%s' "ok." "  Configuring the build environment... "
+  ./configure --with-incompatible-bdb --with-gui=no --enable-suppress-external-warnings > /dev/null 2> >(grep -v "Berkely DB\|BDB\|libzmq" -)
+  printf '%s\n%s' "ok." "  Building (please wait)... "
+  make --jobs "$(($(nproc) + 1))" > /dev/null
+  printf '%s\n%s' "ok." "  Checking (please wait)... "
+  make --jobs "$(($(nproc) + 1))" check > /dev/null 2> >(grep -C2 -v "Ran 3 tests in" -)
+  printf '%s\n%s' "ok." "  Installing Bitcoin... "
+  make install > /dev/null
+  rm -rf "${temp_directory}"/compile_bitcoin/
+  current_bitcoin_version="${target_bitcoin_version}"
 else
   printf '\n'
   bitcoin_core_extract_dir="${temp_directory}/bitcoin-core"
@@ -411,7 +436,7 @@ Darwin) ;; #TODO: Add macOS memory check
   ;;
 esac
 
-if [ "$(grep --count --ignore-case "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
+if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   printf '%s' "Checking free space in home directory... "
   if [ "$(uname -s)" == "Darwin" ]; then
     free_space_in_mib=$(/bin/df -m "${HOME}" | awk '{print $4}' | sed 1d)
@@ -520,7 +545,7 @@ while [ "${ibd_status}" = true ]; do
   sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
   # Handle case of early sync by replacing scientific notation with decimal
 
-  if [ "$(echo "${sync_progress}" | grep --count --ignore-case "e")" -gt 0 ]; then
+  if [ "$(echo "${sync_progress}" | grep -c -i "e")" -gt 0 ]; then
     sync_progress="0.000000001"
   fi
   sync_progress_percent="$(printf '%s\n' "${sync_progress}*100" | bc)"

@@ -45,7 +45,7 @@ jobs:
       - name: lint
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile src/docker/*
+          target: Dockerfile src/docker/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check the current version of Ubuntu
+      - name: Check the current OS version
         run: |
           grep "VERSION\|ID" /etc/os-release
           uname -a
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check the current version of Ubuntu
+      - name: Check the current OS version
         run: |
           grep "VERSION\|ID" /etc/os-release
           uname -a
@@ -136,12 +136,12 @@ jobs:
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
 
-  run-docker-container-ubuntu:
-    name: Run in Ubuntu Docker
+  run-docker-container-alpine:
+    name: Run in Alpine Docker
     runs-on: ubuntu-latest
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check the current version of Ubuntu
+      - name: Check the current OS version
         run: |
           grep "VERSION\|ID" /etc/os-release
           uname -a
@@ -151,7 +151,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./src/docker/Dockerfile_alpine
           push: false
 
   run-docker-container-fedora:
@@ -159,7 +159,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check the current version of Ubuntu
+      - name: Check the current OS version
         run: |
           grep "VERSION\|ID" /etc/os-release
           uname -a
@@ -177,7 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
-      - name: Check the current version of Manjaro
+      - name: Check the current OS version
         run: |
           grep "VERSION\|ID" /etc/os-release
           uname -a
@@ -188,4 +188,22 @@ jobs:
         with:
           context: .
           file: ./src/docker/Dockerfile_manjaro
+          push: false
+
+  run-docker-container-ubuntu:
+    name: Run in Ubuntu Docker
+    runs-on: ubuntu-latest
+    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
+    steps:
+      - name: Check the current OS version
+        run: |
+          grep "VERSION\|ID" /etc/os-release
+          uname -a
+      - uses: actions/checkout@v4
+      - name: Build docker image
+        timeout-minutes: 120
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
           push: false
