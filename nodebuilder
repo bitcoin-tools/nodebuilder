@@ -111,8 +111,8 @@ Linux)
     apk upgrade --quiet
     ;;
   debian | ubuntu)
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -qq update
-    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
+    sudo apt-get -qq update --assume-yes
+    sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null
     ;;
   fedora)
     sudo dnf --assumeyes --quiet upgrade > /dev/null
