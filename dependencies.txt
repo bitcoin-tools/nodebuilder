@@ -1,4 +1,3 @@
-bc
 curl
 git
 gnupg
