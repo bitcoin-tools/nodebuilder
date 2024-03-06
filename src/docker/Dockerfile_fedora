@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM fedora:39@sha256:353b74d8db1cf655e87c780b9ac49f52ed72dfaa3ecc4bb0e9245e72c98a45b5
+FROM fedora:39@sha256:61864fd19bbd64d620f338eb11dae9e8759bf7fa97302ac6c43865c48dccd679
 ENV TERM=xterm
 
 # Check the current system
