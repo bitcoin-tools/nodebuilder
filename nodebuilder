@@ -99,6 +99,10 @@ user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 
+readonly BYTES_TO_KIB=1024
+readonly KIB_TO_MIB=1024
+readonly MIB_TO_GIB=1024
+
 clear
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
@@ -416,31 +420,31 @@ case "$(uname -s)" in
 Darwin) ;; #TODO: Add macOS memory check
 *)
   printf '%s' "Checking the memory on your system... "
-  physical_memory_total_in_mib=$(awk '/MemTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-  physical_memory_free_in_mib=$(awk '/MemAvailable/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-  swap_memory_total_in_mib=$(awk '/SwapTotal/ { printf "%d \n", $2/1024 }' /proc/meminfo)
-  swap_memory_free_in_mib=$(awk '/SwapFree/ { printf "%d \n", $2/1024 }' /proc/meminfo)
+  physical_memory_total_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/MemTotal/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
+  physical_memory_free_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/MemAvailable/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
+  swap_memory_total_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/SwapTotal/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
+  swap_memory_free_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/SwapFree/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
   memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
   printf '%0.1f GiB free of %0.1f GiB.\n' \
-    "$(awk -v mem_free_mib="${memory_free_in_mib}" 'BEGIN{printf "%f\n", mem_free_mib / 1024}')" \
-    "$(awk -v mem_total_mib="${memory_total_in_mib}" 'BEGIN{printf "%f\n", mem_total_mib / 1024}')"
+    "$(awk -v mem_free_mib="${memory_free_in_mib}" -v kib_mib_factor="${KIB_TO_MIB}" 'BEGIN{printf "%f\n", mem_free_mib / kib_mib_factor}')" \
+    "$(awk -v mem_total_mib="${memory_total_in_mib}" -v kib_mib_factor="${KIB_TO_MIB}" 'BEGIN{printf "%f\n", mem_total_mib / kib_mib_factor}')"
 
-  if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
+  if [ "${memory_total_in_mib}" -le $((2 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
     printf '%s' "Configuring for minimal memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "4"
     set_if_unset_bitcoin_core_option "maxmempool" "5"
     set_if_unset_bitcoin_core_option "maxconnections" "4"
     [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
-  elif [ "${memory_total_in_mib}" -le $((4 * 1024)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
+  elif [ "${memory_total_in_mib}" -le $((4 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
     printf '%s' "Configuring for reduced memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "100"
     set_if_unset_bitcoin_core_option "maxmempool" "50"
     set_if_unset_bitcoin_core_option "maxconnections" "10"
     [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
-  elif [ "${memory_total_in_mib}" -le $((8 * 1024)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
+  elif [ "${memory_total_in_mib}" -le $((8 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
     printf '%s' "Configuring for conservative memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "225"
     set_if_unset_bitcoin_core_option "maxmempool" "150"
@@ -470,11 +474,11 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
     fi
   fi
   data_already_synced_in_mib=$((blocks_size_in_mib + chainstate_size_in_mib))
-  printf '%s\n' "$((data_already_synced_in_mib / 1024)) GiB."
+  printf '%s\n' "$((data_already_synced_in_mib / MIB_TO_GIB)) GiB."
 
   printf '%s' "Checking free space in home directory... "
   free_space_in_mib="$(get_free_space_in_mib)"
-  printf '%s\n' "$((free_space_in_mib / 1024)) GiB."
+  printf '%s\n' "$((free_space_in_mib / MIB_TO_GIB)) GiB."
 
   ## This constant will need to be adjusted over time as the chain grows
   ## or need to find how to generate this dynamically in a trustless way.
@@ -484,7 +488,7 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   ## which, as of June 2023, is around 522 GiB.
   archival_node_required_disk_in_gib="686"
 
-  archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * 1024))
+  archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * MIB_TO_GIB))
 
   if [ "${free_space_in_mib}" -ge $((archival_node_required_disk_in_mib - data_already_synced_in_mib)) ]; then
     printf '  %s\n' "Your node will run as an unpruned full node."
@@ -507,7 +511,7 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
         prune_ratio=80
       fi
       prune_amount_in_mib=$((free_space_in_mib * prune_ratio / 100))
-      printf '  Pruning to %d GiB (%d%% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf.\n' "$((prune_amount_in_mib / 1024))" "${prune_ratio}"
+      printf '  Pruning to %d GiB (%d%% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf.\n' "$((prune_amount_in_mib / MIB_TO_GIB))" "${prune_ratio}"
     fi
     set_bitcoin_core_option "prune" "${prune_amount_in_mib}"
   fi
@@ -561,7 +565,7 @@ while [ "${ibd_status}" = true ]; do
   blocks=$(jq '.blocks' <<< "${blockchain_info}")
   headers=$(jq '.headers' <<< "${blockchain_info}")
   last_block_time=$(jq '.time' <<< "${blockchain_info}")
-  size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / 1024 / 1024))
+  size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / BYTES_TO_KIB / KIB_TO_MIB))
 
   free_space_in_mib=$(get_free_space_in_mib)
 
@@ -582,16 +586,16 @@ while [ "${ibd_status}" = true ]; do
     fi
 
     printf '%s' 'Chain sync size:    '
-    if [ "${size_on_disk_in_mib}" -gt 1024 ]; then
-      printf '%d GiB\n' "$((size_on_disk_in_mib / 1024))"
+    if [ "${size_on_disk_in_mib}" -gt "${MIB_TO_GIB}" ]; then
+      printf '%d GiB\n' "$((size_on_disk_in_mib / MIB_TO_GIB))"
     else
       printf '%d MiB\n' "${size_on_disk_in_mib}"
     fi
   fi
 
   printf '%s' 'Disk free space:    '
-  if [ "${free_space_in_mib}" -gt 1024 ]; then
-    printf '%d GiB\n' "$((free_space_in_mib / 1024))"
+  if [ "${free_space_in_mib}" -gt "${MIB_TO_GIB}" ]; then
+    printf '%d GiB\n' "$((free_space_in_mib / MIB_TO_GIB))"
   else
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
