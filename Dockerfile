@@ -8,7 +8,7 @@ RUN grep "VERSION\|ID" /etc/os-release
 # Install system updates and dependencies
 RUN apt-get -qq update \
   && DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends \
-  ca-certificates curl git netcat 'sudo' \
+  apt-utils ca-certificates curl git netcat 'sudo' \
   && rm -rf /var/lib/apt/lists/*
 
 # Execute the script
