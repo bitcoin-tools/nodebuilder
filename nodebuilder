@@ -57,8 +57,8 @@ ensure_cursor_is_on_column_one() {
     printf '%s' "\E[6n"
     read -rsdR cursor_position
     cursor_position="${cursor_position#*[}"
-    cursor_position_column="$(echo "${cursor_position}" | cut -d ";" -f 2)"
-    ([ "${cursor_position_column}" -gt 1 ] && echo) || true
+    cursor_position_column="$(printf '%s\n' "${cursor_position}" | cut -d ";" -f 2)"
+    ([ "${cursor_position_column}" -gt 1 ] && printf '\n') || true
   fi
 }
 
