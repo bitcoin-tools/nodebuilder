@@ -27,21 +27,25 @@ chomp() {
 }
 
 set_bitcoin_core_option() {
+  local option="$1"
+  local value="$2"
   if [ -f "${bitcoin_core_config_file:?}" ]; then
-    sed -i.bak "/^$1=/d" "${bitcoin_core_config_file:?}"
+    sed -i.bak "/^${option}=/d" "${bitcoin_core_config_file:?}"
     rm "${bitcoin_core_config_file:?}.bak"
   else
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
   fi
-  printf '%s\n' "$1=$2" >> "${bitcoin_core_config_file:?}"
+  printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
 }
 
 set_if_unset_bitcoin_core_option() {
+  local option="$1"
+  local value="$2"
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
-    printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
-  elif [ "$(grep -c -i "^$1=" "${bitcoin_core_config_file:?}")" == "0" ]; then
-    printf '%s\n' "$1=$2" >> "${bitcoin_core_data_dir:?}"
+    printf '%s\n' "${option}=${value}" >> "${bitcoin_core_data_dir:?}"
+  elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" == "0" ]; then
+    printf '%s\n' "${option}=${value}" >> "${bitcoin_core_data_dir:?}"
   fi
 }
 
