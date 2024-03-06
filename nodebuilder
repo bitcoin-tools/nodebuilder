@@ -116,7 +116,7 @@ Linux)
     ;;
   debian | ubuntu)
     sudo apt-get -qq update
-    sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null
+    sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> >(grep -v apt-utils -)
     ;;
   fedora)
     sudo dnf --assumeyes --quiet upgrade > /dev/null
@@ -146,7 +146,7 @@ Linux)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk --quiet add
     ;;
   debian | ubuntu)
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo apt-get -qq install --no-install-recommends > /dev/null
+    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
     ;;
   fedora)
     curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
