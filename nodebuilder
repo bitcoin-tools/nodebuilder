@@ -412,7 +412,7 @@ case "$(uname -s)" in
 Darwin) ;; #TODO: Add macOS memory check
 *)
   printf '%s' "Checking the memory on your system... "
-  physical_memory_total_in_mib=$(awk  -v kib_mib_factor="${KIB_TO_MIB}" '/MemTotal/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
+  physical_memory_total_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/MemTotal/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
   physical_memory_free_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/MemAvailable/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
   swap_memory_total_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/SwapTotal/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
   swap_memory_free_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/SwapFree/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
