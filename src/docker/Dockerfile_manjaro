@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM manjarolinux/base:20240227@sha256:313f8427d7246aa0304c271991c72fcd3efdedbffa0a517053ec41382678c44a
+FROM manjarolinux/base:20240227@sha256:369753d82cfddfb500e9ef756334e0323508172c31041ea30501530cb5b24c12
 ENV TERM=xterm
 
 # Check the current system
