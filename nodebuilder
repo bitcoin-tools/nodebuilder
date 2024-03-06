@@ -386,7 +386,7 @@ Darwin) ;; #TODO: Add macOS memory check
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
   printf '%0.1f GiB total, %0.1f GiB free.\n' \
     "$(awk -v mem_total_mib="${memory_total_in_mib}" 'BEGIN{printf "%f\n", mem_total_mib / 1024}')" \
-    "$(printf '%s\n' "${memory_free_in_mib}/1024" | bc --mathlib)"
+    "$(awk -v mem_free_mib="${memory_free_in_mib}" 'BEGIN{printf "%f\n", mem_free_mib / 1024}')"
 
   if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
     printf '%s' "Configuring for minimal memory usage... "
