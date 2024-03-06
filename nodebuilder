@@ -15,6 +15,14 @@ is_running_in_container() {
   fi
 }
 
+get_free_space_in_mib() {
+  if [ "$(uname -s)" == "Darwin" ]; then
+    /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
+  else
+    df --output=avail --block-size="1MiB" "${HOME}" | sed 1d
+  fi
+}
+
 get_os_release_type() {
   local os_release_id_like
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
@@ -469,11 +477,7 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
   printf '%s\n' "$((data_already_synced_in_mib / MIB_TO_GIB)) GiB."
 
   printf '%s' "Checking free space in home directory... "
-  if [ "$(uname -s)" == "Darwin" ]; then
-    free_space_in_mib=$(/bin/df -m "${HOME}" | awk '{print $4}' | sed 1d)
-  else
-    free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
-  fi
+  free_space_in_mib="$(get_free_space_in_mib)"
   printf '%s\n' "$((free_space_in_mib / MIB_TO_GIB)) GiB."
 
   ## This constant will need to be adjusted over time as the chain grows
@@ -563,11 +567,7 @@ while [ "${ibd_status}" = true ]; do
   last_block_time=$(jq '.time' <<< "${blockchain_info}")
   size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / BYTES_TO_KIB / KIB_TO_MIB))
 
-  if [ "$(uname -s)" == "Darwin" ]; then
-    free_space_in_mib=$(/bin/df -m "${HOME}" | awk '{print $4}' | sed 1d)
-  else
-    free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
-  fi
+  free_space_in_mib=$(get_free_space_in_mib)
 
   clear
   if [ "${headers}" -eq 0 ]; then
