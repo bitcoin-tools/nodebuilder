@@ -385,7 +385,7 @@ Darwin) ;; #TODO: Add macOS memory check
   memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
   printf '%0.1f GiB total, %0.1f GiB free.\n' \
-    "$(printf '%s\n' "${memory_total_in_mib}/1024" | bc --mathlib)" \
+    "$(awk -v mem_total_mib="${memory_total_in_mib}" 'BEGIN{printf "%f\n", mem_total_mib / 1024}')" \
     "$(printf '%s\n' "${memory_free_in_mib}/1024" | bc --mathlib)"
 
   if [ "${memory_total_in_mib}" -le $((2 * 1024)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
@@ -523,7 +523,7 @@ while [ "${ibd_status}" = true ]; do
   if [ "$(echo "${sync_progress}" | grep --count --ignore-case "e")" -gt 0 ]; then
     sync_progress="0.000000001"
   fi
-  sync_progress_percent="$(printf '%s\n' "${sync_progress}*100" | bc)"
+  sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')"
 
   blocks=$(jq '.blocks' <<< "${blockchain_info}")
   headers=$(jq '.headers' <<< "${blockchain_info}")
