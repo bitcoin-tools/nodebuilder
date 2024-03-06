@@ -498,7 +498,7 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
         prune_ratio=80
       fi
       prune_amount_in_mib=$((free_space_in_mib * prune_ratio / 100))
-      printf '  Pruning to %d GiB (%d of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf.' "$((prune_amount_in_mib / 1024))" "${prune_ratio}"
+      printf '  Pruning to %d GiB (%d of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf.\n' "$((prune_amount_in_mib / 1024))" "${prune_ratio}"
     fi
     set_bitcoin_core_option "prune" "${prune_amount_in_mib}"
   fi
