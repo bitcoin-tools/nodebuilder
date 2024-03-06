@@ -18,7 +18,7 @@ is_running_in_container() {
 get_os_release_type() {
   local os_release_id_like
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
-  echo "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
+  printf '%s\n' "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
 }
 
 # Taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L89
