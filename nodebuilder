@@ -584,7 +584,7 @@ while [ "${ibd_status}" = true ]; do
     fi
 
     printf '%s' 'Chain sync size:    '
-    if [ "${size_on_disk_in_mib}" -gt MIB_TO_GIB ]; then
+    if [ "${size_on_disk_in_mib}" -gt "${MIB_TO_GIB}" ]; then
       printf '%d GiB\n' "$((size_on_disk_in_mib / MIB_TO_GIB))"
     else
       printf '%d MiB\n' "${size_on_disk_in_mib}"
@@ -592,7 +592,7 @@ while [ "${ibd_status}" = true ]; do
   fi
 
   printf '%s' 'Disk free space:    '
-  if [ "${free_space_in_mib}" -gt MIB_TO_GIB ]; then
+  if [ "${free_space_in_mib}" -gt "${MIB_TO_GIB}" ]; then
     printf '%d GiB\n' "$((free_space_in_mib / MIB_TO_GIB))"
   else
     printf '%d MiB\n' "${free_space_in_mib}"
