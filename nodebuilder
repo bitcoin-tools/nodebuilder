@@ -563,11 +563,7 @@ while [ "${ibd_status}" = true ]; do
   last_block_time=$(jq '.time' <<< "${blockchain_info}")
   size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / 1024 / 1024))
 
-  if [ "$(uname -s)" == "Darwin" ]; then
-    free_space_in_mib=$(/bin/df -m "${HOME}" | awk '{print $4}' | sed 1d)
-  else
-    free_space_in_mib=$(df --output=avail --block-size="1MiB" "${HOME}" | sed 1d)
-  fi
+  free_space_in_mib=$(get_free_space_in_mib)
 
   clear
   if [ "${headers}" -eq 0 ]; then
