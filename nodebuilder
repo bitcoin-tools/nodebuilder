@@ -525,7 +525,7 @@ if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
-  disown 
+  disown
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
