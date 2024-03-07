@@ -521,7 +521,7 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt &> /dev/null 2>; then
+if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt &> /dev/null; then
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
