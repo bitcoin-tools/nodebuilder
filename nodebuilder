@@ -391,7 +391,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
 [Desktop Entry]
 Name=Bitcoin Core
 Comment=Launch Bitcoin Core
-Exec=bitcoin-qt %u
+Exec=bitcoin-qt %u || bitcoind --daemonwait
 Icon=${shortcut_image_file}
 Terminal=false
 StartupWMClass=Bitcoin Core
@@ -520,14 +520,14 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || is_running_in_container; then
+if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt &> /dev/null; then
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
   disown
 fi
-printf '%s\n' "ok."
-printf '  %s' "Checking the RPC status... "
+
+printf '%s\n  %s' "ok." "Checking the RPC status... "
 bitcoin-cli --rpcwait getrpcinfo > /dev/null
 printf '%s\n' "ok."
 
