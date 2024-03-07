@@ -25,7 +25,7 @@ Run the following command in Terminal:
    - Linux - [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
    - Linux - [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop)
    - Linux - [Fedora](https://fedoraproject.org/workstation/download)
-   - Any other OS that can run our [Dockerfile](./Dockerfile)
+   - Any other system that can run our [Dockerfile](./Dockerfile)
 5. `bash`, which is probably already installed, or you can install with a package manager
 6. `curl`, which is installed by default on macOS, or you can install with a package manager
 
