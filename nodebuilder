@@ -26,11 +26,6 @@ get_os_release_type() {
   printf '%s\n' "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
 }
 
-# Taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L89
-chomp() {
-  printf "%s" "${1/"$'\n'"/}"
-}
-
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
     return 0
@@ -198,11 +193,12 @@ Darwin)
     # These steps were taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended xcode tools installation shouldn't take 20+ lines of code
     sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-    clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1"
-    clt_label="$(chomp "$(/bin/bash -c "${clt_label_command}")")"
+    clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
+    clt_label="$(/bin/bash -c "${clt_label_command}")"
     if [[ -n "${clt_label}" ]]; then
       sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
-      #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
+    else
+      handle_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
     fi
     sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
