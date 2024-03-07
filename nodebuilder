@@ -391,7 +391,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
 [Desktop Entry]
 Name=Bitcoin Core
 Comment=Launch Bitcoin Core
-Exec=bitcoin-qt %u
+Exec=bash -c 'command -v bitcoin-qt >/dev/null 2>&1 && exec bitcoin-qt %u || exec bitcoind --daemonwait'
 Icon=${shortcut_image_file}
 Terminal=false
 StartupWMClass=Bitcoin Core
