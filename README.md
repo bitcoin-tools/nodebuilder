@@ -19,11 +19,17 @@ Run the following command in Terminal:
 ## Prerequisites
 
 1. An active internet connection (of course)
-3. macOS, [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop), [Fedora](https://fedoraproject.org/workstation/download), [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), or any other system that can run a [Docker](https://docs.docker.com/get-started/) container
-4. `bash`, which is probably already installed, or you can install on Linux with `sudo apt install -y bash`
-5. `curl`, which is installed by default on macOS, or you can install on Linux with `sudo apt install -y curl`
+3. A compatible operating system:
+   - [macOS](https://apple.com/macos)
+   - [Alpine](https://wiki.alpinelinux.org/wiki/Installation) Linux
+   - [Arch](https://wiki.archlinux.org/title/installation_guide) Linux or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
+   - [Debian](https://debian.org/releases/stable/installmanual) Linux or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop)
+   - [Fedora](https://fedoraproject.org/workstation/download) Linux
+   - Any other system that can run our [Dockerfile](./Dockerfile)
+5. `bash`, which is probably already installed, or you can install with a package manager
+6. `curl`, which is installed by default on macOS, or you can install with a package manager
 
-During runtime, the script will install [these dependencies](./dependencies.txt).
+During runtime, the script will install [dependencies](./dependencies.txt).
 
 ## What Does This Script Do?
 
@@ -31,7 +37,7 @@ The script performs the following actions:
 1. Update the system (including reboot, if required) and install [dependencies](./dependencies.txt).
 2. Download, validate, and extract Bitcoin Core.
 3. Set a prune for Bitcoin Core based on the disk free space.
-4. Create shortcuts for Bitcoin Core on the desktop and on the "Show Applications" list.
+4. Create shortcuts for Bitcoin Core on the desktop and the "Show Applications" list.
 5. Start Bitcoin Core.
 6. Prevent the system from sleeping, suspending, and hibernating.
 7. While the initial block download proceeds, display relevant info such as the percent synced, blocks left to sync, current chain tip date, and the free disk space remaining.
@@ -75,7 +81,7 @@ Inspiration for this project came from these Open Source projects:
 
 ## Contributing
 
-Please open an issue for any bug reports or feature requests. If you plan to submit a pull request, please first review our [test procedures](test/README.md).
+Please open an issue for any bug reports or feature requests. If you plan to submit a pull request, please first look over our [test procedures](test/README.md).
 
 ## License
 
