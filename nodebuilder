@@ -23,7 +23,7 @@ get_free_space_in_mib() {
   fi
 }
 
-calculate_memory_in_mib() {
+get_memory_statistic_in_mib() {
   awk "/$1/ { printf \"%d \n\", \$2/1024 }" /proc/meminfo
 }
 
