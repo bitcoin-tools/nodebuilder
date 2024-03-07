@@ -21,10 +21,10 @@ Run the following command in Terminal:
 1. An active internet connection (of course)
 3. A compatible operating system:
    - [macOS](https://apple.com/macos)
-   - Linux - [Alpine](https://wiki.alpinelinux.org/wiki/Installation)
-   - Linux - [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
-   - Linux - [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop)
-   - Linux - [Fedora](https://fedoraproject.org/workstation/download)
+   - [Alpine](https://wiki.alpinelinux.org/wiki/Installation) Linux
+   - [Arch](https://wiki.archlinux.org/title/installation_guide) Linux or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
+   - [Debian](https://debian.org/releases/stable/installmanual) Linux or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop)
+   - [Fedora](https://fedoraproject.org/workstation/download) Linux
    - Any other system that can run our [Dockerfile](./Dockerfile)
 5. `bash`, which is probably already installed, or you can install with a package manager
 6. `curl`, which is installed by default on macOS, or you can install with a package manager
