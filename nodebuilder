@@ -157,16 +157,16 @@ Linux)
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   case "$(get_os_release_type)" in
   alpine)
-    echo "$dependencies" | xargs apk --quiet add
+    echo "${dependencies}" | xargs apk --quiet add
     ;;
   debian | ubuntu)
-    echo "$dependencies" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+    echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
     ;;
   fedora)
-    echo "$dependencies" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+    echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
     ;;
   arch | manjaro)
-    echo "$dependencies" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+    echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
     ;;
   *)
     handle_error "This version of Linux is not supported"
