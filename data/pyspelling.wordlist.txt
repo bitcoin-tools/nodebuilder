@@ -22,6 +22,8 @@ Westgate
 Yeow
 acknowledgements
 actionlint
+alpinelinux
+archlinux
 armantheparman
 asc
 ayeowch
@@ -33,6 +35,7 @@ chainstate
 ci
 cli
 conf
+debian
 dockerfilelint
 dr
 dylib
@@ -44,10 +47,12 @@ github
 guix
 gz
 https
+installmanual
 io
 libbitcoinconsensus
 linux
 macOS
+macos
 manjaro
 md
 mktemp
