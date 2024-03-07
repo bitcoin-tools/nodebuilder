@@ -5,16 +5,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
-    return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
-    return 0
-  else
-    return 1 #1=false
-  fi
-}
-
 get_free_space_in_mib() {
   if [ "$(uname -s)" == "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -37,6 +27,16 @@ get_os_release_type() {
 # Taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L89
 chomp() {
   printf "%s" "${1/"$'\n'"/}"
+}
+
+is_running_in_container() {
+  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+    return 0
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+    return 0
+  else
+    return 1 #1=false
+  fi
 }
 
 set_bitcoin_core_option() {
