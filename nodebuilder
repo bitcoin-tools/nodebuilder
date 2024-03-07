@@ -521,14 +521,14 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || is_running_in_container; then
+if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt &> /dev/null 2>; then
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
-  disown
+  disown 
 fi
-printf '%s\n' "ok."
-printf '  %s' "Checking the RPC status... "
+
+printf '%s\n  %s' "ok." "Checking the RPC status... "
 bitcoin-cli --rpcwait getrpcinfo > /dev/null
 printf '%s\n' "ok."
 
