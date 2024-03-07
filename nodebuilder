@@ -5,16 +5,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
-    return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
-    return 0
-  else
-    return 1 #1=false
-  fi
-}
-
 get_free_space_in_mib() {
   if [ "$(uname -s)" == "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -23,10 +13,27 @@ get_free_space_in_mib() {
   fi
 }
 
+get_memory_statistic_in_mib() {
+  local statistic_to_query="$1"
+  awk -v stat="$statistic_to_query" \
+    -v kib_mib_factor="$KIB_TO_MIB" \
+    '$0 ~ stat { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
+}
+
 get_os_release_type() {
   local os_release_id_like
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
   printf '%s\n' "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
+}
+
+is_running_in_container() {
+  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+    return 0
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+    return 0
+  else
+    return 1 #1=false
+  fi
 }
 
 set_bitcoin_core_option() {
@@ -416,15 +423,15 @@ case "$(uname -s)" in
 Darwin) ;; #TODO: Add macOS memory check
 *)
   printf '%s' "Checking the memory on your system... "
-  physical_memory_total_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/MemTotal/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
-  physical_memory_free_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/MemAvailable/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
-  swap_memory_total_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/SwapTotal/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
-  swap_memory_free_in_mib=$(awk -v kib_mib_factor="${KIB_TO_MIB}" '/SwapFree/ { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo)
+  physical_memory_total_in_mib="$(get_memory_statistic_in_mib 'MemTotal')"
+  physical_memory_free_in_mib="$(get_memory_statistic_in_mib 'MemAvailable')"
+  swap_memory_total_in_mib="$(get_memory_statistic_in_mib 'SwapTotal')"
+  swap_memory_free_in_mib="$(get_memory_statistic_in_mib 'SwapFree')"
   memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
   printf '%0.1f GiB free of %0.1f GiB.\n' \
-    "$(awk -v mem_free_mib="${memory_free_in_mib}" -v kib_mib_factor="${KIB_TO_MIB}" 'BEGIN{printf "%f\n", mem_free_mib / kib_mib_factor}')" \
-    "$(awk -v mem_total_mib="${memory_total_in_mib}" -v kib_mib_factor="${KIB_TO_MIB}" 'BEGIN{printf "%f\n", mem_total_mib / kib_mib_factor}')"
+    "$(awk -v mem_free_mib="${memory_free_in_mib}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_free_mib / mib_gib_factor}')" \
+    "$(awk -v mem_total_mib="${memory_total_in_mib}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_total_mib / mib_gib_factor}')"
 
   if [ "${memory_total_in_mib}" -le $((2 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
     printf '%s' "Configuring for minimal memory usage... "
