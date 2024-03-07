@@ -23,9 +23,8 @@ get_free_space_in_mib() {
   fi
 }
 
-get_memory_statistic_in_mib() {
-  local statistic_to_query="$1"
-  awk -v stat_to_query="${statistic_to_query}" -v kib_mib_factor="${KIB_TO_MIB}" "/stat_to_query/ { printf \"%d \n\", \$2 / KIB_TO_MIB }" /proc/meminfo
+calculate_memory_in_mib() {
+  awk "/$1/ { printf \"%d \n\", \$2/1024 }" /proc/meminfo
 }
 
 get_os_release_type() {
