@@ -154,25 +154,24 @@ Linux)
 
   printf '%s' "Checking for dependencies... "
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
-
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   case "$(get_os_release_type)" in
   alpine)
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs apk --quiet add
+    echo "${dependencies}" | xargs apk --quiet add
     ;;
   debian | ubuntu)
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+    echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
     ;;
   fedora)
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+    echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
     ;;
   arch | manjaro)
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+    echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
     ;;
   *)
     handle_error "This version of Linux is not supported"
     ;;
   esac
-
   printf '%s\n' "ok."
   ;;
 Darwin)
@@ -233,7 +232,7 @@ fi
 
 if [ -n "${current_bitcoin_version}" ] && [[ "${current_bitcoin_version}" == *"${target_bitcoin_version}"* ]]; then
   printf '%s\n' "ok."
-elif [ "$(get_os_release_type)" == "alpine" ]; then
+elif [ "$(uname -s)" == 'Linux' ] && [ "$(get_os_release_type)" == "alpine" ]; then
   printf '\n  %s' "Installing build dependencies... "
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
