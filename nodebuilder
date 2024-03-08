@@ -203,7 +203,7 @@ Darwin)
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
 
-  if ! command -v git &> /dev/null; then
+  if ! command -v git > /dev/null 2>&1; then
     printf '%s' "Installing git via the Xcode Command Line Tools... "
     # These steps were taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended xcode tools installation shouldn't take 20+ lines of code
@@ -217,7 +217,7 @@ Darwin)
     fi
     sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
-    if command -v git &> /dev/null; then
+    if command -v git > /dev/null 2>&1; then
       printf '%s\n' "ok."
     else
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
@@ -225,7 +225,7 @@ Darwin)
       printf '%s\n' "PRESS ANY KEY when the installation has completed."
       read -rsn1
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
-      if ! command -v git &> /dev/null; then
+      if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
       fi
     fi
@@ -240,7 +240,7 @@ MINGW*)
 esac
 
 printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
-if command -v bitcoind &> /dev/null; then
+if command -v bitcoind > /dev/null 2>&1; then
   current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1)"
 else
   current_bitcoin_version=""
@@ -536,7 +536,7 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt &> /dev/null; then
+if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
@@ -557,7 +557,7 @@ if [ "${ibd_status}" = true ]; then
     if [ "$(uname -s)" = "Darwin" ]; then
       caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
     else
-      sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
+      sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
     printf '%s\n' "ok."
     printf '\n%s\n%s' "Close this Terminal window by clicking on the \"X\"." "This screen will refresh in ${sleep_time} seconds."
