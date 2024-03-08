@@ -139,7 +139,6 @@ Linux)
     sudo pacman -Syu --noconfirm --quiet > /dev/null
     ;;
   suse | opensuse*)
-    zypper --help
     sudo zypper --non-interactive upgrade
     ;;
   *)
