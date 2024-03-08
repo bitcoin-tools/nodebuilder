@@ -74,7 +74,7 @@ jobs:
           path: spellcheck-output.txt
 
   run-nodebuilder:
-    name: Run on ${{ matrix.friendly-name }} metal
+    name: Run on ${{ matrix.friendly-name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
