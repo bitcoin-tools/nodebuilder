@@ -135,7 +135,7 @@ Linux)
     sudo pacman -Syu --noconfirm --quiet > /dev/null
     ;;
   suse | *opensuse*)
-    sudo zypper --non-interactive dist-upgrade
+    sudo zypper --non-interactive --quiet dist-upgrade
     ;;
   *)
     if command -v apk > /dev/null; then
@@ -178,7 +178,7 @@ Linux)
     echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
     ;;
   suse | *opensuse*)
-    echo "${dependencies}" | xargs sudo zypper --non-interactive install
+    echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install
     ;;
   *)
     if command -v apk > /dev/null; then
