@@ -10,7 +10,13 @@ ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dep
 RUN apk update \
   && apk --no-cache add coreutils curl
 RUN curl -s "${DEPENDENCIES_URL}" | xargs apk --no-cache add
-
+RUN apk add bash
+RUN apk add curl
+RUN apk add git
+RUN apk add gnupg
+RUN apk add gzip
+RUN apk add jq
+RUN apk add tar
 
 # Execute the script
 RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
