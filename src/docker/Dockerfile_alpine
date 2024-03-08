@@ -9,6 +9,7 @@ RUN grep "VERSION\|ID" /etc/os-release
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
 RUN apk update \
   && apk --no-cache add coreutils curl
+RUN xargs --version
 RUN curl -s "${DEPENDENCIES_URL}" | xargs apk --no-cache add
 RUN apk --no-cache add bash
 RUN apk --no-cache add curl
