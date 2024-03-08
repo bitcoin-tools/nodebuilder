@@ -141,6 +141,7 @@ Linux)
   suse | opensuse*)
     zypper --help
     sudo zypper --non-interactive upgrade
+    ;;
   *)
     handle_error "This version of Linux is not supported"
     ;;
@@ -173,6 +174,7 @@ Linux)
     ;;
   suse | opensuse*)
     echo "${dependencies}" | xargs sudo zypper --non-interactive install
+    ;;
   *)
     handle_error "This version of Linux is not supported"
     ;;
