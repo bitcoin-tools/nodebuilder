@@ -121,6 +121,8 @@ jobs:
             dockerfile: ./src/docker/Dockerfile_manjaro
           - container: Ubuntu
             dockerfile: ./Dockerfile
+          - container: openSUSE
+            dockerfile: ./src/docker/Dockerfile_opensuse
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current OS version
