@@ -3,7 +3,6 @@
 # A minimally-interactive script for launching a Bitcoin Core node
 set -o errexit
 set -o nounset
-set -o pipefail
 
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
