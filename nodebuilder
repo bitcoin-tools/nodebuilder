@@ -67,7 +67,7 @@ ensure_cursor_is_on_column_one() {
     printf '\n'
   else
     printf '%s' "\E[6n"
-    read -rsdR cursor_position
+    read -dRr cursor_position
     cursor_position="${cursor_position#*[}"
     cursor_position_column="$(printf '%s\n' "${cursor_position}" | cut -d ";" -f 2)"
     ([ "${cursor_position_column}" -gt 1 ] && printf '\n') || true
@@ -151,7 +151,7 @@ Linux)
 
   if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
     printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
-    read -rsn1
+    read -rn1
     printf '%s\n' "\nRebooting."
     sudo reboot
     exit 0
@@ -223,7 +223,7 @@ Darwin)
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ANY KEY when the installation has completed."
-      read -rsn1
+      read -rn1
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
       if ! command -v git &> /dev/null; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
