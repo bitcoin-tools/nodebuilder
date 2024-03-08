@@ -138,7 +138,7 @@ Linux)
   arch | manjaro)
     sudo pacman -Syu --noconfirm --quiet > /dev/null
     ;;
-  suse | *opensuse*)
+  suse* | opensuse*)
     sudo zypper --non-interactive dist-upgrade
     ;;
   *)
@@ -171,7 +171,7 @@ Linux)
   arch | manjaro)
     echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
     ;;
-  suse | opensuse*)
+  suse* | opensuse*)
     echo "${dependencies}" | xargs sudo zypper --non-interactive install
     ;;
   *)
