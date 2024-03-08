@@ -1,4 +1,6 @@
 curl
 git
 gnupg
+gzip
 jq
+tar
