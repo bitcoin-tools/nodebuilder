@@ -6,7 +6,7 @@ ENV TERM=xterm
 RUN grep "VERSION\|ID" /etc/os-release
 
 # Install system updates and dependencies
-RUN zypper refresh && zypper --non-interactive install bash curl git
+RUN zypper refresh && zypper --non-interactive install bash curl git netcat
 
 # Execute the script
 #RUN mount -o remount,exec /tmp
