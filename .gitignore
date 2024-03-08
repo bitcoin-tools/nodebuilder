@@ -1,1 +1,8 @@
+# Ignore directory metadata
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# Ignore backup files
+*~
+*.bak
