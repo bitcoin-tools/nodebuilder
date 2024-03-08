@@ -3,7 +3,6 @@
 # A minimally-interactive script for launching a Bitcoin Core node
 set -o errexit
 set -o nounset
-set -o pipefail
 
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
@@ -13,18 +12,17 @@ get_free_space_in_mib() {
   fi
 }
 
-get_memory_statistic_in_mib() {
-  local statistic_to_query="$1"
+get_memory_statistic_in_mib() (
+  statistic_to_query="$1"
   awk -v stat="$statistic_to_query" \
     -v kib_mib_factor="$KIB_TO_MIB" \
     '$0 ~ stat { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
-}
+)
 
-get_os_release_type() {
-  local os_release_id_like
+get_os_release_type() (
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
   printf '%s\n' "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
-}
+)
 
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
@@ -36,9 +34,9 @@ is_running_in_container() {
   fi
 }
 
-set_bitcoin_core_option() {
-  local option="$1"
-  local value="$2"
+set_bitcoin_core_option() (
+  option="$1"
+  value="$2"
   if [ -f "${bitcoin_core_config_file:?}" ]; then
     sed -i.bak "/^${option}=/d" "${bitcoin_core_config_file:?}"
     rm "${bitcoin_core_config_file:?}.bak"
@@ -46,18 +44,18 @@ set_bitcoin_core_option() {
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
   fi
   printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-}
+)
 
-set_if_unset_bitcoin_core_option() {
-  local option="$1"
-  local value="$2"
+set_if_unset_bitcoin_core_option() (
+  option="$1"
+  value="$2"
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
-}
+)
 
 log_error() {
   printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
