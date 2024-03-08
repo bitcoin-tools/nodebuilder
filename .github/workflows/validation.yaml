@@ -39,7 +39,6 @@ jobs:
   dockerfile-lint:
     name: Lint the Dockerfile
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint]
     steps:
       - uses: actions/checkout@v4
       - name: lint
@@ -52,7 +51,6 @@ jobs:
   markdown-links:
     name: Check the links
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint]
     steps:
       - uses: actions/checkout@v4
       - name: Run markdown-link-check on documentation
@@ -63,7 +61,6 @@ jobs:
   markdown-spellcheck:
     name: Check the spelling
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint]
     steps:
       - uses: actions/checkout@v4
       - uses: rojopolis/spellcheck-github-actions@v0
