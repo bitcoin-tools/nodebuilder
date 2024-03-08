@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
-        if: matrix.install-upgrades-cmd != null
+        if: matrix.install-upgrades-command != null
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
