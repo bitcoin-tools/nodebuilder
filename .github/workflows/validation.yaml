@@ -41,7 +41,6 @@ jobs:
   dockerfile-lint:
     name: Lint the Dockerfile
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint]
     steps:
       - uses: actions/checkout@v4
       - name: lint
@@ -54,7 +53,6 @@ jobs:
   markdown-links:
     name: Check the links
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint]
     steps:
       - uses: actions/checkout@v4
       - name: Run markdown-link-check on documentation
@@ -65,7 +63,6 @@ jobs:
   markdown-spellcheck:
     name: Check the spelling
     runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint]
     steps:
       - uses: actions/checkout@v4
       - uses: rojopolis/spellcheck-github-actions@v0
@@ -78,134 +75,63 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-  run-nodebuilder-ubuntu-latest:
-    name: Run on Ubuntu (latest)
-    runs-on: ubuntu-latest
+  run-nodebuilder:
+    name: Run on ${{ matrix.friendly-name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
+        include:
+          - os: ubuntu-latest
+            friendly-name: Ubuntu 22
+            check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
+            install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+          - os: ubuntu-20.04
+            friendly-name: Ubuntu 20
+            check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
+            install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+          - os: macos-14
+            friendly-name: macOS 14 arm64
+            check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
+          - os: macos-13
+            friendly-name: macOS 13 x86_64
+            check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current OS version
-        run: |
-          grep "VERSION\|ID" /etc/os-release
-          uname -a
+        run: ${{ matrix.check-version-command }}
       - uses: actions/checkout@v4
       - name: Install system upgrades
-        run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+        run: ${{ matrix.install-upgrades-command }}
+        if: matrix.install-upgrades-command != null
       - name: Run nodebuilder
         timeout-minutes: 120
         run: /bin/bash -x ./nodebuilder
 
-  run-nodebuilder-ubuntu-20:
-    name: Run on Ubuntu 20
-    runs-on: ubuntu-20.04
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
-    steps:
-      - name: Check the current OS version
-        run: |
-          grep "VERSION\|ID" /etc/os-release
-          uname -a
-      - uses: actions/checkout@v4
-      - name: Install system upgrades
-        run: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-      - name: Run nodebuilder
-        timeout-minutes: 120
-        run: /bin/bash -x ./nodebuilder
-
-  run-nodebuilder-macos-14:
-    name: Run on macOS 14 (arm64)
-    runs-on: macos-14
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
-    steps:
-      - name: Check the current macOS version
-        run: |
-          sw_vers | grep Version | awk '{print $2}'
-          uname -a
-      - uses: actions/checkout@v4
-      - name: Run nodebuilder
-        timeout-minutes: 120
-        run: /bin/bash -x ./nodebuilder
-
-  run-nodebuilder-macos-13:
-    name: Run on macOS 13 (x64)
-    runs-on: macos-13
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
-    steps:
-      - name: Check the current macOS version
-        run: |
-          sw_vers | grep Version | awk '{print $2}'
-          uname -a
-      - uses: actions/checkout@v4
-      - name: Run nodebuilder
-        timeout-minutes: 120
-        run: /bin/bash -x ./nodebuilder
-
-  run-docker-container-alpine:
-    name: Run in Alpine Docker
+  run-nodebuilder-docker:
+    name: Run in ${{ matrix.container }} container
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        container: [Alpine, Fedora, Manjaro, Ubuntu]
+        include:
+          - container: Alpine
+            dockerfile: ./src/docker/Dockerfile_alpine
+          - container: Fedora
+            dockerfile: ./src/docker/Dockerfile_fedora
+          - container: Manjaro
+            dockerfile: ./src/docker/Dockerfile_manjaro
+          - container: Ubuntu
+            dockerfile: ./Dockerfile
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current OS version
-        run: |
-          grep "VERSION\|ID" /etc/os-release
-          uname -a
+        run: grep "VERSION\|ID" /etc/os-release && uname -a
       - uses: actions/checkout@v4
-      - name: Build docker image
+      - name: Run the docker image
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./src/docker/Dockerfile_alpine
-          push: false
-
-  run-docker-container-fedora:
-    name: Run in Fedora Docker
-    runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
-    steps:
-      - name: Check the current OS version
-        run: |
-          grep "VERSION\|ID" /etc/os-release
-          uname -a
-      - uses: actions/checkout@v4
-      - name: Build docker image
-        timeout-minutes: 120
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./src/docker/Dockerfile_fedora
-          push: false
-
-  run-docker-container-manjaro:
-    name: Run in Manjaro Docker
-    runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
-    steps:
-      - name: Check the current OS version
-        run: |
-          grep "VERSION\|ID" /etc/os-release
-          uname -a
-      - uses: actions/checkout@v4
-      - name: Build docker image
-        timeout-minutes: 120
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./src/docker/Dockerfile_manjaro
-          push: false
-
-  run-docker-container-ubuntu:
-    name: Run in Ubuntu Docker
-    runs-on: ubuntu-latest
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
-    steps:
-      - name: Check the current OS version
-        run: |
-          grep "VERSION\|ID" /etc/os-release
-          uname -a
-      - uses: actions/checkout@v4
-      - name: Build docker image
-        timeout-minutes: 120
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
+          file: ${{ matrix.dockerfile }}
           push: false

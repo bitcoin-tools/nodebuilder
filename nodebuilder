@@ -6,7 +6,7 @@ set -o nounset
 set -o pipefail
 
 get_free_space_in_mib() {
-  if [ "$(uname -s)" == "Darwin" ]; then
+  if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
   else
     df --output=avail --block-size="1MiB" "${HOME}" | sed 1d
@@ -54,7 +54,7 @@ set_if_unset_bitcoin_core_option() {
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-  elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" == "0" ]; then
+  elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
 }
@@ -65,7 +65,7 @@ log_error() {
 
 # shellcheck disable=SC2317
 ensure_cursor_is_on_column_one() {
-  if [ "$(uname -s)" == "Darwin" ]; then
+  if [ "$(uname -s)" = "Darwin" ]; then
     printf '\n'
   else
     printf '%s' "\E[6n"
@@ -125,12 +125,10 @@ Linux)
   printf '%s' "Performing a system upgrade... "
   case "$(get_os_release_type)" in
   alpine)
-    apk update --quiet
-    apk upgrade --quiet
+    apk update --quiet && apk upgrade --quiet
     ;;
   debian | ubuntu)
-    sudo apt-get -qq update
-    sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> >(grep -v apt-utils -)
+    sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> >(grep -v apt-utils -)
     ;;
   fedora)
     sudo dnf --assumeyes --quiet upgrade > /dev/null
@@ -139,7 +137,17 @@ Linux)
     sudo pacman -Syu --noconfirm --quiet > /dev/null
     ;;
   *)
-    handle_error "This version of Linux is not supported"
+    if command -v apk > /dev/null; then
+      apk update --quiet && apk upgrade --quiet
+    elif command -v apt-get > /dev/null; then
+      sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> >(grep -v apt-utils -)
+    elif command -v dnf > /dev/null; then
+      sudo dnf --assumeyes --quiet upgrade > /dev/null
+    elif command -v pacman > /dev/null; then
+      sudo pacman -Syu --noconfirm --quiet > /dev/null
+    else
+      handle_error "This version of Linux is not supported."
+    fi
     ;;
   esac
 
@@ -169,7 +177,17 @@ Linux)
     echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
     ;;
   *)
-    handle_error "This version of Linux is not supported"
+    if command -v apk > /dev/null; then
+      echo "${dependencies}" | xargs apk --quiet add
+    elif command -v apt-get > /dev/null; then
+      echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+    elif command -v dnf > /dev/null; then
+      echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+    elif command -v pacman > /dev/null; then
+      echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+    else
+      handle_error "This version of Linux is not supported."
+    fi
     ;;
   esac
   printf '%s\n' "ok."
@@ -230,9 +248,9 @@ else
   current_bitcoin_version=""
 fi
 
-if [ -n "${current_bitcoin_version}" ] && [[ "${current_bitcoin_version}" == *"${target_bitcoin_version}"* ]]; then
+if [ -n "${current_bitcoin_version}" ] && [[ "${current_bitcoin_version}" = *"${target_bitcoin_version}"* ]]; then
   printf '%s\n' "ok."
-elif [ "$(uname -s)" == 'Linux' ] && [ "$(get_os_release_type)" == "alpine" ]; then
+elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
   printf '\n  %s' "Installing build dependencies... "
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
@@ -296,7 +314,7 @@ else
       handle_error "Either 'sha256sum' or 'shasum' must on PATH."
     fi
     cd "${HOME}"/
-    if ! [[ "${sha256_check}" == *"OK" ]]; then
+    if ! [[ "${sha256_check}" = *"OK" ]]; then
       handle_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
     fi
     printf '%s\n' "ok."
@@ -327,7 +345,7 @@ else
   printf '%s\n' "ok."
 
   printf '  %s' "Running the unit tests... "
-  if [ "${target_bitcoin_architecture}" == "arm64" ]; then
+  if [ "${target_bitcoin_architecture}" = "arm64" ]; then
     codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
   fi
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
@@ -351,7 +369,7 @@ else
     (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
     sudo update_dyld_shared_cache
 
-    if [ "${target_bitcoin_architecture}" == "arm64" ]; then
+    if [ "${target_bitcoin_architecture}" = "arm64" ]; then
       for bitcoin_executable in {bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,bitcoind}; do
         codesign -s - "${bitcoin_install_bin_source}"/"${bitcoin_executable}"
       done
@@ -437,14 +455,14 @@ Darwin) ;; #TODO: Add macOS memory check
     set_if_unset_bitcoin_core_option "dbcache" "4"
     set_if_unset_bitcoin_core_option "maxmempool" "5"
     set_if_unset_bitcoin_core_option "maxconnections" "4"
-    [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
+    [ "$(uname -s)" = "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((4 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
     printf '%s' "Configuring for reduced memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "100"
     set_if_unset_bitcoin_core_option "maxmempool" "50"
     set_if_unset_bitcoin_core_option "maxconnections" "10"
-    [ "$(uname -s)" == "Linux" ] && export MALLOC_ARENA_MAX=1
+    [ "$(uname -s)" = "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((8 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
     printf '%s' "Configuring for conservative memory usage... "
@@ -455,21 +473,21 @@ Darwin) ;; #TODO: Add macOS memory check
   ;;
 esac
 
-if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" == "0" ]; then
+if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
   printf '%s' "Checking data already synced... "
   bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
   bitcoin_core_chainstate_dir="${bitcoin_core_data_dir}/chainstate"
   blocks_size_in_mib="0"
   chainstate_size_in_mib="0"
   if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
-    if [ "$(uname -s)" == "Darwin" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
       blocks_size_in_mib=$(du -d0 -m "${bitcoin_core_blocks_dir}" | cut -f1)
     else
       blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_blocks_dir}" | cut -f1)
     fi
   fi
   if [ -d "${bitcoin_core_chainstate_dir}"/ ]; then
-    if [ "$(uname -s)" == "Darwin" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
       chainstate_size_in_mib=$(du -d0 -m "${bitcoin_core_chainstate_dir}" | cut -f1)
     else
       chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
@@ -538,7 +556,7 @@ ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
 if [ "${ibd_status}" = true ]; then
   if ! is_running_in_container; then
     printf '%s' "Disabling system sleep, suspend, and hibernate... "
-    if [ "$(uname -s)" == "Darwin" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
       caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
     else
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target &> /dev/null
@@ -581,7 +599,7 @@ while [ "${ibd_status}" = true ]; do
     printf 'Sync progress:      %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
 
-    if [ "$(uname -s)" == "Darwin" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
       printf 'Current chain tip:  %s\n' "$(/bin/date -r "${last_block_time}" | cut -c 5-)"
     else
       printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
