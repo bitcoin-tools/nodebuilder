@@ -139,7 +139,7 @@ Linux)
     sudo pacman -Syu --noconfirm --quiet > /dev/null
     ;;
   suse | *opensuse*)
-    sudo zypper --non-interactive upgrade
+    sudo zypper --non-interactive dist-upgrade
     ;;
   *)
     handle_error "This version of Linux is not supported"
