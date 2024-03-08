@@ -89,10 +89,10 @@ jobs:
             check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
             install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
           - os: macos-14
-            friendly-name: macOS 14 [arm64]
+            friendly-name: macOS 14 arm64
             check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
           - os: macos-13
-            friendly-name: macOS 13 [x86_64]
+            friendly-name: macOS 13 x86_64
             check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
