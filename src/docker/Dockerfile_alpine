@@ -8,7 +8,8 @@ RUN grep "VERSION\|ID" /etc/os-release
 # Install dependencies
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
 RUN apk update && apk --no-cache add coreutils curl
-RUN curl -fsSL "${DEPENDENCIES_URL}" | xargs apk --no-cache add
+RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
+  | xargs apk --no-cache add
 
 # Execute the script
 RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
