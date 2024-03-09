@@ -168,9 +168,9 @@ Linux)
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   case "$(get_os_release_type)" in
   alpine)
-    echo "${dependencies}" \
-      | awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' \
-      | xargs apk --quiet add
+    echo "${dependencies}" |
+      awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' |
+      xargs apk --quiet add
     ;;
   debian | ubuntu)
     echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
@@ -186,9 +186,9 @@ Linux)
     ;;
   *)
     if command -v apk > /dev/null; then
-      echo "${dependencies}" \
-        | awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' \
-        | xargs apk --quiet add
+      echo "${dependencies}" |
+        awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' |
+        xargs apk --quiet add
     elif command -v apt-get > /dev/null; then
       echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
     elif command -v dnf > /dev/null; then
