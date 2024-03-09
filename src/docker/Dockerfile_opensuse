@@ -6,12 +6,15 @@ ENV TERM=xterm
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
 
 # Check the current environment
-RUN uname -a && \
-    lsb_release -a && \
-    cat /etc/os-release && \
-    df -h && \
-    free -m && \
-    date -u
+RUN uname -a \
+  && { if [ -f /etc/os-release ]; then \
+      cat /etc/os-release; \
+    elif [ -f /etc/lsb-release ]; then \
+      cat /etc/lsb-release; \
+    fi; } \
+  && df -h \
+  && free -m \
+  && date -u
 
 # Install system updates and dependencies
 RUN zypper refresh \
