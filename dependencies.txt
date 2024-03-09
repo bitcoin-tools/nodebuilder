@@ -4,5 +4,4 @@ git
 gnupg
 gzip
 jq
-netcat
 tar
