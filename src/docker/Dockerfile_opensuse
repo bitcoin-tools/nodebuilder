@@ -5,8 +5,13 @@ ENV TERM=xterm
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
 
-# Check the current system
-RUN grep "VERSION\|ID" /etc/os-release
+# Check the current environment
+RUN uname -a && \
+    lsb_release -a && \
+    cat /etc/os-release && \
+    df -h && \
+    free -m && \
+    date
 
 # Install system updates and dependencies
 RUN zypper refresh \
