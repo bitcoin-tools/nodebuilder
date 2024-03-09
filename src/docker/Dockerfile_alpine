@@ -2,13 +2,15 @@
 FROM alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
 ENV TERM=xterm
 
+# Define the dependencies URL
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
+
 # Check the current system
 RUN grep "VERSION\|ID" /etc/os-release
 
 # Install dependencies
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
-RUN apk update && apk --no-cache add coreutils curl
-RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
+RUN apk --no-cache add coreutils curl \
+  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs apk --no-cache add
 
 # Execute the script

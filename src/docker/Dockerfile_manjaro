@@ -2,11 +2,15 @@
 FROM manjarolinux/base:20240227@sha256:369753d82cfddfb500e9ef756334e0323508172c31041ea30501530cb5b24c12
 ENV TERM=xterm
 
+# Define the dependencies URL
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
+
 # Check the current system
 RUN grep "VERSION\|ID" /etc/os-release
 
 # Install system updates and dependencies
-RUN pacman -Syu --noconfirm git netcat
+RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
+  | xargs pacman -Syu --noconfirm
 
 # Execute the script
 RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
