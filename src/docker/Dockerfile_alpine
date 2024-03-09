@@ -7,8 +7,7 @@ ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dep
 
 # Check the current environment
 RUN uname -a && \
-    lsb_release -a && \
-    cat /etc/os-release && \
+    cat /etc/alpine-release /etc/os-release && \
     df -h && \
     free -m && \
     date -u
