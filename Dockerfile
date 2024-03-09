@@ -17,9 +17,5 @@ RUN apt-get -qq update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Execute the script
-RUN update-ca-certificates \
-  && git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
-  && cd nodebuilder
-COPY nodebuilder /opt/src/scripts/nodebuilder
-RUN /bin/bash -c /opt/src/scripts/nodebuilder
+# Download and execute the script
+RUN /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
