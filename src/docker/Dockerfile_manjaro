@@ -10,8 +10,8 @@ RUN grep "VERSION\|ID" /etc/os-release
 
 # Install system updates and dependencies
 RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs pacman -Syu --noconfirm \
-  && pacman -Syu --noconfirm netcat
+  | xargs pacman -Sy --noconfirm \
+  && pacman -Sy --noconfirm netcat
 
 # Execute the script
 RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
