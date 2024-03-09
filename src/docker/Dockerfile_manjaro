@@ -1,4 +1,6 @@
 # syntax=docker/dockerfile:1
+# Manjaro is known for its user-friendliness, powerful Arch Linux base, and wide community support.
+# This Dockerfile is good for users who want a balance of ease-of-use and control over their environment.
 FROM manjarolinux/base:20240227@sha256:369753d82cfddfb500e9ef756334e0323508172c31041ea30501530cb5b24c12
 ENV TERM=xterm
 
