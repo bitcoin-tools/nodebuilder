@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Ubuntu is known for its user-friendliness and wide community support.
+# Ubuntu is known for its popularity and user-friendly design.
 # This Dockerfile offers a balance between stability, security, and modernity.
 FROM ubuntu:22.04@sha256:77906da86b60585ce12215807090eb327e7386c8fafb5402369e421f44eff17eENV TERM=xterm
 
