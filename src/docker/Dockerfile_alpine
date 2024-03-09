@@ -5,8 +5,12 @@ ENV TERM=xterm
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
 
-# Check the current system
-RUN grep "VERSION\|ID" /etc/os-release
+# Check the current environment
+RUN uname -a \
+  && cat /etc/os-release \
+  && df -h \
+  && grep Mem /proc/meminfo \
+  && date -u
 
 # Install dependencies
 RUN apk --no-cache add coreutils curl \
