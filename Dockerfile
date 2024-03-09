@@ -13,7 +13,7 @@ RUN apt-get -qq update \
   && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
   ca-certificates curl 'sudo' \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends \
+  | DEBIAN_FRONTEND=noninteractive xargs apt-get -qq install --no-install-recommends \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
