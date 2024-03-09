@@ -12,7 +12,7 @@ RUN grep "VERSION\|ID" /etc/os-release
 RUN zypper refresh \
   && zypper --non-interactive install curl 'sudo' \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  && xargs zypper --non-interactive install
+  | xargs zypper --non-interactive install
 
 # Execute the script
 RUN git clone --single-branch --depth 1 https://github.com/bitcoin-tools/nodebuilder.git \
