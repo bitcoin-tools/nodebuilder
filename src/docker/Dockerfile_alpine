@@ -11,6 +11,7 @@ RUN grep "VERSION\|ID" /etc/os-release
 # Install dependencies
 RUN apk --no-cache add coreutils curl \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
+  | awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' \
   | xargs apk --no-cache add
 
 # Download and execute the script
