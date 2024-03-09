@@ -13,7 +13,7 @@ RUN uname -a \
       cat /etc/lsb-release; \
     fi; } \
   && df -h \
-  && free -m \
+  && grep Mem /proc/meminfo \
   && date -u
 
 # Install dependencies
