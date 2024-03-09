@@ -1,4 +1,6 @@
 # syntax=docker/dockerfile:1
+# openSUSE is known for its robustness and flexibility.
+# This Dockerfile is a good choice for a stable and secure environment.
 FROM opensuse/leap:15.5
 ENV TERM=xterm
 
