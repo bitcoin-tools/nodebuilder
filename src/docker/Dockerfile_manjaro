@@ -7,11 +7,7 @@ ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dep
 
 # Check the current environment
 RUN uname -a \
-  && { if [ -f /etc/os-release ]; then \
-      cat /etc/os-release; \
-    elif [ -f /etc/lsb-release ]; then \
-      cat /etc/lsb-release; \
-    fi; } \
+  && cat /etc/os-release \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
