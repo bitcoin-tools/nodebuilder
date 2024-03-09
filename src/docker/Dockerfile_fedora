@@ -11,7 +11,7 @@ RUN uname -a && \
     cat /etc/os-release && \
     df -h && \
     free -m && \
-    date
+    date -u
 
 # Install system updates and dependencies
 RUN dnf makecache \
