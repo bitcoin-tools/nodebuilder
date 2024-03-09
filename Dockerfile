@@ -11,7 +11,7 @@ RUN grep "VERSION\|ID" /etc/os-release
 # Install system updates and dependencies
 RUN apt-get -qq update \
   && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
-  ca-certificates curl 'sudo' \
+  ca-certificates curl netcat 'sudo' \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | DEBIAN_FRONTEND=noninteractive xargs apt-get -qq install --no-install-recommends \
   && apt-get clean \
