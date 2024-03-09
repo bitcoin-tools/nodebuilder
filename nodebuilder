@@ -126,7 +126,7 @@ Linux)
     apk update --quiet && apk upgrade --quiet
     ;;
   debian | ubuntu)
-    sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade 3>&1 1>&2 2>&3 | awk '!/apt-utils/' 1>&2 > /dev/null
+    sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade 3>&1 1>&2 2>&3 | grep -v 'apt-utils' 1>&2 > /dev/null
     ;;
   fedora)
     sudo dnf --assumeyes --quiet upgrade > /dev/null
@@ -141,7 +141,7 @@ Linux)
     if command -v apk > /dev/null; then
       apk update --quiet && apk upgrade --quiet
     elif command -v apt-get > /dev/null; then
-      sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade 3>&1 1>&2 2>&3 | awk '!/apt-utils/' 1>&2 > /dev/null
+      sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade 3>&1 1>&2 2>&3 | grep -v 'apt-utils' 1>&2 > /dev/null
     elif command -v dnf > /dev/null; then
       sudo dnf --assumeyes --quiet upgrade > /dev/null
     elif command -v pacman > /dev/null; then
@@ -171,13 +171,13 @@ Linux)
     echo "${dependencies}" | xargs apk --quiet add
     ;;
   debian | ubuntu)
-    echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends 3>&1 1>&2 2>&3 | awk '!/apt-utils/' 1>&2 > /dev/null
+    echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends 3>&1 1>&2 2>&3 | grep -v 'apt-utils' 1>&2 > /dev/null
     ;;
   fedora)
     echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
     ;;
   arch | manjaro)
-    echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet 3>&1 1>&2 2>&3 | awk '!/skipping/' 1>&2 > /dev/null
+    echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet 3>&1 1>&2 2>&3 | grep -v 'skipping' 1>&2 > /dev/null
     ;;
   suse | *opensuse*)
     echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
@@ -186,11 +186,11 @@ Linux)
     if command -v apk > /dev/null; then
       echo "${dependencies}" | xargs apk --quiet add
     elif command -v apt-get > /dev/null; then
-      echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends 3>&1 1>&2 2>&3 | awk '!/apt-utils/' 1>&2 > /dev/null
+      echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends 3>&1 1>&2 2>&3 | grep -v 'apt-utils' 1>&2 > /dev/null
     elif command -v dnf > /dev/null; then
       echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
     elif command -v pacman > /dev/null; then
-      echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet 3>&1 1>&2 2>&3 | awk '!/skipping/' 1>&2 > /dev/null
+      echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet 3>&1 1>&2 2>&3 | grep -v 'skipping' 1>&2 > /dev/null
     elif command -v zypper > /dev/null; then
       echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
     else
@@ -265,9 +265,9 @@ elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; the
   git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
   printf '%s\n  %s' "ok." "Analyzing hardware confgiruation... "
-  ./autogen.sh 3>&1 1>&2 2>&3 | awk '!/build-aux/' 1>&2 > /dev/null
+  ./autogen.sh 3>&1 1>&2 2>&3 | grep -v 'build-aux' 1>&2 > /dev/null
   printf '%s\n  %s' "ok." "Configuring the build environment... "
-  ./configure --with-incompatible-bdb --with-gui=no --enable-suppress-external-warnings 3>&1 1>&2 2>&3 | awk '!/Berkely DB|BDB|libzmq/' 1>&2 > /dev/null
+  ./configure --with-incompatible-bdb --with-gui=no --enable-suppress-external-warnings 3>&1 1>&2 2>&3 | grep -v 'Berkely DB\|BDB\|libzmq' 1>&2 > /dev/null
   printf '%s\n  %s' "ok." "Building (please wait)... "
   make --jobs "$(($(nproc) + 1))" > /dev/null
   printf '%s\n  %s' "ok." "Checking (please wait)... "
