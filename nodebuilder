@@ -214,8 +214,7 @@ Linux)
       apt-get \
       dnf \
       pacman \
-      zypper
-    do
+      zypper; do
       if command -v "$package_manager" > /dev/null; then
         # Remove '-' to match function names
         install_command_function="install_dependencies_$(echo "$package_manager" | tr -d '-')"
