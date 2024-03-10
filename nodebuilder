@@ -116,10 +116,10 @@ if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
 fi
 if ! command -v sudo > /dev/null 2>&1; then
-    handle_error "The dependency 'sudo' is not installed."
+  handle_error "The dependency 'sudo' is not installed."
 elif ! sudo --validate --noninteractive > /dev/null 2>&1; then
-    printf '%s' "Please enter your sudo password: "
-    sudo --validate
+  printf '%s' "Please enter your sudo password: "
+  sudo --validate
 fi
 case "$(uname -s)" in
 Linux)
