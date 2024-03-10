@@ -126,12 +126,10 @@ trap handle_sigint SIGINT
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
-
 temp_directory="$(mktemp -d)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB=1024
 readonly MIB_TO_GIB=1024
@@ -139,6 +137,16 @@ readonly MIB_TO_GIB=1024
 clear
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
+fi
+if ! command -v sudo > /dev/null 2>&1; then
+  handle_error "The dependency 'sudo' is not installed."
+elif is_running_in_ci ||
+  is_running_in_container ||
+  sudo --validate --noninteractive > /dev/null 2>&1; then
+  :
+else
+  printf '%s' "Please enter your sudo password: "
+  sudo --validate
 fi
 case "$(uname -s)" in
 Linux)
@@ -587,11 +595,12 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if is_running_in_ci || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
+if is_running_in_ci ||
+  is_running_in_container ||
+  ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
-  bitcoin-qt 2> /dev/null &
-  disown
+  nohup bitcoin-qt 2> /dev/null &
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
@@ -672,7 +681,9 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { is_running_in_ci || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if { is_running_in_ci ||
+    is_running_in_container; } &&
+    [ "${size_on_disk_in_mib}" -ge 1 ]; then
     printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi
