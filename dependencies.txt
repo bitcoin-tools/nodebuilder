@@ -1,6 +1,8 @@
+bash
 curl
 git
 gnupg
 gzip
 jq
+netcat
 tar

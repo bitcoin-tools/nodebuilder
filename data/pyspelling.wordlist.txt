@@ -1,6 +1,6 @@
 Acknowledgements
-ArmanTheParman
 Addy
+ArmanTheParman
 BSAPOFSaozbtQ
 BenWestgate
 Dockerfile
@@ -13,9 +13,9 @@ PaymentRequired
 Proxmox
 PySpelling
 README
+SHA
 ShellCheck
 StopAndDecrypt
-SHA
 TxQ
 VSCode
 Westgate
@@ -46,8 +46,10 @@ fsSL
 github
 guix
 gz
+html
 https
 installmanual
+installquick
 io
 libbitcoinconsensus
 linux
@@ -59,12 +61,14 @@ mktemp
 mvdan
 nodebuilder
 npm
+openSUSE
+opensuse
 parmanode
 php
 pyspelling
 replicatedhq
-rhysd
 rf
+rhysd
 runtime
 shellcheck
 shfmt
@@ -72,6 +76,8 @@ sigs
 sr
 stopanddecrypt
 sudo
+sles
+suse
 tcort
 tmp
 tx

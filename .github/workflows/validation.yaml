@@ -46,7 +46,7 @@ jobs:
       - name: lint
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile src/docker/Dockerfile*
+          target: Dockerfile src/dockerfiles/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -116,13 +116,19 @@ jobs:
         container: [Alpine, Fedora, Manjaro, Ubuntu]
         include:
           - container: Alpine
-            dockerfile: ./src/docker/Dockerfile_alpine
+            dockerfile: ./src/dockerfiles/Dockerfile_alpine
+          - container: Arch
+            dockerfile: ./src/dockerfiles/Dockerfile_arch
+          - container: Debian
+            dockerfile: ./src/dockerfiles/Dockerfile_debian
           - container: Fedora
-            dockerfile: ./src/docker/Dockerfile_fedora
+            dockerfile: ./src/dockerfiles/Dockerfile_fedora
           - container: Manjaro
-            dockerfile: ./src/docker/Dockerfile_manjaro
+            dockerfile: ./src/dockerfiles/Dockerfile_manjaro
           - container: Ubuntu
             dockerfile: ./Dockerfile
+          - container: openSUSE
+            dockerfile: ./src/dockerfiles/Dockerfile_opensuse
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current OS version
