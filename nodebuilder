@@ -120,7 +120,7 @@ trap 'handle_error ${LINENO:-}' ERR
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
-readonly MIB_TO_GIB=${BYTES_TO_KIB}"
+readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
