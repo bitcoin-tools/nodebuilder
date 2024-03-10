@@ -58,21 +58,10 @@ set_if_unset_bitcoin_core_option() (
 )
 
 log_error() {
-  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
+  printf '\n%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
 
 # shellcheck disable=SC2317
-ensure_cursor_is_on_column_one() {
-  if [ "$(uname -s)" = "Darwin" ]; then
-    printf '\n'
-  else
-    printf '%s' "\E[6n"
-    read -dRr cursor_position
-    cursor_position="${cursor_position#*[}"
-    cursor_position_column="$(printf '%s\n' "${cursor_position}" | cut -d ";" -f 2)"
-    ([ "${cursor_position_column}" -gt 1 ] && printf '\n') || true
-  fi
-}
 
 # shellcheck disable=SC2317
 handle_exit() {
@@ -81,7 +70,6 @@ handle_exit() {
 
 # shellcheck disable=SC2317
 handle_error() {
-  ensure_cursor_is_on_column_one
   log_error "Failed to run '${BASH_COMMAND}' on line $1."
   printf '%s\n' "Exiting."
   handle_exit
