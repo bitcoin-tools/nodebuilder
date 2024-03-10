@@ -117,7 +117,9 @@ if is_running_in_container; then
 fi
 if ! command -v sudo > /dev/null 2>&1; then
   handle_error "The dependency 'sudo' is not installed."
-elif ! (is_running_in_ci || is_running_in_container || sudo --validate --noninteractive > /dev/null 2>&1); then
+elif is_running_in_ci || is_running_in_container || sudo --validate --noninteractive > /dev/null 2>&1; then
+  :
+else
   printf '%s' "Please enter your sudo password: "
   sudo --validate
 fi
