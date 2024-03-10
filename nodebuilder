@@ -168,35 +168,35 @@ Linux)
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   case "$(get_os_release_type)" in
   alpine)
-    echo "${dependencies}" |
+    printf '%s\n' "${dependencies}" |
       awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' |
       xargs apk --quiet add
     ;;
   debian | ubuntu)
-    echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+    printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
     ;;
   fedora)
-    echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+    printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
     ;;
   arch | manjaro)
-    echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+    printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
     ;;
   suse | *opensuse*)
-    echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+    printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
     ;;
   *)
     if command -v apk > /dev/null; then
-      echo "${dependencies}" |
+      printf '%s\n' "${dependencies}" |
         awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' |
         xargs apk --quiet add
     elif command -v apt-get > /dev/null; then
-      echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+      printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
     elif command -v dnf > /dev/null; then
-      echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+      printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
     elif command -v pacman > /dev/null; then
-      echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+      printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
     elif command -v zypper > /dev/null; then
-      echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+      printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
     else
       handle_error "This version of Linux is not supported."
     fi
