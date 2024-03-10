@@ -600,7 +600,7 @@ if is_running_in_ci ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
-  nohup bitcoin-qt 2> /dev/null &
+  ( trap '' INT; nohup bitcoin-qt 2> /dev/null & )
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
