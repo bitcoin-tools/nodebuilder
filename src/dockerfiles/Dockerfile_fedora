@@ -18,7 +18,6 @@ RUN uname -a \
 RUN dnf makecache \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs dnf --assumeyes install \
-  && dnf --assumeyes install netcat \
   && dnf clean all
 
 # Download and execute the script
