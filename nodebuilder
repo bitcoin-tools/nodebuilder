@@ -208,16 +208,23 @@ Linux)
     install_dependencies_zypper
     ;;
   *)
-    if command -v apk > /dev/null; then
-      install_dependencies_apk
-    elif command -v apt-get > /dev/null; then
-      install_dependencies_aptget
-    elif command -v dnf > /dev/null; then
-      install_dependencies_dnf
-    elif command -v pacman > /dev/null; then
-      install_dependencies_pacman
-    elif command -v zypper > /dev/null; then
-      install_dependencies_zypper
+    install_command_function=""
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      pacman \
+      zypper
+    do
+      if command -v "$package_manager" > /dev/null; then
+        # Remove '-' to match function names
+        install_command_function="install_dependencies_$(echo "$package_manager" | tr -d '-')"
+        break
+      fi
+    done
+
+    if [ -n "$install_command_function" ]; then
+      "$install_command_function"
     else
       handle_error "This version of Linux is not supported."
     fi
