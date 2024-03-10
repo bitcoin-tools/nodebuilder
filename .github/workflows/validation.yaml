@@ -1,9 +1,11 @@
 name: Validation CI
 on:
   push:
-    branches: [ "master" ]
+    branches: [ master ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ master ]
+  schedule:
+    - cron: '0 10,22 * * *'
   workflow_dispatch:
 env:
   TERM: xterm
