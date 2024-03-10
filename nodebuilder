@@ -70,13 +70,14 @@ set_bitcoin_core_option() (
   printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
 )
 
+# This function sets a Bitcoin Core option in the configuration file if it's not already set.
 set_if_unset_bitcoin_core_option() (
   option="$1"
   value="$2"
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
-    printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-  elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
+  fi
+  if [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
 )
