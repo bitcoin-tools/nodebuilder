@@ -76,13 +76,14 @@ set_bitcoin_core_option() (
   printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
 )
 
+# This function sets a Bitcoin Core option in the configuration file if it's not already set.
 set_if_unset_bitcoin_core_option() (
   option="$1"
   value="$2"
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
-    printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-  elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
+  fi
+  if [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
 )
@@ -202,16 +203,21 @@ Linux)
     install_dependencies_zypper
     ;;
   *)
-    if command -v apk > /dev/null; then
-      install_dependencies_apk
-    elif command -v apt-get > /dev/null; then
-      install_dependencies_aptget
-    elif command -v dnf > /dev/null; then
-      install_dependencies_dnf
-    elif command -v pacman > /dev/null; then
-      install_dependencies_pacman
-    elif command -v zypper > /dev/null; then
-      install_dependencies_zypper
+    install_command_function=""
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      pacman \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_command_function="install_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+
+    if [ -n "${install_command_function}" ]; then
+      "${install_command_function}"
     else
       handle_error "This version of Linux is not supported."
     fi
