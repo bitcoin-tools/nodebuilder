@@ -16,7 +16,7 @@ RUN uname -a \
 
 # Install system updates and dependencies
 RUN zypper refresh \
-  && zypper --non-interactive install curl netcat 'sudo' \
+  && zypper --non-interactive install curl 'sudo' \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs zypper --non-interactive install
 
