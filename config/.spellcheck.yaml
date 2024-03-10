@@ -5,7 +5,7 @@ matrix:
     d: en_US
   dictionary:
     wordlists:
-    - ../data/pyspelling.wordlist.txt
+    - data/pyspelling.wordlist.txt
     encoding: utf-8
   sources:
   - '**/*.md'
