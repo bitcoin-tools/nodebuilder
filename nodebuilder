@@ -113,6 +113,7 @@ handle_error() {
   exit 1
 }
 
+# shellcheck disable=SC2317
 handle_sigint() {
   printf '%s\n' "Caught SIGINT. Exiting without stopping bitcoin-qt."
   handle_exit
