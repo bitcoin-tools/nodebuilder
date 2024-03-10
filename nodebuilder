@@ -54,6 +54,10 @@ install_dependencies_zypper() {
   install_dependencies zypper --non-interactive --quiet install > /dev/null
 }
 
+is_running_in_ci() {
+
+}
+
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
     return 0
