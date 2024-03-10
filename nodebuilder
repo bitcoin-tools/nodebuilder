@@ -21,7 +21,13 @@ get_memory_metric_in_mib() (
 
 get_os_release_type() (
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
-  printf '%s\n' "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
+  os_release_id=$(grep "^ID=" /etc/os-release | cut -d= -f2)
+
+  if [ -n "$os_release_id_like" ] || [ -n "$os_release_id" ]; then
+    printf '%s\n' "${os_release_id_like:-$os_release_id}"
+  else
+    handle_error "Failed to determine OS release type"
+  fi
 )
 
 is_running_in_container() {
