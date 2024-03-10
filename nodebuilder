@@ -55,7 +55,11 @@ install_dependencies_zypper() {
 }
 
 is_running_in_ci() {
-
+  if [ "${CI:-false}" = "true" ]; then
+    return 0
+  else
+    return 1 #1=false
+  fi
 }
 
 is_running_in_container() {
@@ -177,7 +181,7 @@ Linux)
     ;;
   esac
 
-  if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
+  if [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
     read -rn1
     printf '%s\n' "\nRebooting."
@@ -457,7 +461,9 @@ EOF
   chmod u+x "${applications_path}"/"${shortcut_filename}"
   chmod u+x "${desktop_path}"/"${shortcut_filename}"
   ## Make the desktop shortcut trusted
-  if [ "${CI:-false}" = false ] && ! is_running_in_container; then
+  if is_running_in_ci || is_running_in_container; then
+    :
+  else
     gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
   fi
   printf '%s\n' "ok."
@@ -575,7 +581,7 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
+if is_running_in_ci || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
@@ -660,7 +666,7 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { [ "${CI:-false}" = true ] || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if { is_running_in_ci || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
     printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi
