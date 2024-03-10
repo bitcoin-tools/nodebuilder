@@ -4,6 +4,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  issues:
+    types: [ opened ]
   schedule:
     - cron: '0 10,22 * * *'
   workflow_dispatch:
