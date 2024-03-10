@@ -1,0 +1,23 @@
+# syntax=docker/dockerfile:1
+# Arch Linux is a minimalist, rolling-release distribution.
+# This Dockerfile is ideal for users who prefer a hands-on approach and a clean, streamlined environment.
+FROM archlinux:latest@sha256:fed6efe803e79d94544f93607e4afec1056cfd9bee5744c965eec0944624d81f
+ENV TERM=xterm
+
+# Define the dependencies URL
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
+
+# Check the current environment
+RUN uname -a \
+  && cat /etc/os-release \
+  && df -h \
+  && grep Mem /proc/meminfo \
+  && date -u
+
+# Install system updates and dependencies
+RUN pacman -Sy --noconfirm 'sudo' \
+  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
+  | xargs pacman -Sy --noconfirm
+
+# Download and execute the script
+RUN /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"

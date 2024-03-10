@@ -21,7 +21,13 @@ get_memory_metric_in_mib() (
 
 get_os_release_type() (
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
-  printf '%s\n' "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
+  os_release_id=$(grep "^ID=" /etc/os-release | cut -d= -f2)
+
+  if [ -n "${os_release_id_like}" ] || [ -n "${os_release_id}" ]; then
+    printf '%s\n' "${os_release_id_like:-${os_release_id}}"
+  else
+    handle_error "Failed to determine OS release type"
+  fi
 )
 
 install_dependencies() {
@@ -48,6 +54,14 @@ install_dependencies_zypper() {
   install_dependencies zypper --non-interactive --quiet install > /dev/null
 }
 
+is_running_in_ci() {
+  if [ "${CI:-false}" = "true" ]; then
+    return 0
+  else
+    return 1 #1=false
+  fi
+}
+
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
     return 0
@@ -70,13 +84,14 @@ set_bitcoin_core_option() (
   printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
 )
 
+# This function sets a Bitcoin Core option in the configuration file if it's not already set.
 set_if_unset_bitcoin_core_option() (
   option="$1"
   value="$2"
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
-    printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-  elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
+  fi
+  if [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
 )
@@ -170,7 +185,7 @@ Linux)
     ;;
   esac
 
-  if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
+  if [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
     read -rn1
     printf '%s\n' "\nRebooting."
@@ -200,16 +215,21 @@ Linux)
     install_dependencies_zypper
     ;;
   *)
-    if command -v apk > /dev/null; then
-      install_dependencies_apk
-    elif command -v apt-get > /dev/null; then
-      install_dependencies_aptget
-    elif command -v dnf > /dev/null; then
-      install_dependencies_dnf
-    elif command -v pacman > /dev/null; then
-      install_dependencies_pacman
-    elif command -v zypper > /dev/null; then
-      install_dependencies_zypper
+    install_command_function=""
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      pacman \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_command_function="install_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+
+    if [ -n "${install_command_function}" ]; then
+      "${install_command_function}"
     else
       handle_error "This version of Linux is not supported."
     fi
@@ -445,7 +465,9 @@ EOF
   chmod u+x "${applications_path}"/"${shortcut_filename}"
   chmod u+x "${desktop_path}"/"${shortcut_filename}"
   ## Make the desktop shortcut trusted
-  if [ "${CI:-false}" = false ] && ! is_running_in_container; then
+  if is_running_in_ci || is_running_in_container; then
+    :
+  else
     gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
   fi
   printf '%s\n' "ok."
@@ -563,7 +585,7 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
+if is_running_in_ci || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
   bitcoin-qt 2> /dev/null &
@@ -648,7 +670,7 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { [ "${CI:-false}" = true ] || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if { is_running_in_ci || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
     printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi
