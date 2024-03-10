@@ -584,8 +584,7 @@ printf '%s' "Starting Bitcoin Core... "
 if is_running_in_ci || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
-  bitcoin-qt 2> /dev/null &
-  disown
+  nohup bitcoin-qt 2> /dev/null &
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
