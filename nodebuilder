@@ -86,8 +86,6 @@ log_error() {
 }
 
 # shellcheck disable=SC2317
-
-# shellcheck disable=SC2317
 handle_exit() {
   [ -n "${temp_directory:-''}" ] && rm -rf -- "${temp_directory:?}"/
 }
@@ -105,12 +103,10 @@ trap 'handle_error ${LINENO:-}' ERR
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
-
 temp_directory="$(mktemp -d)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB=1024
 readonly MIB_TO_GIB=1024
@@ -118,6 +114,12 @@ readonly MIB_TO_GIB=1024
 clear
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
+fi
+if ! command -v sudo > /dev/null 2>&1; then
+    handle_error "The dependency 'sudo' is not installed."
+elif ! sudo --validate --noninteractive > /dev/null 2>&1; then
+    printf '%s' "Please enter your sudo password: "
+    sudo --validate
 fi
 case "$(uname -s)" in
 Linux)
