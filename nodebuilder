@@ -113,18 +113,20 @@ handle_error() {
   exit 1
 }
 
+temp_directory="$(mktemp -d)"
+
 trap handle_exit EXIT
 trap 'handle_error ${LINENO:-}' ERR
 
+readonly BYTES_TO_KIB=1024
+readonly KIB_TO_MIB="${BYTES_TO_KIB}"
+readonly MIB_TO_GIB=${BYTES_TO_KIB}"
+
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
-temp_directory="$(mktemp -d)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
-shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-readonly BYTES_TO_KIB=1024
-readonly KIB_TO_MIB=1024
-readonly MIB_TO_GIB=1024
+shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 
 clear
 if is_running_in_container; then
