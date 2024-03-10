@@ -115,6 +115,8 @@ jobs:
         include:
           - container: Alpine
             dockerfile: ./src/dockerfiles/Dockerfile_alpine
+          - container: Arch
+            dockerfile: ./src/dockerfiles/Dockerfile_arch
           - container: Debian
             dockerfile: ./src/dockerfiles/Dockerfile_debian
           - container: Fedora
