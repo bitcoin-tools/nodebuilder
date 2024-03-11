@@ -25,10 +25,9 @@ set -o nounset
 for message in \
   "Expected.*message 1" \
   "Expected.*message 2" \
-  "Expected.*message 3"
-do
-  if ! grep "${message}" output_stdout.txt >/dev/null 2>&1; then
-    printf '%s\n' "FAILURE: ${message} not found"
+  "Expected.*message 3"; do
+  if ! grep "${message}" output_stdout.txt > /dev/null 2>&1; then
+    printf '%s\n' "FAILURE: Expected message ${message} not found."
     exit 1
   fi
 done
@@ -36,12 +35,11 @@ done
 for message in \
   "Unexpected.*message 1" \
   "Unexpected.*message 2" \
-  "Unexpected.*message 3"
-do
-  if grep "${message}" output_stdout.txt >/dev/null 2>&1; then
-    printf '%s\n' "FAILURE: ${message} found"
+  "Unexpected.*message 3"; do
+  if grep "${message}" output_stdout.txt > /dev/null 2>&1; then
+    printf '%s\n' "FAILURE: Unexpected message ${message} found."
     exit 1
   fi
 done
 
-printf '%s\n' "Test passed."
+printf '%s\n' "PASS: All console output tests passed."
