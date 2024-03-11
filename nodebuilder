@@ -701,9 +701,7 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { is_running_in_ci ||
-    is_running_in_container; } &&
-    [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if [ "${size_on_disk_in_mib}" -ge 1 ] && (is_running_in_ci || is_running_in_container); then
     printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi
