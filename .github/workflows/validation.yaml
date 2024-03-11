@@ -1,5 +1,6 @@
 name: Validation CI
 on:
+  pull_request:
   push:
     branches: [ master ]
     paths:
@@ -9,8 +10,6 @@ on:
       - test/test_bitcoin
       - .github/workflows/*.yaml
       - dockerfiles/Dockerfile_*
-  pull_request:
-    branches: [ master ]
   issues:
     types: [ opened ]
   schedule:

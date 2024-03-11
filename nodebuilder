@@ -202,7 +202,7 @@ Linux)
     handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n\n%s' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)" "PRESS ENTER to reboot or press Ctrl+C to exit... "
-    read -r
+    read -r _
     printf '\n%s\n' "Rebooting."
     sudo reboot
     exit 0
@@ -285,7 +285,7 @@ Darwin)
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ENTER when the installation has completed."
-      read -r
+      read -r _
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
