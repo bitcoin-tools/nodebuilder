@@ -12,17 +12,55 @@ get_free_space_in_mib() {
   fi
 }
 
-get_memory_statistic_in_mib() (
-  statistic_to_query="$1"
-  awk -v stat="$statistic_to_query" \
-    -v kib_mib_factor="$KIB_TO_MIB" \
-    '$0 ~ stat { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
+get_memory_metric_in_mib() (
+  metric_to_query="$1"
+  awk -v metric="${metric_to_query}" \
+    -v kib_mib_factor="${KIB_TO_MIB}" \
+    '$0 ~ metric { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
 )
 
 get_os_release_type() (
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
-  printf '%s\n' "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
+  os_release_id=$(grep "^ID=" /etc/os-release | cut -d= -f2)
+
+  if [ -n "${os_release_id_like}" ] || [ -n "${os_release_id}" ]; then
+    printf '%s\n' "${os_release_id_like:-${os_release_id}}"
+  else
+    handle_error "Failed to determine OS release type"
+  fi
 )
+
+install_dependencies() {
+  printf '%s\n' "${dependencies}" | xargs sudo "$@"
+}
+
+install_dependencies_aptget() {
+  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+}
+
+install_dependencies_dnf() {
+  install_dependencies dnf --assumeyes --quiet install > /dev/null
+}
+
+install_dependencies_apk() {
+  printf '%s\n' "${dependencies}" | awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' | xargs apk --quiet add
+}
+
+install_dependencies_pacman() {
+  install_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+}
+
+install_dependencies_zypper() {
+  install_dependencies zypper --non-interactive --quiet install > /dev/null
+}
+
+is_running_in_ci() {
+  if [ "${CI:-false}" = "true" ]; then
+    return 0
+  else
+    return 1 #1=false
+  fi
+}
 
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
@@ -46,32 +84,20 @@ set_bitcoin_core_option() (
   printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
 )
 
+# This function sets a Bitcoin Core option in the configuration file if it's not already set.
 set_if_unset_bitcoin_core_option() (
   option="$1"
   value="$2"
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
-    printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-  elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
+  fi
+  if [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
 )
 
 log_error() {
-  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
-}
-
-# shellcheck disable=SC2317
-ensure_cursor_is_on_column_one() {
-  if [ "$(uname -s)" = "Darwin" ]; then
-    printf '\n'
-  else
-    printf '%s' "\E[6n"
-    read -dRr cursor_position
-    cursor_position="${cursor_position#*[}"
-    cursor_position_column="$(printf '%s\n' "${cursor_position}" | cut -d ";" -f 2)"
-    ([ "${cursor_position_column}" -gt 1 ] && printf '\n') || true
-  fi
+  printf '\n%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
 
 # shellcheck disable=SC2317
@@ -81,31 +107,39 @@ handle_exit() {
 
 # shellcheck disable=SC2317
 handle_error() {
-  ensure_cursor_is_on_column_one
   log_error "Failed to run '${BASH_COMMAND}' on line $1."
   printf '%s\n' "Exiting."
   handle_exit
   exit 1
 }
 
-trap handle_exit EXIT
-trap 'handle_error ${LINENO:-}' ERR
+temp_directory="$(mktemp -d)"
+
+trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
+
+readonly BYTES_TO_KIB=1024
+readonly KIB_TO_MIB="${BYTES_TO_KIB}"
+readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
-
-temp_directory="$(mktemp -d)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
-shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-
-readonly BYTES_TO_KIB=1024
-readonly KIB_TO_MIB=1024
-readonly MIB_TO_GIB=1024
+shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 
 clear
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
+fi
+if ! command -v sudo > /dev/null 2>&1; then
+  handle_error "The dependency 'sudo' is not installed."
+elif is_running_in_ci ||
+  is_running_in_container ||
+  sudo --validate --noninteractive > /dev/null 2>&1; then
+  :
+else
+  printf '%s' "Please enter your sudo password: "
+  sudo --validate
 fi
 case "$(uname -s)" in
 Linux)
@@ -154,10 +188,12 @@ Linux)
     ;;
   esac
 
-  if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
-    printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
+  if [ -f /var/run/reboot-required ] && is_running_in_container; then
+    handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
+  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
+    printf '\n%s\n%s\n\n%s' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)" "PRESS ANY KEY to reboot or press Ctrl+C to exit... "
     read -r
-    printf '%s\n' "\nRebooting."
+    printf '\n%s\n' "Rebooting."
     sudo reboot
     exit 0
   fi
@@ -166,33 +202,39 @@ Linux)
   printf '%s' "Checking for dependencies... "
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  [ -z "$dependencies" ] && handle_error "The list of dependencies is empty."
   case "$(get_os_release_type)" in
   alpine)
-    echo "${dependencies}" | xargs apk --quiet add
+    install_dependencies_apk
     ;;
   debian | ubuntu)
-    echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+    install_dependencies_aptget
     ;;
   fedora)
-    echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+    install_dependencies_dnf
     ;;
   arch | manjaro)
-    echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+    install_dependencies_pacman
     ;;
   suse | *opensuse*)
-    echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+    install_dependencies_zypper
     ;;
   *)
-    if command -v apk > /dev/null; then
-      echo "${dependencies}" | xargs apk --quiet add
-    elif command -v apt-get > /dev/null; then
-      echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
-    elif command -v dnf > /dev/null; then
-      echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
-    elif command -v pacman > /dev/null; then
-      echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
-    elif command -v zypper > /dev/null; then
-      echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+    install_command_function=""
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      pacman \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_command_function="install_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+
+    if [ -n "${install_command_function}" ]; then
+      "${install_command_function}"
     else
       handle_error "This version of Linux is not supported."
     fi
@@ -428,7 +470,9 @@ EOF
   chmod u+x "${applications_path}"/"${shortcut_filename}"
   chmod u+x "${desktop_path}"/"${shortcut_filename}"
   ## Make the desktop shortcut trusted
-  if [ "${CI:-false}" = false ] && ! is_running_in_container; then
+  if is_running_in_ci || is_running_in_container; then
+    :
+  else
     gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
   fi
   printf '%s\n' "ok."
@@ -448,10 +492,10 @@ case "$(uname -s)" in
 Darwin) ;; #TODO: Add macOS memory check
 *)
   printf '%s' "Checking the memory on your system... "
-  physical_memory_total_in_mib="$(get_memory_statistic_in_mib 'MemTotal')"
-  physical_memory_free_in_mib="$(get_memory_statistic_in_mib 'MemAvailable')"
-  swap_memory_total_in_mib="$(get_memory_statistic_in_mib 'SwapTotal')"
-  swap_memory_free_in_mib="$(get_memory_statistic_in_mib 'SwapFree')"
+  physical_memory_total_in_mib="$(get_memory_metric_in_mib 'MemTotal')"
+  physical_memory_free_in_mib="$(get_memory_metric_in_mib 'MemAvailable')"
+  swap_memory_total_in_mib="$(get_memory_metric_in_mib 'SwapTotal')"
+  swap_memory_free_in_mib="$(get_memory_metric_in_mib 'SwapFree')"
   memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
   printf '%0.1f GiB free of %0.1f GiB.\n' \
@@ -546,16 +590,17 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
+if is_running_in_ci ||
+  is_running_in_container ||
+  ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
-  bitcoin-qt 2> /dev/null &
-  disown
+  nohup bitcoin-qt 2> /dev/null &
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
-rpc_timeout=10
-if ! bitcoin-cli --rpcwait --rpcwaittimeout="${rpc_timeout}" getrpcinfo; then
+rpc_timeout=60
+if ! bitcoin-cli --rpcwait --rpcwaittimeout="${rpc_timeout}" getrpcinfo > /dev/null; then
   handle_error "RPC communication failed after ${rpc_timeout} seconds"
 fi
 printf '%s\n' "ok."
@@ -631,7 +676,9 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { [ "${CI:-false}" = true ] || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if { is_running_in_ci ||
+    is_running_in_container; } &&
+    [ "${size_on_disk_in_mib}" -ge 1 ]; then
     printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi

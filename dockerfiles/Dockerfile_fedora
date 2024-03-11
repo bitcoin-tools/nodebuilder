@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Ubuntu is known for its popularity and user-friendly design.
-# This Dockerfile offers a balance between stability, security, and modernity.
-FROM ubuntu:22.04@sha256:77906da86b60585ce12215807090eb327e7386c8fafb5402369e421f44eff17e
+# Fedora is known for its proactive security and commitment to open-source software.
+# This Dockerfile is a good choice for modern and resource-rich environments.
+FROM fedora:39@sha256:61864fd19bbd64d620f338eb11dae9e8759bf7fa97302ac6c43865c48dccd679
 ENV TERM=xterm
 
 # Define the dependencies URL
@@ -15,13 +15,10 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies
-RUN apt-get -qq update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
-  ca-certificates curl 'sudo' \
+RUN dnf makecache \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | DEBIAN_FRONTEND=noninteractive xargs apt-get -qq install --no-install-recommends \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  | xargs dnf --assumeyes install \
+  && dnf clean all
 
 # Download and execute the script
 RUN /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
