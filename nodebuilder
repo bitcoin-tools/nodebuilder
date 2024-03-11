@@ -607,7 +607,7 @@ printf '%s\n' "ok."
 
 sleep_time="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
-ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
+ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
 if [ "${ibd_status}" = true ]; then
   if ! is_running_in_container; then
@@ -630,18 +630,17 @@ else
 fi
 
 while [ "${ibd_status}" = true ]; do
-  sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
+  blocks=$(echo "${blockchain_info}" | jq '.blocks')
+  headers=$(echo "${blockchain_info}" | jq '.headers')
+  last_block_time=$(echo "${blockchain_info}" | jq '.time')
+  size_on_disk_in_mib=$(($(echo "${blockchain_info}" | jq '.size_on_disk') / BYTES_TO_KIB / KIB_TO_MIB))
+  sync_progress=$(echo "${blockchain_info}" | jq '.verificationprogress')
+  
   # Handle case of early sync by replacing scientific notation with decimal
-
   if [ "$(printf '%s\n' "${sync_progress}" | grep -c -i "e")" -gt 0 ]; then
     sync_progress="0.000000001"
   fi
   sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')"
-
-  blocks=$(jq '.blocks' <<< "${blockchain_info}")
-  headers=$(jq '.headers' <<< "${blockchain_info}")
-  last_block_time=$(jq '.time' <<< "${blockchain_info}")
-  size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / BYTES_TO_KIB / KIB_TO_MIB))
 
   free_space_in_mib=$(get_free_space_in_mib)
 
@@ -690,7 +689,7 @@ while [ "${ibd_status}" = true ]; do
 
   blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
   printf '\n'
-  ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
+  ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 done
 
 printf '%s\n' "This script has completed successfully."
