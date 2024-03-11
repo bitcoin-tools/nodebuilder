@@ -101,8 +101,6 @@ log_error() {
 }
 
 # shellcheck disable=SC2317
-
-# shellcheck disable=SC2317
 handle_exit() {
   [ -n "${temp_directory:-''}" ] && rm -rf -- "${temp_directory:?}"/
 }
@@ -115,24 +113,41 @@ handle_error() {
   exit 1
 }
 
-trap handle_exit EXIT
-trap 'handle_error ${LINENO:-}' ERR
+# shellcheck disable=SC2317
+handle_sigint() {
+  printf '\n%s\n' "Detected Ctrl+C. Exiting."
+  handle_exit
+  exit 0
+}
+
+temp_directory="$(mktemp -d)"
+
+trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
+trap handle_sigint SIGINT
+
+readonly BYTES_TO_KIB=1024
+readonly KIB_TO_MIB="${BYTES_TO_KIB}"
+readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
-
-temp_directory="$(mktemp -d)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
-shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-
-readonly BYTES_TO_KIB=1024
-readonly KIB_TO_MIB=1024
-readonly MIB_TO_GIB=1024
+shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 
 clear
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
+fi
+if ! command -v sudo > /dev/null 2>&1; then
+  handle_error "The dependency 'sudo' is not installed."
+elif is_running_in_ci ||
+  is_running_in_container ||
+  sudo --validate --noninteractive > /dev/null 2>&1; then
+  :
+else
+  printf '%s' "Please enter your sudo password: "
+  sudo --validate
 fi
 case "$(uname -s)" in
 Linux)
@@ -181,10 +196,12 @@ Linux)
     ;;
   esac
 
-  if [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
-    printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
-    read -rn1
-    printf '%s\n' "\nRebooting."
+  if [ -f /var/run/reboot-required ] && is_running_in_container; then
+    handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
+  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
+    printf '\n%s\n%s\n\n%s' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)" "PRESS ENTER to reboot or press Ctrl+C to exit... "
+    read -r
+    printf '\n%s\n' "Rebooting."
     sudo reboot
     exit 0
   fi
@@ -265,8 +282,8 @@ Darwin)
     else
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
-      printf '%s\n' "PRESS ANY KEY when the installation has completed."
-      read -rn1
+      printf '%s\n' "PRESS ENTER when the installation has completed."
+      read -r
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
@@ -581,15 +598,16 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if is_running_in_ci || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
+if is_running_in_ci ||
+  is_running_in_container ||
+  ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
-  bitcoin-qt 2> /dev/null &
-  disown
+  setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
-rpc_timeout=10
+rpc_timeout=60
 if ! bitcoin-cli --rpcwait --rpcwaittimeout="${rpc_timeout}" getrpcinfo > /dev/null; then
   handle_error "RPC communication failed after ${rpc_timeout} seconds"
 fi
@@ -597,7 +615,7 @@ printf '%s\n' "ok."
 
 sleep_time="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
-ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
+ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
 if [ "${ibd_status}" = true ]; then
   if ! is_running_in_container; then
@@ -620,18 +638,17 @@ else
 fi
 
 while [ "${ibd_status}" = true ]; do
-  sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
-  # Handle case of early sync by replacing scientific notation with decimal
+  blocks=$(echo "${blockchain_info}" | jq '.blocks')
+  headers=$(echo "${blockchain_info}" | jq '.headers')
+  last_block_time=$(echo "${blockchain_info}" | jq '.time')
+  size_on_disk_in_mib=$(($(echo "${blockchain_info}" | jq '.size_on_disk') / BYTES_TO_KIB / KIB_TO_MIB))
+  sync_progress=$(echo "${blockchain_info}" | jq '.verificationprogress')
 
+  # Handle case of early sync by replacing scientific notation with decimal
   if [ "$(printf '%s\n' "${sync_progress}" | grep -c -i "e")" -gt 0 ]; then
     sync_progress="0.000000001"
   fi
   sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')"
-
-  blocks=$(jq '.blocks' <<< "${blockchain_info}")
-  headers=$(jq '.headers' <<< "${blockchain_info}")
-  last_block_time=$(jq '.time' <<< "${blockchain_info}")
-  size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / BYTES_TO_KIB / KIB_TO_MIB))
 
   free_space_in_mib=$(get_free_space_in_mib)
 
@@ -666,7 +683,9 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { is_running_in_ci || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if { is_running_in_ci ||
+    is_running_in_container; } &&
+    [ "${size_on_disk_in_mib}" -ge 1 ]; then
     printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi
@@ -678,7 +697,7 @@ while [ "${ibd_status}" = true ]; do
 
   blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
   printf '\n'
-  ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
+  ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 done
 
 printf '%s\n' "This script has completed successfully."
