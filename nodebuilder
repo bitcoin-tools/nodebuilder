@@ -115,8 +115,7 @@ handle_error() {
 
 temp_directory="$(mktemp -d)"
 
-trap handle_exit EXIT
-trap 'handle_error ${LINENO:-}' ERR
+trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
