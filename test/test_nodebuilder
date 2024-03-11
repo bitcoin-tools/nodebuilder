@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Function to handle normal exit
 handle_exit() {
-  kill "${tail_pid}"
+  if kill -0 "${tail_pid}" >/dev/null 2>&1; then
+    kill "${tail_pid}"
+  fi
 }
 
-# Function to handle errors
 handle_error() {
   handle_exit
   printf '%s\n' "Test failed."
