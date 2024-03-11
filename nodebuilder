@@ -642,9 +642,11 @@ if [ "${ibd_status}" = true ]; then
     printf '%s\n' "ok."
     printf '\n%s\n%s' "Close this Terminal window by clicking on the \"X\"." "This screen will refresh in ${sleep_time} seconds."
   fi
-  for ((i = 1; i <= sleep_time; i++)); do
+  i=1
+  while [ "$i" -le 10 ]; do
     sleep 1
-    printf "."
+    printf '%s' "."
+    i=$((i + 1))
   done
   printf '\n'
 else
