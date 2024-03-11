@@ -107,7 +107,7 @@ handle_exit() {
 
 # shellcheck disable=SC2317
 handle_error() {
-  log_error "Failed to run '${BASH_COMMAND}' on line $1."
+  log_error "Failed to run line $1."
   printf '%s\n' "Exiting."
   handle_exit
   exit 1
@@ -123,7 +123,7 @@ handle_sigint() {
 temp_directory="$(mktemp -d)"
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
-trap handle_sigint SIGINT
+trap handle_sigint INT
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
