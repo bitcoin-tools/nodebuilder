@@ -107,7 +107,7 @@ handle_exit() {
 
 # shellcheck disable=SC2317
 handle_error() {
-  log_error "Failed to run '${BASH_COMMAND}' on line $1."
+  log_error "Failed to run line $1."
   printf '%s\n' "Exiting."
   handle_exit
   exit 1
