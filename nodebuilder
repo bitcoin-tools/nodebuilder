@@ -113,9 +113,17 @@ handle_error() {
   exit 1
 }
 
+# shellcheck disable=SC2317
+handle_sigint() {
+  printf '\n%s\n' "Detected Ctrl+C. Exiting."
+  handle_exit
+  exit 0
+}
+
 temp_directory="$(mktemp -d)"
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
+trap handle_sigint SIGINT
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
@@ -595,7 +603,7 @@ if is_running_in_ci ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
-  nohup bitcoin-qt 2> /dev/null &
+  setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
