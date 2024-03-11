@@ -156,7 +156,7 @@ Linux)
 
   if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
     printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
-    read -rn1
+    read -r
     printf '%s\n' "\nRebooting."
     sudo reboot
     exit 0
@@ -233,7 +233,7 @@ Darwin)
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ANY KEY when the installation has completed."
-      read -rn1
+      read -r
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
