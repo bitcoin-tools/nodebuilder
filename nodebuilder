@@ -113,8 +113,7 @@ handle_error() {
   exit 1
 }
 
-trap handle_exit EXIT
-trap 'handle_error ${LINENO:-}' ERR
+trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
