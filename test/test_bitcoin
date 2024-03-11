@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Function to handle normal exit
+handle_exit() {
+  kill "${tail_pid}"
+}
+
+# Function to handle errors
+handle_error() {
+  handle_exit
+  printf '%s\n' "Test failed."
+}
+
+tail -f output_stdout.txt &
+tail_pid=$!
+
+trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
+
+set -o errexit
+set -o nounset
+
+/bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)" 2> output_stderr.txt |
+  tee output_stdout.txt
+
+for message in \
+  "Expected.*message 1" \
+  "Expected.*message 2" \
+  "Expected.*message 3"
+do
+  if ! grep "${message}" output_stdout.txt >/dev/null 2>&1; then
+    printf '%s\n' "FAILURE: ${message} not found"
+    exit 1
+  fi
+done
+
+for message in \
+  "Unexpected.*message 1" \
+  "Unexpected.*message 2" \
+  "Unexpected.*message 3"
+do
+  if grep "${message}" output_stdout.txt >/dev/null 2>&1; then
+    printf '%s\n' "FAILURE: ${message} found"
+    exit 1
+  fi
+done
+
+printf '%s\n' "Test passed."
