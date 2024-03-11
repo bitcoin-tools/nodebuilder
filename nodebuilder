@@ -122,8 +122,7 @@ handle_sigint() {
 
 temp_directory="$(mktemp -d)"
 
-trap handle_exit EXIT
-trap 'handle_error ${LINENO:-}' ERR
+trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
 trap handle_sigint SIGINT
 
 readonly BYTES_TO_KIB=1024
@@ -200,9 +199,9 @@ Linux)
   if [ -f /var/run/reboot-required ] && is_running_in_container; then
     handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
-    printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
+    printf '\n%s\n%s\n\n%s' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)" "PRESS ANY KEY to reboot or press Ctrl+C to exit... "
     read -rn1
-    printf '%s\n' "\nRebooting."
+    printf '\n%s\n' "Rebooting."
     sudo reboot
     exit 0
   fi
