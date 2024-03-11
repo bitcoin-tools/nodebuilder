@@ -270,7 +270,7 @@ Darwin)
     sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
     clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
     clt_label="$(/bin/bash -c "${clt_label_command}")"
-    if [[ -n "${clt_label}" ]]; then
+    if [ -n "${clt_label}" ]; then
       sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
     else
       handle_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
@@ -301,12 +301,20 @@ esac
 
 printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
 if command -v bitcoind > /dev/null 2>&1; then
-  current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1)"
+  current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1 | cut -c23-)"
 else
   current_bitcoin_version=""
 fi
 
-if [ -n "${current_bitcoin_version}" ] && [[ "${current_bitcoin_version}" = *"${target_bitcoin_version}"* ]]; then
+# If bitcoin target version is like xx.yy, pad it as "xx.yy.0"
+case "${target_bitcoin_version}" in
+  *[.]*[.]* ) ;;
+  * )
+    target_bitcoin_version_padded="${target_bitcoin_version}.0"
+    ;;
+esac
+
+if [ "${current_bitcoin_version}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "ok."
 elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
   printf '\n  %s' "Installing build dependencies... "
@@ -372,9 +380,12 @@ else
       handle_error "Either 'sha256sum' or 'shasum' must on PATH."
     fi
     cd "${HOME}"/
-    if ! [[ "${sha256_check}" = *"OK" ]]; then
-      handle_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
-    fi
+    case "${sha256_check}" in
+      *"OK"*) ;;
+      *)
+        handle_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
+        ;;
+    esac
     printf '%s\n' "ok."
 
     printf '  %s' "Validating the signatures... "
@@ -385,7 +396,7 @@ else
       gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
     fi
     gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
-    if [[ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]]; then
+    if [ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]; then
       printf '%s\n' "${gpg_good_signature_count} good."
       [ -d "$(dirname "${bitcoin_tarball_destination_file}")" ] || mkdir -p "$(dirname "${bitcoin_tarball_destination_file}")"
       mv "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_destination_file}"
@@ -407,13 +418,14 @@ else
     codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
   fi
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
-  if [[ "${unit_test_response}" != *"No errors detected"* ]]; then
-    printf '%s\n' "\n${unit_test_response}"
-    handle_error "Unit tests failed."
-  fi
-  printf '%s\n' "ok."
-
-  printf '  %s' "Installing Bitcoin Core... "
+  case "${unit_test_response}" in
+    *"No errors detected"*) ;;
+    *)
+      printf '%s\n' "\n${unit_test_response}"
+      handle_error "Unit tests failed."
+      ;;
+  esac
+  printf '%s\n  %s' "ok." "Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || handle_error "Unable to create directory ${bitcoin_install_lib_destination}."
   case "$(uname -s)" in
   Linux)
