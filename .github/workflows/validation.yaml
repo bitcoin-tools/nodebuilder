@@ -1,8 +1,7 @@
 name: Validation CI
 on:
-  push:
-    branches: [ master ]
   pull_request:
+  push:
     branches: [ master ]
   issues:
     types: [ opened ]
