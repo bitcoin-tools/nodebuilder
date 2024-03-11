@@ -2,6 +2,13 @@ name: Validation CI
 on:
   push:
     branches: [ master ]
+    paths:
+      - Dockerfile
+      - dependencies.txt
+      - nodebuilder
+      - test/test_bitcoin
+      - .github/workflows/*.yaml
+      - dockerfiles/Dockerfile_*
   pull_request:
     branches: [ master ]
   issues:
