@@ -107,9 +107,9 @@ jobs:
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
-      - name: Run nodebuilder
+      - name: Test nodebuilder's console output
         timeout-minutes: 120
-        run: /bin/bash -x ./nodebuilder
+        run: /bin/bash -x ./test/test_nodebuilder
 
   run-nodebuilder-docker:
     name: Run in ${{ matrix.container }} container
