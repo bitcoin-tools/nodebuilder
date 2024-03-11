@@ -604,11 +604,8 @@ if is_running_in_ci ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
-  (
-    trap '' SIGINT
-    nohup bitcoin-qt 2> /dev/null &
-  )
-fi
+  setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
+fifrom 
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
 rpc_timeout=60
