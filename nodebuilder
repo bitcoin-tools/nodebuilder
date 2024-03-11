@@ -139,6 +139,7 @@ clear
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
 fi
+
 if ! command -v sudo > /dev/null 2>&1; then
   handle_error "The dependency 'sudo' is not installed."
 elif is_running_in_ci ||
@@ -146,9 +147,10 @@ elif is_running_in_ci ||
   sudo --validate --noninteractive > /dev/null 2>&1; then
   :
 else
-  printf '%s' "Please enter your sudo password: "
+  printf '%s\n' "Please enter your sudo password if requested."
   sudo --validate
 fi
+
 case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
