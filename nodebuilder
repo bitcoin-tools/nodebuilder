@@ -8,7 +8,7 @@ check_internet() {
   address=$1
   port=$2
   check_internet_timeout=10
-  timeout --preserve-status "${internet_check_timeout}" nc -z "${address}" "${port}"
+  timeout --preserve-status "${check_internet_timeout}" nc -z "${address}" "${port}"
 }
 
 get_free_space_in_mib() {
@@ -744,7 +744,7 @@ while [ "${ibd_status}" = true ]; do
   fi
 
   if [ "${size_on_disk_in_mib}" -ge 1 ] && (is_running_in_ci || is_running_in_container); then
-    printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
+    printf '%s\n' "The blockchain download is progressing. Exiting the script."
     exit 0
   fi
 
