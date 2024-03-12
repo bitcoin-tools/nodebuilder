@@ -140,7 +140,7 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   *)
-    echo "Error: Unknown argument $1"
+    printf '%s\n%s\n' "Error: '$1' is invalid." "Use -h or --help for available options."
     exit 1
     ;;
   esac
