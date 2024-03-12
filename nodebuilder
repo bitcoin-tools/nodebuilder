@@ -314,11 +314,15 @@ Darwin)
     if command -v git > /dev/null 2>&1; then
       printf '%s\n' "ok."
     else
+      if [ "${unattended}" = true ]; then
+        printf '\n%s\n' "ERROR: Failed to install Xcode. Try re-running without -u/--unattended."
+        exit 1
+      fi
+
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ENTER when the installation has completed."
       read -r _
-      #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
       fi
