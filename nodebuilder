@@ -4,6 +4,13 @@
 set -o errexit
 set -o nounset
 
+check_internet() {
+  address=$1
+  port=$2
+  check_internet_timeout=10
+  timeout --preserve-status "${check_internet_timeout}" nc -z "${address}" "${port}"
+}
+
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -120,6 +127,32 @@ handle_sigint() {
   exit 0
 }
 
+print_help() {
+  printf '%s\n\n' "Usage: $0 [options]"
+  printf '%s\n' "Options:"
+  printf '%s\n' "-h, --help         Display this help message"
+  printf '%s\n' "-u, --unattended   Run in unattended mode"
+}
+
+unattended=false
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -h | --help)
+    print_help
+    exit 0
+    ;;
+  -u | --unattended)
+    unattended=true
+    shift
+    ;;
+  *)
+    printf '%s\n%s\n' "Error: '$1' is invalid." "Use -h or --help for available options."
+    exit 1
+    ;;
+  esac
+done
+
 temp_directory="$(mktemp -d)"
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
@@ -154,13 +187,12 @@ fi
 case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
-  ( (timeout --preserve-status 1 nc -z 1.1.1.1 53 ||
-    timeout --preserve-status 1 nc -z 1.1.0.0 53 ||
-    timeout --preserve-status 1 nc -z 9.9.9.9 53 ||
-    timeout --preserve-status 1 nc -z 9.9.9.11 53) &&
-    timeout --preserve-status 5 nc -z bitcoincore.org 443) || {
+  ( (check_internet 1.1.1.1 53 ||
+    check_internet 1.1.0.0 53 ||
+    check_internet 9.9.9.9 53 ||
+    check_internet 9.9.9.11 53) &&
+    check_internet bitcoincore.org 443) ||
     handle_error "Check for active internet failed."
-  }
 
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
@@ -198,12 +230,18 @@ Linux)
     ;;
   esac
 
+  # Stop running if the Docker container base image is outdated
   if [ -f /var/run/reboot-required ] && is_running_in_container; then
     handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
+  # Reboot the system unless it's running in CI/CD
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
-    printf '\n%s\n%s\n\n%s' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)" "PRESS ENTER to reboot or press Ctrl+C to exit... "
-    read -r _
-    printf '\n%s\n' "Rebooting."
+    printf '\n%s\n%s\n' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)"
+    if [ "${unattended}" = false ]; then
+      printf '\n%s' "PRESS ENTER to reboot or press Ctrl+C to exit... "
+      read -r _
+      printf '\n'
+    fi
+    printf '%s\n' "Rebooting."
     sudo reboot
     exit 0
   fi
@@ -282,11 +320,15 @@ Darwin)
     if command -v git > /dev/null 2>&1; then
       printf '%s\n' "ok."
     else
+      if [ "${unattended}" = true ]; then
+        printf '\n%s\n' "ERROR: Failed to install Xcode. Try re-running without -u/--unattended."
+        exit 1
+      fi
+
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ENTER when the installation has completed."
       read -r _
-      #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
       fi
@@ -319,9 +361,9 @@ case "${target_bitcoin_version}" in
 esac
 
 if [ "${current_bitcoin_version}" = "${target_bitcoin_version_padded}" ]; then
-  printf '%s\n' "ok."
+  printf '%s\n' "found."
 elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
-  printf '\n  %s' "Installing build dependencies... "
+  printf '%s\n  %s' "not found." "Installing build dependencies... "
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
@@ -339,7 +381,7 @@ elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; the
   rm -rf "${temp_directory}"/compile_bitcoin/
   current_bitcoin_version="${target_bitcoin_version}"
 else
-  printf '\n'
+  printf '%s\n' "not found."
   bitcoin_core_extract_dir="${temp_directory}/bitcoin-core"
   bitcoin_install_bin_source="${bitcoin_core_extract_dir}/bin"
   bitcoin_install_lib_source="${bitcoin_core_extract_dir}/lib"
@@ -702,7 +744,7 @@ while [ "${ibd_status}" = true ]; do
   fi
 
   if [ "${size_on_disk_in_mib}" -ge 1 ] && (is_running_in_ci || is_running_in_container); then
-    printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
+    printf '%s\n' "The blockchain download is progressing. Exiting the script."
     exit 0
   fi
 

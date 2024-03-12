@@ -9,4 +9,5 @@ matrix:
     encoding: utf-8
   sources:
   - '**/*.md'
+  - '.github/ISSUE_TEMPLATE/*.md'
   default_encoding: utf-8
