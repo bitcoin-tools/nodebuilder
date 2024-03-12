@@ -4,6 +4,13 @@
 set -o errexit
 set -o nounset
 
+check_internet() {
+  address=$1
+  port=$2
+  check_internet_timeout=10
+  timeout --preserve-status "${internet_check_timeout}" nc -z "${address}" "${port}"
+}
+
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -180,13 +187,12 @@ fi
 case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
-  ( (timeout --preserve-status 1 nc -z 1.1.1.1 53 ||
-    timeout --preserve-status 1 nc -z 1.1.0.0 53 ||
-    timeout --preserve-status 1 nc -z 9.9.9.9 53 ||
-    timeout --preserve-status 1 nc -z 9.9.9.11 53) &&
-    timeout --preserve-status 5 nc -z bitcoincore.org 443) || {
+  ( (check_internet 1.1.1.1 53 ||
+    check_internet 1.1.0.0 53 ||
+    check_internet 9.9.9.9 53 ||
+    check_internet 9.9.9.11 53) &&
+    check_internet bitcoincore.org 443) ||
     handle_error "Check for active internet failed."
-  }
 
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
