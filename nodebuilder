@@ -125,7 +125,6 @@ print_help() {
   printf '%s\n' "Options:"
   printf '%s\n' "-h, --help         Display this help message"
   printf '%s\n' "-u, --unattended   Run in unattended mode"
-  printf '\n'
 }
 
 unattended=false
