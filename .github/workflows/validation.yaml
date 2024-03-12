@@ -85,7 +85,7 @@ jobs:
           path: spellcheck-output.txt
 
   run-nodebuilder:
-    name: Run on ${{ matrix.friendly-name }}
+    name: Test on ${{ matrix.friendly-name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -113,7 +113,7 @@ jobs:
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
-      - name: Test nodebuilder's console output
+      - name: Test nodebuilder console output
         timeout-minutes: 120
         run: /bin/bash -x ./test/test_nodebuilder
 
