@@ -107,7 +107,7 @@ handle_exit() {
 
 # shellcheck disable=SC2317
 handle_error() {
-  log_error "Failed to run '${BASH_COMMAND}' on line $1."
+  log_error "Failed to run line $1."
   printf '%s\n' "Exiting."
   handle_exit
   exit 1
@@ -123,7 +123,7 @@ handle_sigint() {
 temp_directory="$(mktemp -d)"
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
-trap handle_sigint SIGINT
+trap handle_sigint INT
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
@@ -202,7 +202,7 @@ Linux)
     handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n\n%s' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)" "PRESS ENTER to reboot or press Ctrl+C to exit... "
-    read -r
+    read -r _
     printf '\n%s\n' "Rebooting."
     sudo reboot
     exit 0
@@ -285,7 +285,7 @@ Darwin)
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ENTER when the installation has completed."
-      read -r
+      read -r _
       #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
@@ -701,9 +701,7 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { is_running_in_ci ||
-    is_running_in_container; } &&
-    [ "${size_on_disk_in_mib}" -ge 1 ]; then
+  if [ "${size_on_disk_in_mib}" -ge 1 ] && (is_running_in_ci || is_running_in_container); then
     printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
     exit 0
   fi
