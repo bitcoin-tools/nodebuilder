@@ -23,7 +23,7 @@ set -o nounset
   tee output_stdout.txt
 
 for message in \
-  "Detected: running on (Linux|macOS)." \
+  "Detected: running on \(Linux\|macOS\)\." \
   "Performing a system upgrade... ok." \
   "Checking for dependencies... ok." \
   "Checking for Bitcoin Core 26.0... (not )?found" \
