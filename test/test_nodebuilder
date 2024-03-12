@@ -23,9 +23,26 @@ set -o nounset
   tee output_stdout.txt
 
 for message in \
-  "Expected.*message 1" \
-  "Expected.*message 2" \
-  "Expected.*message 3"; do
+  "Detected: running on (Linux|macOS)." \
+  "Performing a system upgrade... ok." \
+  "Checking for dependencies... ok." \
+  "Checking for Bitcoin Core 26.0... (not )?found" \
+  "Installing Bitcoin Core... ok." \
+  "Creating application shortcuts... ok." \
+  "Setting the default node behavior... ok." \
+  "Checking the memory on your system... [0-9]+\.[0-9] GiB free of [0-9]+\.[0-9] GiB." \
+  "Checking data already synced... [0-9]+ GiB." \
+  "Checking free space in home directory... [0-9]+ [GM]iB." \
+  "Starting Bitcoin Core... ok." \
+  "Checking the RPC status... ok." \
+  ".........." \
+  "Syncing the block headers (.* pass)." \
+  "Sync progress:      [0-9]+\.[0-9]{3} %" \
+  "Blocks remaining:   [0-9]*$" \
+  "Current chain tip:  (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) [1-3]?[0-9] [0-9]{2}:[0-9]{2}:[0-9]{2} UTC 2[0-9]{3}" \
+  "Chain sync size:    [0-9]+ [GM]iB" \
+  "Disk free space:    [0-9]+ GiB" \
+  "The blockchain download is progressing. Exiting the script."; do
   if ! grep "${message}" output_stdout.txt > /dev/null 2>&1; then
     printf '%s\n' "FAILURE: Expected message ${message} not found."
     exit 1
@@ -33,9 +50,15 @@ for message in \
 done
 
 for message in \
-  "Unexpected.*message 1" \
-  "Unexpected.*message 2" \
-  "Unexpected.*message 3"; do
+  "apt-utils 1" \
+  "libzmq" \
+  "BDB" \
+  "Berkeley DB" \
+  "Checking the memory on your system... 0 GiB free of 0 GiB." \
+  "Checking the memory on your system... 0.0 GiB free of 0.0 GiB." \
+  "Checking free space in home directory... 0 GiB." \
+  "Sync progress:      [0-9]+\.[0-9]{4} %" \
+  "Disk free space:    (0 G|[0-9]+ M)iB"; do
   if grep "${message}" output_stdout.txt > /dev/null 2>&1; then
     printf '%s\n' "FAILURE: Unexpected message ${message} found."
     exit 1
