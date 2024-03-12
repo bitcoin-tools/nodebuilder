@@ -339,7 +339,7 @@ elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; the
   rm -rf "${temp_directory}"/compile_bitcoin/
   current_bitcoin_version="${target_bitcoin_version}"
 else
-  printf '%s\n' "not found.
+  printf '%s\n' "not found."
   bitcoin_core_extract_dir="${temp_directory}/bitcoin-core"
   bitcoin_install_bin_source="${bitcoin_core_extract_dir}/bin"
   bitcoin_install_lib_source="${bitcoin_core_extract_dir}/lib"
