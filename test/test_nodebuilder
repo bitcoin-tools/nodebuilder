@@ -19,7 +19,7 @@ trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 set -o errexit
 set -o nounset
 
-/bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)" 2> output_stderr.txt |
+/bin/bash -x "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)" 2> output_stderr.txt |
   tee output_stdout.txt
 
 for message in \
