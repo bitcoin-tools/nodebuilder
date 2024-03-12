@@ -11,7 +11,7 @@ handle_error() {
   printf '%s\n' "Test failed."
 }
 
-tail -f stdout &
+tail -f output_stdout.txt &
 tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
