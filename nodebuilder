@@ -291,7 +291,7 @@ Linux)
   printf '%s\n' "ok."
   ;;
 Darwin)
-  printf '%s\n' "Detected: Running on macOS."
+  printf '%s\n' "Detected: running on macOS."
   ( (curl --silent --output /dev/null --connect-timeout 1 1.1.1.1 ||
     curl --silent --output /dev/null --connect-timeout 1 1.1.0.0 ||
     curl --silent --output /dev/null --connect-timeout 1 9.9.9.9 ||
