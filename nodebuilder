@@ -162,9 +162,9 @@ case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
   ( ( check_internet 1.1.1.1 53 ||
-      check_internet 1.1.0.0 53 ||
-      check_internet 9.9.9.9 53 ||
-      check_internet 9.9.9.11 53 ) &&
+    check_internet 1.1.0.0 53 ||
+    check_internet 9.9.9.9 53 ||
+    check_internet 9.9.9.11 53 ) &&
     check_internet bitcoincore.org 443 ) ||
   handle_error "Check for active internet failed."
 
