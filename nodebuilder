@@ -8,7 +8,7 @@ check_internet() {
   address=$1
   port=$2
   check_internet_timeout=10
-  timeout --preserve-status "${internet_check_timeout}" nc -z "${address}" "${port}"
+  timeout --preserve-status "${check_internet_timeout}" nc -z "${address}" "${port}"
 }
 
 get_free_space_in_mib() {
