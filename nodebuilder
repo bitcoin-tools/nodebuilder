@@ -120,6 +120,33 @@ handle_sigint() {
   exit 0
 }
 
+print_help() {
+  printf '%s\n\n' "Usage: $0 [options]"
+  printf '%s\n' "Options:"
+  printf '%s\n' "-h, --help         Display this help message"
+  printf '%s\n' "-u, --unattended   Run in unattended mode"
+  printf '\n'
+}
+
+unattended=false
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -h | --help)
+    print_help
+    exit 0
+    ;;
+  -u | --unattended)
+    unattended=true
+    shift
+    ;;
+  *)
+    echo "Error: Unknown argument $1"
+    exit 1
+    ;;
+  esac
+done
+
 temp_directory="$(mktemp -d)"
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
@@ -198,12 +225,18 @@ Linux)
     ;;
   esac
 
+  # Stop running if the Docker container base image is outdated
   if [ -f /var/run/reboot-required ] && is_running_in_container; then
     handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
+  # Reboot the system unless it's running in CI/CD
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
-    printf '\n%s\n%s\n\n%s' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)" "PRESS ENTER to reboot or press Ctrl+C to exit... "
-    read -r _
-    printf '\n%s\n' "Rebooting."
+    printf '\n%s\n%s\n' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)"
+    if [ "${unattended}" = false ]; then
+      printf '\n%s' "PRESS ENTER to reboot or press Ctrl+C to exit... "
+      read -r _
+      printf '\n'
+    fi
+    printf '%s\n' "Rebooting."
     sudo reboot
     exit 0
   fi
