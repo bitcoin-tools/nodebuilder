@@ -109,7 +109,7 @@ log_error() {
 
 # shellcheck disable=SC2317
 handle_exit() {
-  [ -n "${temp_directory:-''}" ] && rm -rf -- "${temp_directory:?}"/
+  [ -n "${temp_directory:?}" ] && rm -rf -- "${temp_directory:?}"/
 }
 
 # shellcheck disable=SC2317
