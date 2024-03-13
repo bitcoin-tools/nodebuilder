@@ -146,7 +146,6 @@ while [ $# -gt 0 ]; do
   -p | --prune)
     if [ $# -eq 1 ]; then
       handle_error "-p/--prune requires an argument"
-      exit 1
     fi
     case $2 in
     *[!0-9]*) # if $2 contains any non-numeric characters
