@@ -34,9 +34,7 @@ for message in \
   "Detected: running on (Linux|macOS).$" \
   "Checking for Bitcoin Core 26.0... (not )?found.$" \
   "Installing Bitcoin Core... ok.$" \
-  "Creating application shortcuts... ok.$" \
   "Setting the default node behavior... ok.$" \
-  "Checking the memory on your system... [0-9]+\.[0-9] GiB free of [0-9]+\.[0-9] GiB.$" \
   "Checking data already synced... [0-9]+ GiB.$" \
   "Checking free space in home directory... [0-9]+ [GM]iB.$" \
   "Starting Bitcoin Core... ok.$" \
@@ -58,7 +56,9 @@ done
 if [ "$(uname -s)" != "Darwin" ]; then
   for message in \
     "Performing a system upgrade... ok.$" \
-    "Checking for dependencies... ok.$"; do
+    "Checking for dependencies... ok.$" \
+    "Creating application shortcuts... ok.$" \
+    "Checking the memory on your system... [0-9]+\.[0-9] GiB free of [0-9]+\.[0-9] GiB.$"; do
     if ! grep -Eq "${message}" output_stdout.txt > /dev/null 2>&1; then
       printf '%s\n' "FAILURE: Expected message ${message} not found."
       exit 1
