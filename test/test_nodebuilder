@@ -55,7 +55,7 @@ for message in \
   fi
 done
 
-if [ "$(uname -s)" != "Darwin ]; then
+if [ "$(uname -s)" != "Darwin" ]; then
   for message in \
     "Performing a system upgrade... ok.$" \
     "Checking for dependencies... ok.$"; do
