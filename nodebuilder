@@ -3,6 +3,7 @@
 # A minimally-interactive script for launching a Bitcoin Core node
 set -o errexit
 set -o nounset
+set -x
 
 check_internet() {
   address=$1
