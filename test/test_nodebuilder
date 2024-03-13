@@ -26,10 +26,14 @@ tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
-nohup /bin/bash -x "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)" 2> output_stderr.txt > output_stdout.txt
+curl -fsSL -o nodebuilder https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
+chmod +x nodebuilder
+nohup /bin/bash -x nodebuilder > output_stdout.txt 2> output_stderr.txt
+rm nodebuilder
 kill_tail
-printf '%s\n' "Printing the contents of stdout for debug purposes"
-cat output_stdout.txt
+
+#printf '%s\n' "Printing the contents of stdout for debug purposes"
+#cat output_stdout.txt
 
 for message in \
   "Detected: running on (Linux|macOS).$" \
