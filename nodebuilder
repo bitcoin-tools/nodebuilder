@@ -149,10 +149,13 @@ while [ $# -gt 0 ]; do
     fi
     case $2 in
     *[!0-9]*) # if $2 contains any non-numeric characters
-      handle_error "The prune value '$2' must be a positive integer to set pruning or zero to disable pruning."
+      handle_error "The prune value '$2' must be a positive integer or zero to disable pruning."
       ;;
     *) ;;
     esac
+    if [ "$2" -gt 0 ] && [ "$2" -lt "550" ]; then
+      handle_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning."
+    fi
     prune_value="$2"
     shift 2
     ;;
