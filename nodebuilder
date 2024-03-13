@@ -291,7 +291,7 @@ Linux)
   printf '%s\n' "ok."
   ;;
 Darwin)
-  printf '%s\n' "Detected: Running on macOS."
+  printf '%s\n' "Detected: running on macOS."
   ( (curl --silent --output /dev/null --connect-timeout 1 1.1.1.1 ||
     curl --silent --output /dev/null --connect-timeout 1 1.1.0.0 ||
     curl --silent --output /dev/null --connect-timeout 1 9.9.9.9 ||
@@ -486,26 +486,30 @@ else
     sudo update_dyld_shared_cache
 
     if [ "${target_bitcoin_architecture}" = "arm64" ]; then
-      for bitcoin_executable in {bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,bitcoind}; do
-        codesign -s - "${bitcoin_install_bin_source}"/"${bitcoin_executable}"
+      for bitcoin_executable in bitcoin-cli bitcoin-qt bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do
+        codesign -s - "${bitcoin_install_bin_source}/${bitcoin_executable}"
       done
     fi
     ;;
   esac
 
   [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_bin_destination}" || handle_error "Unable to create directory ${bitcoin_install_bin_destination}."
-  sudo install -c "${bitcoin_install_bin_source}"/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin} "${bitcoin_install_bin_destination}"/
+  for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet test_bitcoin; do
+    sudo install -c "${bitcoin_install_bin_source}/${bitcoin_executable}" "${bitcoin_install_bin_destination}/"
+  done
 
   [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_include_destination}" || handle_error "Unable to create directory ${bitcoin_install_include_destination}."
-  sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}"/
+  sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}/"
 
   [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}" 2> /dev/null || sudo mkdir -p "${bitcoin_install_man_destination}" || handle_error "Unable to create directory ${bitcoin_install_man_destination}."
-  sudo install -c -m 644 "${bitcoin_install_man_source}"/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1} "${bitcoin_install_man_destination}"/
+  for man_page in bitcoind.1 bitcoin-qt.1 bitcoin-cli.1 bitcoin-tx.1 bitcoin-util.1 bitcoin-wallet.1; do
+    sudo install -c -m 644 "${bitcoin_install_man_source}/${man_page}" "${bitcoin_install_man_destination}/"
+  done
   printf '%s\n' "ok."
 
   printf '  %s' "Removing temporary files... "
-  rm -r "${bitcoin_core_extract_dir:?}"/
-  rm -r "${temp_directory:?}"/
+  rm -r "${bitcoin_core_extract_dir:?}/"
+  rm -r "${temp_directory:?}/"
   printf '%s\n' "ok."
 fi
 

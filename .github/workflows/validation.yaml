@@ -86,7 +86,7 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-  run-nodebuilder:
+  run-nodebuilder-baremetal:
     name: Run on ${{ matrix.friendly-name }}
     runs-on: ${{ matrix.os }}
     strategy:
