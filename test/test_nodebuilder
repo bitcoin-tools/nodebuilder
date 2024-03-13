@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# A console output test script for nodebuilder
+set -o errexit
+set -o nounset
+set -x
 
 handle_exit() {
   if kill -0 "${tail_pid}" > /dev/null 2>&1; then
@@ -16,9 +21,6 @@ tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
-set -o errexit
-set -o nounset
-set -x
 
 nohup /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)" 2> output_stderr.txt > output_stdout.txt
 kill "${tail_pid}"
