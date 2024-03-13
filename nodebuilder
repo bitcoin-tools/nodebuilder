@@ -611,7 +611,7 @@ Darwin) ;; #TODO: Add macOS memory check
 esac
 
 if [ "${prune_value}" -ge 0 ]; then
-  set_bitcoin_core_option "${prune_value}"
+  set_bitcoin_core_option "prune" "${prune_value}"
 elif [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
   printf '%s' "Checking data already synced... "
   bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
