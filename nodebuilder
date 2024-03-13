@@ -135,6 +135,7 @@ print_help() {
 }
 
 unattended=false
+prune_value="-1"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -149,7 +150,7 @@ while [ $# -gt 0 ]; do
     fi
     case $2 in
     *[!0-9]*) # if $2 contains any non-numeric characters
-      handle_error "The prune value '$2' must be a positive integer."
+      handle_error "The prune value '$2' must be a positive integer to set pruning or zero to disable pruning."
       ;;
     *) ;;
     esac
@@ -609,7 +610,9 @@ Darwin) ;; #TODO: Add macOS memory check
   ;;
 esac
 
-if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
+if [ "${prune_value}" -ge 0 ]; then
+  set_bitcoin_core_option "${prune_value}"
+elif [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
   printf '%s' "Checking data already synced... "
   bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
   bitcoin_core_chainstate_dir="${bitcoin_core_data_dir}/chainstate"
