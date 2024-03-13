@@ -109,13 +109,12 @@ log_error() {
 
 # shellcheck disable=SC2317
 handle_exit() {
-  [ -n "${temp_directory:?}" ] && rm -rf -- "${temp_directory:?}"/
+  [ -n "${temp_directory:-''}" ] && rm -rf -- "${temp_directory:?}"/
 }
 
 # shellcheck disable=SC2317
 handle_error() {
   log_error "Failed to run line $1."
-  printf '%s\n' "Exiting."
   handle_exit
   exit 1
 }
