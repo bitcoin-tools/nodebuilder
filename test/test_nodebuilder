@@ -20,6 +20,7 @@ kill_tail() {
   fi
 }
 
+[ -f output_stdout.txt ] || touch output_stdout.txt
 tail -f output_stdout.txt &
 tail_pid=$!
 
