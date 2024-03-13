@@ -62,9 +62,8 @@ if [ "$(uname -s)" != "Darwin ]; then
     if ! grep -Eq "${message}" output_stdout.txt > /dev/null 2>&1; then
       printf '%s\n' "FAILURE: Expected message ${message} not found."
       exit 1
-  fi
-done
-
+    fi
+  done
 fi
 
 for message in \
