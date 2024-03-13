@@ -134,6 +134,7 @@ print_help() {
   printf '%s\n' "-u, --unattended   Run in unattended mode"
 }
 
+temp_directory=""
 unattended=false
 prune_value="-1"
 
