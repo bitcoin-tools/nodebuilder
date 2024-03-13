@@ -649,8 +649,11 @@ archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * MIB_T
 
 # check if the user passed in a prune value
 if [ "${prune_value}" -ge 0 ]; then
-  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -ge "${}"
-  printf '%s\n' "WARNING: Insufficient disk space for user-defined prune value.
+  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -ge "${prune_value}" ]; then
+    printf '  %s\n%s  \n' \
+      "WARNING: Not enough free space for prune=${prune_value} but setting anyways." \
+      "Recommend setting a proper prune value or re-running without -p/--prune option."
+  fi
   printf '  %s' "Configuring with the user-defined prune setting... "
   set_bitcoin_core_option "prune" "${prune_value}"
   printf '%s\n' "ok."
