@@ -155,6 +155,7 @@ while [ $# -gt 0 ]; do
     esac
     prune_value="$2"
     shift 2
+    ;;
   -u | --unattended)
     unattended=true
     shift
