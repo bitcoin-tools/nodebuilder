@@ -67,6 +67,31 @@ install_dependencies_zypper() {
   install_dependencies zypper --non-interactive --quiet install > /dev/null
 }
 
+install_updates_aptget() {
+  stderr_install_log_file="${temp_directory}/stderr_install.log"
+  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> "${stderr_install_log_file}"
+  grep -v "apt-utils" "${stderr_install_log_file}" >&2
+  rm "${stderr_install_log_file}"
+}
+
+install_updates_dnf() {
+  sudo dnf --assumeyes --quiet upgrade > /dev/null
+}
+
+install_updates_apk() {
+  apk update --quiet && apk upgrade --quiet
+}
+
+install_updates_pacman() {
+  sudo pacman -Syu --noconfirm --quiet > /dev/null
+}
+
+install_updates_zypper() {
+  sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
+}
+
+}
+
 is_running_in_ci() {
   if [ "${CI:-false}" = "true" ]; then
     return 0
@@ -205,31 +230,31 @@ Linux)
   printf '%s' "Performing a system upgrade... "
   case "$(get_os_release_type)" in
   alpine)
-    apk update --quiet && apk upgrade --quiet
+    install_updates_apk
     ;;
   debian | ubuntu)
-    sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> >(grep -v apt-utils -)
+    install_updates_aptget
     ;;
   fedora)
-    sudo dnf --assumeyes --quiet upgrade > /dev/null
+    install_updates_dnf
     ;;
   arch | manjaro)
-    sudo pacman -Syu --noconfirm --quiet > /dev/null
+    install_updates_pacman
     ;;
   suse | *opensuse*)
-    sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
+    install_updates_zypper
     ;;
   *)
     if command -v apk > /dev/null; then
-      apk update --quiet && apk upgrade --quiet
+      install_updates_apk
     elif command -v apt-get > /dev/null; then
-      sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> >(grep -v apt-utils -)
+      install_updates_aptget
     elif command -v dnf > /dev/null; then
-      sudo dnf --assumeyes --quiet upgrade > /dev/null
+      install_updates_dnf
     elif command -v pacman > /dev/null; then
-      sudo pacman -Syu --noconfirm --quiet > /dev/null
+      install_updates_pacman
     elif command -v zypper > /dev/null; then
-      sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
+      install_updates_zypper
     else
       handle_error "This version of Linux is not supported."
     fi
