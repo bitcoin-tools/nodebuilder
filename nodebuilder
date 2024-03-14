@@ -142,6 +142,10 @@ while [ $# -gt 0 ]; do
     print_help
     exit 0
     ;;
+  -t|--test)
+    unit_test=true
+    shift
+    ;;
   -u | --unattended)
     unattended=true
     shift
