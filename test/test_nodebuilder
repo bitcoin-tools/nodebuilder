@@ -3,7 +3,6 @@
 # A console output test script for nodebuilder
 set -o errexit
 set -o nounset
-set -x
 
 handle_exit() {
   kill_tail_process
@@ -16,7 +15,7 @@ handle_error() {
 
 kill_tail_process() {
   if kill -0 "${tail_pid}" > /dev/null 2>&1; then
-    kill "${tail_pid}"
+    kill -INT "${tail_pid}"
   fi
 }
 
@@ -26,9 +25,9 @@ tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
-curl -fsSL -o nodebuilder https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
-chmod +x nodebuilder
-/bin/bash -x -c "nohup /bin/bash -x nodebuilder > output_stdout.txt 2> output_stderr.txt"
+nohup /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)" \
+  > output_stdout.txt \
+  2> output_stderr.txt
 rm nodebuilder
 kill_tail_process
 
