@@ -8,7 +8,7 @@ check_internet() {
   address=$1
   port=$2
   check_internet_timeout=10
-  timeout --preserve-status "${check_internet_timeout}" nc -z "${address}" "${port}"
+  timeout --preserve-status "${check_internet_timeout}" nc -z "${address}" "${port}" > /dev/null
 }
 
 get_free_space_in_mib() {
@@ -109,7 +109,7 @@ log_error() {
 
 # shellcheck disable=SC2317
 handle_exit() {
-  [ -n "${temp_directory:-''}" ] && rm -rf -- "${temp_directory:?}"/
+  [ -n "${temp_directory:?}" ] && rm -rf -- "${temp_directory:?}"/
 }
 
 # shellcheck disable=SC2317
