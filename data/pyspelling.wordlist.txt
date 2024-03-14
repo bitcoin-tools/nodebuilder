@@ -26,6 +26,7 @@ alpinelinux
 archlinux
 armantheparman
 asc
+assignees
 ayeowch
 bitcoinconsensus
 bitcoind

@@ -1,17 +1,22 @@
 # syntax=docker/dockerfile:1
+# Manjaro focuses on user-friendliness and accessibility.
+# This Dockerfile is ideal for users who want a balance of control and convenience.
 FROM manjarolinux/base:20240227@sha256:369753d82cfddfb500e9ef756334e0323508172c31041ea30501530cb5b24c12
 ENV TERM=xterm
 
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
 
-# Check the current system
-RUN grep "VERSION\|ID" /etc/os-release
+# Check the current environment
+RUN uname -a \
+  && cat /etc/os-release \
+  && df -h \
+  && grep Mem /proc/meminfo \
+  && date -u
 
 # Install system updates and dependencies
 RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs pacman -Sy --noconfirm \
-  && pacman -Sy --noconfirm netcat
+  | xargs pacman -Sy --noconfirm
 
 # Download and execute the script
 RUN /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"

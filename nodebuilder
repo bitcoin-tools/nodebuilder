@@ -4,6 +4,13 @@
 set -o errexit
 set -o nounset
 
+check_internet() {
+  address=$1
+  port=$2
+  check_internet_timeout=10
+  timeout --preserve-status "${check_internet_timeout}" nc -z "${address}" "${port}" > /dev/null
+}
+
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -21,8 +28,46 @@ get_memory_metric_in_mib() (
 
 get_os_release_type() (
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
-  printf '%s\n' "${os_release_id_like:-"$(grep "^ID=" /etc/os-release | cut -d= -f2)"}"
+  os_release_id=$(grep "^ID=" /etc/os-release | cut -d= -f2)
+
+  if [ -n "${os_release_id_like}" ] || [ -n "${os_release_id}" ]; then
+    printf '%s\n' "${os_release_id_like:-${os_release_id}}"
+  else
+    handle_error "Failed to determine OS release type"
+  fi
 )
+
+install_dependencies() {
+  printf '%s\n' "${dependencies}" | xargs sudo "$@"
+}
+
+install_dependencies_aptget() {
+  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+}
+
+install_dependencies_dnf() {
+  install_dependencies dnf --assumeyes --quiet install > /dev/null
+}
+
+install_dependencies_apk() {
+  printf '%s\n' "${dependencies}" | awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' | xargs apk --quiet add
+}
+
+install_dependencies_pacman() {
+  install_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+}
+
+install_dependencies_zypper() {
+  install_dependencies zypper --non-interactive --quiet install > /dev/null
+}
+
+is_running_in_ci() {
+  if [ "${CI:-false}" = "true" ]; then
+    return 0
+  else
+    return 1 #1=false
+  fi
+}
 
 is_running_in_container() {
   if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
@@ -46,77 +91,108 @@ set_bitcoin_core_option() (
   printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
 )
 
+# This function sets a Bitcoin Core option in the configuration file if it's not already set.
 set_if_unset_bitcoin_core_option() (
   option="$1"
   value="$2"
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
-    printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-  elif [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
+  fi
+  if [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
 )
 
 log_error() {
-  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
-}
-
-# shellcheck disable=SC2317
-ensure_cursor_is_on_column_one() {
-  if [ "$(uname -s)" = "Darwin" ]; then
-    printf '\n'
-  else
-    printf '%s' "\E[6n"
-    read -dRr cursor_position
-    cursor_position="${cursor_position#*[}"
-    cursor_position_column="$(printf '%s\n' "${cursor_position}" | cut -d ";" -f 2)"
-    ([ "${cursor_position_column}" -gt 1 ] && printf '\n') || true
-  fi
+  printf '\n%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
 
 # shellcheck disable=SC2317
 handle_exit() {
-  [ -n "${temp_directory:-''}" ] && rm -rf -- "${temp_directory:?}"/
+  [ -n "${temp_directory:?}" ] && rm -rf -- "${temp_directory:?}"/
 }
 
 # shellcheck disable=SC2317
 handle_error() {
-  ensure_cursor_is_on_column_one
-  log_error "Failed to run '${BASH_COMMAND}' on line $1."
+  log_error "Failed to run line $1."
   printf '%s\n' "Exiting."
   handle_exit
   exit 1
 }
 
-trap handle_exit EXIT
-trap 'handle_error ${LINENO:-}' ERR
+# shellcheck disable=SC2317
+handle_sigint() {
+  printf '\n%s\n' "Detected Ctrl+C. Exiting."
+  handle_exit
+  exit 0
+}
+
+print_help() {
+  printf '%s\n\n' "Usage: $0 [options]"
+  printf '%s\n' "Options:"
+  printf '%s\n' "-h, --help         Display this help message"
+  printf '%s\n' "-u, --unattended   Run in unattended mode"
+}
+
+unattended=false
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -h | --help)
+    print_help
+    exit 0
+    ;;
+  -u | --unattended)
+    unattended=true
+    shift
+    ;;
+  *)
+    printf '%s\n%s\n' "Error: '$1' is invalid." "Use -h or --help for available options."
+    exit 1
+    ;;
+  esac
+done
+
+temp_directory="$(mktemp -d)"
+
+trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
+trap handle_sigint INT
+
+readonly BYTES_TO_KIB=1024
+readonly KIB_TO_MIB="${BYTES_TO_KIB}"
+readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 target_bitcoin_version="26.0"
 target_bitcoin_architecture="$(uname -m)"
-
-temp_directory="$(mktemp -d)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
-shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-
-readonly BYTES_TO_KIB=1024
-readonly KIB_TO_MIB=1024
-readonly MIB_TO_GIB=1024
+shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 
 clear
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
 fi
+
+if ! command -v sudo > /dev/null 2>&1; then
+  handle_error "The dependency 'sudo' is not installed."
+elif is_running_in_ci ||
+  is_running_in_container ||
+  sudo --validate --noninteractive > /dev/null 2>&1; then
+  :
+else
+  printf '%s\n' "Please enter your sudo password if requested."
+  sudo --validate
+fi
+
 case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
-  ( (timeout --preserve-status 1 nc -z 1.1.1.1 53 ||
-    timeout --preserve-status 1 nc -z 1.1.0.0 53 ||
-    timeout --preserve-status 1 nc -z 9.9.9.9 53 ||
-    timeout --preserve-status 1 nc -z 9.9.9.11 53) &&
-    timeout --preserve-status 5 nc -z bitcoincore.org 443) || {
+  ( (check_internet 1.1.1.1 53 ||
+    check_internet 1.1.0.0 53 ||
+    check_internet 9.9.9.9 53 ||
+    check_internet 9.9.9.11 53) &&
+    check_internet bitcoincore.org 443) ||
     handle_error "Check for active internet failed."
-  }
 
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
@@ -154,10 +230,18 @@ Linux)
     ;;
   esac
 
-  if [ -f /var/run/reboot-required ] && [ "${CI:-false}" = false ]; then
-    printf '%s' "\nREBOOT REQUIRED to upgrade the following:\n$(cat /var/run/reboot-required.pkgs)\n\nPRESS ANY KEY to reboot or press Ctrl+C to exit... "
-    read -rn1
-    printf '%s\n' "\nRebooting."
+  # Stop running if the Docker container base image is outdated
+  if [ -f /var/run/reboot-required ] && is_running_in_container; then
+    handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
+  # Reboot the system unless it's running in CI/CD
+  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
+    printf '\n%s\n%s\n' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)"
+    if [ "${unattended}" = false ]; then
+      printf '\n%s' "PRESS ENTER to reboot or press Ctrl+C to exit... "
+      read -r _
+      printf '\n'
+    fi
+    printf '%s\n' "Rebooting."
     sudo reboot
     exit 0
   fi
@@ -166,33 +250,39 @@ Linux)
   printf '%s' "Checking for dependencies... "
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  [ -z "$dependencies" ] && handle_error "The list of dependencies is empty."
   case "$(get_os_release_type)" in
   alpine)
-    echo "${dependencies}" | xargs apk --quiet add
+    install_dependencies_apk
     ;;
   debian | ubuntu)
-    echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends 3>&1 1>&2 2>&3 | grep -v 'apt-utils' 1>&2 > /dev/null
+    install_dependencies_aptget
     ;;
   fedora)
-    echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+    install_dependencies_dnf
     ;;
   arch | manjaro)
-    echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet 3>&1 1>&2 2>&3 | grep -v 'skipping' 1>&2 > /dev/null
+    install_dependencies_pacman
     ;;
   suse | *opensuse*)
-    echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+    install_dependencies_zypper
     ;;
   *)
-    if command -v apk > /dev/null; then
-      echo "${dependencies}" | xargs apk --quiet add
-    elif command -v apt-get > /dev/null; then
-      echo "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends 3>&1 1>&2 2>&3 | grep -v 'apt-utils' 1>&2 > /dev/null
-    elif command -v dnf > /dev/null; then
-      echo "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
-    elif command -v pacman > /dev/null; then
-      echo "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet 3>&1 1>&2 2>&3 | grep -v 'skipping' 1>&2 > /dev/null
-    elif command -v zypper > /dev/null; then
-      echo "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+    install_command_function=""
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      pacman \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_command_function="install_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+
+    if [ -n "${install_command_function}" ]; then
+      "${install_command_function}"
     else
       handle_error "This version of Linux is not supported."
     fi
@@ -201,7 +291,7 @@ Linux)
   printf '%s\n' "ok."
   ;;
 Darwin)
-  printf '%s\n' "Detected: Running on macOS."
+  printf '%s\n' "Detected: running on macOS."
   ( (curl --silent --output /dev/null --connect-timeout 1 1.1.1.1 ||
     curl --silent --output /dev/null --connect-timeout 1 1.1.0.0 ||
     curl --silent --output /dev/null --connect-timeout 1 9.9.9.9 ||
@@ -220,7 +310,7 @@ Darwin)
     sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
     clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
     clt_label="$(/bin/bash -c "${clt_label_command}")"
-    if [[ -n "${clt_label}" ]]; then
+    if [ -n "${clt_label}" ]; then
       sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
     else
       handle_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
@@ -230,11 +320,15 @@ Darwin)
     if command -v git > /dev/null 2>&1; then
       printf '%s\n' "ok."
     else
+      if [ "${unattended}" = true ]; then
+        printf '\n%s\n' "ERROR: Failed to install Xcode. Try re-running without -u/--unattended."
+        exit 1
+      fi
+
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
-      printf '%s\n' "PRESS ANY KEY when the installation has completed."
-      read -rn1
-      #sudo /usr/bin/xcode-select --switch /Library/Developer/CommandLineTools
+      printf '%s\n' "PRESS ENTER when the installation has completed."
+      read -r _
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
       fi
@@ -251,16 +345,26 @@ esac
 
 printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
 if command -v bitcoind > /dev/null 2>&1; then
-  current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1)"
+  current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1 | cut -c23-)"
 else
   current_bitcoin_version=""
 fi
 
-if [ -n "${current_bitcoin_version}" ] && [[ "${current_bitcoin_version}" = *"${target_bitcoin_version}"* ]]; then
-  printf '%s\n' "ok."
+# If bitcoin target version is like 'xx.yy', pad it as 'xx.yy.0'
+case "${target_bitcoin_version}" in
+*[.]*[.]*)
+  target_bitcoin_version_padded="${target_bitcoin_version}"
+  ;;
+*)
+  target_bitcoin_version_padded="${target_bitcoin_version}.0"
+  ;;
+esac
+
+if [ "${current_bitcoin_version}" = "${target_bitcoin_version_padded}" ]; then
+  printf '%s\n' "found."
 elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
-  printf '\n  %s' "Installing build dependencies... "
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> >(grep -A2 -B1 -v "ICU with non-English" -)
+  printf '%s\n  %s' "not found." "Installing build dependencies... "
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
@@ -277,7 +381,7 @@ elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; the
   rm -rf "${temp_directory}"/compile_bitcoin/
   current_bitcoin_version="${target_bitcoin_version}"
 else
-  printf '\n'
+  printf '%s\n' "not found."
   bitcoin_core_extract_dir="${temp_directory}/bitcoin-core"
   bitcoin_install_bin_source="${bitcoin_core_extract_dir}/bin"
   bitcoin_install_lib_source="${bitcoin_core_extract_dir}/lib"
@@ -322,9 +426,12 @@ else
       handle_error "Either 'sha256sum' or 'shasum' must on PATH."
     fi
     cd "${HOME}"/
-    if ! [[ "${sha256_check}" = *"OK" ]]; then
+    case "${sha256_check}" in
+    *"OK"*) ;;
+    *)
       handle_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
-    fi
+      ;;
+    esac
     printf '%s\n' "ok."
 
     printf '  %s' "Validating the signatures... "
@@ -335,7 +442,7 @@ else
       gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
     fi
     gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
-    if [[ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]]; then
+    if [ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]; then
       printf '%s\n' "${gpg_good_signature_count} good."
       [ -d "$(dirname "${bitcoin_tarball_destination_file}")" ] || mkdir -p "$(dirname "${bitcoin_tarball_destination_file}")"
       mv "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_destination_file}"
@@ -357,13 +464,14 @@ else
     codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
   fi
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
-  if [[ "${unit_test_response}" != *"No errors detected"* ]]; then
+  case "${unit_test_response}" in
+  *"No errors detected"*) ;;
+  *)
     printf '%s\n' "\n${unit_test_response}"
     handle_error "Unit tests failed."
-  fi
-  printf '%s\n' "ok."
-
-  printf '  %s' "Installing Bitcoin Core... "
+    ;;
+  esac
+  printf '%s\n  %s' "ok." "Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || handle_error "Unable to create directory ${bitcoin_install_lib_destination}."
   case "$(uname -s)" in
   Linux)
@@ -378,26 +486,30 @@ else
     sudo update_dyld_shared_cache
 
     if [ "${target_bitcoin_architecture}" = "arm64" ]; then
-      for bitcoin_executable in {bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,bitcoind}; do
-        codesign -s - "${bitcoin_install_bin_source}"/"${bitcoin_executable}"
+      for bitcoin_executable in bitcoin-cli bitcoin-qt bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do
+        codesign -s - "${bitcoin_install_bin_source}/${bitcoin_executable}"
       done
     fi
     ;;
   esac
 
   [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_bin_destination}" || handle_error "Unable to create directory ${bitcoin_install_bin_destination}."
-  sudo install -c "${bitcoin_install_bin_source}"/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin} "${bitcoin_install_bin_destination}"/
+  for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet test_bitcoin; do
+    sudo install -c "${bitcoin_install_bin_source}/${bitcoin_executable}" "${bitcoin_install_bin_destination}/"
+  done
 
   [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_include_destination}" || handle_error "Unable to create directory ${bitcoin_install_include_destination}."
-  sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}"/
+  sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}/"
 
   [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}" 2> /dev/null || sudo mkdir -p "${bitcoin_install_man_destination}" || handle_error "Unable to create directory ${bitcoin_install_man_destination}."
-  sudo install -c -m 644 "${bitcoin_install_man_source}"/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1} "${bitcoin_install_man_destination}"/
+  for man_page in bitcoind.1 bitcoin-qt.1 bitcoin-cli.1 bitcoin-tx.1 bitcoin-util.1 bitcoin-wallet.1; do
+    sudo install -c -m 644 "${bitcoin_install_man_source}/${man_page}" "${bitcoin_install_man_destination}/"
+  done
   printf '%s\n' "ok."
 
   printf '  %s' "Removing temporary files... "
-  rm -r "${bitcoin_core_extract_dir:?}"/
-  rm -r "${temp_directory:?}"/
+  rm -r "${bitcoin_core_extract_dir:?}/"
+  rm -r "${temp_directory:?}/"
   printf '%s\n' "ok."
 fi
 
@@ -428,7 +540,9 @@ EOF
   chmod u+x "${applications_path}"/"${shortcut_filename}"
   chmod u+x "${desktop_path}"/"${shortcut_filename}"
   ## Make the desktop shortcut trusted
-  if [ "${CI:-false}" = false ] && ! is_running_in_container; then
+  if is_running_in_ci || is_running_in_container; then
+    :
+  else
     gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
   fi
   printf '%s\n' "ok."
@@ -546,15 +660,16 @@ if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
 fi
 
 printf '%s' "Starting Bitcoin Core... "
-if [ "${CI:-false}" = true ] || is_running_in_container || ! command -v bitcoin-qt > /dev/null 2>&1; then
+if is_running_in_ci ||
+  is_running_in_container ||
+  ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
 else
-  bitcoin-qt 2> /dev/null &
-  disown
+  setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
-rpc_timeout=10
+rpc_timeout=60
 if ! bitcoin-cli --rpcwait --rpcwaittimeout="${rpc_timeout}" getrpcinfo > /dev/null; then
   handle_error "RPC communication failed after ${rpc_timeout} seconds"
 fi
@@ -562,7 +677,7 @@ printf '%s\n' "ok."
 
 sleep_time="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
-ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
+ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
 if [ "${ibd_status}" = true ]; then
   if ! is_running_in_container; then
@@ -575,9 +690,11 @@ if [ "${ibd_status}" = true ]; then
     printf '%s\n' "ok."
     printf '\n%s\n%s' "Close this Terminal window by clicking on the \"X\"." "This screen will refresh in ${sleep_time} seconds."
   fi
-  for ((i = 1; i <= sleep_time; i++)); do
+  i=1
+  while [ "$i" -le 10 ]; do
     sleep 1
-    printf "."
+    printf '%s' "."
+    i=$((i + 1))
   done
   printf '\n'
 else
@@ -585,18 +702,17 @@ else
 fi
 
 while [ "${ibd_status}" = true ]; do
-  sync_progress=$(jq '.verificationprogress' <<< "${blockchain_info}")
-  # Handle case of early sync by replacing scientific notation with decimal
+  blocks=$(echo "${blockchain_info}" | jq '.blocks')
+  headers=$(echo "${blockchain_info}" | jq '.headers')
+  last_block_time=$(echo "${blockchain_info}" | jq '.time')
+  size_on_disk_in_mib=$(($(echo "${blockchain_info}" | jq '.size_on_disk') / BYTES_TO_KIB / KIB_TO_MIB))
+  sync_progress=$(echo "${blockchain_info}" | jq '.verificationprogress')
 
+  # Handle case of early sync by replacing scientific notation with decimal
   if [ "$(printf '%s\n' "${sync_progress}" | grep -c -i "e")" -gt 0 ]; then
     sync_progress="0.000000001"
   fi
   sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')"
-
-  blocks=$(jq '.blocks' <<< "${blockchain_info}")
-  headers=$(jq '.headers' <<< "${blockchain_info}")
-  last_block_time=$(jq '.time' <<< "${blockchain_info}")
-  size_on_disk_in_mib=$(($(jq '.size_on_disk' <<< "${blockchain_info}") / BYTES_TO_KIB / KIB_TO_MIB))
 
   free_space_in_mib=$(get_free_space_in_mib)
 
@@ -631,8 +747,8 @@ while [ "${ibd_status}" = true ]; do
     printf '%d MiB\n' "${free_space_in_mib}"
   fi
 
-  if { [ "${CI:-false}" = true ] || is_running_in_container; } && [ "${size_on_disk_in_mib}" -ge 1 ]; then
-    printf '%s\n' "The IBD sync is progressing. Exiting the script successfully."
+  if [ "${size_on_disk_in_mib}" -ge 1 ] && (is_running_in_ci || is_running_in_container); then
+    printf '%s\n' "The blockchain download is progressing. Exiting the script."
     exit 0
   fi
 
@@ -643,7 +759,7 @@ while [ "${ibd_status}" = true ]; do
 
   blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
   printf '\n'
-  ibd_status=$(jq '.initialblockdownload' <<< "${blockchain_info}")
+  ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 done
 
 printf '%s\n' "This script has completed successfully."

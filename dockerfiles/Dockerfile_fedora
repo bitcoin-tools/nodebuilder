@@ -1,18 +1,23 @@
 # syntax=docker/dockerfile:1
+# Fedora is known for its proactive security and commitment to open-source software.
+# This Dockerfile is a good choice for modern and resource-rich environments.
 FROM fedora:39@sha256:61864fd19bbd64d620f338eb11dae9e8759bf7fa97302ac6c43865c48dccd679
 ENV TERM=xterm
 
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
 
-# Check the current system
-RUN grep "VERSION\|ID" /etc/os-release
+# Check the current environment
+RUN uname -a \
+  && cat /etc/os-release \
+  && df -h \
+  && grep Mem /proc/meminfo \
+  && date -u
 
 # Install system updates and dependencies
 RUN dnf makecache \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs dnf --assumeyes install \
-  && dnf --assumeyes install netcat \
   && dnf clean all
 
 # Download and execute the script

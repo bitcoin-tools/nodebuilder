@@ -1,9 +1,19 @@
 name: Validation CI
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
+  push:
+    branches: [ master ]
+    paths:
+      - Dockerfile
+      - dependencies.txt
+      - nodebuilder
+      - test/test_bitcoin
+      - .github/workflows/*.yaml
+      - dockerfiles/Dockerfile_*
+  issues:
+    types: [ opened ]
+  schedule:
+    - cron: '0 10,22 * * *'
   workflow_dispatch:
 env:
   TERM: xterm
@@ -44,7 +54,7 @@ jobs:
       - name: lint
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile src/docker/Dockerfile*
+          target: Dockerfile dockerfiles/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -66,6 +76,7 @@ jobs:
       - uses: rojopolis/spellcheck-github-actions@v0
         name: Spell check markdown files with PySpelling
         with:
+          config_path: config/.spellcheck.yaml
           output_file: spellcheck-output.txt
       - uses: actions/upload-artifact@v4
         if: '!cancelled()'
@@ -73,8 +84,8 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-  run-nodebuilder:
-    name: Run on ${{ matrix.friendly-name }}
+  run-nodebuilder-baremetal:
+    name: Test on ${{ matrix.friendly-name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -94,7 +105,7 @@ jobs:
           - os: macos-13
             friendly-name: macOS 13 x86_64
             check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
     steps:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }}
@@ -102,9 +113,9 @@ jobs:
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
-      - name: Run nodebuilder
+      - name: Test nodebuilder console output
         timeout-minutes: 120
-        run: /bin/bash -x ./nodebuilder
+        run: /bin/bash -x ./test/test_nodebuilder
 
   run-nodebuilder-docker:
     name: Run in ${{ matrix.container }} container
@@ -114,16 +125,20 @@ jobs:
         container: [Alpine, Fedora, Manjaro, Ubuntu]
         include:
           - container: Alpine
-            dockerfile: ./src/docker/Dockerfile_alpine
+            dockerfile: ./dockerfiles/Dockerfile_alpine
+          - container: Arch
+            dockerfile: ./dockerfiles/Dockerfile_arch
+          - container: Debian
+            dockerfile: ./dockerfiles/Dockerfile_debian
           - container: Fedora
-            dockerfile: ./src/docker/Dockerfile_fedora
+            dockerfile: ./dockerfiles/Dockerfile_fedora
           - container: Manjaro
-            dockerfile: ./src/docker/Dockerfile_manjaro
+            dockerfile: ./dockerfiles/Dockerfile_manjaro
           - container: Ubuntu
             dockerfile: ./Dockerfile
           - container: openSUSE
-            dockerfile: ./src/docker/Dockerfile_opensuse
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
+            dockerfile: ./dockerfiles/Dockerfile_opensuse
+    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
     steps:
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a

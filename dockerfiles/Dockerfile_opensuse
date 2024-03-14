@@ -1,16 +1,22 @@
 # syntax=docker/dockerfile:1
-FROM opensuse/leap:15.5
+# openSUSE is a robust Linux distribution that offers a great balance of stability and modernity.
+# This Dockerfile is ideal for users seeking a reliable, versatile operating system.
+FROM opensuse/leap:15.5@sha256:bd0fcef5afdc37936fd102ade71522d30b68364e724cb84083bc64d036b995b4
 ENV TERM=xterm
 
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
 
-# Check the current system
-RUN grep "VERSION\|ID" /etc/os-release
+# Check the current environment
+RUN uname -a \
+  && cat /etc/os-release \
+  && df -h \
+  && grep Mem /proc/meminfo \
+  && date -u
 
 # Install system updates and dependencies
 RUN zypper refresh \
-  && zypper --non-interactive install curl netcat 'sudo' \
+  && zypper --non-interactive install curl 'sudo' \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs zypper --non-interactive install
 
