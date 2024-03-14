@@ -6,7 +6,7 @@ set -o nounset
 set -x
 
 handle_exit() {
-  kill_tail
+  kill_tail_process
 }
 
 handle_error() {
@@ -14,7 +14,7 @@ handle_error() {
   printf '%s\n' "Test failed."
 }
 
-kill_tail() {
+kill_tail_process() {
   if kill -0 "${tail_pid}" > /dev/null 2>&1; then
     kill "${tail_pid}"
   fi
@@ -30,7 +30,7 @@ curl -fsSL -o nodebuilder https://github.com/bitcoin-tools/nodebuilder/raw/maste
 chmod +x nodebuilder
 /bin/bash -x -c "nohup /bin/bash -x nodebuilder > output_stdout.txt 2> output_stderr.txt"
 rm nodebuilder
-kill_tail
+kill_tail_process
 
 #printf '%s\n' "Printing the contents of stdout for debug purposes"
 #cat output_stdout.txt
