@@ -87,7 +87,7 @@ jobs:
           path: spellcheck-output.txt
 
   run-nodebuilder-baremetal:
-    name: Run on ${{ matrix.friendly-name }}
+    name: Test on ${{ matrix.friendly-name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -107,7 +107,7 @@ jobs:
           - os: macos-13
             friendly-name: macOS 13 x86_64
             check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
     steps:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }}
@@ -115,9 +115,9 @@ jobs:
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
-      - name: Run nodebuilder
+      - name: Test nodebuilder console output
         timeout-minutes: 120
-        run: /bin/bash -x ./nodebuilder
+        run: /bin/bash -x ./test/test_nodebuilder
 
   run-nodebuilder-docker:
     name: Run in ${{ matrix.container }} container
@@ -140,7 +140,7 @@ jobs:
             dockerfile: ./Dockerfile
           - container: openSUSE
             dockerfile: ./dockerfiles/Dockerfile_opensuse
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
     steps:
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
