@@ -38,11 +38,17 @@ get_os_release_type() (
 )
 
 install_dependencies() {
-  printf '%s\n' "${dependencies}" | xargs sudo "$@"
+  stderr_install_log_file="${temp_directory}/stderr_install.log"
+  printf '%s\n' "${dependencies}" | xargs sudo "$@" 2> "${stderr_install_log_file}"
+  grep -v \
+    -e "apt-utils" \
+    -e "skipping"
+  "${stderr_install_log_file}" >&2
+  rm "${stderr_install_log_file}"
 }
 
 install_dependencies_aptget() {
-  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null
 }
 
 install_dependencies_dnf() {
@@ -54,7 +60,7 @@ install_dependencies_apk() {
 }
 
 install_dependencies_pacman() {
-  install_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+  install_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null
 }
 
 install_dependencies_zypper() {
