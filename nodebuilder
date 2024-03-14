@@ -90,8 +90,6 @@ install_updates_zypper() {
   sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
 }
 
-}
-
 is_running_in_ci() {
   if [ "${CI:-false}" = "true" ]; then
     return 0
