@@ -138,13 +138,12 @@ log_error() {
 
 # shellcheck disable=SC2317
 handle_exit() {
-  [ -n "${temp_directory:?}" ] && rm -rf -- "${temp_directory:?}"/
+  [ -n "${temp_directory:-}" ] && rm -rf -- "${temp_directory:?}"/
 }
 
 # shellcheck disable=SC2317
 handle_error() {
   log_error "Failed to run line $1."
-  printf '%s\n' "Exiting."
   handle_exit
   exit 1
 }
@@ -163,13 +162,31 @@ print_help() {
   printf '%s\n' "-u, --unattended   Run in unattended mode"
 }
 
+temp_directory=""
 unattended=false
+prune_value="-1"
 
 while [ $# -gt 0 ]; do
   case "$1" in
   -h | --help)
     print_help
     exit 0
+    ;;
+  -p | --prune)
+    if [ $# -eq 1 ]; then
+      handle_error "-p/--prune requires an argument"
+    fi
+    case $2 in
+    *[!0-9]*) # if $2 contains any non-numeric characters
+      handle_error "The prune value '$2' must be a positive integer or zero to disable pruning"
+      ;;
+    *) ;;
+    esac
+    if [ "$2" -gt 0 ] && [ "$2" -lt "550" ]; then
+      handle_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning"
+    fi
+    prune_value="$2"
+    shift 2
     ;;
   -u | --unattended)
     unattended=true
@@ -634,43 +651,59 @@ Darwin) ;; #TODO: Add macOS memory check
   ;;
 esac
 
-if [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
-  printf '%s' "Checking data already synced... "
-  bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
-  bitcoin_core_chainstate_dir="${bitcoin_core_data_dir}/chainstate"
-  blocks_size_in_mib="0"
-  chainstate_size_in_mib="0"
-  if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
-    if [ "$(uname -s)" = "Darwin" ]; then
-      blocks_size_in_mib=$(du -d0 -m "${bitcoin_core_blocks_dir}" | cut -f1)
-    else
-      blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_blocks_dir}" | cut -f1)
-    fi
+printf '%s' "Checking data already synced... "
+bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
+bitcoin_core_chainstate_dir="${bitcoin_core_data_dir}/chainstate"
+blocks_size_in_mib="0"
+chainstate_size_in_mib="0"
+if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
+  if [ "$(uname -s)" = "Darwin" ]; then
+    blocks_size_in_mib=$(du -d0 -m "${bitcoin_core_blocks_dir}" | cut -f1)
+  else
+    blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_blocks_dir}" | cut -f1)
   fi
-  if [ -d "${bitcoin_core_chainstate_dir}"/ ]; then
-    if [ "$(uname -s)" = "Darwin" ]; then
-      chainstate_size_in_mib=$(du -d0 -m "${bitcoin_core_chainstate_dir}" | cut -f1)
-    else
-      chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
-    fi
+fi
+if [ -d "${bitcoin_core_chainstate_dir}"/ ]; then
+  if [ "$(uname -s)" = "Darwin" ]; then
+    chainstate_size_in_mib=$(du -d0 -m "${bitcoin_core_chainstate_dir}" | cut -f1)
+  else
+    chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
   fi
-  data_already_synced_in_mib=$((blocks_size_in_mib + chainstate_size_in_mib))
-  printf '%s\n' "$((data_already_synced_in_mib / MIB_TO_GIB)) GiB."
+fi
+data_already_synced_in_mib=$((blocks_size_in_mib + chainstate_size_in_mib))
+printf '%s\n' "$((data_already_synced_in_mib / MIB_TO_GIB)) GiB."
 
-  printf '%s' "Checking free space in home directory... "
-  free_space_in_mib="$(get_free_space_in_mib)"
-  printf '%s\n' "$((free_space_in_mib / MIB_TO_GIB)) GiB."
+printf '%s' "Checking free space in home directory... "
+free_space_in_mib="$(get_free_space_in_mib)"
+printf '%s\n' "$((free_space_in_mib / MIB_TO_GIB)) GiB."
 
-  ## This constant will need to be adjusted over time as the chain grows
-  ## or need to find how to generate this dynamically in a trustless way.
-  ## The lower this number is, the more likely disk space errors during IBD.
-  ## The higher this number is, the more likely a node will be to prune.
-  ## The sweet spot is about 50 to 100 GB more than the size of blocks/ + chainstate/,
-  ## which, as of June 2023, is around 522 GiB.
-  archival_node_required_disk_in_gib="686"
+## This constant will need to be adjusted over time as the chain grows
+## or need to find how to generate this dynamically in a trustless way.
+## The lower this number is, the more likely disk space errors during IBD.
+## The higher this number is, the more likely a node will be to prune.
+## The sweet spot is about 50 to 100 GB more than the size of blocks/ + chainstate/,
+## which, as of June 2023, is around 522 GiB.
+archival_node_required_disk_in_gib="686"
+archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * MIB_TO_GIB))
 
-  archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * MIB_TO_GIB))
-
+# check if the user wants to disable pruning
+if [ "${prune_value}" -eq 0 ]; then
+  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${archival_node_required_disk_in_mib}" ]; then
+    handle_error "Not enough storage to disable pruning. Free up ${archival_node_required_disk_in_gib} GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+  fi
+  printf '  %s' "Configuring with the disabled prune option... "
+  set_bitcoin_core_option "prune" "${prune_value}"
+  printf '%s\n' "ok."
+# check if the user passed in a prune value
+elif [ "${prune_value}" -gt 0 ]; then
+  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${prune_value}" ]; then
+    handle_error "Prune value ${prune_value} too large. Run without setting prune or use a value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+  fi
+  printf '  %s' "Configuring with the ${prune_value} MiB prune option... "
+  set_bitcoin_core_option "prune" "${prune_value}"
+  printf '%s\n' "ok."
+# check that a prune value doesn't already exist in the config file
+elif [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
   if [ "${free_space_in_mib}" -ge $((archival_node_required_disk_in_mib - data_already_synced_in_mib)) ]; then
     printf '  %s\n' "Your node will run as an unpruned full node."
     set_bitcoin_core_option "prune" "0"
