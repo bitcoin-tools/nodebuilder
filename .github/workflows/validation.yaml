@@ -8,7 +8,7 @@ on:
       - dependencies.txt
       - nodebuilder
       - test/test_bitcoin
-      - .github/workflows/*.yamlimprove w
+      - .github/workflows/*.yaml
       - dockerfiles/Dockerfile_*
   issues:
     types: [ opened ]
