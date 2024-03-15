@@ -736,6 +736,8 @@ if is_running_in_ci ||
   is_running_in_container ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
+elif [ "$(uname -s)" = "Darwin" ]; then
+  nohup bitcoin-qt > /dev/null 2>&1 < /dev/null &
 else
   setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
 fi
