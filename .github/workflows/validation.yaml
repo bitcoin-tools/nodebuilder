@@ -47,7 +47,7 @@ jobs:
         shell: bash
 
   dockerfile-lint:
-    name: Lint the Dockerfile
+    name: Lint the Dockerfiles
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
