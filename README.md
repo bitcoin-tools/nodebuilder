@@ -19,18 +19,20 @@ Run the following command in Terminal:
 ## Prerequisites
 
 1. An active internet connection (of course)
-3. A compatible operating system:
+3. A Posix-compatible operating system:
    - [macOS](https://apple.com/macos)
-   - [Alpine](https://wiki.alpinelinux.org/wiki/Installation) Linux
-   - [Arch](https://wiki.archlinux.org/title/installation_guide) Linux or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
-   - [Debian](https://debian.org/releases/stable/installmanual) Linux or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop)
-   - [Fedora](https://fedoraproject.org/workstation/download) Linux
-   - [SUSE](https://documentation.suse.com/sles/) Linux or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
-   - Any other system that can run our [Dockerfile](./Dockerfile)
-5. `bash`, which is probably already installed, or you can install with a package manager
+   - Linux
+      - [Alpine](https://wiki.alpinelinux.org/wiki/Installation) Linux
+      - [Arch](https://wiki.archlinux.org/title/installation_guide) Linux or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
+      - [Debian](https://debian.org/releases/stable/installmanual) Linux or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop)
+      - [Fedora](https://fedoraproject.org/workstation/download) Linux
+      - [SUSE](https://documentation.suse.com/sles/) Linux or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
+   - Any other system that can run a Docker container
+      - Use the [default Ubuntu Dockerfile](./Dockerfile)
+      - Or any of the six [alternate Dockerfiles](./dockerfiles/)
 6. `curl`, which is installed by default on macOS, or you can install with a package manager
 
-During runtime, the script will install [dependencies](./dependencies.txt).
+This POSIX-compliant script installs several widely-used runtime dependencies that aren't defined in POSIX.
 
 ## What Does This Script Do?
 
@@ -57,12 +59,16 @@ Before launching Bitcoin Core, this script modifies the following files:
 - The validated Bitcoin Core tarball and PGP keys:
   - `~/Downloads/bitcoin-<version>-<architecture>-linux-gnu.tar.gz`
   - `~/Downloads/guix.sigs/`
-- The installed binaries and other relevant files:
-  - `/usr/local/bin/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin}`
-  - `/usr/local/include/bitcoinconsensus.h`
-  - `/usr/local/lib/{libbitcoinconsensus.so,libbitcoinconsensus.so.0,libbitcoinconsensus.so.0.0.0}` (Linux)
-  - `/usr/local/lib/{libbitcoinconsensus.0.dylib}` (macOS)
-  - `/usr/local/man/man1/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1}`
+- The installed Bitcoin Core files:
+  - binaries
+     - `/usr/local/bin/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin}`
+  - headers
+     - `/usr/local/include/bitcoinconsensus.h`
+  - libraries
+     - `/usr/local/lib/{libbitcoinconsensus.so,libbitcoinconsensus.so.0,libbitcoinconsensus.so.0.0.0}` (Linux)
+     - `/usr/local/lib/{libbitcoinconsensus.0.dylib}` (macOS)
+  - manpages
+     - `/usr/local/man/man1/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1}`
 - The Bitcoin Core configuration file:
   - `~/.bitcoin/bitcoin.conf` (Linux)
   - `~/Library/Application Support/Bitcoin/bitcoin.conf` (macOS)
