@@ -8,7 +8,7 @@ on:
       - dependencies.txt
       - nodebuilder
       - test/test_bitcoin
-      - .github/workflows/*.yaml
+      - .github/workflows/*.yamlimprove w
       - dockerfiles/Dockerfile_*
   issues:
     types: [ opened ]
@@ -85,7 +85,7 @@ jobs:
           path: spellcheck-output.txt
 
   pause-if-master-commit:
-    name: Refresh GitHub cache on master
+    name: Refresh cache on master
     runs-on: ubuntu-latest
     steps:
       - name: Sleep for the cache-control max-age duration
