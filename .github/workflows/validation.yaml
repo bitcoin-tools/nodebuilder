@@ -92,7 +92,7 @@ jobs:
         run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
 
   run-nodebuilder-baremetal:
-    name: Run ${{ matrix.binary-friendly-name }} on ${{ matrix.os-friendly-name }}
+    name: ${{ matrix.purpose-of-job }} on ${{ matrix.os-friendly-name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -101,8 +101,10 @@ jobs:
         include:
           - binary-path: './nodebuilder'
             binary-friendly-name: nodebuilder
+            purpose-of-job: Run nodebuilder
           - binary-path: './test/test_nodebuilder'
             binary-friendly-name: test_nodebuilder
+            purpose-of-job: Test nodebuilder
           - os: ubuntu-latest
             os-friendly-name: Ubuntu 22
             check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
@@ -125,7 +127,7 @@ jobs:
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
-      - name: Run the command
+      - name: Run ${{ matrix.binary-path }}
         run: /bin/bash -x ${{ matrix.binary-path }}
         timeout-minutes: 120
 
