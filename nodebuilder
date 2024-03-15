@@ -42,8 +42,8 @@ install_dependencies() {
   printf '%s\n' "${dependencies}" | xargs sudo "$@" 2> "${stderr_install_log_file}"
   grep -v \
     -e "apt-utils" \
-    -e "skipping"
-  "${stderr_install_log_file}" >&2 || true
+    -e "skipping" \
+    "${stderr_install_log_file}" >&2 || true
   rm "${stderr_install_log_file}"
 }
 
