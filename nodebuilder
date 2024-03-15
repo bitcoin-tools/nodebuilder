@@ -647,18 +647,18 @@ printf '%s\n' "$((free_space_in_mib / MIB_TO_GIB)) GiB."
 archival_node_required_disk_in_gib="686"
 archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * MIB_TO_GIB))
 
-# check if the user passed in a prune value
-if [ "${prune_value}" -ge 0 ]; then
-  if [ "${prune_value}" -gt 0 ] && [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${prune_value}" ]; then
-    printf '  %s\n  %s\n' \
-      "WARNING: Not enough free space for prune=${prune_value} but setting anyways." \
-      "Recommend re-running without -p/--prune or with prune less than $((data_already_synced_in_mib + free_space_in_mib)) MiB."
-  elif [ "${prune_value}" -eq 0 ] && [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${archival_node_required_disk_in_mib}" ]; then
-    printf '  %s\n  %s\n' \
-      "WARNING: Not enough free space for prune=${prune_value} but setting anyways." \
-      "Recommend re-running without -p/--prune or with prune less than $((data_already_synced_in_mib + free_space_in_mib)) MiB."
+# check if the user wants to disable pruning
+if [ "${prune_value}" -eq 0 ]
+  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${archival_node_required_disk_in_mib}" ]; then
+    handle_error "Not enough storage to disable pruning. Free up ${archival_node_required_disk_in_gib}" GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) (MiB)."
   fi
-  printf '  %s' "Configuring with the user-defined prune setting... "
+  printf '  %s' "Configuring with the disabled prune option... "
+  set_bitcoin_core_option "prune" "${prune_value}"
+  printf '%s\n' "ok."
+# check if the user passed in a prune value
+elif [ "${prune_value}" -gt 0 ] && [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${prune_value}" ]; then
+  handle_error "Prune value ${prune_value} too large. Run without -p/--prune or with prune less than $((data_already_synced_in_mib + free_space_in_mib)) (MiB)."
+  printf '  %s' "Configuring with the ${prune_value} MiB prune option... "
   set_bitcoin_core_option "prune" "${prune_value}"
   printf '%s\n' "ok."
 # check that a prune value doesn't already exist in the config file
