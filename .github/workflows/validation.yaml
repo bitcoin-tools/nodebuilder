@@ -132,7 +132,7 @@ jobs:
         timeout-minutes: 120
 
   run-nodebuilder-docker:
-    name: Run in ${{ matrix.container }} container
+    name: Run ${{ matrix.container }} container
     runs-on: ubuntu-latest
     strategy:
       matrix:
