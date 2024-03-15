@@ -411,7 +411,8 @@ if [ "${current_bitcoin_version}" = "${target_bitcoin_version_padded}" ]; then
 elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
   printf '%s\n  %s' "not found." "Installing build dependencies... "
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> "${stderr_compile_log_file}"
+  grep -v "ICU with non-English" -A2 -B1 "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
@@ -420,12 +421,16 @@ elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; the
   grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
   ./configure --with-incompatible-bdb --with-gui=no --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
-  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
+  grep -v \
+    -e "BDB" \
+    -e "Berkeley DB" \
+    -e "libzmq" \
+    "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Building (please wait)... "
   make --jobs "$(($(nproc) + 1))" > /dev/null
   printf '%s\n  %s' "ok." "Checking (please wait)... "
   make --jobs "$(($(nproc) + 1))" check > /dev/null 2> "${stderr_compile_log_file}"
-  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
+  grep -v "Ran 3 tests in " -A1 -B2 "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Installing Bitcoin... "
   make install > /dev/null
   rm "${stderr_compile_log_file}"
