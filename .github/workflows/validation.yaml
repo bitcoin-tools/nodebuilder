@@ -85,7 +85,7 @@ jobs:
           path: spellcheck-output.txt
 
   pause-if-master-commit:
-    name: Ensure GitHub cache is refreshed by pausing
+    name: Refresh GitHub cache on master
     runs-on: ubuntu-latest
     steps:
       - name: Sleep for the cache-control max-age duration
