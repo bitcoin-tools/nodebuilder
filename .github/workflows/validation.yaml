@@ -84,39 +84,39 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-run-nodebuilder-baremetal:
-  name: Test on ${{ matrix.friendly-name }} with ${{ matrix.binary-to-run }}
-  runs-on: ${{ matrix.os }}
-  strategy:
-    matrix:
-      os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
-      binary-to-run: ['./test/test_nodebuilder', './nodebuilder']
-      include:
-        - os: ubuntu-latest
-          friendly-name: Ubuntu 22
-          check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
-          install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-        - os: ubuntu-20.04
-          friendly-name: Ubuntu 20
-          check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
-          install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-        - os: macos-14
-          friendly-name: macOS 14 arm64
-          check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
-        - os: macos-13
-          friendly-name: macOS 13 x86_64
-          check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
-  needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
-  steps:
-    - name: Check the current OS version
-      run: ${{ matrix.check-version-command }}
-    - uses: actions/checkout@v4
-    - name: Install system upgrades
-      run: ${{ matrix.install-upgrades-command }}
-      if: matrix.install-upgrades-command != null
-    - name: Run the command
-      run: /bin/bash -x ${{ matrix.binary-to-run }}
-      timeout-minutes: 120
+  run-nodebuilder-baremetal:
+    name: Test on ${{ matrix.friendly-name }} with ${{ matrix.binary-to-run }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
+        binary-to-run: ['./test/test_nodebuilder', './nodebuilder']
+        include:
+          - os: ubuntu-latest
+            friendly-name: Ubuntu 22
+            check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
+            install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+          - os: ubuntu-20.04
+            friendly-name: Ubuntu 20
+            check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
+            install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
+          - os: macos-14
+            friendly-name: macOS 14 arm64
+            check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
+          - os: macos-13
+            friendly-name: macOS 13 x86_64
+            check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
+    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
+    steps:
+      - name: Check the current OS version
+        run: ${{ matrix.check-version-command }}
+      - uses: actions/checkout@v4
+      - name: Install system upgrades
+        run: ${{ matrix.install-upgrades-command }}
+        if: matrix.install-upgrades-command != null
+      - name: Run the command
+        run: /bin/bash -x ${{ matrix.binary-to-run }}
+        timeout-minutes: 120
 
   run-nodebuilder-docker:
     name: Run in ${{ matrix.container }} container
