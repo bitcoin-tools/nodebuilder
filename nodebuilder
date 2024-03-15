@@ -38,11 +38,17 @@ get_os_release_type() (
 )
 
 install_dependencies() {
-  printf '%s\n' "${dependencies}" | xargs sudo "$@"
+  stderr_install_log_file="${temp_directory}/stderr_install.log"
+  printf '%s\n' "${dependencies}" | xargs sudo "$@" 2> "${stderr_install_log_file}"
+  grep -v \
+    -e "apt-utils" \
+    -e "skipping" \
+    "${stderr_install_log_file}" >&2 || true
+  rm "${stderr_install_log_file}"
 }
 
 install_dependencies_aptget() {
-  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null 2> >(grep -v apt-utils -)
+  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null
 }
 
 install_dependencies_dnf() {
@@ -54,11 +60,34 @@ install_dependencies_apk() {
 }
 
 install_dependencies_pacman() {
-  install_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null 2> >(grep -v skipping -)
+  install_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null
 }
 
 install_dependencies_zypper() {
   install_dependencies zypper --non-interactive --quiet install > /dev/null
+}
+
+install_updates_aptget() {
+  stderr_install_log_file="${temp_directory}/stderr_install.log"
+  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> "${stderr_install_log_file}"
+  grep -v "apt-utils" "${stderr_install_log_file}" >&2 || true
+  rm "${stderr_install_log_file}"
+}
+
+install_updates_dnf() {
+  sudo dnf --assumeyes --quiet upgrade > /dev/null
+}
+
+install_updates_apk() {
+  apk update --quiet && apk upgrade --quiet
+}
+
+install_updates_pacman() {
+  sudo pacman -Syu --noconfirm --quiet > /dev/null
+}
+
+install_updates_zypper() {
+  sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
 }
 
 is_running_in_ci() {
@@ -216,31 +245,31 @@ Linux)
   printf '%s' "Performing a system upgrade... "
   case "$(get_os_release_type)" in
   alpine)
-    apk update --quiet && apk upgrade --quiet
+    install_updates_apk
     ;;
   debian | ubuntu)
-    sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> >(grep -v apt-utils -)
+    install_updates_aptget
     ;;
   fedora)
-    sudo dnf --assumeyes --quiet upgrade > /dev/null
+    install_updates_dnf
     ;;
   arch | manjaro)
-    sudo pacman -Syu --noconfirm --quiet > /dev/null
+    install_updates_pacman
     ;;
   suse | *opensuse*)
-    sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
+    install_updates_zypper
     ;;
   *)
     if command -v apk > /dev/null; then
-      apk update --quiet && apk upgrade --quiet
+      install_updates_apk
     elif command -v apt-get > /dev/null; then
-      sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> >(grep -v apt-utils -)
+      install_updates_aptget
     elif command -v dnf > /dev/null; then
-      sudo dnf --assumeyes --quiet upgrade > /dev/null
+      install_updates_dnf
     elif command -v pacman > /dev/null; then
-      sudo pacman -Syu --noconfirm --quiet > /dev/null
+      install_updates_pacman
     elif command -v zypper > /dev/null; then
-      sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
+      install_updates_zypper
     else
       handle_error "This version of Linux is not supported."
     fi
@@ -380,21 +409,26 @@ esac
 if [ "${current_bitcoin_version}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "found."
 elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
+  stderr_compile_log_file="${temp_directory}/stderr_install.log"
   printf '%s\n  %s' "not found." "Installing build dependencies... "
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> <(grep -A2 -B1 -v "ICU with non-English" -)
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
   cd "${temp_directory}"/compile_bitcoin/
   printf '%s\n  %s' "ok." "Analyzing hardware confgiruation... "
-  ./autogen.sh > /dev/null 2> >(grep -v "build-aux" -)
+  ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
+  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
-  ./configure --with-incompatible-bdb --with-gui=no --enable-suppress-external-warnings > /dev/null 2> >(grep -v "Berkely DB\|BDB\|libzmq" -)
+  ./configure --with-incompatible-bdb --with-gui=no --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
+  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Building (please wait)... "
   make --jobs "$(($(nproc) + 1))" > /dev/null
   printf '%s\n  %s' "ok." "Checking (please wait)... "
-  make --jobs "$(($(nproc) + 1))" check > /dev/null 2> >(grep -C2 -v "Ran 3 tests in" -)
+  make --jobs "$(($(nproc) + 1))" check > /dev/null 2> "${stderr_compile_log_file}"
+  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Installing Bitcoin... "
   make install > /dev/null
+  rm "${stderr_compile_log_file}"
   rm -rf "${temp_directory}"/compile_bitcoin/
   current_bitcoin_version="${target_bitcoin_version}"
 else
