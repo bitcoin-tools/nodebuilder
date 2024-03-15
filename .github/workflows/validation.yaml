@@ -18,13 +18,15 @@ on:
 env:
   TERM: xterm
 jobs:
-  bash-lint:
-    name: Lint the bash
+  shell-lint:
+    name: Check shell code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Lint with shellcheck
         uses: ludeeus/action-shellcheck@master
+        env:
+          SHELLCHECK_OPTS: -s sh
         with:
           ignore_names: offloadcoredata usei2p usetor
       - name: Lint with shfmt
@@ -36,7 +38,7 @@ jobs:
           sh_checker_exclude: offloadcoredata usei2p usetor
 
   yaml-lint:
-    name: Lint the yaml
+    name: Check yaml code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,7 +49,7 @@ jobs:
         shell: bash
 
   dockerfile-lint:
-    name: Lint the Dockerfiles
+    name: Check Dockerfile code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   markdown-links:
-    name: Check the links
+    name: Check hyperlinks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +71,7 @@ jobs:
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
-    name: Check the spelling
+    name: Check spelling
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -117,7 +119,7 @@ jobs:
           - os: macos-13
             os-friendly-name: macOS 13 x86_64
             check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     steps:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }}
@@ -126,7 +128,7 @@ jobs:
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
       - name: Run ${{ matrix.binary-path }}
-        run: /bin/bash -x ${{ matrix.binary-path }}
+        run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
 
   run-nodebuilder-docker:
@@ -150,7 +152,7 @@ jobs:
             dockerfile: ./Dockerfile
           - container: openSUSE
             dockerfile: ./dockerfiles/Dockerfile_opensuse
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     steps:
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a

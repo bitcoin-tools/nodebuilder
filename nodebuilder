@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
 set -o errexit
@@ -355,7 +355,7 @@ Darwin)
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended xcode tools installation shouldn't take 20+ lines of code
     sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
     clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
-    clt_label="$(/bin/bash -c "${clt_label_command}")"
+    clt_label="$(/bin/sh -c "${clt_label_command}")"
     if [ -n "${clt_label}" ]; then
       sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
     else
