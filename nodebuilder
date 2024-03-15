@@ -684,7 +684,7 @@ archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * MIB_T
 # check if the user wants to disable pruning
 if [ "${prune_value}" -eq 0 ]; then
   if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${archival_node_required_disk_in_mib}" ]; then
-    handle_error "Not enough storage to disable pruning. Free up ${archival_node_required_disk_in_gib}" GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+    handle_error "Not enough storage to disable pruning. Free up ${archival_node_required_disk_in_gib} GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
   fi
   printf '  %s' "Configuring with the disabled prune option... "
   set_bitcoin_core_option "prune" "${prune_value}"
