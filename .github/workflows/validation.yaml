@@ -87,10 +87,9 @@ jobs:
   pause-if-master-commit:
     name: Ensure GitHub cache is refreshed by pausing
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
     steps:
       - name: Sleep for the cache-control max-age duration
-        run: sleep 5m
+        run: [ "${{ github.ref }}" = "refs/heads/master" ] && sleep 5m
 
   run-nodebuilder-baremetal:
     name: Test on ${{ matrix.friendly-name }}
