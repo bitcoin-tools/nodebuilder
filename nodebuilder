@@ -43,7 +43,7 @@ install_dependencies() {
   grep -v \
     -e "apt-utils" \
     -e "skipping"
-  "${stderr_install_log_file}" >&2
+  "${stderr_install_log_file}" >&2 || true
   rm "${stderr_install_log_file}"
 }
 
@@ -70,7 +70,7 @@ install_dependencies_zypper() {
 install_updates_aptget() {
   stderr_install_log_file="${temp_directory}/stderr_install.log"
   sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> "${stderr_install_log_file}"
-  grep -v "apt-utils" "${stderr_install_log_file}" >&2
+  grep -v "apt-utils" "${stderr_install_log_file}" >&2 || true
   rm "${stderr_install_log_file}"
 }
 
