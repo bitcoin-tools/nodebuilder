@@ -84,6 +84,14 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
+  pause-if-master-commit:
+    name: Ensure GitHub cache is refreshed by pausing
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Sleep for the cache-control max-age duration
+        run: sleep 5m
+
   run-nodebuilder-baremetal:
     name: Test on ${{ matrix.friendly-name }}
     runs-on: ${{ matrix.os }}
@@ -105,7 +113,7 @@ jobs:
           - os: macos-13
             friendly-name: macOS 13 x86_64
             check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     steps:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }}
@@ -138,7 +146,7 @@ jobs:
             dockerfile: ./Dockerfile
           - container: openSUSE
             dockerfile: ./dockerfiles/Dockerfile_opensuse
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
+    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     steps:
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
