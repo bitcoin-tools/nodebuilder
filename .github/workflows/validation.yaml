@@ -85,26 +85,30 @@ jobs:
           path: spellcheck-output.txt
 
   run-nodebuilder-baremetal:
-    name: Test on ${{ matrix.friendly-name }} with ${{ matrix.binary-to-run }}
+    name: Run ${{ matrix.binary-friendly-name }} on ${{ matrix.os-friendly-name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        binary-path: ['./nodebuilder', './test/test_nodebuilder']
         os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
-        binary-to-run: ['./test/test_nodebuilder', './nodebuilder']
         include:
+          - binary-path: './nodebuilder'
+            binary-friendly-name: nodebuilder
+          - binary-path: './test/test_nodebuilder'
+            binary-friendly-name: test_nodebuilder
           - os: ubuntu-latest
-            friendly-name: Ubuntu 22
+            os-friendly-name: Ubuntu 22
             check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
             install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
           - os: ubuntu-20.04
-            friendly-name: Ubuntu 20
+            os-friendly-name: Ubuntu 20
             check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
             install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
           - os: macos-14
-            friendly-name: macOS 14 arm64
+            os-friendly-name: macOS 14 arm64
             check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
           - os: macos-13
-            friendly-name: macOS 13 x86_64
+            os-friendly-name: macOS 13 x86_64
             check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
     needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-spellcheck]
     steps:
@@ -115,7 +119,7 @@ jobs:
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
       - name: Run the command
-        run: /bin/bash -x ${{ matrix.binary-to-run }}
+        run: /bin/bash -x ${{ matrix.binary-path }}
         timeout-minutes: 120
 
   run-nodebuilder-docker:
