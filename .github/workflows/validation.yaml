@@ -89,7 +89,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Sleep for the cache-control max-age duration
-        run: [ "${{ github.ref }}" = "refs/heads/master" ] && sleep 5m
+        run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
 
   run-nodebuilder-baremetal:
     name: Test on ${{ matrix.friendly-name }}
