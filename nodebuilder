@@ -400,15 +400,15 @@ elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; the
   cd "${temp_directory}"/compile_bitcoin/
   printf '%s\n  %s' "ok." "Analyzing hardware confgiruation... "
   ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
-  grep -v "build-aux" "${stderr_compile_log_file}" >&2
+  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
   ./configure --with-incompatible-bdb --with-gui=no --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
-  grep -v "build-aux" "${stderr_compile_log_file}" >&2
+  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Building (please wait)... "
   make --jobs "$(($(nproc) + 1))" > /dev/null
   printf '%s\n  %s' "ok." "Checking (please wait)... "
   make --jobs "$(($(nproc) + 1))" check > /dev/null 2> "${stderr_compile_log_file}"
-  grep -v "build-aux" "${stderr_compile_log_file}" >&2
+  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Installing Bitcoin... "
   make install > /dev/null
   rm "${stderr_compile_log_file}"
