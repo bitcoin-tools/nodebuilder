@@ -690,8 +690,10 @@ if [ "${prune_value}" -eq 0 ]; then
   set_bitcoin_core_option "prune" "${prune_value}"
   printf '%s\n' "ok."
 # check if the user passed in a prune value
-elif [ "${prune_value}" -gt 0 ] && [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${prune_value}" ]; then
-  handle_error "Prune value ${prune_value} too large. Run without -p/--prune or with prune less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+elif [ "${prune_value}" -gt 0 ]; then
+  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${prune_value}" ]; then
+    handle_error "Prune value ${prune_value} too large. Run without setting prune or use a value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+  fi
   printf '  %s' "Configuring with the ${prune_value} MiB prune option... "
   set_bitcoin_core_option "prune" "${prune_value}"
   printf '%s\n' "ok."
