@@ -100,11 +100,9 @@ jobs:
         os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
         include:
           - binary-path: './nodebuilder'
-            binary-friendly-name: nodebuilder
-            purpose-of-job: Run nodebuilder
+            purpose-of-job: Run
           - binary-path: './test/test_nodebuilder'
-            binary-friendly-name: test_nodebuilder
-            purpose-of-job: Test nodebuilder
+            purpose-of-job: Test
           - os: ubuntu-latest
             os-friendly-name: Ubuntu 22
             check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
