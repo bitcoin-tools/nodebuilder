@@ -107,22 +107,22 @@ jobs:
             purpose-of-job: Test
           - os: ubuntu-latest
             os-friendly-name: Ubuntu 22
-            check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
+            check-version-command: grep "VERSION\|ID" /etc/os-release
             install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
           - os: ubuntu-20.04
             os-friendly-name: Ubuntu 20
-            check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
+            check-version-command: grep "VERSION\|ID" /etc/os-release
             install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
           - os: macos-14
             os-friendly-name: macOS 14 arm64
-            check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
+            check-version-command: sw_vers | grep Version | awk '{print $2}'
           - os: macos-13
             os-friendly-name: macOS 13 x86_64
-            check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
+            check-version-command: sw_vers | grep Version | awk '{print $2}'
     needs: [shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     steps:
       - name: Check the current OS version
-        run: ${{ matrix.check-version-command }}
+        run: ${{ matrix.check-version-command }} && uname -a
       - uses: actions/checkout@v4
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
