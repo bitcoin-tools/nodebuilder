@@ -409,13 +409,14 @@ esac
 if [ "${current_bitcoin_version}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "found."
 elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
+  compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
   printf '%s\n  %s' "not found." "Installing build dependencies... "
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev 2> "${stderr_compile_log_file}"
   grep -v "ICU with non-English" -A2 -B1 "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
-  git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${temp_directory}"/compile_bitcoin
-  cd "${temp_directory}"/compile_bitcoin/
+  git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
+  cd "${compile_directory}"/
   printf '%s\n  %s' "ok." "Analyzing hardware confgiruation... "
   ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
   grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
@@ -433,8 +434,9 @@ elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; the
   grep -v "Ran 3 tests in " -A1 -B2 "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Installing Bitcoin... "
   make install > /dev/null
+  cd "${temp_directory}"/
   rm "${stderr_compile_log_file}"
-  rm -rf "${temp_directory}"/compile_bitcoin/
+  rm -rf "${compile_directory}"/
   current_bitcoin_version="${target_bitcoin_version}"
 else
   printf '%s\n' "not found."
