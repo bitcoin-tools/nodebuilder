@@ -24,13 +24,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Lint with shellcheck
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@2.0.0
         env:
           SHELLCHECK_OPTS: -s sh
         with:
           ignore_names: offloadcoredata usei2p usetor
       - name: Lint with shfmt
-        uses: luizm/action-sh-checker@master
+        uses: luizm/action-sh-checker@v0.8.0
         env:
           SHFMT_OPTS: -i 2 -sr
         with:
@@ -87,7 +87,7 @@ jobs:
           path: spellcheck-output.txt
 
   pause-if-master-commit:
-    name: Refresh cache on master
+    name: Pause on master commits
     runs-on: ubuntu-latest
     steps:
       - name: Sleep for the cache-control max-age duration
