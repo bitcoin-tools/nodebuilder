@@ -214,7 +214,6 @@ user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
 
-clear
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
 fi
@@ -230,6 +229,7 @@ else
   sudo --validate
 fi
 
+clear
 case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
