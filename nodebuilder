@@ -4,6 +4,10 @@
 set -o errexit
 set -o nounset
 
+check_dpkg_lock() {
+  [ -f /var/lib/dpkg/lock-frontend ] && handle_error 'Debian package manager `dpkg` is locked by another process. Try running: ps aux | grep -i apt'
+}
+
 check_internet() {
   address=$1
   port=$2
@@ -48,6 +52,7 @@ install_dependencies() {
 }
 
 install_dependencies_aptget() {
+  check_dpkg_lock
   install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null
 }
 
@@ -68,6 +73,7 @@ install_dependencies_zypper() {
 }
 
 install_updates_aptget() {
+  check_dpkg_lock
   stderr_install_log_file="${temp_directory}/stderr_install.log"
   sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> "${stderr_install_log_file}"
   grep -v "apt-utils" "${stderr_install_log_file}" >&2 || true
