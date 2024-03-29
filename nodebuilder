@@ -5,7 +5,7 @@ set -o errexit
 set -o nounset
 
 check_dpkg_lock() {
-  [ -f /var/lib/dpkg/lock-frontend ] && handle_error 'Debian package manager `dpkg` is locked by another process. Try running: ps aux | grep -i apt'
+  [ -f /var/lib/dpkg/lock-frontend ] && handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
 }
 
 check_internet() {
