@@ -108,11 +108,11 @@ jobs:
           - os: ubuntu-latest
             os-friendly-name: Ubuntu 22
             check-version-command: grep "VERSION\|ID" /etc/os-release
-            install-upgrades-command: sudo apt-get update --fix-missing && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y --fix-missing
+            install-upgrades-command: sleep $((RANDOM % 30 + 1)) && sudo apt-get update --fix-missing && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y --fix-missing
           - os: ubuntu-20.04
             os-friendly-name: Ubuntu 20
             check-version-command: grep "VERSION\|ID" /etc/os-release
-            install-upgrades-command: sudo apt-get update --fix-missing && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y --fix-missing
+            install-upgrades-command: sleep $((RANDOM % 30 + 1)) && sudo apt-get update --fix-missing && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y --fix-missing
           - os: macos-14
             os-friendly-name: macOS 14 arm64
             check-version-command: sw_vers | grep Version | awk '{print $2}'
