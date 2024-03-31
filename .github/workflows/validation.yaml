@@ -134,7 +134,6 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         run: |
           sudo chown -R "$(whoami)" /var/cache/apt/archives
-          sudo chown -R "$(whoami)" /var/lib/apt/lists
       - name: Cache apt archive debs and lists
         if: contains(matrix.os, 'ubuntu')
         uses: actions/cache@v2
