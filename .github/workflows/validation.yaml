@@ -130,11 +130,10 @@ jobs:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - uses: actions/checkout@v4
-      - name: Change owner of apt archives and lists directories
+      - name: Change owner of apt archives
         if: contains(matrix.os, 'ubuntu')
-        run: |
-          sudo chown -R "$(whoami)" /var/cache/apt/archives
-      - name: Cache apt archive debs and lists
+        run: sudo chown -R "$(whoami)" /var/cache/apt/archives
+      - name: Cache apt archives and lists
         if: contains(matrix.os, 'ubuntu')
         uses: actions/cache@v2
         with:
