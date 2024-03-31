@@ -134,7 +134,10 @@ jobs:
         uses: actions/cache@v2
         if: contains(matrix.os, 'ubuntu')
         with:
-          path: /var/cache/apt/archives
+          path: |
+            /var/cache/apt/archives
+            !/var/cache/apt/archives/lock
+            !/var/cache/apt/archives/partial
           key: ${{ matrix.os }}-apt-${{ github.run_id }}
           restore-keys: |
             ${{ matrix.os }}-apt-
