@@ -4,12 +4,12 @@
 set -o errexit
 set -o nounset
 
+# shellcheck disable=SC2009
 check_dpkg_lock() {
   if [ -f /var/lib/dpkg/lock-frontend ]; then
     ls -la /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock /var/cache/apt/archives/lock
     sudo cat /var/lib/dpkg/lock-frontend
     printf '%s\n' "ps grepping"
-    # shellcheck disable=SC2009
     ps aux | grep -i apt
     printf '%s\n' "ps + ps grepping"
     for pid in $(ps aux | grep -i apt); do
