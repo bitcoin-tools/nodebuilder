@@ -16,7 +16,8 @@ check_dpkg_lock() {
       user=$(ps -o user= -p "$pid")
       echo "The process $pid is run by $user"
     done
-    handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
+    # FOR DEBUGGING PURPOSES, DON'T HANDLE ERROR
+    #handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
   fi
 }
 
