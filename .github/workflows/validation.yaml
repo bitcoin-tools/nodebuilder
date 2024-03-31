@@ -140,7 +140,7 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         with:
           path: |
-            /var/cache/apt/archives
+            /var/cache/apt/archives/*.deb
             /var/lib/apt/lists
           key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: cache-apt-${{ matrix.os }}
