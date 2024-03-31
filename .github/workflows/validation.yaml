@@ -130,14 +130,11 @@ jobs:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - uses: actions/checkout@v4
-      - name: Cache apt packages
-        uses: actions/cache@v2
+      - name: Cache apt packages on Ubuntu
         if: contains(matrix.os, 'ubuntu')
+        uses: actions/cache@v2
         with:
-          path: |
-            /var/cache/apt/archives
-            !/var/cache/apt/archives/lock
-            !/var/cache/apt/archives/partial
+          path: /var/cache/apt/archives
           key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: |
             cache-apt-${{ matrix.os }}
@@ -147,6 +144,10 @@ jobs:
       - name: Run ${{ matrix.binary-path }}
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
+      - name: Change apt permissions on Ubuntu
+        if: contains(matrix.os, 'ubuntu')
+        run: sudo chown -R $(whoami) /var/cache/apt/archives
+
 
   run-nodebuilder-docker:
     name: Run ${{ matrix.container }} container
