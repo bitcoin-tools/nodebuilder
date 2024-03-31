@@ -109,14 +109,14 @@ jobs:
             os-friendly-name: Ubuntu 22
             check-version-command: grep "VERSION\|ID" /etc/os-release
             install-upgrades-command: >-
-              sleep $(echo "scale=3; $RANDOM/32768*10" | bc)
+              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --fix-missing -o 'Acquire::Retries=5'
               && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y --fix-missing -o 'Acquire::Retries=5'
           - os: ubuntu-20.04
             os-friendly-name: Ubuntu 20
             check-version-command: grep "VERSION\|ID" /etc/os-release
             install-upgrades-command: >-
-              sleep $(echo "scale=3; $RANDOM/32768*10" | bc)
+              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --fix-missing --option 'Acquire::Retries=5'
               && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --fix-missing --option 'Acquire::Retries=5'
           - os: macos-14
