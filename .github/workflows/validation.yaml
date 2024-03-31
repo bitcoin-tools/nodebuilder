@@ -137,7 +137,7 @@ jobs:
           path: /var/cache/apt/archives
           key: ${{ matrix.os }}-apt-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-apt-
+            ${{ matrix.os }}-apt-
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
