@@ -130,6 +130,14 @@ jobs:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - uses: actions/checkout@v4
+      - name: Cache apt packages
+        uses: actions/cache@v2
+        if: contains(matrix.os, 'ubuntu')
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
