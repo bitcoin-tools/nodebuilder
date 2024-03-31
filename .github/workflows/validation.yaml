@@ -135,7 +135,7 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         with:
           path: /var/cache/apt/archives
-          key: apt-archives-cache-${{ matrix.os }}-${{ github.run_id }}
+          key: apt-archives-cache-${{ matrix.os }}-${{ hashFiles('**/apt-packages.txt') }}
           restore-keys: |
             apt-archives-cache-${{ matrix.os }}-
             apt-archives-cache-
