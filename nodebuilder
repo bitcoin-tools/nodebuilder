@@ -11,11 +11,6 @@ check_dpkg_lock() {
     sudo cat /var/lib/dpkg/lock-frontend
     printf '%s\n' "ps grepping"
     ps aux | grep -i apt
-    printf '%s\n' "ps + ps grepping"
-    for pid in $(ps aux | grep -i apt); do
-      user=$(ps -o user= -p "$pid")
-      echo "The process $pid is run by $user"
-    done
     # FOR DEBUGGING PURPOSES, DON'T HANDLE ERROR
     #handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
   fi
