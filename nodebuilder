@@ -9,7 +9,7 @@ check_dpkg_lock() {
     ls -la /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock /var/cache/apt/archives/lock
     sudo cat /var/lib/dpkg/lock-frontend
     printf '%s\n' "pgrepping"
-    pgrep 'apt'
+    ps aux | grep -i apt
     printf '%s\n' "ps + pgrepping"
     for pid in $(pgrep 'apt'); do
       user=$(ps -o user= -p "$pid")
