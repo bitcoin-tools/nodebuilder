@@ -130,14 +130,21 @@ jobs:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - uses: actions/checkout@v4
-      - name: Cache apt packages
+      - name: Change owner of apt packages and lists directories
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          sudo chown -R $(whoami) /var/cache/apt/archives
+          sudo chown -R $(whoami) /var/lib/apt/lists
+      - name: Cache apt packages and lists
         uses: actions/cache@v2
         if: contains(matrix.os, 'ubuntu')
         with:
-          path: /var/cache/apt/archives
-          key: ${{ matrix.os }}-apt-${{ github.run_id }}
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: |
-            ${{ matrix.os }}-apt-
+            cache-apt-${{ matrix.os }}
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
