@@ -6,7 +6,7 @@ set -o nounset
 
 check_dpkg_lock() {
   if [ -f /var/lib/dpkg/lock-frontend ]; then
-    cat /var/lib/dpkg/lock-frontend
+    sudo cat /var/lib/dpkg/lock-frontend
     printf '%s\n' "pgrepping"
     pgrep 'apt'
     printf '%s\n' "ps + pgrepping"
