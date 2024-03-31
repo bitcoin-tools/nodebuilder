@@ -135,9 +135,10 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         with:
           path: /var/cache/apt/archives
-          key: ${{ matrix.os }}-apt-${{ github.run_id }}
+          key: apt-archives-cache-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: |
-            ${{ matrix.os }}-apt-
+            apt-archives-cache-${{ matrix.os }}-
+            apt-archives-cache-
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
