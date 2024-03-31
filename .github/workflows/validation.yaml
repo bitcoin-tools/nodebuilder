@@ -132,7 +132,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Change owner of apt cache directory
         if: contains(matrix.os, 'ubuntu')
-        run: sudo chown -R $(whoami):$(whoami) /var/cache/apt/archives
+        run: sudo chown -R "$(whoami)":"$(whoami)" /var/cache/apt/archives
       - name: Cache apt packages
         if: contains(matrix.os, 'ubuntu')
         uses: actions/cache@v2
