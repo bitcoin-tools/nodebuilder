@@ -138,9 +138,9 @@ jobs:
             /var/cache/apt/archives
             !/var/cache/apt/archives/lock
             !/var/cache/apt/archives/partial
-          key: ${{ matrix.os }}-apt-${{ github.run_id }}
+          key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: |
-            ${{ matrix.os }}-apt-
+            cache-apt-${{ matrix.os }}
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
