@@ -134,7 +134,10 @@ jobs:
         uses: actions/cache@v2
         if: contains(matrix.os, 'ubuntu')
         with:
-          path: /var/cache/apt/archives
+          path: |
+            /var/cache/apt/archives
+            !/var/cache/apt/archives/lock
+            !/var/cache/apt/archives/partial
           key: apt-archives-cache-${{ matrix.os }}
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
