@@ -6,7 +6,7 @@ set -o nounset
 
 # shellcheck disable=SC2009
 check_dpkg_lock() {
-  if [ ! lsof /var/lib/dpkg/lock >/dev/null 2>&1 ] || [ ! lsof /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ]; then
+  if ! lsof /var/lib/dpkg/lock >/dev/null 2>&1 || ! lsof /var/lib/dpkg/lock-frontend >/dev/null 2>&1; then
     printf '%s\n' "ps grepping"
     ps aux | grep -i apt
     # FOR DEBUGGING PURPOSES, DON'T HANDLE ERROR
