@@ -182,7 +182,7 @@ install_system_updates_dnf() {
 }
 
 install_updates_macos() {
-  sudo softwareupdate --install --os-only --restart
+  sudo softwareupdate --install --os-only --recommended --restart
 }
 
 install_system_updates_pacman() {
