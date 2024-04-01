@@ -105,7 +105,7 @@ jobs:
     name: Pause on master commits
     runs-on: ubuntu-latest
     steps:
-      - name: Sleep for the cache-control max-age duration
+      - name: Sleep for the GitHub cache-control max-age duration
         run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
 
   run-nodebuilder-baremetal:
@@ -182,8 +182,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ matrix.cache-path }}
-          key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
-          restore-keys: cache-apt-${{ matrix.os }}
+          key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
+          restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
         run: ${{ matrix.remove-snap-command }}
       - name: Install system upgrades
