@@ -130,14 +130,20 @@ jobs:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - uses: actions/checkout@v4
-      - name: Change owner of apt cache directory
+      - name: Change owner of apt archives
         if: contains(matrix.os, 'ubuntu')
         run: sudo chown -R "$(whoami)" /var/cache/apt/archives
-      - name: Cache apt packages
+      - name: Cache apt archives and lists
         if: contains(matrix.os, 'ubuntu')
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
-          path: /var/cache/apt/archives/*.deb
+          path: |
+            /var/cache/apt/archives/*.deb
+            /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
+            /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
+            /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
+            /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
+            /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: cache-apt-${{ matrix.os }}
       - name: Install system upgrades
