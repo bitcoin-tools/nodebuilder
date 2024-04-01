@@ -161,12 +161,12 @@ jobs:
             os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
             install-upgrades-command: softwareupdate --list && softwareupdate --install --recommended
-            cache-path: /Library/Archives
+            cache-path: /Library/Updates
           - os: macos-13
             os-friendly-name: macOS 13 [x86_64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
             install-upgrades-command: softwareupdate --list && softwareupdate --install --recommended
-            cache-path: /Library/Archives
+            cache-path: /Library/Updates
     needs: [shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     steps:
       - name: Check the current OS version
