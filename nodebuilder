@@ -103,17 +103,7 @@ install_runtime_dependencies_aptget() {
   fi
 }
 
-install_runtime_dependencies_dnf() {
-  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
-  else
-    handle_error "The list of dependencies is empty."
-  fi
-}
-
-install_dependencies_macos() {
+install_runtime_dependencies_darwin() {
   if ! command -v git > /dev/null 2>&1; then
     printf '%s' "Installing git via the Xcode Command Line Tools... "
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
@@ -144,6 +134,16 @@ install_dependencies_macos() {
   fi
 }
 
+install_runtime_dependencies_dnf() {
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt"
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  if [ -n "${dependencies}" ]; then
+    printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+  else
+    handle_error "The list of dependencies is empty."
+  fi
+}
+
 install_runtime_dependencies_pacman() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt"
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
@@ -153,7 +153,6 @@ install_runtime_dependencies_pacman() {
     handle_error "The list of dependencies is empty."
   fi
 }
-
 
 install_runtime_dependencies_zypper() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
@@ -177,12 +176,12 @@ install_system_updates_aptget() {
   rm "${stderr_install_log_file}"
 }
 
-install_system_updates_dnf() {
-  sudo dnf --assumeyes --quiet upgrade > /dev/null
+install_updates_darwin() {
+  sudo softwareupdate --install --os-only --recommended --restart
 }
 
-install_updates_macos() {
-  sudo softwareupdate --install --os-only --recommended --restart
+install_system_updates_dnf() {
+  sudo dnf --assumeyes --quiet upgrade > /dev/null
 }
 
 install_system_updates_pacman() {
@@ -499,7 +498,7 @@ Darwin)
     exit 0
   fi
   printf '%s\n%s' "ok." "Checking for git... "
-  install_dependencies_macos
+  install_runtime_dependencies_darwin
   printf '%s\n' "ok."
   ;;
 MINGW*)
