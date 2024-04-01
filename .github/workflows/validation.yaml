@@ -144,7 +144,7 @@ jobs:
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           - os: ubuntu-20.04
-            os-friendly-name: Ubuntu 20.04
+            os-friendly-name: Ubuntu 20
             check-version-command: grep "VERSION\|ID" /etc/os-release
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
@@ -158,15 +158,12 @@ jobs:
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           - os: macos-14
-            os-friendly-name: macOS 14 arm64
+            os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
             install-upgrades-command: softwareupdate --list && softwareupdate --install --recommended
             cache-path: /Library/Archives
           - os: macos-13
             os-friendly-name: macOS 13 [x86_64]
-            check-version-command: sw_vers | grep Version | awk '{print $2}'
-          - os: macos-14
-            os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
             install-upgrades-command: softwareupdate --list && softwareupdate --install --recommended
             cache-path: /Library/Archives
