@@ -124,21 +124,21 @@ install_dependencies_macos() {
     if [ -n "${clt_label}" ]; then
       sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
     else
-      handle_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
+      handle_error "Failed to install git. Cannot find a compatible Xcode Command Line Tools package."
     fi
     sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
     if command -v git > /dev/null 2>&1; then
       printf '%s\n' "ok."
     elif [ "${unattended}" = true ]; then
-        handle_error "Failed to install Xcode. Try re-running without -u/--unattended or manually install git."
+      handle_error "Failed to install Xcode Command Line Tools. Try re-running without -u/--unattended or manually installing git."
     else
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a popup window)."
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ENTER after you've completed the installation via the popup window."
       read -r _
       if ! command -v git > /dev/null 2>&1; then
-        handle_error "Failed to install git via the Xcode Command Line Tools."
+        handle_error "Failed to install git via the Xcode Command Line Tools. Try manually installing git"
       fi
     fi
   fi
