@@ -113,6 +113,37 @@ install_runtime_dependencies_dnf() {
   fi
 }
 
+install_dependencies_macos() {
+  if ! command -v git > /dev/null 2>&1; then
+    printf '%s' "Installing git via the Xcode Command Line Tools... "
+    # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
+    # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
+    sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+    clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
+    clt_label="$(/bin/sh -c "${clt_label_command}")"
+    if [ -n "${clt_label}" ]; then
+      sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
+    else
+      handle_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
+    fi
+    sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+
+    if command -v git > /dev/null 2>&1; then
+      printf '%s\n' "ok."
+    elif [ "${unattended}" = true ]; then
+        handle_error "Failed to install Xcode. Try re-running without -u/--unattended or manually install git."
+    else
+      printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a popup window)."
+      /usr/bin/xcode-select --install
+      printf '%s\n' "PRESS ENTER after you've completed the installation via the popup window."
+      read -r _
+      if ! command -v git > /dev/null 2>&1; then
+        handle_error "Failed to install git via the Xcode Command Line Tools."
+      fi
+    fi
+  fi
+}
+
 install_runtime_dependencies_pacman() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt"
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
@@ -123,6 +154,7 @@ install_runtime_dependencies_pacman() {
   fi
 }
 
+
 install_runtime_dependencies_zypper() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
@@ -131,6 +163,10 @@ install_runtime_dependencies_zypper() {
   else
     handle_error "The list of dependencies is empty."
   fi
+}
+
+install_updates_apk() {
+  apk update --quiet && apk upgrade --quiet
 }
 
 install_system_updates_aptget() {
@@ -145,8 +181,8 @@ install_system_updates_dnf() {
   sudo dnf --assumeyes --quiet upgrade > /dev/null
 }
 
-install_system_updates_apk() {
-  apk update --quiet && apk upgrade --quiet
+install_updates_macos() {
+  sudo softwareupdate --install --all
 }
 
 install_system_updates_pacman() {
@@ -391,9 +427,10 @@ Linux)
     sudo reboot
     exit 0
   fi
-  printf '%s\n' "ok."
-
-  printf '%s' "Ensuring runtime dependencies... "
+  printf '%s\n%s' "ok." "Checking for dependencies... "
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  [ -z "$dependencies" ] && handle_error "The list of dependencies is empty."
   case "$(get_os_release_type)" in
   alpine)
     install_runtime_dependencies_apk
@@ -445,37 +482,24 @@ Darwin)
     handle_error "Check for active internet failed."
   printf '%s\n' "ok."
   display_macos_warning
-  if ! command -v git > /dev/null 2>&1; then
-    printf '%s' "Installing git via the Xcode Command Line Tools... "
-    # These steps were taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
-    # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended xcode tools installation shouldn't take 20+ lines of code
-    sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-    clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
-    clt_label="$(/bin/sh -c "${clt_label_command}")"
-    if [ -n "${clt_label}" ]; then
-      sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
-    else
-      handle_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
-    fi
-    sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
-    if command -v git > /dev/null 2>&1; then
-      printf '%s\n' "ok."
-    else
-      if [ "${unattended}" = true ]; then
-        printf '\n%s\n' "ERROR: Failed to install Xcode. Try re-running without -u/--unattended."
-        exit 1
-      fi
-
-      printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
-      /usr/bin/xcode-select --install
-      printf '%s' "PRESS ENTER when the installation has completed."
+  printf '%s' "Performing a system upgrade... "
+  reboot_required_list_macos="$(softwareupdate --list | grep "[restart]")"
+  install_updates_macos
+  if [ -n "${reboot_required_list_macos}" ] && ! is_running_in_ci; then
+    printf '\n%s\n%s\n' "REBOOT REQUIRED to upgrade the following:" "${reboot_required_list_macos}"
+    if [ "${unattended}" = false ]; then
+      printf '\n%s' "PRESS ENTER to reboot or press Ctrl+C to exit... "
       read -r _
-      if ! command -v git > /dev/null 2>&1; then
-        handle_error "Failed to install git via the Xcode Command Line Tools."
-      fi
+      printf '\n'
     fi
+    printf '%s\n' "Rebooting."
+    sudo reboot
+    exit 0
   fi
+  printf '%s\n%s' "ok." "Checking for git... "
+  install_dependencies_macos
+  printf '%s\n' "ok."
   ;;
 MINGW*)
   handle_error "Windows is not supported. Instead, use WSL (Windows Subsystem for Linux)."
