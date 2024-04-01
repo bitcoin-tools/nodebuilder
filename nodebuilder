@@ -177,7 +177,29 @@ install_system_updates_aptget() {
 }
 
 install_updates_darwin() {
-  sudo softwareupdate --install --os-only --recommended --restart
+  softwareupdate --install --os-only --recommended &
+  softwareupdate_pid="$!"
+
+  # Continuously check for the presence of the restart dialog while softwareupdate is running
+  while ps -p "${softwareupdate_pid}" > /dev/null; do
+    # If the restart dialog is present, handle it
+    if ps aux | grep --quiet "[i]nstallassistant_springboard"; then
+      if is_running_in_ci || is_running_in_container; then
+        installassistant_pid=$(ps aux | grep "[i]nstallassistant_springboard" | awk '{print $2}')
+
+        # DEBUG TESTING HERE DELETE BEFORE MERGING
+        # MIGHT ALSO NEED TO SEND A kill -TERM "${installassistant_pid}"
+        # MIGHT ALSO NEED TO TRY kill "${softwareupdate_pid}"
+        kill -INT "${installassistant_pid}"
+      else
+        echo "The system needs to restart to finish installing updates. Please click the restart button."
+        exit 0
+      fi
+    fi
+
+    # Wait a bit before checking again
+    sleep 1
+  done
 }
 
 install_system_updates_dnf() {
