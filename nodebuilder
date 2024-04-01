@@ -4,13 +4,10 @@
 set -o errexit
 set -o nounset
 
-# shellcheck disable=SC2009
 check_dpkg_lock() {
   if lsof /var/lib/dpkg/lock || lsof /var/lib/dpkg/lock-frontend; then
     printf '%s\n' "ps grepping"
-    ps aux | grep -i apt
-    # FOR DEBUGGING PURPOSES, DON'T HANDLE ERROR
-    #handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
+    handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
   fi
 }
 
