@@ -346,11 +346,11 @@ Linux)
   ;;
 Darwin)
   printf '%s\n' "Detected: running on macOS."
-  ( (check_internet 1.1.1.1 ||
-    check_internet 1.1.0.0 ||
-    check_internet 9.9.9.9 ||
-    check_internet 9.9.9.11) &&
-    check_internet bitcoincore.org) ||
+  ( (check_internet 1.1.1.1 53 ||
+    check_internet 1.1.0.0 53 ||
+    check_internet 9.9.9.9 53 ||
+    check_internet 9.9.9.11 53) &&
+    check_internet bitcoincore.org 443) ||
     handle_error "Check for active internet failed."
 
   target_bitcoin_operating_system="apple-darwin"
