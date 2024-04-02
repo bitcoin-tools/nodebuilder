@@ -62,7 +62,7 @@ install_dependencies_dnf() {
 }
 
 install_dependencies_apk() {
-  printf '%s\n' "${dependencies}" | awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' | xargs apk --quiet add
+  install_dependencies apk --quiet add
 }
 
 install_dependencies_pacman() {
