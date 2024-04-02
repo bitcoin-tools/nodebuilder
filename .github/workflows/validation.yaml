@@ -27,8 +27,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${HOME}/work/_actions/luizm/action-sh-checker/
-          key: cache-shfmt-${{ matrix.os }}-${{ github.run_id }}
-          restore-keys: cache-apt-${{ matrix.os }}
+          key: cache-lint-${{ github.run_id }}
+          restore-keys: cache-lint
       - name: Lint with shellcheck
         uses: ludeeus/action-shellcheck@2.0.0
         env:
