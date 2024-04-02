@@ -12,9 +12,9 @@ check_dpkg_lock() {
 
 check_internet() {
   check_int_address=$1
-  check_int_port=$2
+  check_int_port="443"
   check_int_timeout="10"
-  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" "${check_int_address}:${check_int_port:-443}"
+  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" "${check_int_address}:${check_int_port}"
 }
 
 get_free_space_in_mib() {
@@ -241,11 +241,11 @@ clear
 case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
-  ( (check_internet 1.1.1.1 53 ||
-    check_internet 1.1.0.0 53 ||
-    check_internet 9.9.9.9 53 ||
-    check_internet 9.9.9.11 53) &&
-    check_internet bitcoincore.org 443) ||
+  ( (check_internet 1.1.1.1 ||
+    check_internet 1.1.0.0 ||
+    check_internet 9.9.9.9 ||
+    check_internet 9.9.9.11) &&
+    check_internet bitcoincore.org) ||
     handle_error "Check for active internet failed."
 
   target_bitcoin_operating_system="linux-gnu"
@@ -346,11 +346,11 @@ Linux)
   ;;
 Darwin)
   printf '%s\n' "Detected: running on macOS."
-  ( (check_internet 1.1.1.1 53 ||
-    check_internet 1.1.0.0 53 ||
-    check_internet 9.9.9.9 53 ||
-    check_internet 9.9.9.11 53) &&
-    check_internet bitcoincore.org 443) ||
+  ( (check_internet 1.1.1.1 ||
+    check_internet 1.1.0.0 ||
+    check_internet 9.9.9.9 ||
+    check_internet 9.9.9.11) &&
+    check_internet bitcoincore.org) ||
     handle_error "Check for active internet failed."
 
   target_bitcoin_operating_system="apple-darwin"
