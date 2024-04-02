@@ -3,6 +3,5 @@ git
 gnupg
 gzip
 jq
-ping
 sudo
 tar
