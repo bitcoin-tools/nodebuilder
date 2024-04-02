@@ -11,9 +11,11 @@ check_dpkg_lock() {
 }
 
 check_internet() {
-  address=$1
-  check_internet_timeout=10
-  timeout --preserve-status "${check_internet_timeout}" ping -c 1 -q "${address}" > /dev/null 2>&1
+  check_int_address=$1
+  check_int_port=$2
+  check_int_default_port="443"
+  check_int_timeout="10"
+  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" "${check_int_address}:${check_int_port:-check_int_default_port}"
 }
 
 get_free_space_in_mib() {
@@ -240,11 +242,11 @@ clear
 case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
-  ( (check_internet 1.1.1.1 ||
-    check_internet 1.1.0.0 ||
-    check_internet 9.9.9.9 ||
-    check_internet 9.9.9.11) &&
-    check_internet bitcoincore.org) ||
+  ( (check_internet 1.1.1.1 53 ||
+    check_internet 1.1.0.0 53 ||
+    check_internet 9.9.9.9 53 ||
+    check_internet 9.9.9.11 53) &&
+    check_internet bitcoincore.org 443) ||
     handle_error "Check for active internet failed."
 
   target_bitcoin_operating_system="linux-gnu"
