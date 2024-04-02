@@ -13,9 +13,8 @@ check_dpkg_lock() {
 check_internet() {
   check_int_address=$1
   check_int_port=$2
-  check_int_default_port="443"
   check_int_timeout="10"
-  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" "${check_int_address}:${check_int_port:-check_int_default_port}"
+  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" "${check_int_address}:${check_int_port:-443}"
 }
 
 get_free_space_in_mib() {
