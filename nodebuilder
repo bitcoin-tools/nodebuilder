@@ -446,8 +446,8 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     echo "install_build_dependencies_zypper()"
     ;;
   Darwin)
-    # TODO: install brew
-    brew install automake libtool boost pkg-config libevent berkeley-db@4 python qt@5 qrencode
+    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew install --quiet automake libtool boost pkg-config libevent python qt@5 qrencode > /dev/null
     ;;
   *)
     install_command_function=""
