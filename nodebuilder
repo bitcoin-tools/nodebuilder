@@ -424,12 +424,52 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
   printf '%s\n  %s' "not found." "Installing build dependencies... "
-  if [ "$(get_os_release_type)" = "alpine" ]; then
+
+  printf '%s' "Checking for dependencies... "
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  [ -z "$dependencies" ] && handle_error "The list of dependencies is empty."
+  case "$(get_os_release_type)" in
+  alpine)
+    echo "install_build_dependencies_apk()"
     apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev |
       grep -v "ICU with non-English locales" -A2 -B1 || true
-  else
-    echo "TODO figure out how to install compile-time dependencies for all Linux distros and macOS"
-  fi
+    ;;
+  debian | ubuntu)
+    echo "install_build_dependencies_aptget()"
+    sudo apt install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev qtbase5-dev qttools5-dev qttools5-dev-tools qtwayland5 libqrencode-dev
+    ;;
+  fedora | rhel)
+    echo "install_build_dependencies_dnf()"
+    sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel
+    ;;
+  arch | manjaro)
+    echo "install_build_dependencies_pacman()"
+    ;;
+  suse | *opensuse*)
+    echo "install_build_dependencies_zypper()"
+    ;;
+  *)
+    install_command_function=""
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      pacman \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+    #if [ -n "${install_build_command_function}" ]; then
+    #  "${install_command_function}"
+    #else
+    #  handle_error "This version of Linux is not supported."
+    #fi
+    echo "DEBUG ONLY The build build command function to be called is ${install_command_function}()"
+    ;;
+  esac
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
   cd "${compile_directory}"/
