@@ -36,7 +36,7 @@ kill_tail_process
 
 for message in \
   "Detected: running on (Linux|macOS).$" \
-  "Checking for Bitcoin Core 26.0... (not )?found.$" \
+  "Checking for Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?... (not )?found.$" \
   "Installing Bitcoin Core... ok.$" \
   "Setting the default node behavior... ok.$" \
   "Checking data already synced... [0-9]+ GiB.$" \
