@@ -258,7 +258,7 @@ Linux)
   debian | ubuntu)
     install_updates_aptget
     ;;
-  fedora)
+  fedora | rhel)
     install_updates_dnf
     ;;
   arch | manjaro)
@@ -312,7 +312,7 @@ Linux)
   debian | ubuntu)
     install_dependencies_aptget
     ;;
-  fedora)
+  fedora | rhel)
     install_dependencies_dnf
     ;;
   arch | manjaro)
