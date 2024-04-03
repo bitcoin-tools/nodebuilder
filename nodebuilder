@@ -477,14 +477,8 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
   grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
-  if [ "$(get_os_release_type)" = "alpine" ]; then
-    ./configure --with-incompatible-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
-  else
-    ./configure --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
-  fi
+  ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
   grep -v \
-    -e "BDB" \
-    -e "Berkeley DB" \
     -e "libzmq" \
     "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Building (please wait)... "
