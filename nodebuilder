@@ -487,7 +487,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   make --jobs "$(($(nproc) + 1))" check > /dev/null 2> "${stderr_compile_log_file}"
   grep -v "Ran 3 tests in " -A1 -B2 "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Installing Bitcoin... "
-  make install > /dev/null || sudo make install > /dev/null
+  make install > /dev/null 2>&1 || sudo make install > /dev/null
   cd "${temp_directory}"/
   rm "${stderr_compile_log_file}"
   rm -rf "${compile_directory:?}"/
