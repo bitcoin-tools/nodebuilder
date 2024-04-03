@@ -59,7 +59,7 @@ install_dependencies() {
 
 install_dependencies_aptget() {
   check_dpkg_lock
-  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null
+  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
 }
 
 install_dependencies_dnf() {
@@ -81,7 +81,7 @@ install_dependencies_zypper() {
 install_updates_aptget() {
   check_dpkg_lock
   stderr_install_log_file="${temp_directory}/stderr_install.log"
-  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> "${stderr_install_log_file}"
+  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${stderr_install_log_file}"
   grep -v "apt-utils" "${stderr_install_log_file}" >&2 || true
   rm "${stderr_install_log_file}"
 }
@@ -438,7 +438,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     ;;
   debian | ubuntu)
     echo "install_build_dependencies_aptget()"
-    sudo apt install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev qtbase5-dev qttools5-dev qttools5-dev-tools qtwayland5 libqrencode-dev
+    DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev qtbase5-dev qttools5-dev qttools5-dev-tools qtwayland5 libqrencode-dev > /dev/null
     ;;
   fedora | rhel)
     echo "install_build_dependencies_dnf()"
