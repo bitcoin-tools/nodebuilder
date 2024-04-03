@@ -467,7 +467,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     #else
     #  handle_error "This version of Linux is not supported."
     #fi
-    echo "DEBUG ONLY The build build command function to be called is ${install_command_function}()"
+    echo "DEBUG ONLY The build build command function to be called is ${install_build_command_function}()"
     ;;
   esac
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
