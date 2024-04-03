@@ -176,6 +176,9 @@ prune_value="-1"
 
 while [ $# -gt 0 ]; do
   case "$1" in
+  -c | --compile)
+    compile_bitcoin="true"
+    ;;
   -h | --help)
     print_help
     exit 0
@@ -413,12 +416,16 @@ esac
 
 if [ "${current_bitcoin_version}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "found."
-elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
+elif [ "$compile_bitcoin" = "true" ] || [ "$(get_os_release_type)" = "alpine" ]; then
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
   printf '%s\n  %s' "not found." "Installing build dependencies... "
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev |
-    grep -v "ICU with non-English locales" -A2 -B1 || true
+  if [ "$(get_os_release_type)" = "alpine" ]; then
+    apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev |
+      grep -v "ICU with non-English locales" -A2 -B1 || true
+  else
+    echo "TODO figure out how to install compile-time dependencies for all Linux distros and macOS"
+  fi
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
   cd "${compile_directory}"/
