@@ -5,7 +5,7 @@ set -o errexit
 set -o nounset
 
 check_dpkg_lock() {
-  if lsof /var/lib/dpkg/lock || lsof /var/lib/dpkg/lock-frontend; then
+  if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; then
     handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
   fi
 }
