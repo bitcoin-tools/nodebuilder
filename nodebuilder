@@ -450,7 +450,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     echo "install_build_dependencies_zypper()"
     ;;
   Darwin)
-    # TODO: install brew 
+    # TODO: install brew
     brew install automake libtool boost pkg-config libevent berkeley-db@4 python qt@5 qrencode
     ;;
   *)
