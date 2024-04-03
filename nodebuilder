@@ -425,11 +425,6 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
   printf '%s\n  %s' "not found." "Installing build dependencies... "
-
-  printf '%s' "Checking for dependencies... "
-  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
-  [ -z "$dependencies" ] && handle_error "The list of dependencies is empty."
   case "$(get_os_release_type)" in
   alpine)
     echo "install_build_dependencies_apk()"
