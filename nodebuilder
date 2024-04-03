@@ -447,8 +447,9 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     ;;
   Darwin)
     printf '\n'
-    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    brew install --quiet automake boost libevent libtool pkg-config python qrencode qt@5
+    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &>/dev/null
+    printf '%s\n%s' "finished installing/updating brew" "continuing... "
+    brew install --quiet automake boost libevent libtool pkg-config python qrencode qt@5 > /dev/null
     ;;
   *)
     install_command_function=""
