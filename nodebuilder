@@ -572,7 +572,7 @@ else
   done
   printf '%s\n' "ok."
 
-  printf '  %s' "Removing temporary files... "
+  printf '  %s' "Removing installation files... "
   rm -r "${bitcoin_core_extract_dir:?}/"
   rm -r "${temp_directory:?}/"
   printf '%s\n' "ok."
