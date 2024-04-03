@@ -170,6 +170,8 @@ jobs:
             dockerfile: ./dockerfiles/Dockerfile_fedora
           - container: Manjaro
             dockerfile: ./dockerfiles/Dockerfile_manjaro
+          - container: RHEL UBI
+            dockerfile: ./dockerfiles/Dockerfile_rhel_ubi
           - container: Ubuntu
             dockerfile: ./Dockerfile
           - container: openSUSE
