@@ -332,7 +332,7 @@ Linux)
   fi
   printf '%s\n' "ok."
 
-  printf '%s' "Checking for runtime dependencies... "
+  printf '%s' "Ensuring runtime dependencies... "
   case "$(get_os_release_type)" in
   alpine)
     install_runtime_dependencies_apk
@@ -453,7 +453,7 @@ if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ];
 elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = "alpine" ]; then
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
-  printf '%s\n  %s' "not found." "Installing build dependencies... "
+  printf '%s\n  %s' "not found." "Ensuring compile dependencies... "
   case "$(get_os_release_type)" in
   alpine)
     install_build_dependencies_apk
