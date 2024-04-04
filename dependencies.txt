@@ -1,6 +1,6 @@
 curl
 git
-gnupg2
+gnupg
 gzip
 jq
 sudo
