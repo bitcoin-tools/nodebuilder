@@ -499,16 +499,15 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     -e "libzmq" \
     -e "xgettext" \
     "${stderr_compile_log_file}" >&2 || true
-  printf '%s\n  %s' "ok." "Building (please wait)... "
+  printf '%s\n  %s' "ok." "Compiling source code (please wait)... "
   if [ "$(get_os_release_type)" = "Darwin" ]; then
-    make --jobs "$(($(sysctl -n hw.physicalcpu) + 1))" > /dev/null
-    printf '%s\n  %s' "ok." "Checking (please wait)... "
-    make --jobs "$(($(sysctl -n hw.physicalcpu) + 1))" check > /dev/null 2> "${stderr_compile_log_file}"
+    compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
   else
-    make --jobs "$(($(nproc) + 1))" > /dev/null
-    printf '%s\n  %s' "ok." "Checking (please wait)... "
-    make --jobs "$(($(nproc) + 1))" check > /dev/null 2> "${stderr_compile_log_file}"
+    compile_jobs_count="$(($(nproc) + 1))"
   fi
+  make --jobs "${compile_jobs_count}" > /dev/null
+  printf '%s\n  %s' "ok." "Running build checks (please wait)... "
+  make --jobs "${compile_jobs_count}" check > /dev/null 2> "${stderr_compile_log_file}"
   grep -v "Ran 3 tests in " -A1 -B2 "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Installing Bitcoin... "
   make install > /dev/null 2>&1 || sudo make install > /dev/null
