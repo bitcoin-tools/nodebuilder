@@ -49,7 +49,7 @@ get_os_release_type() (
 
 install_build_dependencies_apk() {
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev |
-    grep -v "ICU with non-English locales" -A2 -B1 || true 
+    grep -v "ICU with non-English locales" -A2 -B1 || true
 }
 
 install_build_dependencies_aptget() {
@@ -67,7 +67,6 @@ install_build_dependencies_pacman() {
 install_build_dependencies_zypper() {
   echo "TODO: install_build_dependencies_zypper()"
 }
-
 
 install_runtime_dependencies() {
   stderr_install_log_file="${temp_directory}/stderr_install.log"
