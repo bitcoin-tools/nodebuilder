@@ -162,7 +162,7 @@ jobs:
         include:
           - container: Alpine
             dockerfile: ./dockerfiles/Dockerfile_alpine
-          - container: Amazon Linux
+          - container: Amazon
             dockerfile: ./dockerfiles/Dockerfile_amazon
           - container: Arch
             dockerfile: ./dockerfiles/Dockerfile_arch
