@@ -332,7 +332,7 @@ Linux)
   fi
   printf '%s\n' "ok."
 
-  printf '%s' "Checking for dependencies... "
+  printf '%s' "Checking for runtime dependencies... "
   case "$(get_os_release_type)" in
   alpine)
     install_runtime_dependencies_apk
