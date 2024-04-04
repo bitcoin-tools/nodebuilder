@@ -91,8 +91,8 @@ install_runtime_dependencies_dnf() {
   install_runtime_dependencies dnf --assumeyes --quiet install > /dev/null
 }
 
-install__apk() {
-  install_ apk --quiet add
+install_runtime_dependencies_apk() {
+  install_runtime_dependencies apk --quiet add
 }
 
 install_runtime_dependencies_pacman() {
@@ -103,7 +103,7 @@ install_runtime_dependencies_zypper() {
   install_runtime_dependencies zypper --non-interactive --quiet install > /dev/null
 }
 
-install_updates_aptget() {
+install_system_updates_aptget() {
   check_dpkg_lock
   stderr_install_log_file="${temp_directory}/stderr_install.log"
   sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${stderr_install_log_file}"
@@ -111,19 +111,19 @@ install_updates_aptget() {
   rm "${stderr_install_log_file}"
 }
 
-install_updates_dnf() {
+install_system_updates_dnf() {
   sudo dnf --assumeyes --quiet upgrade > /dev/null
 }
 
-install_updates_apk() {
+install_system_updates_apk() {
   apk update --quiet && apk upgrade --quiet
 }
 
-install_updates_pacman() {
+install_system_updates_pacman() {
   sudo pacman -Syu --noconfirm --quiet > /dev/null
 }
 
-install_updates_zypper() {
+install_system_updates_zypper() {
   sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
 }
 
@@ -285,31 +285,31 @@ Linux)
   printf '%s\n%s' "ok." "Performing a system upgrade... "
   case "$(get_os_release_type)" in
   alpine)
-    install_updates_apk
+    install_system_updates_apk
     ;;
   debian | ubuntu)
-    install_updates_aptget
+    install_system_updates_aptget
     ;;
   fedora | rhel | centos*)
-    install_updates_dnf
+    install_system_updates_dnf
     ;;
   arch | manjaro)
-    install_updates_pacman
+    install_system_updates_pacman
     ;;
   suse | *opensuse*)
-    install_updates_zypper
+    install_system_updates_zypper
     ;;
   *)
     if command -v apk > /dev/null; then
-      install_updates_apk
+      install_system_updates_apk
     elif command -v apt-get > /dev/null; then
-      install_updates_aptget
+      install_system_updates_aptget
     elif command -v dnf > /dev/null; then
-      install_updates_dnf
+      install_system_updates_dnf
     elif command -v pacman > /dev/null; then
-      install_updates_pacman
+      install_system_updates_pacman
     elif command -v zypper > /dev/null; then
-      install_updates_zypper
+      install_system_updates_zypper
     else
       handle_error "This version of Linux is not supported."
     fi
@@ -464,7 +464,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     install_build_dependencies_zypper
     ;;
   Darwin)
-    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &> /dev/null
+    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
     brew install --quiet automake boost libevent libtool pkg-config python qrencode qt@5 > /dev/null
     ;;
   *)
