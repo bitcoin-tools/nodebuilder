@@ -18,7 +18,7 @@ RUN uname -a \
 RUN dnf makecache \
   && dnf --assumeyes install findutils \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs dnf --assumeyes install \
+  | xargs dnf --allowerasing --assumeyes install \
   && dnf clean all
 
 # Download and execute the script
