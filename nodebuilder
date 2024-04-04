@@ -400,8 +400,15 @@ if command -v bitcoind > /dev/null 2>&1; then
 else
   current_bitcoin_version=""
 fi
-
-# If bitcoin target version is like 'xx.yy', pad it as 'xx.yy.0'
+# If version is like 'xx.yy', pad it as 'xx.yy.0'
+case "${current_bitcoin_version}" in
+*[.]*[.]*)
+  current_bitcoin_version_padded="${current_bitcoin_version}"
+  ;;
+*)
+  current_bitcoin_version_padded="${current_bitcoin_version}.0"
+  ;;
+esac
 case "${target_bitcoin_version}" in
 *[.]*[.]*)
   target_bitcoin_version_padded="${target_bitcoin_version}"
@@ -410,8 +417,7 @@ case "${target_bitcoin_version}" in
   target_bitcoin_version_padded="${target_bitcoin_version}.0"
   ;;
 esac
-
-if [ "${current_bitcoin_version}" = "${target_bitcoin_version_padded}" ]; then
+if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "found."
 elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
   compile_directory="${temp_directory}/compile_bitcoin"
