@@ -639,7 +639,7 @@ Darwin) ;; #TODO: Add macOS memory check
   swap_memory_free_in_mib="$(get_memory_metric_in_mib 'SwapFree')"
   memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
   memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
-  printf '%0.1f GiB free of %0.1f GiB.\n' \
+  printf '%0.1f of %0.1f GiB free.\n' \
     "$(awk -v mem_free_mib="${memory_free_in_mib}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_free_mib / mib_gib_factor}')" \
     "$(awk -v mem_total_mib="${memory_total_in_mib}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_total_mib / mib_gib_factor}')"
 
