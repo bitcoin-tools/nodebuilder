@@ -5,10 +5,10 @@ set -o errexit
 set -o nounset
 
 check_dpkg_lock() {
-  if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-fronten
-Viewed
-@@ -33,18 +33,46 @@ get_memory_metric_in_mib() (
-)
+  if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; then
+    handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
+  fi
+}
 
 get_os_release_type() (
   os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
