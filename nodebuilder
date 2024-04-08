@@ -116,6 +116,24 @@ is_running_in_container() {
   fi
 }
 
+is_valid_bitcoin_version() {
+  if [ -z "$1" ]; then
+    handle_error "No arguemnt passed into is_valid_bitcoin_version"
+  fi
+  bitcoin_version_to_check="$1"
+  valid_bitcoin_version_list="0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 0.11.0 \
+    0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 \0.14.3 0.15.2 0.16.3 \
+    0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 0.20.0 \
+    0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 0.9.5 22.0 22.1 23.0 23.1 23.2 24.0 \
+    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 27.0"
+  for version in $valid_bitcoin_version_list; do
+    if [ "${bitcoin_version_to_check}" = "${version}" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 set_bitcoin_core_option() (
   option="$1"
   value="$2"
@@ -173,9 +191,22 @@ print_help() {
 temp_directory=""
 unattended=false
 prune_value="-1"
+target_bitcoin_version="26.1"
+target_bitcoin_architecture="$(uname -m)"
 
 while [ $# -gt 0 ]; do
   case "$1" in
+  -b | --bitcoin-version)
+    if [ $# -eq 1 ]; then
+      handle_error "-B/--bitcoin-versoin requires an argument"
+    fi
+    if is_valid_bitcoin_version "$2"; then
+      target_bitcoin_version="$2"
+    else
+      handle_error "The Bitcoin version '$2' is not valid. Please use a value such as '26.0' from https://bitcoincore.org/bin/"
+    fi
+    shift 2
+    ;;
   -h | --help)
     print_help
     exit 0
@@ -216,8 +247,6 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-target_bitcoin_version="26.1"
-target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
