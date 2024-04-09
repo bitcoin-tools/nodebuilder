@@ -15,7 +15,7 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies
-RUN pacman -Sy --noconfirm 'sudo' \
+RUN pacman -Sy --noconfirm 'sudo' libxcb \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs pacman -Sy --noconfirm
 
