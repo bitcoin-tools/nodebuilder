@@ -16,7 +16,7 @@ RUN uname -a \
 
 # Install system updates and dependencies
 RUN dnf makecache \
-  && dnf --assumeyes install libxcb-devel
+  && dnf --assumeyes install libxcb-devel \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs dnf --assumeyes install \
   && dnf clean all
