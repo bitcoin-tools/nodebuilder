@@ -479,9 +479,9 @@ esac
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "found."
 elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = "alpine" ]; then
+  printf '%s\n  %s' "not found." "Ensuring compile dependencies... "
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
-  printf '%s\n  %s' "not found." "Ensuring compile dependencies... "
   case "$(get_os_release_type)" in
   alpine)
     install_build_dependencies_apk
@@ -547,7 +547,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   make --jobs "${compile_jobs_count}" > /dev/null
   printf '%s\n  %s' "ok." "Running compile checks, please wait... "
   make --jobs "${compile_jobs_count}" check > /dev/null 2> "${stderr_compile_log_file}"
-  grep -v "Ran 3 tests in " -A1 -B2 "${stderr_compile_log_file}" >&2 || true
+  grep -v "Ran 3 tests in .*s\n\nOK" -B2 "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Installing Bitcoin... "
   make install > /dev/null 2>&1 || sudo make install > /dev/null
   printf '%s\n' "ok."
