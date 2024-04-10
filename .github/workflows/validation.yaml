@@ -102,7 +102,7 @@ jobs:
         binary-path: ['./nodebuilder', './test/test_nodebuilder']
         os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
         include:
-          - purpose-of-job: 'Run Download'
+          - purpose-of-job: 'Run download'
             binary-path: './nodebuilder'
           - purpose-of-job: 'Test'
             binary-path: './test/test_nodebuilder'
