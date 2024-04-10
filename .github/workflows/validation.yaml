@@ -94,19 +94,18 @@ jobs:
         run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
 
   run-nodebuilder-baremetal:
-    name: ${{ matrix.purpose-of-job }} on ${{ matrix.os-friendly-name }}
+    name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        purpose-of-job: ['Run download', 'Run compile', 'Test']
-        binary-path: ['./nodebuilder', './test/test_nodebuilder']
+        job-purpose: [Run, Test, Compile]
         os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
         include:
-          - purpose-of-job: 'Run download'
+          - job-purpose: Run
             binary-path: './nodebuilder'
-          - purpose-of-job: 'Test'
+          - job-purpose: Test
             binary-path: './test/test_nodebuilder'
-          - purpose-of-job: 'Run compile'
+          - job-purpose: Compile
             binary-path: './nodebuilder --compile'
           - os: ubuntu-latest
             os-friendly-name: Ubuntu 22
