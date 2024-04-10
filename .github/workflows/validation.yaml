@@ -98,13 +98,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        purpose-of-job: ['Run download', 'Run compile', 'Test']
         binary-path: ['./nodebuilder', './test/test_nodebuilder']
         os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
         include:
-          - binary-path: './nodebuilder'
-            purpose-of-job: Run
-          - binary-path: './test/test_nodebuilder'
-            purpose-of-job: Test
+          - purpose-of-job: 'Run Download'
+            binary-path: './nodebuilder'
+          - purpose-of-job: 'Test'
+            binary-path: './test/test_nodebuilder'
+          - purpose-of-job: 'Run compile'
+            binary-path: './nodebuilder --compile'
           - os: ubuntu-latest
             os-friendly-name: Ubuntu 22
             check-version-command: grep "VERSION\|ID" /etc/os-release
