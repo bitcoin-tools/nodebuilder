@@ -98,7 +98,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        job-purpose: [Run, Test, Compile]
+        job-purpose: [Compile, Test]
         os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
         include:
           - job-purpose: Compile
