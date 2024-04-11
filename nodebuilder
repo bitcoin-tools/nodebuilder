@@ -394,6 +394,7 @@ Darwin)
     check_internet bitcoincore.org) ||
     handle_error "Check for active internet failed."
   printf '%s\n' "ok."
+  display_macos_warning
   if ! command -v git > /dev/null 2>&1; then
     printf '%s' "Installing git via the Xcode Command Line Tools... "
     # These steps were taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
