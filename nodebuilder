@@ -17,6 +17,17 @@ check_internet() {
   curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
 }
 
+display_macos_warning() {
+  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+    printf '%s\n%s\n%s\n' \
+      "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
+      "Avoid performing any security-critical actions and consider switching to Ubuntu Linux." \
+      "PRESS ENTER to continue or press Ctrl+C to exit... "
+    read -r _
+    printf '\n'
+  fi
+}
+
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -407,8 +418,9 @@ Darwin)
 
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
       /usr/bin/xcode-select --install
-      printf '%s\n' "PRESS ENTER when the installation has completed."
+      printf '%s' "PRESS ENTER when the installation has completed."
       read -r _
+      printf '\n'
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
       fi
