@@ -19,12 +19,14 @@ check_internet() {
 
 display_macos_warning() {
   if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
-    printf '%s\n%s\n%s\n' \
+    printf '%s\n%s\n' \
       "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
-      "Avoid performing any security-critical actions and consider switching to Ubuntu Linux." \
-      "PRESS ENTER to continue or press Ctrl+C to exit... "
-    read -r _
-    printf '\n'
+      "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
+    if ! is_running_in_ci; then
+      printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
+      read -r _
+      printf '\n'
+    fi
   fi
 }
 
