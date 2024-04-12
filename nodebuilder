@@ -45,18 +45,46 @@ get_memory_metric_in_mib() (
 )
 
 get_os_release_type() (
-  os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
-  os_release_id=$(grep "^ID=" /etc/os-release | cut -d= -f2)
-
-  if [ -n "${os_release_id_like}" ] || [ -n "${os_release_id}" ]; then
-    printf '%s\n' "${os_release_id_like:-${os_release_id}}"
+  if [ "$(uname -s)" = "Darwin" ]; then
+    printf '%s\n' "Darwin"
   else
-    handle_error "Failed to determine OS release type"
+    os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
+    os_release_id=$(grep "^ID=" /etc/os-release | cut -d= -f2)
+
+    if [ -n "${os_release_id_like}" ] || [ -n "${os_release_id}" ]; then
+      printf '%s\n' "${os_release_id_like:-${os_release_id}}"
+    else
+      handle_error "Failed to determine OS release type"
+    fi
   fi
 )
 
-install_dependencies() {
+install_build_dependencies_apk() {
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev |
+    grep -v "ICU with non-English locales" -A2 -B1 || true
+}
+
+install_build_dependencies_aptget() {
+  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev qtbase5-dev qttools5-dev qttools5-dev-tools qtwayland5 libqrencode-dev > /dev/null
+}
+
+install_build_dependencies_dnf() {
+  sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel
+}
+
+install_build_dependencies_pacman() {
+  echo "TODO: install_build_dependencies_pacman()"
+}
+
+install_build_dependencies_zypper() {
+  echo "TODO: install_build_dependencies_zypper()"
+}
+
+install_runtime_dependencies() {
   stderr_install_log_file="${temp_directory}/stderr_install.log"
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  [ -z "${dependencies}" ] && handle_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | xargs sudo "$@" 2> "${stderr_install_log_file}"
   grep -v \
     -e "apt-utils" \
@@ -65,48 +93,48 @@ install_dependencies() {
   rm "${stderr_install_log_file}"
 }
 
-install_dependencies_aptget() {
+install_runtime_dependencies_aptget() {
   check_dpkg_lock
-  install_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends > /dev/null
+  install_runtime_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
 }
 
-install_dependencies_dnf() {
-  install_dependencies dnf --assumeyes --quiet install > /dev/null
+install_runtime_dependencies_dnf() {
+  install_runtime_dependencies dnf --assumeyes --quiet install > /dev/null
 }
 
-install_dependencies_apk() {
-  install_dependencies apk --quiet add
+install_runtime_dependencies_apk() {
+  install_runtime_dependencies apk --quiet add
 }
 
-install_dependencies_pacman() {
-  install_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null
+install_runtime_dependencies_pacman() {
+  install_runtime_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null
 }
 
-install_dependencies_zypper() {
-  install_dependencies zypper --non-interactive --quiet install > /dev/null
+install_runtime_dependencies_zypper() {
+  install_runtime_dependencies zypper --non-interactive --quiet install > /dev/null
 }
 
-install_updates_aptget() {
+install_system_updates_aptget() {
   check_dpkg_lock
   stderr_install_log_file="${temp_directory}/stderr_install.log"
-  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade > /dev/null 2> "${stderr_install_log_file}"
+  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${stderr_install_log_file}"
   grep -v "apt-utils" "${stderr_install_log_file}" >&2 || true
   rm "${stderr_install_log_file}"
 }
 
-install_updates_dnf() {
+install_system_updates_dnf() {
   sudo dnf --assumeyes --quiet upgrade > /dev/null
 }
 
-install_updates_apk() {
+install_system_updates_apk() {
   apk update --quiet && apk upgrade --quiet
 }
 
-install_updates_pacman() {
+install_system_updates_pacman() {
   sudo pacman -Syu --noconfirm --quiet > /dev/null
 }
 
-install_updates_zypper() {
+install_system_updates_zypper() {
   sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
 }
 
@@ -217,7 +245,10 @@ while [ $# -gt 0 ]; do
     else
       handle_error "The Bitcoin version '$2' is not valid. Please use a value such as '26.0' from https://bitcoincore.org/bin/"
     fi
-    shift 2
+    shift
+    ;;
+  -c | --compile)
+    compile_bitcoin="true"
     ;;
   -h | --help)
     print_help
@@ -237,17 +268,17 @@ while [ $# -gt 0 ]; do
       handle_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning"
     fi
     prune_value="$2"
-    shift 2
+    shift
     ;;
   -u | --unattended)
     unattended=true
-    shift
     ;;
   *)
     printf '%s\n%s\n' "Error: '$1' is invalid." "Use -h or --help for available options."
     exit 1
     ;;
   esac
+  shift
 done
 
 temp_directory="$(mktemp -d)"
@@ -293,31 +324,31 @@ Linux)
   printf '%s\n%s' "ok." "Performing a system upgrade... "
   case "$(get_os_release_type)" in
   alpine)
-    install_updates_apk
+    install_system_updates_apk
     ;;
   debian | ubuntu)
-    install_updates_aptget
+    install_system_updates_aptget
     ;;
-  fedora | rhel)
-    install_updates_dnf
+  fedora | rhel | centos*)
+    install_system_updates_dnf
     ;;
   arch | manjaro)
-    install_updates_pacman
+    install_system_updates_pacman
     ;;
   suse | *opensuse*)
-    install_updates_zypper
+    install_system_updates_zypper
     ;;
   *)
     if command -v apk > /dev/null; then
-      install_updates_apk
+      install_system_updates_apk
     elif command -v apt-get > /dev/null; then
-      install_updates_aptget
+      install_system_updates_aptget
     elif command -v dnf > /dev/null; then
-      install_updates_dnf
+      install_system_updates_dnf
     elif command -v pacman > /dev/null; then
-      install_updates_pacman
+      install_system_updates_pacman
     elif command -v zypper > /dev/null; then
-      install_updates_zypper
+      install_system_updates_zypper
     else
       handle_error "This version of Linux is not supported."
     fi
@@ -340,28 +371,25 @@ Linux)
   fi
   printf '%s\n' "ok."
 
-  printf '%s' "Checking for dependencies... "
-  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
-  [ -z "$dependencies" ] && handle_error "The list of dependencies is empty."
+  printf '%s' "Ensuring runtime dependencies... "
   case "$(get_os_release_type)" in
   alpine)
-    install_dependencies_apk
+    install_runtime_dependencies_apk
     ;;
   debian | ubuntu)
-    install_dependencies_aptget
+    install_runtime_dependencies_aptget
     ;;
   fedora | rhel)
-    install_dependencies_dnf
+    install_runtime_dependencies_dnf
     ;;
   arch | manjaro)
-    install_dependencies_pacman
+    install_runtime_dependencies_pacman
     ;;
   suse | *opensuse*)
-    install_dependencies_zypper
+    install_runtime_dependencies_zypper
     ;;
   *)
-    install_command_function=""
+    install_runtime_command_function=""
     for package_manager in \
       apk \
       apt-get \
@@ -369,13 +397,13 @@ Linux)
       pacman \
       zypper; do
       if command -v "${package_manager}" > /dev/null; then
-        install_command_function="install_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
         break
       fi
     done
 
-    if [ -n "${install_command_function}" ]; then
-      "${install_command_function}"
+    if [ -n "${install_runtime_command_function}" ]; then
+      "${install_runtime_command_function}"
     else
       handle_error "This version of Linux is not supported."
     fi
@@ -462,12 +490,50 @@ esac
 
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "found."
-elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; then
+elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = "alpine" ]; then
+  printf '%s\n  %s' "not found." "Ensuring compile dependencies... "
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
-  printf '%s\n  %s' "not found." "Installing build dependencies... "
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev |
-    grep -v "ICU with non-English locales" -A2 -B1 || true
+  case "$(get_os_release_type)" in
+  alpine)
+    install_build_dependencies_apk
+    ;;
+  debian | ubuntu)
+    install_build_dependencies_aptget
+    ;;
+  fedora | rhel)
+    install_build_dependencies_dnf
+    ;;
+  arch | manjaro)
+    install_build_dependencies_pacman
+    ;;
+  suse | *opensuse*)
+    install_build_dependencies_zypper
+    ;;
+  Darwin)
+    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
+    brew install --quiet automake boost libevent libtool pkg-config python qrencode qt@5 > /dev/null
+    ;;
+  *)
+    install_build_command_function=""
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      pacman \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+    if [ -n "${install_build_command_function}" ]; then
+      "${install_build_command_function}"
+    else
+      printf '%s\n  %s\n' "failed." "Unable to determine build dependencies. Attempting to compile without verifying dependencies."
+    fi
+    ;;
+  esac
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
   cd "${compile_directory}"/
@@ -475,20 +541,30 @@ elif [ "$(uname -s)" = 'Linux' ] && [ "$(get_os_release_type)" = "alpine" ]; the
   ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
   grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
-  ./configure --with-incompatible-bdb --with-gui=no --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
+  if [ "$(get_os_release_type)" = "Darwin" ]; then
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
+  else
+    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
+  fi
   grep -v \
-    -e "BDB" \
-    -e "Berkeley DB" \
     -e "libzmq" \
+    -e "xgettext" \
     "${stderr_compile_log_file}" >&2 || true
-  printf '%s\n  %s' "ok." "Building (please wait)... "
-  make --jobs "$(($(nproc) + 1))" > /dev/null
-  printf '%s\n  %s' "ok." "Checking (please wait)... "
-  make --jobs "$(($(nproc) + 1))" check > /dev/null 2> "${stderr_compile_log_file}"
-  grep -v "Ran 3 tests in " -A1 -B2 "${stderr_compile_log_file}" >&2 || true
+  printf '%s\n  %s' "ok." "Compiling source code, please wait... "
+  if [ "$(get_os_release_type)" = "Darwin" ]; then
+    compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
+  else
+    compile_jobs_count="$(($(nproc) + 1))"
+  fi
+  make --jobs "${compile_jobs_count}" > /dev/null
+  printf '%s\n  %s' "ok." "Running compile checks, please wait... "
+  make --jobs "${compile_jobs_count}" check > /dev/null 2> "${stderr_compile_log_file}"
+  # exclude the two lines before and after "Ran 3 tests in " in make check's stdout
+  sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${stderr_compile_log_file}" >&2
   printf '%s\n  %s' "ok." "Installing Bitcoin... "
-  make install > /dev/null
-  cd -
+  make install > /dev/null 2>&1 || sudo make install > /dev/null
+  printf '%s\n' "ok."
+  cd - > /dev/null
   rm "${stderr_compile_log_file}"
   rm -rf "${compile_directory:?}"/
   current_bitcoin_version="${target_bitcoin_version}"
