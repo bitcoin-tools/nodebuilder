@@ -25,7 +25,6 @@ display_macos_warning() {
     if ! is_running_in_ci; then
       printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
       read -r _
-      printf '\n'
     fi
   fi
 }
@@ -334,7 +333,6 @@ Linux)
     if [ "${unattended}" = false ]; then
       printf '\n%s' "PRESS ENTER to reboot or press Ctrl+C to exit... "
       read -r _
-      printf '\n'
     fi
     printf '%s\n' "Rebooting."
     sudo reboot
@@ -423,7 +421,6 @@ Darwin)
       /usr/bin/xcode-select --install
       printf '%s' "PRESS ENTER when the installation has completed."
       read -r _
-      printf '\n'
       if ! command -v git > /dev/null 2>&1; then
         handle_error "Failed to install git via the Xcode Command Line Tools."
       fi
