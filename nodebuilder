@@ -532,12 +532,8 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   if [ "$(get_os_release_type)" = "Darwin" ]; then
     ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
   else
-    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
+    ./configure --without-bdb --enable-suppress-external-warnings
   fi
-  grep -v \
-    -e "libzmq" \
-    -e "xgettext" \
-    "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Compiling source code, please wait... "
   if [ "$(get_os_release_type)" = "Darwin" ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
