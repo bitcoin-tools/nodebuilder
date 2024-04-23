@@ -219,7 +219,7 @@ print_help() {
 temp_directory=""
 unattended=false
 prune_value="-1"
-target_bitcoin_version="26.1"
+target_bitcoin_version="27.0"
 target_bitcoin_architecture="$(uname -m)"
 
 while [ $# -gt 0 ]; do
