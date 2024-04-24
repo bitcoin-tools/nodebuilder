@@ -229,6 +229,7 @@ print_usage() {
   printf '%s\n' "-b, --bitcoin-version   Speficy the Bitcoin version"
   printf '%s\n' "-c, --compile           Build Bitcoin from source"
   printf '%s\n' "-h, --help              Display this help message"
+  printf '%s\n' "-p, --prune             Set a prune value in MiB"
   printf '%s\n' "-u, --unattended        Run in non-interactive mode"
 }
 
