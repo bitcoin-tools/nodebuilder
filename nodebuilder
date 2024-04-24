@@ -55,7 +55,7 @@ install_build_dependencies_apk() {
 install_build_dependencies_aptget() {
   DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev qtbase5-dev qttools5-dev qttools5-dev-tools qtwayland5 libqrencode-dev > /dev/null
   # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
-  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --yassume-yes --no-install-recommends gcc-12
+  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12
 }
 
 install_build_dependencies_dnf() {
