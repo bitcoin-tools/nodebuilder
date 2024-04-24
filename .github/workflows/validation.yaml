@@ -17,8 +17,12 @@ on:
   workflow_dispatch:
 env:
   TERM: xterm
+permissions:
+  contents: read
+  pull-requests: write
 jobs:
-  dependency-review:
+  dependencies-check:
+    name: Check CI depencencies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +30,7 @@ jobs:
         uses: actions/dependency-review-action@v4
         with:
           comment-summary-in-pr: always
+          fail-on-severity: low
   shell-lint:
     name: Check shell code
     runs-on: ubuntu-latest
