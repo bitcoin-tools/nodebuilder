@@ -95,6 +95,7 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
+    needs: [shell-lint, yaml-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -118,7 +119,6 @@ jobs:
           - os: macos-13
             os-friendly-name: macOS 13 x86_64
             check-version-command: sw_vers | grep Version | awk '{print $2}'
-    needs: [shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     steps:
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
@@ -148,6 +148,7 @@ jobs:
 
   run-nodebuilder-docker:
     name: Run ${{ matrix.container }} container
+    needs: [shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -171,7 +172,6 @@ jobs:
             dockerfile: ./Dockerfile
           - container: openSUSE
             dockerfile: ./dockerfiles/Dockerfile_opensuse
-    needs: [shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     steps:
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
