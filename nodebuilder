@@ -82,38 +82,54 @@ install_build_dependencies_zypper() {
   echo "TODO: install_build_dependencies_zypper()"
 }
 
-install_runtime_dependencies() {
-  stderr_install_log_file="${temp_directory}/stderr_install.log"
-  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
+install_runtime_dependencies_apk() {
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_apk.txt"
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
-  [ -z "${dependencies}" ] && handle_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo "$@" 2> "${stderr_install_log_file}"
-  grep -v \
-    -e "apt-utils" \
-    -e "skipping" \
-    "${stderr_install_log_file}" >&2 || true
-  rm "${stderr_install_log_file}"
+  if [ -n "${dependencies}" ]; then
+    printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add
+  else
+    handle_error "The list of dependencies is empty."
+  fi
 }
 
 install_runtime_dependencies_aptget() {
   check_dpkg_lock
-  install_runtime_dependencies DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_aptget.txt"
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  if [ -n "${dependencies}" ]; then
+    printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
+  else
+    handle_error "The list of dependencies is empty."
+  fi
 }
 
 install_runtime_dependencies_dnf() {
-  install_runtime_dependencies dnf --assumeyes --quiet install > /dev/null
-}
-
-install_runtime_dependencies_apk() {
-  install_runtime_dependencies apk --quiet add
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt"
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  if [ -n "${dependencies}" ]; then
+    printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+  else
+    handle_error "The list of dependencies is empty."
 }
 
 install_runtime_dependencies_pacman() {
-  install_runtime_dependencies pacman -Syu --needed --noconfirm --quiet > dev/null
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt"
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  if [ -n "${dependencies}" ]; then
+    printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null
+  else
+    handle_error "The list of dependencies is empty."
+  fi
 }
 
 install_runtime_dependencies_zypper() {
-  install_runtime_dependencies zypper --non-interactive --quiet install > /dev/null
+  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
+  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  if [ -n "${dependencies}" ]; then
+    printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+  else
+    handle_error "The list of dependencies is empty."
+  fi
 }
 
 install_system_updates_aptget() {
