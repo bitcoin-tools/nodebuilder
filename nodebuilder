@@ -66,6 +66,8 @@ install_build_dependencies_apk() {
 
 install_build_dependencies_aptget() {
   DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev qtbase5-dev qttools5-dev qttools5-dev-tools qtwayland5 libqrencode-dev > /dev/null
+  # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
+  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12
 }
 
 install_build_dependencies_dnf() {
@@ -227,13 +229,14 @@ print_usage() {
   printf '%s\n' "-b, --bitcoin-version   Speficy the Bitcoin version"
   printf '%s\n' "-c, --compile           Build Bitcoin from source"
   printf '%s\n' "-h, --help              Display this help message"
+  printf '%s\n' "-p, --prune             Set a prune value in MiB"
   printf '%s\n' "-u, --unattended        Run in non-interactive mode"
 }
 
 temp_directory=""
 unattended=false
 prune_value="-1"
-target_bitcoin_version="26.1"
+target_bitcoin_version="27.0"
 target_bitcoin_architecture="$(uname -m)"
 
 while [ $# -gt 0 ]; do
@@ -744,7 +747,6 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
   [ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
   set_bitcoin_core_option "server" "1"
   set_bitcoin_core_option "mempoolfullrbf" "1"
-  set_bitcoin_core_option "v2transport" "1"
   printf '%s\n' "ok."
 fi
 

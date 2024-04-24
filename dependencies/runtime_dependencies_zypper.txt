@@ -1,0 +1,8 @@
+curl
+git
+gnupg
+gzip
+jq
+libxcb-xinerama0
+sudo
+tar
