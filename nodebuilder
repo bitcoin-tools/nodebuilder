@@ -221,11 +221,13 @@ handle_sigint() {
   exit 0
 }
 
-print_help() {
+print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' "Options:"
-  printf '%s\n' "-h, --help         Display this help message"
-  printf '%s\n' "-u, --unattended   Run in unattended mode"
+  printf '%s\n' "-b, --bitcoin-version   Speficy the Bitcoin version"
+  printf '%s\n' "-c, --compile           Build Bitcoin from source"
+  printf '%s\n' "-h, --help              Display this help message"
+  printf '%s\n' "-u, --unattended        Run in non-interactive mode"
 }
 
 temp_directory=""
@@ -251,7 +253,7 @@ while [ $# -gt 0 ]; do
     compile_bitcoin="true"
     ;;
   -h | --help)
-    print_help
+    print_usage
     exit 0
     ;;
   -p | --prune)
