@@ -100,24 +100,24 @@ jobs:
     strategy:
       matrix:
         job-purpose: [Compile, Test]
-        os: [ubuntu-latest, macos-14, macos-13]
+        os: [ubuntu-latest, macos-13, macos-14]
         include:
           - job-purpose: Compile
             binary-path: './nodebuilder --compile'
           - job-purpose: Test
             binary-path: './test/test_nodebuilder'
           - os: ubuntu-latest
-            os-friendly-name: Ubuntu 22
+            os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
               && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
-          - os: macos-14
-            os-friendly-name: macOS 14 arm64
-            check-version-command: sw_vers | grep Version | awk '{print $2}'
           - os: macos-13
-            os-friendly-name: macOS 13 x86_64
+            os-friendly-name: macOS 13 [x86_64]
+            check-version-command: sw_vers | grep Version | awk '{print $2}'
+          - os: macos-14
+            os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
     steps:
       - name: Check the current OS version
