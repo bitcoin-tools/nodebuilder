@@ -49,7 +49,7 @@ The script performs the following actions:
 
 ### Which Parts of My System Does This Script Touch?
 
-This script modifies the following parts of your filesystem:
+This script modifies the following in your file system:
 - Any files related to installing system updates and [dependencies](./dependencies/)
 - The downloaded Bitcoin Core and validation files:
   - `<temporary_directory>/compile_bitcoin/`
