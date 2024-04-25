@@ -72,7 +72,7 @@ This script modifies the following parts of your filesystem:
 - The Bitcoin Core configuration file:
   - `~/.bitcoin/bitcoin.conf` on Linux
   - `~/Library/Application Support/Bitcoin/bitcoin.conf` on macOS
-- Any files modified by Bitcoin Core, such as the blockchain and UTXO data and information about known peers.
+- Any files modified by Bitcoin Core, such as the blockchain, unspent transaction, and peer data.
 
 ### How Do I Uninstall Everything?
 
@@ -98,7 +98,7 @@ An automated solution is in the backlog. For now, here are a series of manual st
 
 - To remove the data directory, open the Files or Finder application, go to the `~` on Linux or `~/Library/Application Support` on macOS, and delete the data directory named `.bitcoin` on Linux or `Bitcoin` on macOS. You need to enable the "Show Hidden Files" option in the Files or Finder settings.
 
-  - Or do it in Terminal with `rm -r ~/.bitcoin/` on Linux or `rm -r ~/Library/Applicatoin\ Support/Bitcoin/` on macOS.
+  - Or do it in Terminal with `rm -r ~/.bitcoin/` on Linux or `rm -r ~/Library/Application\ Support/Bitcoin/` on macOS.
  
 If you have any questions or ideas on how this section can be improved, please [open an issue](https://github.com/bitcoin-tools/nodebuilder/issues).
 
