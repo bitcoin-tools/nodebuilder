@@ -29,8 +29,7 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          comment-summary-in-pr: always
-          fail-on-severity: low
+          config-file: './config/dependency-review-config.yaml'
   shell-lint:
     name: Check shell code
     runs-on: ubuntu-latest
