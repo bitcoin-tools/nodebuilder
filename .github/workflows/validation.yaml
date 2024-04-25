@@ -123,7 +123,7 @@ jobs:
           - os: ubuntu-latest
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
-            remove-snap-command: apt remove --assume-yes snap
+            remove-snap-command: sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
