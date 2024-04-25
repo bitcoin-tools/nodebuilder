@@ -120,7 +120,7 @@ jobs:
             binary-path: './nodebuilder --compile'
           - job-purpose: Test
             binary-path: './test/test_nodebuilder'
-          - os: ubuntu-22
+          - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
             remove-snap-command: sudo apt remove --assume-yes snap
