@@ -161,7 +161,7 @@ jobs:
         timeout-minutes: 120
 
   run-nodebuilder-docker:
-    name: Run container with ${{ matrix.container }}
+    name: Run container ${{ matrix.container }}
     needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ubuntu-latest
     strategy:
