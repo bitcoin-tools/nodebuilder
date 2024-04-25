@@ -4,12 +4,13 @@ on:
   push:
     branches: [ master ]
     paths:
+      - .github/workflows/*.yaml
       - Dockerfile
-      - dependencies.txt
+      - config/*.yaml
+      - dependencies/*.txt
+      - dockerfiles/Dockerfile_*
       - nodebuilder
       - test/test_bitcoin
-      - .github/workflows/*.yaml
-      - dockerfiles/Dockerfile_*
   issues:
     types: [ opened ]
   schedule:
