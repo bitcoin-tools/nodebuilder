@@ -14,46 +14,45 @@ check_internet() {
   check_int_address=$1
   check_int_port="443"
   check_int_timeout="10"
-  if command -v curl > /dev/null; then
-    curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
-  else
-    handle_error "'curl' not found. Please run: $(get_curl_install_command)"
-  fi
 }
 
-get_curl_install_command() {
-  case "$(get_os_release_type)" in
-  alpine)
-    printf '%s\n' "apk add curl"
-    ;;
-  debian | ubuntu)
-    printf '%s\n' "sudo apt-get install -y curl"
-    ;;
-  fedora | rhel | centos*)
-    printf '%s\n' "sudo dnf install curl"
-    ;;
-  arch | manjaro)
-    printf '%s\n' "sudo pacman -Syu --needed --noconfirm curl"
-    ;;
-  suse | *opensuse*)
-    printf '%s\n' "sudo zypper --non-interactive --quiet install curl"
-    ;;
-  *)
-    if command -v apk > /dev/null; then
-      printf '%s\n' "apk --quiet add curl"
-    elif command -v apt-get > /dev/null; then
-      printf '%s\n' "apt-get -qq install -y curl"
-    elif command -v dnf > /dev/null; then
-      printf '%s\n' "sudo dnf install curl"
-    elif command -v pacman > /dev/null; then
-      printf '%s\n' "sudo pacman -Syu --needed --noconfirm curl"
-    elif command -v zypper > /dev/null; then
-      printf '%s\n' "sudo zypper --non-interactive --quiet install curl"
-    else
-      handle_error "PACKAGE MANAGER NOT FOUND. Please research how to install 'curl'."
-    fi
-    ;;
-  esac
+ensure_curl_dependency() {
+  if ! command -v curl > /dev/null; then
+    printf '%s' "'curl' not found. Installing... "
+    case "$(get_os_release_type)" in
+    alpine)
+      apk --quiet add curl
+      ;;
+    debian | ubuntu)
+      sudo apt-get install -y curl > /dev/null
+      ;;
+    fedora | rhel | centos*)
+      sudo dnf install curl > /dev/null
+      ;;
+    arch | manjaro)
+      sudo pacman -Syu --needed --noconfirm curl > /dev/null
+      ;;
+    suse | *opensuse*)
+      sudo zypper --non-interactive --quiet install curl > /dev/null
+      ;;
+    *)
+      if command -v apk > /dev/null; then
+        apk --quiet add curl
+      elif command -v apt-get > /dev/null; then
+        sudo apt-get -qq install -y curl
+      elif command -v dnf > /dev/null; then
+        sudo dnf install curl > /dev/null
+      elif command -v pacman > /dev/null; then
+        sudo pacman -Syu --needed --noconfirm curl > /dev/null
+      elif command -v zypper > /dev/null; then
+        sudo zypper --non-interactive --quiet install curl > /dev/null
+      else
+        handle_error "PACKAGE MANAGER NOT FOUND. Please research how to install 'curl'."
+      fi
+      ;;
+    esac
+    printf '%s\n' "ok."
+  fi
 }
 
 display_macos_warning() {
@@ -110,7 +109,7 @@ install_build_dependencies_aptget() {
 }
 
 install_build_dependencies_dnf() {
-  sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel
+  sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel > /dev/null
 }
 
 install_build_dependencies_pacman() {
@@ -369,6 +368,7 @@ else
   printf '%s\n' "Please enter your sudo password if requested."
   sudo --validate
 fi
+ensure_curl_dependency
 
 clear
 case "$(uname -s)" in
