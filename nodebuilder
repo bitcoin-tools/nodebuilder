@@ -17,7 +17,7 @@ check_internet() {
   if command -v curl; then
     curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
   else
-    handle_error "Required dependency 'curl' not found. Please run: $(get_curl_install_command)"
+    handle_error "'curl' not found. Please run: $(get_curl_install_command)"
   fi
 }
 
