@@ -5,7 +5,7 @@ FROM registry.access.redhat.com/ubi8/ubi:8.9@sha256:edc34f89cf9c818c2fb28b8ea178
 ENV TERM=xterm
 
 # Define the  dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt
 
 # Check the current environment
 RUN uname -a \
