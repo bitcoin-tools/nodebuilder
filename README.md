@@ -92,13 +92,15 @@ An automated solution is in the backlog. For now, here are a series of manual st
 
    - Or do it in Terminal with `rm ~/Desktop/bitcoin_core.desktop ~/.local/share/applications/bitcoin_core.desktop` on Linux.
 
-- **If you want to keep your synced blocks and chainstate data**, open the Files or Finder application, go to the data directory at `~/.bitcoin` on Linux or `~/Library/Application Support/Bitcoin` on macOS, and either backup the `blocks` and `chainstate` directories to an external drive or . (The next step will remove everything else from the Bitcoin Core data directory.)
+- **If you want to keep your synced blocks and chainstate data**, open the Files or Finder application, go to the data directory at `~/.bitcoin` on Linux or `~/Library/Application Support/Bitcoin` on macOS, and either backup the `blocks` and `chainstate` directories to an external drive or move those directories somewhere else on your computer. (The next step will remove everything else from the Bitcoin Core data directory.)
 
-   - Also open `bitcoin.conf` and make note of your prune value, in MiB (1024^2 bytes). Any future Bitcoin Core nodes you run must have a prune setting less than or equal to this value, or you'll have to re-sync the chain.
+   - Also open `bitcoin.conf` and make note of your prune value, in MiB (1024^2 bytes). Perhaps save that line (and only that line) to a text file wherever you copy/move the `blocks` and `chainstate` directories to. Any future Bitcoin Core nodes you run ***must have a prune setting less than or equal to this value***, or you'll have to re-sync the chain.
 
-- To remove the data directory, open the Files or Finder application, go to the `~` on Linux or `~/Library/Application Support` on macOS, and delete the data directory named `.bitcoin` on Linux or `Bitcoin` on macOS. You may need to enable the *Show Hidden Files* option in the Files or Finder settings.
+- To remove the data directory, open the Files or Finder application, go to the `~` on Linux or `~/Library/Application Support` on macOS, and delete the data directory named `.bitcoin` on Linux or `Bitcoin` on macOS. You need to enable the "Show Hidden Files" option in the Files or Finder settings.
 
-- Or do it in Terminal with `rm -r ~/.bitcoin/` on Linux or `rm -r ~/Library/Applicatoin\ Support/Bitcoin/` on macOS.
+  - Or do it in Terminal with `rm -r ~/.bitcoin/` on Linux or `rm -r ~/Library/Applicatoin\ Support/Bitcoin/` on macOS.
+ 
+If you have any questions or ideas on how this section can be improved, please [open an issue](https://github.com/bitcoin-tools/nodebuilder/issues).
 
 ## Acknowledgements
 
