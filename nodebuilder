@@ -184,6 +184,7 @@ install_updates_darwin() {
 
   # Continuously check for the presence of the restart dialog while softwareupdate is running
   while ps -p "${softwareupdate_pid}" > /dev/null; do
+    ps aux #debug
     # If the restart dialog is present, handle it
     if ps aux | grep --quiet "[i]nstallassistant_springboard"; then
       if is_running_in_ci || is_running_in_container; then
