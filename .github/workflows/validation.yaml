@@ -19,7 +19,7 @@ env:
   TERM: xterm
 jobs:
   dependencies-check:
-    name: Check CI depencencies
+    name: Check depencencies
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -109,7 +109,7 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [shell-lint, yaml-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [dependencies-check, shell-lint, yaml-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -162,7 +162,7 @@ jobs:
 
   run-nodebuilder-docker:
     name: Run ${{ matrix.container }} container
-    needs: [shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ubuntu-latest
     strategy:
       matrix:
