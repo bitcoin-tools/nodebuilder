@@ -17,13 +17,13 @@ on:
   workflow_dispatch:
 env:
   TERM: xterm
-permissions:
-  #contents: write
-  pull-requests: write
 jobs:
   dependencies-check:
     name: Check CI depencencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - name: Dependency Review
