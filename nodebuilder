@@ -27,7 +27,7 @@ get_curl_install_command() {
     printf '%s\n' "apk add curl"
     ;;
   debian | ubuntu)
-    printf '%s\n' "sudo apt-get update && sudo apt-get install -y curl"
+    printf '%s\n' "sudo apt-get install -y curl"
     ;;
   fedora | rhel | centos*)
     printf '%s\n' "sudo dnf install curl"
