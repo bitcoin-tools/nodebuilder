@@ -1,4 +1,4 @@
-# This is the configuration file for the dependency-review-action job in the validation CI workflow.
+# This is the configuration file for the dependency-review-action job in the Validation CI workflow.
 
 # Add a comment directly to any PR (also in validation.yaml, requires permissions: pull-requests: write)
 # Possible values are "always", "on-failure", and "never"
