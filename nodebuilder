@@ -14,6 +14,7 @@ check_internet() {
   check_int_address=$1
   check_int_port="443"
   check_int_timeout="10"
+  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
 }
 
 ensure_curl_dependency() {
