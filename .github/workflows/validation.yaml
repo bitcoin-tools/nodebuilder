@@ -114,7 +114,7 @@ jobs:
     strategy:
       matrix:
         job-purpose: [Compile, Test]
-        os: [ubuntu-22, ubuntu-latest, macos-13, macos-14]
+        os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
         include:
           - job-purpose: Compile
             binary-path: './nodebuilder --compile'
