@@ -11,7 +11,8 @@ Run the following command in Terminal:
 
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
-- [Which Files Does This Script Touch?](#which-files-does-this-script-touch)
+  - [Which Parts of My System Does This Script Touch?](#which-parts-of-my-system-does-this-script-touch)
+  - [How Do I Uninstall Everything?](#how-do-i-uninstall-everything)
 - [Acknowledgements](#acknowledgements)
 - [Contributing](#contributing)
 - [License](#license)
@@ -46,35 +47,60 @@ The script performs the following actions:
 7. Display relevant info while the initial block download proceeds, such as the percent synced, blocks left to sync, current chain tip date, and the free disk space remaining.
 8. After the initial block download completes, tell the user that the script has finished and end the script.
 
-## Which Files Does This Script Touch?
+### Which Parts of My System Does This Script Touch?
 
-Before launching Bitcoin Core, this script modifies the following files:
+This script modifies the following in your file system:
 - Any files related to installing system updates and [dependencies](./dependencies/)
-- Any files added by Bitcoin Core, such as the `blocks/` and `chainstate/` directories
-- The downloaded Bitcoin Core archive and validation files:
-  - `/tmp/<mktemp_directory>/bitcoin-<version>-<architecture>-linux-gnu.tar.gz`
-  - `/tmp/<mktemp_directory>/SHA256SUMS`
-  - `/tmp/<mktemp_directory>/SHA256SUMS.asc`
-  - `/tmp/<mktemp_directory>/guix.sigs/`
+- The downloaded Bitcoin Core and validation files:
+  - `<temporary_directory>/compile_bitcoin/`
+  - `<temporary_directory>/bitcoin-<version>-<architecture>-linux-gnu.tar.gz`
+  - `<temporary_directory>/SHA256SUMS`
+  - `<temporary_directory>/SHA256SUMS.asc`
+  - `<temporary_directory>/guix.sigs/`
 - The validated Bitcoin Core tarball and PGP keys:
   - `~/Downloads/bitcoin-<version>-<architecture>-linux-gnu.tar.gz`
   - `~/Downloads/guix.sigs/`
-- The installed Bitcoin Core files:
-  - binaries
-     - `/usr/local/bin/{bitcoind,bitcoin-qt,bitcoin-cli,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin}`
-  - headers
-     - `/usr/local/include/bitcoinconsensus.h`
-  - libraries
-     - `/usr/local/lib/{libbitcoinconsensus.so,libbitcoinconsensus.so.0,libbitcoinconsensus.so.0.0.0}` (Linux)
-     - `/usr/local/lib/{libbitcoinconsensus.0.dylib}` (macOS)
-  - manpages
-     - `/usr/local/man/man1/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1}`
+- The installed Bitcoin Core executable binaries, headers, libraries, and manual pages, respectively, are installed into:
+  - `/usr/local/bin/{bitcoind,bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin}`
+  - `/usr/local/include/bitcoinconsensus.h`
+  - `/usr/local/lib/{libbitcoinconsensus.so,libbitcoinconsensus.so.0,libbitcoinconsensus.so.0.0.0}` on Linux
+  - `/usr/local/lib/libbitcoinconsensus.0.dylib` on macOS
+  - `/usr/local/man/man1/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1}`
+- An entry in the Show Applications menu and also on the desktop:
+  - `~/Desktop/bitcoin_core.desktop` on Linux
+  - `~/.local/share/applications/bitcoin_core.desktop` on Linux
 - The Bitcoin Core configuration file:
-  - `~/.bitcoin/bitcoin.conf` (Linux)
-  - `~/Library/Application Support/Bitcoin/bitcoin.conf` (macOS)
-- A shortcut on the desktop and Show Applications menu:
-  - `~/Desktop/bitcoin_core.desktop` (Linux)
-  - `~/.local/share/applications/bitcoin_core.desktop` (Linux)
+  - `~/.bitcoin/bitcoin.conf` on Linux
+  - `~/Library/Application Support/Bitcoin/bitcoin.conf` on macOS
+- Any files modified by Bitcoin Core, such as the blockchain, unspent transaction, and peer data.
+
+### How Do I Uninstall Everything?
+
+An automated solution is in the backlog. For now, here are a series of manual steps to follow:
+
+- Uninstalling [runtime dependencies](./dependencies/) can be be tricky. This script installs a minimal number of dependencies like curl, gzip, sudo, and tar as a defensive security posture. For advanced users, if you compiled Bitcoin from source by either using the `-c/--compile` optional argument or by running on Alpine Linux,  please also review the build dependencies that were installed.
+
+- To remove the downloaded Bitcoin Core installation and verification files, open the Files or Finder application, go to Downloads, and remove any files starting with `bitcoin-`. Also remove the directory named `guix.sigs`.
+
+  - Or do it in Terminal with `rm ~/Downloads/bitcoin-*.tar.gz && rm -r ~/Downloads/guix.sigs/`.
+
+- To remove the installed executable binaries, headers, libraries, and manual pages, open the Files or Finder application, go to `/usr/local/bin`, and remove `bitcoind`, `bitcoin-cli`, `bitcoin-qt`, `bitcoin-util`, `bitcoin-wallet`, and `test_bitcoin`. Then go to `/usr/local/include` and remove `bitcoinconsensus.h`. Then go to `/usr/local/lib` and remove `libbitcoinconsensus.so`, `libbitcoinconsensus.so.0`, `libbitcoinconsensus.so.0.0.0` on Linux or `libbitcoinconsensus.0.dylib` on macOS. Then go to `/usr/local/man/man1` and remove `bitcoind.1`, `bitcoin-qt.1`, `bitcoin-cli.1`, `bitcoin-tx.1`, `bitcoin-util.1`, and `bitcoin-wallet.1`.
+
+   - Or do it in Terminal with `rm /usr/local/bin/{bitcoind,bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin} /usr/local/include/bitcoinconsensus.h /usr/local/lib/{libbitcoinconsensus.so,libbitcoinconsensus.so.0,libbitcoinconsensus.so.0.0.0} /usr/local/man/man1/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1}` on Linux or `rm /usr/local/bin/{bitcoind,bitcoin-cli,bitcoin-qt,bitcoin-tx,bitcoin-util,bitcoin-wallet,test_bitcoin} /usr/local/include/bitcoinconsensus.h /usr/local/lib/libbitcoinconsensus.0.dylib /usr/local/man/man1/{bitcoind.1,bitcoin-qt.1,bitcoin-cli.1,bitcoin-tx.1,bitcoin-util.1,bitcoin-wallet.1}` on macOS. If the command fails, your user doesn't have proper privileges. Try adding `sudo` to the front of the command.
+
+- To remove the shortcut files on Linux, go to the Desktop and remove the `bitcoin_core.desktop` file. Then go to `~/.local/share/applications` and remove `bitcoin_core.desktop`.
+
+   - Or do it in Terminal with `rm ~/Desktop/bitcoin_core.desktop ~/.local/share/applications/bitcoin_core.desktop` on Linux.
+
+- **If you want to keep your synced blocks and chainstate data**, open the Files or Finder application, go to the data directory at `~/.bitcoin` on Linux or `~/Library/Application Support/Bitcoin` on macOS, and either backup the `blocks` and `chainstate` directories to an external drive or move those directories somewhere else on your computer. (The next step will remove everything else from the Bitcoin Core data directory.)
+
+   - Also open `bitcoin.conf` and make note of your prune value, in MiB (1024^2 bytes). Perhaps save that line (and only that line) to a text file wherever you copy/move the `blocks` and `chainstate` directories to. Any future Bitcoin Core nodes you run ***must have a prune setting less than or equal to this value***, or you'll have to re-sync the chain.
+
+- To remove the data directory, open the Files or Finder application, go to the `~` on Linux or `~/Library/Application Support` on macOS, and delete the data directory named `.bitcoin` on Linux or `Bitcoin` on macOS. You need to enable the "Show Hidden Files" option in the Files or Finder settings.
+
+  - Or do it in Terminal with `rm -r ~/.bitcoin/` on Linux or `rm -r ~/Library/Application\ Support/Bitcoin/` on macOS.
+ 
+If you have any questions or ideas on how this section can be improved, please [open an issue](https://github.com/bitcoin-tools/nodebuilder/issues).
 
 ## Acknowledgements
 
@@ -88,7 +114,9 @@ Inspiration for this project came from these Open Source projects:
 
 ## Contributing
 
-Please open an issue for any bug reports or feature requests. If you plan to submit a pull request, please first look over our [test procedures](test/README.md).
+Please open an issue for any bug reports or feature requests. You can see the list of open issues [here](https://github.com/bitcoin-tools/nodebuilder/issues).
+
+If you plan to submit a pull request, please first look over our automated and manual [test procedures](test/README.md).
 
 ## License
 
