@@ -1,3 +1,5 @@
+# This is the configuration file for the pyspelling spell check job in the Validation CI workflow.
+
 matrix:
 - name: Markdown
   aspell:

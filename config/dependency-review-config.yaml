@@ -1,8 +1,11 @@
-# Possible values: "critical", "high", "moderate", "low"
-fail_on_severity: low
+# This is the configuration file for the dependency-review-action job in the Validation CI workflow.
 
-# Add a comment directly to any PR (also requires permissions: pull-requests: write in validation.yaml
+# Add a comment directly to any PR (also in validation.yaml, requires permissions: pull-requests: write)
+# Possible values are "always", "on-failure", and "never"
 comment_summary_in_pr: on-failure
+
+# Possible values are "critical", "high", "moderate", "low"
+fail_on_severity: low
 
 # List of FOSS licenses taken from https://spdx.org/licenses/
 allow_licenses:
