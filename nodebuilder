@@ -14,7 +14,7 @@ check_internet() {
   check_int_address=$1
   check_int_port="443"
   check_int_timeout="10"
-  if command -v curl; then
+  if command -v curl > /dev/null; then
     curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
   else
     handle_error "'curl' not found. Please run: $(get_curl_install_command)"
