@@ -1,7 +1,0 @@
-curl
-git
-gnupg
-gzip
-jq
-sudo
-tar

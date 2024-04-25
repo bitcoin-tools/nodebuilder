@@ -37,19 +37,19 @@ This POSIX-compliant script installs several common runtime dependencies that ar
 ## What Does This Script Do?
 
 The script performs the following actions:
-1. Update the system (including reboot, if required) and install [dependencies](./dependencies.txt).
-2. Download, validate, and extract Bitcoin Core.
+1. Update the system (including reboot, if required) and install [dependencies](./dependencies/).
+2. Either download, validate, and extract Bitcoin Core or build directly from the source code.
 3. Set a prune for Bitcoin Core based on the disk free space.
 4. Create shortcuts for Bitcoin Core on the desktop and the "Show Applications" list.
 5. Start Bitcoin Core.
 6. Prevent the system from sleeping, suspending, and hibernating.
-7. While the initial block download proceeds, display relevant info such as the percent synced, blocks left to sync, current chain tip date, and the free disk space remaining.
+7. Display relevant info while the initial block download proceeds, such as the percent synced, blocks left to sync, current chain tip date, and the free disk space remaining.
 8. After the initial block download completes, tell the user that the script has finished and end the script.
 
 ## Which Files Does This Script Touch?
 
 Before launching Bitcoin Core, this script modifies the following files:
-- Any files related to installing system updates and dependencies
+- Any files related to installing system updates and [dependencies](./dependencies/)
 - Any files added by Bitcoin Core, such as the `blocks/` and `chainstate/` directories
 - The downloaded Bitcoin Core archive and validation files:
   - `/tmp/<mktemp_directory>/bitcoin-<version>-<architecture>-linux-gnu.tar.gz`
