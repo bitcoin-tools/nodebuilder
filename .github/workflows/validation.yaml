@@ -18,6 +18,18 @@ on:
 env:
   TERM: xterm
 jobs:
+  dependencies-check:
+    name: Check CI depencencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          config-file: './config/dependency-review-config.yaml'
   shell-lint:
     name: Check shell code
     runs-on: ubuntu-latest
