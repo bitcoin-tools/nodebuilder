@@ -123,6 +123,7 @@ jobs:
           - os: ubuntu-latest
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
+            remove-snap-command: sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
@@ -153,6 +154,8 @@ jobs:
             /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: cache-apt-${{ matrix.os }}
+      - name: Remove the snap package
+        run: ${{ matrix.remove-snap-command }}
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
