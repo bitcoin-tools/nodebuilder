@@ -8,6 +8,7 @@ Hrnls
 JWWeatherman
 LTS
 Manjaro
+MiB
 Parmanode
 PaymentRequired
 POSIX
@@ -32,6 +33,7 @@ ayeowch
 bitcoinconsensus
 bitcoind
 bitnodes
+blockchain
 cd
 chainstate
 ci
@@ -49,6 +51,7 @@ fsSL
 github
 guix
 gz
+gzip
 html
 https
 installmanual
