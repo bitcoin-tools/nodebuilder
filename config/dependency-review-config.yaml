@@ -1,8 +1,12 @@
-# Possible values: "critical", "high", "moderate", "low"
-fail_on_severity: low
+# git base and head references for performing the comparison check
+base_ref: ${{ github.event.pull_request.base.sha || 'master' }}
+head_ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
 # Add a comment directly to any PR (also requires permissions: pull-requests: write in validation.yaml
-comment_summary_in_pr: on-failure
+comment_summary_in_pr: always
+
+# Possible values: "critical", "high", "moderate", "low"
+fail_on_severity: low
 
 # List of FOSS licenses taken from https://spdx.org/licenses/
 allow_licenses:
