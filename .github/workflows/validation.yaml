@@ -114,13 +114,13 @@ jobs:
     strategy:
       matrix:
         job-purpose: [Compile, Test]
-        os: [ubuntu-latest, macos-13, macos-14]
+        os: [ubuntu-22, ubuntu-latest, macos-13, macos-14]
         include:
           - job-purpose: Compile
             binary-path: './nodebuilder --compile'
           - job-purpose: Test
             binary-path: './test/test_nodebuilder'
-          - os: ubuntu-latest
+          - os: ubuntu-22
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
             install-upgrades-command: >-
