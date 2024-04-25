@@ -30,6 +30,8 @@ jobs:
         uses: actions/dependency-review-action@v4
         with:
           config-file: './config/dependency-review-config.yaml'
+          base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
+          head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
   shell-lint:
     name: Check shell code
     runs-on: ubuntu-latest
