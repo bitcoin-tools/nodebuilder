@@ -14,7 +14,46 @@ check_internet() {
   check_int_address=$1
   check_int_port="443"
   check_int_timeout="10"
-  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
+  if command -v curl; then
+    curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
+  else
+    handle_error "Required dependency 'curl' not found. Please run: $(get_curl_install_command)"
+  fi
+}
+
+get_curl_install_command() {
+  case "$(get_os_release_type)" in
+  alpine)
+    printf '%s\n' "apk add curl"
+    ;;
+  debian | ubuntu)
+    printf '%s\n' "sudo apt-get update && sudo apt-get install -y curl"
+    ;;
+  fedora | rhel | centos*)
+    printf '%s\n' "sudo dnf install curl"
+    ;;
+  arch | manjaro)
+    printf '%s\n' "sudo pacman -Syu --needed --noconfirm curl"
+    ;;
+  suse | *opensuse*)
+    printf '%s\n' "sudo zypper --non-interactive --quiet install curl"
+    ;;
+  *)
+    if command -v apk > /dev/null; then
+      printf '%s\n' "apk --quiet add curl"
+    elif command -v apt-get > /dev/null; then
+      printf '%s\n' "apt-get -qq install -y curl"
+    elif command -v dnf > /dev/null; then
+      printf '%s\n' "sudo dnf install curl"
+    elif command -v pacman > /dev/null; then
+      printf '%s\n' "sudo pacman -Syu --needed --noconfirm curl"
+    elif command -v zypper > /dev/null; then
+      printf '%s\n' "sudo zypper --non-interactive --quiet install curl"
+    else
+      handle_error "PACKAGE MANAGER NOT FOUND. Please research how to install 'curl'."
+    fi
+    ;;
+  esac
 }
 
 display_macos_warning() {
