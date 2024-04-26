@@ -99,7 +99,7 @@ get_os_release_type() (
 )
 
 install_build_dependencies_apk() {
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qttools-dev |
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qtbase-x11 |
     grep -v "ICU with non-English locales" -A2 -B1 || true
 }
 
