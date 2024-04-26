@@ -641,7 +641,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   if [ "$(get_os_release_type)" = "Darwin" ]; then
     ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
   else
-    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
+    ./configure --without-bdb --enable-suppress-external-warnings 2> "${stderr_compile_log_file}"
   fi
   grep -v \
     -e "libzmq" \
