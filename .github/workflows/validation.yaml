@@ -132,6 +132,7 @@ jobs:
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
+            remove-snap-command: sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
@@ -163,10 +164,11 @@ jobs:
           key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: cache-apt-${{ matrix.os }}
       - name: Remove the snap package
+        if: matrix.remove-snap-command != null
         run: ${{ matrix.remove-snap-command }}
       - name: Install system upgrades
-        run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
+        run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
