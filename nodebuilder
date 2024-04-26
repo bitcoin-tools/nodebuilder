@@ -369,13 +369,13 @@ else
   printf '%s\n' "Please enter your sudo password if requested."
   sudo --validate
 fi
-ensure_curl_dependency
 
 clear
 case "$(uname -s)" in
 Linux)
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
+  ensure_curl_dependency
   printf '%s\n%s' "Detected: running on Linux." "Checking for internet... "
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
