@@ -17,6 +17,45 @@ check_internet() {
   curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
 }
 
+ensure_curl_dependency() {
+  if ! command -v curl > /dev/null; then
+    printf '%s' "Installing curl depencency... "
+    case "$(get_os_release_type)" in
+    alpine)
+      apk --quiet add curl
+      ;;
+    debian | ubuntu)
+      sudo apt-get install -y curl > /dev/null
+      ;;
+    fedora | rhel | centos*)
+      sudo dnf install curl > /dev/null
+      ;;
+    arch | manjaro)
+      sudo pacman -Syu --needed --noconfirm curl > /dev/null
+      ;;
+    suse | *opensuse*)
+      sudo zypper --non-interactive --quiet install curl > /dev/null
+      ;;
+    *)
+      if command -v apk > /dev/null; then
+        apk --quiet add curl
+      elif command -v apt-get > /dev/null; then
+        sudo apt-get -qq install -y curl > /dev/null
+      elif command -v dnf > /dev/null; then
+        sudo dnf install curl > /dev/null
+      elif command -v pacman > /dev/null; then
+        sudo pacman -Syu --needed --noconfirm curl > /dev/null
+      elif command -v zypper > /dev/null; then
+        sudo zypper --non-interactive --quiet install curl > /dev/null
+      else
+        handle_error "PACKAGE MANAGER NOT FOUND. Please research how to install 'curl'."
+      fi
+      ;;
+    esac
+    printf '%s\n' "ok."
+  fi
+}
+
 display_macos_warning() {
   if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
     printf '%s\n%s\n' \
@@ -71,7 +110,7 @@ install_build_dependencies_aptget() {
 }
 
 install_build_dependencies_dnf() {
-  sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel
+  sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel > /dev/null
 }
 
 install_build_dependencies_pacman() {
@@ -334,9 +373,11 @@ fi
 clear
 case "$(uname -s)" in
 Linux)
+  printf '%s\n' "Detected: running on Linux."
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
-  printf '%s\n%s' "Detected: running on Linux." "Checking for internet... "
+  ensure_curl_dependency
+  printf '%s' "Checking the internet status... "
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
     check_internet 9.9.9.9 ||
