@@ -509,7 +509,7 @@ Darwin)
 
   printf '%s' "Performing a system upgrade... "
   softwareupdate --list #DEBUG PURPOSES DELETE THIS LINE BEFORE MERGING
-  reboot_required_list_macos="$(softwareupdate --list 2> /dev/null | grep "restart")"
+  reboot_required_list_macos="$(softwareupdate --list 2> /dev/null | grep "restart" || '')"
   install_system_updates_darwin
   if [ -n "${reboot_required_list_macos}" ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n' "REBOOT REQUIRED to upgrade the following:" "${reboot_required_list_macos}"
