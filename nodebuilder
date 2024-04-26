@@ -504,10 +504,7 @@ Linux)
     sudo reboot
     exit 0
   fi
-  printf '%s\n%s' "ok." "Checking for dependencies... "
-  dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
-  [ -z "$dependencies" ] && handle_error "The list of dependencies is empty."
+  printf '%s\n%s' "ok." "Ensuring runtime dependencies... "
   case "$(get_os_release_type)" in
   alpine)
     install_runtime_dependencies_apk
