@@ -332,7 +332,6 @@ throw_error() {
   exit 1
 }
 
-
 temp_directory=""
 unattended=false
 prune_value="-1"
