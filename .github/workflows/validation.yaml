@@ -105,7 +105,7 @@ jobs:
     name: Pause on master commits
     runs-on: ubuntu-latest
     steps:
-      - name: Sleep for the cache-control max-age duration
+      - name: Sleep for the GitHub cache-control max-age duration
         run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
 
   run-nodebuilder-baremetal:
@@ -129,6 +129,13 @@ jobs:
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
               && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
+            cache-path: |
+              /var/cache/apt/archives/*.deb
+              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
+              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
+              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
+              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
+              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
@@ -137,6 +144,13 @@ jobs:
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
               && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
+            cache-path: |
+              /var/cache/apt/archives/*.deb
+              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
+              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
+              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
+              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
+              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           - os: macos-13
             os-friendly-name: macOS 13 [x86_64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
@@ -150,19 +164,13 @@ jobs:
       - name: Change owner of apt archives
         if: contains(matrix.os, 'ubuntu')
         run: sudo chown -R "$(whoami)" /var/cache/apt/archives
-      - name: Cache apt archives and lists
-        if: contains(matrix.os, 'ubuntu')
+      - name: Cache system archives
+        if: matrix.cache-path != null
         uses: actions/cache@v4
         with:
-          path: |
-            /var/cache/apt/archives/*.deb
-            /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
-            /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
-            /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
-            /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
-            /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
-          key: cache-apt-${{ matrix.os }}-${{ github.run_id }}
-          restore-keys: cache-apt-${{ matrix.os }}
+          path: ${{ matrix.cache-path }}
+          key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
+          restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
         if: matrix.remove-snap-command != null
         run: ${{ matrix.remove-snap-command }}
