@@ -166,7 +166,7 @@ install_runtime_dependencies_zypper() {
   fi
 }
 
-install_updates_apk() {
+install_system_updates_apk() {
   apk update --quiet && apk upgrade --quiet
 }
 
@@ -178,7 +178,7 @@ install_system_updates_aptget() {
   rm "${stderr_install_log_file}"
 }
 
-install_updates_darwin() {
+install_system_updates_darwin() {
   softwareupdate --install --os-only --recommended &
   softwareupdate_pid="$!"
 
