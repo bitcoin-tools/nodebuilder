@@ -511,7 +511,7 @@ Linux)
     if [ -n "${install_runtime_command_function}" ]; then
       "${install_runtime_command_function}"
     else
-      throw_error "This version of Linux is not supported."
+      throw_error "Unknown package manager. This version of Linux is not supported."
     fi
     ;;
   esac
@@ -532,37 +532,6 @@ Darwin)
   printf '%s\n%s' "ok." "Checking for git... "
   install_runtime_dependencies_darwin
   printf '%s\n' "ok."
-  if ! command -v git > /dev/null 2>&1; then
-    printf '%s' "Installing git via the Xcode Command Line Tools... "
-    # These steps were taken from https://github.com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
-    # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended xcode tools installation shouldn't take 20+ lines of code
-    sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-    clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
-    clt_label="$(/bin/sh -c "${clt_label_command}")"
-    if [ -n "${clt_label}" ]; then
-      sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
-    else
-      throw_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
-    fi
-    sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-
-    if command -v git > /dev/null 2>&1; then
-      printf '%s\n' "ok."
-    else
-      if [ "${unattended}" = true ]; then
-        printf '\n%s\n' "ERROR: Failed to install Xcode. Try re-running without -u/--unattended."
-        exit 1
-      fi
-
-      printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a GUI popup)."
-      /usr/bin/xcode-select --install
-      printf '%s' "PRESS ENTER when the installation has completed."
-      read -r _
-      if ! command -v git > /dev/null 2>&1; then
-        throw_error "Failed to install git via the Xcode Command Line Tools."
-      fi
-    fi
-  fi
   ;;
 MINGW*)
   throw_error "Windows is not supported. Instead, use WSL (Windows Subsystem for Linux)."
