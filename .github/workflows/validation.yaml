@@ -129,9 +129,17 @@ jobs:
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
               && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
+            cache-path: |
+              /var/cache/apt/archives/*.deb
+              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
+              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
+              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
+              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
+              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
+            remove-snap-command: sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
@@ -168,6 +176,7 @@ jobs:
           restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
         run: ${{ matrix.remove-snap-command }}
+        if: matrix.install-upgrades-command != null
       - name: Install system upgrades
         run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
