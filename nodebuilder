@@ -16,7 +16,19 @@ check_internet() {
   check_int_address=$1
   check_int_port="443"
   check_int_timeout="10"
-  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}"
+  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
+}
+
+display_macos_warning() {
+  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+    printf '%s\n%s\n' \
+      "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
+      "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
+    if ! is_running_in_ci; then
+      printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
+      read -r _
+    fi
+  fi
 }
 
 ensure_curl_dependency() {
@@ -58,18 +70,6 @@ ensure_curl_dependency() {
   fi
 }
 
-display_macos_warning() {
-  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
-    printf '%s\n%s\n' \
-      "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
-      "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
-    if ! is_running_in_ci; then
-      printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
-      read -r _
-    fi
-  fi
-}
-
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -101,7 +101,7 @@ get_os_release_type() (
 )
 
 install_build_dependencies_apk() {
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev |
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qtbase-x11 qt5-qttools-dev |
     grep -v "ICU with non-English locales" -A2 -B1 || true
 }
 
@@ -146,7 +146,7 @@ install_runtime_dependencies_aptget() {
 
 install_runtime_dependencies_darwin() {
   if ! command -v git > /dev/null 2>&1; then
-    printf '%s' "Installing git via the Xcode Command Line Tools... "
+    printf '%s\n%s' "not found." "Installing git via the Xcode Command Line Tools... "
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
     sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
@@ -547,7 +547,9 @@ Darwin)
     handle_error "Check for active internet failed."
   printf '%s\n' "ok."
   display_macos_warning
-
+  printf '%s\n%s' "ok." "Checking for git... "
+  install_runtime_dependencies_darwin
+  printf '%s\n' "ok."
   printf '%s' "Performing a system upgrade... "
   softwareupdate --list #DEBUG PURPOSES DELETE THIS LINE BEFORE MERGING
   reboot_required_list_macos="$(softwareupdate --list 2> /dev/null | grep "restart" || true)"
