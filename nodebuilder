@@ -98,6 +98,25 @@ get_os_release_type() (
   fi
 )
 
+# shellcheck disable=SC2317
+handle_error() {
+  log_error "Failed to run line $1."
+  handle_exit
+  exit 1
+}
+
+# shellcheck disable=SC2317
+handle_exit() {
+  [ -n "${temp_directory:-}" ] && rm -rf -- "${temp_directory:?}"/
+}
+
+# shellcheck disable=SC2317
+handle_sigint() {
+  printf '\n%s\n' "Detected Ctrl+C. Exiting."
+  handle_exit
+  exit 0
+}
+
 install_build_dependencies_apk() {
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qtbase-x11 qt5-qttools-dev |
     grep -v "ICU with non-English locales" -A2 -B1 || true
@@ -203,6 +222,10 @@ install_runtime_dependencies_zypper() {
   fi
 }
 
+install_system_updates_apk() {
+  apk update --quiet && apk upgrade --quiet
+}
+
 install_system_updates_aptget() {
   check_dpkg_lock
   stderr_install_log_file="${temp_directory}/stderr_install.log"
@@ -213,10 +236,6 @@ install_system_updates_aptget() {
 
 install_system_updates_dnf() {
   sudo dnf --assumeyes --quiet upgrade > /dev/null
-}
-
-install_system_updates_apk() {
-  apk update --quiet && apk upgrade --quiet
 }
 
 install_system_updates_pacman() {
@@ -263,6 +282,20 @@ is_valid_bitcoin_version() {
   return 1
 }
 
+log_error() {
+  printf '\n%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
+}
+
+print_usage() {
+  printf '%s\n\n' "Usage: $0 [options]"
+  printf '%s\n' "Options:"
+  printf '%s\n' "-b, --bitcoin-version   Speficy the Bitcoin version"
+  printf '%s\n' "-c, --compile           Build Bitcoin from source"
+  printf '%s\n' "-h, --help              Display this help message"
+  printf '%s\n' "-p, --prune             Set a prune value in MiB"
+  printf '%s\n' "-u, --unattended        Run in non-interactive mode"
+}
+
 set_bitcoin_core_option() (
   option="$1"
   value="$2"
@@ -286,39 +319,6 @@ set_if_unset_bitcoin_core_option() (
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
 )
-
-log_error() {
-  printf '\n%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
-}
-
-# shellcheck disable=SC2317
-handle_exit() {
-  [ -n "${temp_directory:-}" ] && rm -rf -- "${temp_directory:?}"/
-}
-
-# shellcheck disable=SC2317
-handle_error() {
-  log_error "Failed to run line $1."
-  handle_exit
-  exit 1
-}
-
-# shellcheck disable=SC2317
-handle_sigint() {
-  printf '\n%s\n' "Detected Ctrl+C. Exiting."
-  handle_exit
-  exit 0
-}
-
-print_usage() {
-  printf '%s\n\n' "Usage: $0 [options]"
-  printf '%s\n' "Options:"
-  printf '%s\n' "-b, --bitcoin-version   Speficy the Bitcoin version"
-  printf '%s\n' "-c, --compile           Build Bitcoin from source"
-  printf '%s\n' "-h, --help              Display this help message"
-  printf '%s\n' "-p, --prune             Set a prune value in MiB"
-  printf '%s\n' "-u, --unattended        Run in non-interactive mode"
-}
 
 throw_error() {
   if [ $# -gt 1 ]; then
