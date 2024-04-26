@@ -17,8 +17,8 @@ check_internet() {
 
   # If torsocks exists, try using torsocks curl but fall back to curl
   if command -v torsocks > /dev/null 2>&1; then
-    torsocks curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null || \
-    curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
+    torsocks curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null ||
+      curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
   else
     curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
   fi
