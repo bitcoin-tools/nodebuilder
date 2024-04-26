@@ -6,6 +6,7 @@ set -o nounset
 
 handle_exit() {
   kill_tail_process
+  rm 
 }
 
 handle_error() {
@@ -19,20 +20,24 @@ kill_tail_process() {
   fi
 }
 
-[ -f output_stdout.txt ] || touch output_stdout.txt
-tail -f output_stdout.txt &
+[ -f test_output_stdout.txt ] || touch test_output_stdout.txt
+tail -f test_output_stdout.txt &
 tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
 nohup /bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)" \
-  > output_stdout.txt \
-  2> output_stderr.txt
+  > test_output_stdout.txt \
+  2> test_output_stderr.txt
 rm nodebuilder
 kill_tail_process
 
-#printf '%s\n' "Printing the contents of stdout for debug purposes"
-#cat output_stdout.txt
+if [ -s test_output_stderr.txt ]; then
+  printf '%s\n' "Printing the contents of stderr:"
+  cat test_output_stderr.txt
+  printf '%s\n' "FAILURE: Detected runtime errors."
+  exit 1
+fi
 
 for message in \
   "Detected: running on (Linux|macOS).$" \
@@ -52,7 +57,7 @@ for message in \
   "Chain sync size:    [0-9]+ [GM]iB$" \
   "Disk free space:    [0-9]+ GiB$" \
   "The blockchain download is progressing. Exiting the script.$"; do
-  if ! grep -Eq "${message}" output_stdout.txt > /dev/null 2>&1; then
+  if ! grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
     printf '%s\n' "FAILURE: Expected message ${message} not found."
     exit 1
   fi
@@ -64,7 +69,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
     "Ensuring (build|runtime) dependencies... ok.$" \
     "Creating application shortcuts... ok.$" \
     "Checking the memory on your system... [0-9]+\.[0-9] of [0-9]+\.[0-9] GiB free.$"; do
-    if ! grep -Eq "${message}" output_stdout.txt > /dev/null 2>&1; then
+    if ! grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
       printf '%s\n' "FAILURE: Expected message ${message} not found."
       exit 1
     fi
@@ -81,7 +86,7 @@ for message in \
   "Checking free space in home directory... 0 GiB." \
   "Sync progress:      [0-9]+\.[0-9]{4} %" \
   "Disk free space:    (0 G|[0-9]+ M)iB"; do
-  if grep -Eq "${message}" output_stdout.txt > /dev/null 2>&1; then
+  if grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
     printf '%s\n' "FAILURE: Unexpected message ${message} found."
     exit 1
   fi
