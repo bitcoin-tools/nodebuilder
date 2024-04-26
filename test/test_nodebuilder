@@ -6,7 +6,8 @@ set -o nounset
 
 handle_exit() {
   kill_tail_process
-  rm 
+  [ -f test_output_stdout.txt ] && rm test_output_stdout.txt
+  [ -f test_output_stderr.txt ] && rm test_output_stderr.txt
 }
 
 handle_error() {
