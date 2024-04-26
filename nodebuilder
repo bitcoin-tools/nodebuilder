@@ -165,10 +165,10 @@ install_runtime_dependencies_pacman() {
 install_runtime_dependencies_zypper() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
   dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
-  else
+  if [ -z "${dependencies}" ]; then
     handle_error "The list of dependencies is empty."
+  else
+    printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
   fi
 }
 
