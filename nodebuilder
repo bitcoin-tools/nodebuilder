@@ -17,6 +17,18 @@ check_internet() {
   curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
 }
 
+display_macos_warning() {
+  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+    printf '%s\n%s\n' \
+      "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
+      "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
+    if ! is_running_in_ci; then
+      printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
+      read -r _
+    fi
+  fi
+}
+
 ensure_curl_dependency() {
   if ! command -v curl > /dev/null; then
     printf '%s' "Installing curl depencency... "
@@ -56,18 +68,6 @@ ensure_curl_dependency() {
   fi
 }
 
-display_macos_warning() {
-  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
-    printf '%s\n%s\n' \
-      "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
-      "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
-    if ! is_running_in_ci; then
-      printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
-      read -r _
-    fi
-  fi
-}
-
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -99,7 +99,7 @@ get_os_release_type() (
 )
 
 install_build_dependencies_apk() {
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qtbase-x11 |
+  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qtbase-x11 qt5-qttools-dev |
     grep -v "ICU with non-English locales" -A2 -B1 || true
 }
 
