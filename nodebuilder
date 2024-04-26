@@ -508,7 +508,7 @@ Linux)
 Darwin)
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s\n%s' "Detected: running on macOS." "Checking for internet... "
+  printf '%s\n%s' "Detected: running on macOS." "Checking the internet status... "
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
     check_internet 9.9.9.9 ||
