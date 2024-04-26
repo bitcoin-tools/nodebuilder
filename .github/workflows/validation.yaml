@@ -177,7 +177,6 @@ jobs:
       - name: Remove the snap package
         if: matrix.remove-snap-command != null
         run: ${{ matrix.remove-snap-command }}
-        if: matrix.install-upgrades-command != null
       - name: Install system upgrades
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
