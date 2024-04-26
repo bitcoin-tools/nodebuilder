@@ -175,11 +175,12 @@ jobs:
           key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
+        if: matrix.remove-snap-command != null
         run: ${{ matrix.remove-snap-command }}
         if: matrix.install-upgrades-command != null
       - name: Install system upgrades
-        run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
+        run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
