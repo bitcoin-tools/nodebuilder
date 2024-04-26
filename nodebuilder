@@ -6,7 +6,7 @@ set -o nounset
 
 check_dpkg_lock() {
   if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; then
-    handle_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
+    throw_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
   fi
 }
 
@@ -60,7 +60,7 @@ ensure_curl_dependency() {
       elif command -v zypper > /dev/null; then
         sudo zypper --non-interactive --quiet install curl > /dev/null
       else
-        handle_error "PACKAGE MANAGER NOT FOUND. Please research how to install 'curl'."
+        throw_error "PACKAGE MANAGER NOT FOUND. Please research how to install 'curl'."
       fi
       ;;
     esac
@@ -93,7 +93,7 @@ get_os_release_type() (
     if [ -n "${os_release_id_like}" ] || [ -n "${os_release_id}" ]; then
       printf '%s\n' "${os_release_id_like:-${os_release_id}}"
     else
-      handle_error "Failed to determine OS release type"
+      throw_error "Failed to determine OS release type"
     fi
   fi
 )
@@ -127,7 +127,7 @@ install_runtime_dependencies_apk() {
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add
   else
-    handle_error "The list of dependencies is empty."
+    throw_error "The list of dependencies is empty."
   fi
 }
 
@@ -138,7 +138,7 @@ install_runtime_dependencies_aptget() {
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
   else
-    handle_error "The list of dependencies is empty."
+    throw_error "The list of dependencies is empty."
   fi
 }
 
@@ -153,21 +153,21 @@ install_runtime_dependencies_darwin() {
     if [ -n "${clt_label}" ]; then
       sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
     else
-      handle_error "Failed to install git. Cannot find a compatible Xcode Command Line Tools package."
+      throw_error "Failed to install git. Cannot find a compatible Xcode Command Line Tools package."
     fi
     sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
     if command -v git > /dev/null 2>&1; then
       printf '%s\n' "ok."
     elif [ "${unattended}" = true ]; then
-      handle_error "Failed to install Xcode Command Line Tools. Try re-running without -u/--unattended or manually installing git."
+      throw_error "Failed to install Xcode Command Line Tools. Try re-running without -u/--unattended or manually installing git."
     else
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a popup window)."
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ENTER after you've completed the installation via the popup window."
       read -r _
       if ! command -v git > /dev/null 2>&1; then
-        handle_error "Failed to install git via the Xcode Command Line Tools. Try manually installing git"
+        throw_error "Failed to install git via the Xcode Command Line Tools. Try manually installing git"
       fi
     fi
   fi
@@ -179,7 +179,7 @@ install_runtime_dependencies_dnf() {
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
   else
-    handle_error "The list of dependencies is empty."
+    throw_error "The list of dependencies is empty."
   fi
 }
 
@@ -189,7 +189,7 @@ install_runtime_dependencies_pacman() {
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null
   else
-    handle_error "The list of dependencies is empty."
+    throw_error "The list of dependencies is empty."
   fi
 }
 
@@ -199,7 +199,7 @@ install_runtime_dependencies_zypper() {
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
   else
-    handle_error "The list of dependencies is empty."
+    throw_error "The list of dependencies is empty."
   fi
 }
 
@@ -247,7 +247,7 @@ is_running_in_container() {
 
 is_valid_bitcoin_version() {
   if [ -z "$1" ]; then
-    handle_error "No arguemnt passed into is_valid_bitcoin_version"
+    throw_error "No arguemnt passed into is_valid_bitcoin_version"
   fi
   bitcoin_version_to_check="$1"
   valid_bitcoin_version_list="0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 0.11.0 \
@@ -320,6 +320,19 @@ print_usage() {
   printf '%s\n' "-u, --unattended        Run in non-interactive mode"
 }
 
+throw_error() {
+  if [ $# -gt 1 ]; then
+    log_error "$@"
+  elif [ $# -eq 1 ]; then
+    log_error "$1"
+  else
+    log_error "Unknown error thrown at line ${LINENO:-}"
+  fi
+  handle_exit
+  exit 1
+}
+
+
 temp_directory=""
 unattended=false
 prune_value="-1"
@@ -330,12 +343,12 @@ while [ $# -gt 0 ]; do
   case "$1" in
   -b | --bitcoin-version)
     if [ $# -eq 1 ]; then
-      handle_error "-B/--bitcoin-versoin requires an argument"
+      throw_error "-B/--bitcoin-versoin requires an argument"
     fi
     if is_valid_bitcoin_version "$2"; then
       target_bitcoin_version="$2"
     else
-      handle_error "The Bitcoin version '$2' is not valid. Please use a value such as '26.0' from https://bitcoincore.org/bin/"
+      throw_error "The Bitcoin version '$2' is not valid. Please use a value such as '26.0' from https://bitcoincore.org/bin/"
     fi
     shift
     ;;
@@ -348,16 +361,16 @@ while [ $# -gt 0 ]; do
     ;;
   -p | --prune)
     if [ $# -eq 1 ]; then
-      handle_error "-p/--prune requires an argument"
+      throw_error "-p/--prune requires an argument"
     fi
     case $2 in
     *[!0-9]*) # if $2 contains any non-numeric characters
-      handle_error "The prune value '$2' must be a positive integer or zero to disable pruning"
+      throw_error "The prune value '$2' must be a positive integer or zero to disable pruning"
       ;;
     *) ;;
     esac
     if [ "$2" -gt 0 ] && [ "$2" -lt "550" ]; then
-      handle_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning"
+      throw_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning"
     fi
     prune_value="$2"
     shift
@@ -391,7 +404,7 @@ if is_running_in_container; then
 fi
 
 if ! command -v sudo > /dev/null 2>&1; then
-  handle_error "The dependency 'sudo' is not installed."
+  throw_error "The dependency 'sudo' is not installed."
 elif is_running_in_ci ||
   is_running_in_container ||
   sudo --validate --noninteractive > /dev/null 2>&1; then
@@ -414,7 +427,7 @@ Linux)
     check_internet 9.9.9.9 ||
     check_internet 9.9.9.11) &&
     check_internet bitcoincore.org) ||
-    handle_error "Check for active internet failed."
+    throw_error "Check for active internet failed."
   printf '%s\n%s' "ok." "Performing a system upgrade... "
   case "$(get_os_release_type)" in
   alpine)
@@ -444,14 +457,14 @@ Linux)
     elif command -v zypper > /dev/null; then
       install_system_updates_zypper
     else
-      handle_error "This version of Linux is not supported."
+      throw_error "This version of Linux is not supported."
     fi
     ;;
   esac
 
   # Stop running if the Docker container base image is outdated
   if [ -f /var/run/reboot-required ] && is_running_in_container; then
-    handle_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
+    throw_error "The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder."
   # Reboot the system unless it's running in CI/CD
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)"
@@ -499,7 +512,7 @@ Linux)
     if [ -n "${install_runtime_command_function}" ]; then
       "${install_runtime_command_function}"
     else
-      handle_error "This version of Linux is not supported."
+      throw_error "This version of Linux is not supported."
     fi
     ;;
   esac
@@ -514,7 +527,7 @@ Darwin)
     check_internet 9.9.9.9 ||
     check_internet 9.9.9.11) &&
     check_internet bitcoincore.org) ||
-    handle_error "Check for active internet failed."
+    throw_error "Check for active internet failed."
   printf '%s\n' "ok."
   display_macos_warning
   printf '%s\n%s' "ok." "Checking for git... "
@@ -530,7 +543,7 @@ Darwin)
     if [ -n "${clt_label}" ]; then
       sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
     else
-      handle_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
+      throw_error "Failed to install git, cannot find a compatible Xcode Command Line Tools package."
     fi
     sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
 
@@ -547,16 +560,16 @@ Darwin)
       printf '%s' "PRESS ENTER when the installation has completed."
       read -r _
       if ! command -v git > /dev/null 2>&1; then
-        handle_error "Failed to install git via the Xcode Command Line Tools."
+        throw_error "Failed to install git via the Xcode Command Line Tools."
       fi
     fi
   fi
   ;;
 MINGW*)
-  handle_error "Windows is not supported. Instead, use WSL (Windows Subsystem for Linux)."
+  throw_error "Windows is not supported. Instead, use WSL (Windows Subsystem for Linux)."
   ;;
 *)
-  handle_error "Your operating system is not supported."
+  throw_error "Your operating system is not supported."
   ;;
 esac
 
@@ -708,13 +721,13 @@ else
     elif command -v shasum > /dev/null; then
       sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | shasum -a 256 --check 2> /dev/null)"
     else
-      handle_error "Either 'sha256sum' or 'shasum' must on PATH."
+      throw_error "Either 'sha256sum' or 'shasum' must on PATH."
     fi
     cd "${HOME}"/
     case "${sha256_check}" in
     *"OK"*) ;;
     *)
-      handle_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
+      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
       ;;
     esac
     printf '%s\n' "ok."
@@ -735,7 +748,7 @@ else
       rm "${bitcoin_hash_file}"
       rm "${gpg_signatures_file}"
     else
-      handle_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${gpg_signatures_file}."
+      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${gpg_signatures_file}."
     fi
   fi
 
@@ -753,11 +766,11 @@ else
   *"No errors detected"*) ;;
   *)
     printf '%s\n' "\n${unit_test_response}"
-    handle_error "Unit tests failed."
+    throw_error "Unit tests failed."
     ;;
   esac
   printf '%s\n  %s' "ok." "Installing Bitcoin Core... "
-  [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || handle_error "Unable to create directory ${bitcoin_install_lib_destination}."
+  [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || throw_error "Unable to create directory ${bitcoin_install_lib_destination}."
   case "$(uname -s)" in
   Linux)
     sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
@@ -778,15 +791,15 @@ else
     ;;
   esac
 
-  [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_bin_destination}" || handle_error "Unable to create directory ${bitcoin_install_bin_destination}."
+  [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_bin_destination}" || throw_error "Unable to create directory ${bitcoin_install_bin_destination}."
   for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet test_bitcoin; do
     sudo install -c "${bitcoin_install_bin_source}/${bitcoin_executable}" "${bitcoin_install_bin_destination}/"
   done
 
-  [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_include_destination}" || handle_error "Unable to create directory ${bitcoin_install_include_destination}."
+  [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_include_destination}" || throw_error "Unable to create directory ${bitcoin_install_include_destination}."
   sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}/"
 
-  [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}" 2> /dev/null || sudo mkdir -p "${bitcoin_install_man_destination}" || handle_error "Unable to create directory ${bitcoin_install_man_destination}."
+  [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}" 2> /dev/null || sudo mkdir -p "${bitcoin_install_man_destination}" || throw_error "Unable to create directory ${bitcoin_install_man_destination}."
   for man_page in bitcoind.1 bitcoin-qt.1 bitcoin-cli.1 bitcoin-tx.1 bitcoin-util.1 bitcoin-wallet.1; do
     sudo install -c -m 644 "${bitcoin_install_man_source}/${man_page}" "${bitcoin_install_man_destination}/"
   done
@@ -917,7 +930,7 @@ archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * MIB_T
 # check if the user wants to disable pruning
 if [ "${prune_value}" -eq 0 ]; then
   if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${archival_node_required_disk_in_mib}" ]; then
-    handle_error "Not enough storage to disable pruning. Free up ${archival_node_required_disk_in_gib} GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+    throw_error "Not enough storage to disable pruning. Free up ${archival_node_required_disk_in_gib} GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
   fi
   printf '  %s' "Configuring with the disabled prune option... "
   set_bitcoin_core_option "prune" "${prune_value}"
@@ -925,7 +938,7 @@ if [ "${prune_value}" -eq 0 ]; then
 # check if the user passed in a prune value
 elif [ "${prune_value}" -gt 0 ]; then
   if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${prune_value}" ]; then
-    handle_error "Prune value ${prune_value} too large. Run without setting prune or use a value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+    throw_error "Prune value ${prune_value} too large. Run without setting prune or use a value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
   fi
   printf '  %s' "Configuring with the ${prune_value} MiB prune option... "
   set_bitcoin_core_option "prune" "${prune_value}"
@@ -936,7 +949,7 @@ elif [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
     printf '  %s\n' "Your node will run as an unpruned full node."
     set_bitcoin_core_option "prune" "0"
   elif [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 80 - data_already_synced_in_mib)) ]; then
-    handle_error "You are too low on disk space to run Bitcoin Core."
+    throw_error "You are too low on disk space to run Bitcoin Core."
   else
     if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 40 - data_already_synced_in_mib)) ]; then
       printf '  %s\n  %s\n' "Your disk space is low." "Setting blocks-only mode and the minimum 0.55 GiB prune."
@@ -973,7 +986,7 @@ fi
 printf '%s\n  %s' "ok." "Checking the RPC status... "
 rpc_timeout=60
 if ! bitcoin-cli --rpcwait --rpcwaittimeout="${rpc_timeout}" getrpcinfo > /dev/null; then
-  handle_error "RPC communication failed after ${rpc_timeout} seconds"
+  throw_error "RPC communication failed after ${rpc_timeout} seconds"
 fi
 printf '%s\n' "ok."
 
