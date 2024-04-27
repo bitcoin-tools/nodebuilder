@@ -1,0 +1,9 @@
+# This is the configuration file for the markdown link check in the Validation CI workflow.
+
+{
+  "timeout": "30s",
+  "retryOn429": true,
+  "retryCount": 5,
+  "fallbackRetryDelay": "120s",
+  "aliveStatusCodes": [200, 206]
+}
