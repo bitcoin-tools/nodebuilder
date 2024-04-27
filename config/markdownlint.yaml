@@ -1,0 +1,5 @@
+# This is the configuration file for the pyspelling spell check job in the Validation CI workflow.
+
+default: true # includes/excludes all rules by default
+
+# TODO: exclude the 80 width rule
