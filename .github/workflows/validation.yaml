@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Lint the Dockerfiles
+      - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
           target: Dockerfile dockerfiles/Dockerfile*
@@ -76,11 +76,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   markdown-lint:
-    name: Lint changelog file
+    name: Check markdown code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Lint changelog file
+      - name: Lint markdown
         uses: avto-dev/markdown-lint@v1
         with:
           #rules: '/lint/rules/changelog.js'
