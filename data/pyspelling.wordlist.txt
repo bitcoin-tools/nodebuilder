@@ -36,6 +36,7 @@ bitnodes
 blockchain
 cd
 chainstate
+chmod
 ci
 cli
 conf
@@ -94,6 +95,7 @@ usr
 util
 vscode
 wZM
+wget
 wordlist
 yaml
 yeticold
