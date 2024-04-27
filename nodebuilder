@@ -529,7 +529,7 @@ Darwin)
     throw_error "Check for active internet failed."
   printf '%s\n' "ok."
   display_macos_warning
-  printf '%s\n%s' "ok." "Checking for git... "
+  printf '%s' "Checking for git... "
   install_runtime_dependencies_darwin
   printf '%s\n' "ok."
   ;;
