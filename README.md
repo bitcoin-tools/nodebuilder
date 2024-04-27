@@ -10,6 +10,7 @@ Run the following command in Terminal:
 ## Table of Contents
 
 - [Usage](#usage)
+  - [Optional Arguments](#optional-arguments)
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
   - [Which Parts of My System Does This Script Touch?](#which-parts-of-my-system-does-this-script-touch)
@@ -34,15 +35,15 @@ chmod u+x nodebuilder
 ./nodebuilder
 ```
 
-### Optional Command-Line Arguments
+### Optional Arguments
 
-`nodebuilder` also supports overrides to the default semi-automated settings:
+`nodebuilder` also supports passing in arguments to override the default semi-automated settings:
 
 | Short | Long Version | Description |
 |:-----:|:-------------|:------------|
 | `-b` | `--bitcoin-version` | Speficy the Bitcoin version. Requires one argument, for example: `-b 26.0` |
 | `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
-| `-h` | `--help` | Display this help message. _Overrides any other arguments._ |
+| `-h` | `--help` | Display this help message. _Overrides all other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
 | `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
 
