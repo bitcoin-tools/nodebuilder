@@ -420,7 +420,7 @@ Linux)
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
   ensure_curl_dependency
-  printf '%s' "Checking the internet status... "
+  printf '%s' "Checking internet status... "
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
     check_internet 9.9.9.9 ||
@@ -520,7 +520,7 @@ Linux)
 Darwin)
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s\n%s' "Detected: running on macOS." "Checking the internet status... "
+  printf '%s\n%s' "Detected: running on macOS." "Checking internet status... "
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
     check_internet 9.9.9.9 ||
