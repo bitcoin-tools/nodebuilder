@@ -97,6 +97,7 @@ jobs:
       - name: Run markdown-link-check on documentation
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
+          config-file: 'config/mlc_config.json' 
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
