@@ -41,7 +41,7 @@ chmod u+x nodebuilder
 
 | Short | Long Version | Description |
 |:-----:|:-------------|:------------|
-| `-b` | `--bitcoin-version` | Speficy the Bitcoin version. Requires one argument, for example: `-b 26.0` |
+| `-b` | `--bitcoin-version` | Specify the Bitcoin version. Requires one argument, for example: `-b 26.0` |
 | `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
 | `-h` | `--help` | Display this help message. _Overrides all other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
