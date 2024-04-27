@@ -14,7 +14,7 @@ check_internet() {
   check_int_address=$1
   check_int_port="443"
   check_int_timeout="10"
-  # shellcheck disable=2016
+  # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
     torsocks curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null ||
     curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
@@ -627,7 +627,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     ;;
   esac
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
-  # shellcheck disable=2016
+  # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
     torsocks git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}" ||
     git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
@@ -730,7 +730,7 @@ else
     if [ -d "${guix_sigs_destination_dir}"/ ]; then
       gpg --quiet --import "${guix_sigs_destination_dir}"/builder-keys/*.gpg
     else
-      # shellcheck disable=2016
+      # shellcheck disable=SC2015
       command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] && 
         torsocks git clone --single-branch --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}" ||
         git clone --single-branch --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
@@ -816,7 +816,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
 
   [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
   if ! [ -f "${shortcut_image_file}" ]; then
-    # shellcheck disable=2016
+    # shellcheck disable=SC2015
     command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
       torsocks curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}" ||
       curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}"
