@@ -289,7 +289,7 @@ log_error() {
 print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' "Options:"
-  printf '%s\n' "-b, --bitcoin-version   Speficy the Bitcoin version"
+  printf '%s\n' "-b, --bitcoin-version   Specify the Bitcoin version"
   printf '%s\n' "-c, --compile           Build Bitcoin from source"
   printf '%s\n' "-h, --help              Display this help message"
   printf '%s\n' "-p, --prune             Set a prune value in MiB"
