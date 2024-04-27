@@ -21,7 +21,9 @@ Run the following command in Terminal:
 
 # Usage
 
-As mentioned above, you can start the script directly in the command line:
+As mentioned above, you can start the script directly in the command line.
+
+First open Terminal then run:
 
 ```
 /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
@@ -43,11 +45,12 @@ chmod u+x nodebuilder
 |:-----:|:-------------|:------------|
 | `-b` | `--bitcoin-version` | Specify the Bitcoin version. Requires one argument, for example: `-b 26.0` |
 | `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
-| `-h` | `--help` | Display this help message. _Overrides all other arguments._ |
+| `-h` | `--help` | Display the help message. _Overrides all other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
 | `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
 
 You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattended with a 50000 MiB prune:
+
 ```
 ./nodebuilder -b 26.0 -c -p 50000 -u
 ./nodebuilder --bitcoin-version 26.0 --compile --prune 50000 --unattended
