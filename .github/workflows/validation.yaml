@@ -88,7 +88,6 @@ jobs:
           args: '*/*.md'
           #ignore: './one_file.md ./another_file.md' # multiple files must be separated with single space
 
-
   markdown-links:
     name: Check hyperlinks
     runs-on: ubuntu-latest
@@ -97,7 +96,7 @@ jobs:
       - name: Run markdown-link-check on documentation
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
-          config-file: 'config/mlc_config.json' 
+          config-file: 'config/markdown-link-check-config.json' 
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
