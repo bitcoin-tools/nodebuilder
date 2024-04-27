@@ -68,12 +68,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: lint
+      - name: Lint the Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
           target: Dockerfile dockerfiles/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  markdown-lint:
+    name: Lint changelog file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint changelog file
+        uses: avto-dev/markdown-lint@v1
+        with:
+          #rules: '/lint/rules/changelog.js'
+          #config: '/lint/config/changelog.yml'
+          args: './README.md'
+          #ignore: './one_file.md ./another_file.md' # multiple files must be separated with single space
+
 
   markdown-links:
     name: Check hyperlinks
