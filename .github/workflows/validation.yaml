@@ -85,7 +85,7 @@ jobs:
         with:
           #rules: '/lint/rules/changelog.js'
           config: 'config/markdownlint.yaml'
-          args: './*.md'
+          args: '*/*.md'
           #ignore: './one_file.md ./another_file.md' # multiple files must be separated with single space
 
 
