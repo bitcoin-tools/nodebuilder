@@ -124,7 +124,7 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [dependencies-check, shell-lint, yaml-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -197,7 +197,7 @@ jobs:
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ubuntu-latest
     strategy:
       matrix:
