@@ -24,7 +24,7 @@ Run the following command in Terminal:
 As mentioned above, start the script from the command line. Open Terminal and run:
 
 ```sh
-/bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+/bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
 ```
 
 Or you can download the script to your local system, set permissions, and run it:
