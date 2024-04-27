@@ -3,12 +3,15 @@
 Create a secure Bitcoin Core node with ease.
 
 Run the following command in Terminal:
-```
-/bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.2.0/nodebuilder)"
+
+```sh
+/bin/ba -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.2.0/nodebuilder)"
 ```
 
 ## Table of Contents
 
+- [Usage](#usage)
+  - [Optional Arguments](#optional-arguments)
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
   - [Which Parts of My System Does This Script Touch?](#which-parts-of-my-system-does-this-script-touch)
@@ -16,6 +19,41 @@ Run the following command in Terminal:
 - [Acknowledgements](#acknowledgements)
 - [Contributing](#contributing)
 - [License](#license)
+
+# Usage
+
+As mentioned above, start the script from the command line. Open Terminal and run:
+
+```sh
+/bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+```
+
+Or you can download the script to your local system, set permissions, and run it:
+
+```sh
+wget https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
+chmod u+x nodebuilder
+./nodebuilder
+```
+
+### Optional Arguments
+
+`nodebuilder` supports optional arguments to override the default semi-automated settings:
+
+| Short | Long Version | Description |
+|:-----:|:-------------|:------------|
+| `-b` | `--bitcoin-version` | Specify the Bitcoin version. Requires one argument, for example: `-b 26.0` |
+| `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
+| `-h` | `--help` | Display the help message. _Overrides all other arguments._ |
+| `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
+| `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
+
+You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattended with a 50000 MiB prune:
+
+```sh
+./nodebuilder -b 26.0 -c -p 50000 -u
+./nodebuilder --bitcoin-version 26.0 --compile --prune 50000 --unattended
+```
 
 ## Prerequisites
 
