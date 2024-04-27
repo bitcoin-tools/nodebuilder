@@ -37,7 +37,7 @@ chmod u+x nodebuilder
 
 ### Optional Arguments
 
-`nodebuilder` also supports passing in arguments to override the default semi-automated settings:
+`nodebuilder` supports optional arguments to override the default semi-automated settings:
 
 | Short | Long Version | Description |
 |:-----:|:-------------|:------------|
