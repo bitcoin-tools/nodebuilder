@@ -5,7 +5,7 @@ Create a secure Bitcoin Core node with ease.
 Run the following command in Terminal:
 
 ```sh
-/bin/ba -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.2.0/nodebuilder)"
+/bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.2.0/nodebuilder)"
 ```
 
 ## Table of Contents
