@@ -3,6 +3,7 @@
 This page outlines the procedures to test changes to the `nodebuilder` repository.
 
 ## Table of Contents
+
 - [Automated Validation](#automated-validation)
 - [Manual Testing](#manual-testing)
 
@@ -15,9 +16,9 @@ You can view the status of these CI tests on GitHub.com under the `Checks` tab o
 Documentation changes must have the six verification checks passing. (No need to wait for the runtime checks.) All changes affecting code must have all of the 'Run nodebuilder' runtime checks passing.
 
 - [ShellCheck](https://shellcheck.net/) check the bash shell scripts, including:
-   - typical beginner's syntax issues that cause a shell to give cryptic error messages
-   - typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
-   - subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
+  - typical beginner's syntax issues that cause a shell to give cryptic error messages
+  - typical intermediate level semantic problems that cause a shell to behave strangely and counter-intuitively.
+  - subtle caveats, corner cases and pitfalls that may cause an advanced user's otherwise working script to fail under future circumstances.
 
 - [actionlint](https://github.com/rhysd/actionlint) checks the GitHub Actions `.yaml` workflow file. We like that it enforces ShellCheck inside workflows.
 
@@ -30,6 +31,7 @@ Documentation changes must have the six verification checks passing. (No need to
 - [PySpelling](https://facelessuser.github.io/pyspelling/) which will check for typos in the markdown files. If you see any false-positives during the CI check, add the words to [our whitelist](../data/pyspelling.wordlist.txt)
 
 After passing those six checks, GitHub Actions will then:
+
 - Run `nodebuilder` on Ubuntu 22 (latest)
 - Run `nodebuilder` on Ubuntu 20
 - Run `nodebuilder` on macOS 14 (arm64)
@@ -41,12 +43,14 @@ After passing those six checks, GitHub Actions will then:
 ## Manual Testing
 
 During the review period, open pull requests should be manually tested to ensure:
+
 1. The change actually fixes the issue
 2. The change doesn't cause unintentional bugs
 
 ### Major Code Changes
 
 For major changes to the code or for Bitcoin Core version upgrades, perform a full test on a fresh install of:
+
 - Ubuntu Desktop LTS running on bare metal
 - Debian 12 running on a Proxmox virtual machine
 
@@ -55,6 +59,7 @@ For major changes to the code or for Bitcoin Core version upgrades, perform a fu
 For minor changes, each pull request should be tested on Ubuntu Desktop.
 
 Run the following command after updating the `test_branch_name`:
+
 ```bash
 test_branch_name=""
 cd "${HOME}"/
@@ -62,4 +67,3 @@ cd "${HOME}"/
 git clone https://github.com/bitcoin-tools/nodebuilder.git -b "${test_branch_name}"
 "${HOME}"/nodebuilder/nodebuilder
 ```
-
