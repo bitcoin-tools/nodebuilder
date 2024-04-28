@@ -98,6 +98,22 @@ for message in \
   fi
 done
 
+for message in \
+  "apt-utils" \
+  "libzmq" \
+  "BDB" \
+  "Berkeley DB" \
+  "Checking the memory on your system... 0 GiB of 0 GiB free." \
+  "Checking the memory on your system... 0.0 GiB of 0.0 GiB free." \
+  "Checking free space in home directory... 0 GiB." \
+  "Sync progress:      [0-9]+\.[0-9]{4} %" \
+  "Disk free space:    (0 G|[0-9]+ M)iB"; do
+  if grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
+    printf '%s\n' "FAILURE: Unexpected message ${message} found."
+    exit 1
+  fi
+done
+
 if [ "${compile_bitcoin}" = "true" ] || [ "$(grep "^ID=" /etc/os-release | cut -d= -f2)" = "alpine" ]; then
   for message in \
     "Ensuring compile dependencies... ok.$" \
@@ -114,13 +130,21 @@ else
   for message in \
     "Downloading Bitcoin Core... ok.$" \
     "Validating the checksum... ok.$" \
-    "Validating the signatures... ^0*[1-9]\d* good.$" \
+    "Validating the signatures... [0-9]+ good.$" \
     "Extracting Bitcoin Core... ok.$" \
     "Running the unit tests... ok.$" \
     "Installing Bitcoin Core... ok.$" \
     "Removing installation files... ok.$"; do
     if ! grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
       printf '%s\n' "FAILURE: Expected message ${message} not found."
+      exit 1
+    fi
+  done
+  for message in \
+    # from nodebuilder, gpg_good_signatures_required="7"
+    "Validating the signatures... [0-6] good.$"; do
+    if grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
+      printf '%s\n' "FAILURE: Unexpected message ${message} found."
       exit 1
     fi
   done
@@ -139,20 +163,6 @@ if [ "$(uname -s)" != "Darwin" ]; then
   done
 fi
 
-for message in \
-  "apt-utils" \
-  "libzmq" \
-  "BDB" \
-  "Berkeley DB" \
-  "Checking the memory on your system... 0 GiB of 0 GiB free." \
-  "Checking the memory on your system... 0.0 GiB of 0.0 GiB free." \
-  "Checking free space in home directory... 0 GiB." \
-  "Sync progress:      [0-9]+\.[0-9]{4} %" \
-  "Disk free space:    (0 G|[0-9]+ M)iB"; do
-  if grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
-    printf '%s\n' "FAILURE: Unexpected message ${message} found."
-    exit 1
-  fi
-done
+
 
 printf '%s\n' "PASS: All console output tests passed."
