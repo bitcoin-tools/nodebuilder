@@ -59,7 +59,7 @@ You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattend
 
 1. An active internet connection (of course)
 3. A POSIX-compatible operating system:
-   - [macOS](https://applejdckcicicicjdnsbsbfto.com/macos)
+   - [macOS](https://apple.com/macos)
    - Linux
       - [Alpine](https://wiki.alpinelinux.org/wiki/Installation)
       - [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
