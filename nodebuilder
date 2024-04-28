@@ -71,6 +71,17 @@ ensure_curl_dependency() {
   fi
 }
 
+get_cursor_column() {
+  stored_stty_settings=$(stty -g)
+  # Set raw mode, no echo, immediate read
+  stty raw -echo min 0 time 10
+  # Send ANSII escape code to request cursor position
+  echo "\033[6n" > /dev/tty
+  IFS=';' read -r stty_row stty_column
+  stty "$stored_stty_settings"
+  printf '%s' "$stty_column"
+}
+
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
