@@ -161,6 +161,4 @@ if [ "$(uname -s)" != "Darwin" ]; then
   done
 fi
 
-
-
 printf '%s\n' "PASS: All console output tests passed."
