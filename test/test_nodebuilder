@@ -28,6 +28,8 @@ print_usage() {
   printf '%s\n' "-h, --help              Display this help message"
 }
 
+compile_bitcoin="false"
+
 while [ $# -gt 0 ]; do
   case "$1" in
   -c | --compile)
