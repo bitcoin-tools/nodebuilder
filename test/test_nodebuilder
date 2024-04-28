@@ -21,15 +21,47 @@ kill_tail_process() {
   fi
 }
 
+print_usage() {
+  printf '%s\n\n' "Usage: $0 [options]"
+  printf '%s\n' "Options:"
+  printf '%s\n' "-c, --compile           Build Bitcoin from source"
+  printf '%s\n' "-h, --help              Display this help message"
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -c | --compile)
+    compile_bitcoin="true"
+    ;;
+  -h | --help)
+    print_usage
+    exit 0
+    ;;
+  *)
+    printf '%s\n%s\n' "Error: '$1' is invalid." "Use -h or --help for available options."
+    exit 1
+    ;;
+  esac
+  shift
+done
+
 [ -f test_output_stdout.txt ] || touch test_output_stdout.txt
 tail -f test_output_stdout.txt &
 tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
-nohup /bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)" \
-  > test_output_stdout.txt \
-  2> test_output_stderr.txt
+wget https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
+chmod u+x nodebuilder
+if [ "${compile_bitcoin}" = 'true' ]; then
+  ./nodebuilder --compile \
+    > test_output_stdout.txt \
+    2> test_output_stderr.txt
+else
+  ./nodebuilder \
+    > test_output_stdout.txt \
+    2> test_output_stderr.txt
+fi
 rm nodebuilder
 kill_tail_process
 
@@ -64,10 +96,26 @@ for message in \
   fi
 done
 
+if [ "${compile_bitcoin}" = "true" ] || [ "$(grep "^ID=" /etc/os-release | cut -d= -f2)" = "alpine" ]; then
+  for message in \
+    "Ensuring compile dependencies... ok.$" \
+    "Downloading Bitcoin source code... ok.$" \
+    "Analyzing hardware configuration... ok.$" \
+    "Configuring the build environment... ok.$" \
+    "Compiling source code, please wait... ok.$"; do
+    if ! grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
+      printf '%s\n' "FAILURE: Expected message ${message} not found."
+      exit 1
+    fi
+  done
+else
+
+fi
+
 if [ "$(uname -s)" != "Darwin" ]; then
   for message in \
     "Performing a system upgrade... ok.$" \
-    "Ensuring (build|runtime) dependencies... ok.$" \
+    "Ensuring runtime dependencies... ok.$" \
     "Creating application shortcuts... ok.$" \
     "Checking the memory on your system... [0-9]+\.[0-9] of [0-9]+\.[0-9] GiB free.$"; do
     if ! grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
