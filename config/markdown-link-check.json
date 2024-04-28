@@ -1,6 +1,6 @@
 # This is the configuration file for the markdown link check in the Validation CI workflow.
-
 {
+  "projectBaseUrl":"${workspaceFolder}",
   "timeout": "30s",
   "retryOn429": true,
   "retryCount": 5,
