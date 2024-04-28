@@ -650,7 +650,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   else
     compile_jobs_count="$(($(nproc) + 1))"
   fi
-  make --jobs "${compile_jobs_count}" > /dev/null
+  make --jobs "${compile_jobs_count}" > /dev/null 2>&1
   printf '%s\n  %s' "ok." "Running compile checks, please wait... "
   make --jobs "${compile_jobs_count}" check > /dev/null 2> "${stderr_compile_log_file}"
   # exclude the two lines before and after "Ran 3 tests in " in make check's stdout
