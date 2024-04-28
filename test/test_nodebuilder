@@ -109,7 +109,19 @@ if [ "${compile_bitcoin}" = "true" ] || [ "$(grep "^ID=" /etc/os-release | cut -
     fi
   done
 else
-
+  for message in \
+    "Downloading Bitcoin Core... ok.$" \
+    "Validating the checksum... ok.$" \
+    "Validating the signatures... ^0*[1-9]\d* good.$" \
+    "Extracting Bitcoin Core... ok.$" \
+    "Running the unit tests... ok.$" \
+    "Installing Bitcoin Core... ok.$" \
+    "Removing installation files... ok.$"; do
+    if ! grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
+      printf '%s\n' "FAILURE: Expected message ${message} not found."
+      exit 1
+    fi
+  done
 fi
 
 if [ "$(uname -s)" != "Darwin" ]; then
