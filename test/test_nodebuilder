@@ -140,14 +140,12 @@ else
       exit 1
     fi
   done
-  for message in \
-    "Validating the signatures... [0-6] good.$"; do
-    # from nodebuilder, gpg_good_signatures_required="7"
-    if grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
-      printf '%s\n' "FAILURE: Unexpected message ${message} found."
-      exit 1
-    fi
-  done
+  # from nodebuilder, gpg_good_signatures_required="7"
+  message="Validating the signatures... [0-6] good.$"
+  if grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
+    printf '%s\n' "FAILURE: Unexpected message ${message} found."
+    exit 1
+  fi
 fi
 
 if [ "$(uname -s)" != "Darwin" ]; then
