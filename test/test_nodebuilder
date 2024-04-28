@@ -141,8 +141,8 @@ else
     fi
   done
   for message in \
-    # from nodebuilder, gpg_good_signatures_required="7"
     "Validating the signatures... [0-6] good.$"; do
+    # from nodebuilder, gpg_good_signatures_required="7"
     if grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
       printf '%s\n' "FAILURE: Unexpected message ${message} found."
       exit 1
