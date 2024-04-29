@@ -323,7 +323,6 @@ is_valid_bitcoin_version() {
 }
 
 log_error() {
-  test_get_cursor_column
   [ "$(get_cursor_column)" -gt 0 ] && printf '\n'
   printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
@@ -336,6 +335,13 @@ print_usage() {
   printf '%s\n' "-h, --help              Display this help message"
   printf '%s\n' "-p, --prune             Set a prune value in MiB"
   printf '%s\n' "-u, --unattended        Run in non-interactive mode"
+}
+
+run_unit_tests() {
+  printf '%s' "Testing get_cursor_column..."
+  test_get_cursor_column
+  printf '%s\n' "PASS"
+  return 0
 }
 
 set_bitcoin_core_option() (
@@ -374,11 +380,13 @@ throw_error() {
   exit 1
 }
 
-temp_directory=""
-unattended=false
-prune_value="-1"
 target_bitcoin_version="27.0"
-target_bitcoin_architecture="$(uname -m)"
+
+temp_directory=""
+compile_bitcoin=false
+prune_value="-1"
+unattended=false
+unit_tests=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -416,6 +424,9 @@ while [ $# -gt 0 ]; do
     prune_value="$2"
     shift
     ;;
+  -t | --test)
+    unit_tests=true
+    ;;
   -u | --unattended)
     unattended=true
     ;;
@@ -427,7 +438,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-temp_directory="$(mktemp -d)"
+[ "${unit_tests}" = "true" ] && run_unit_tests
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
 trap handle_sigint INT
@@ -436,6 +447,8 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
+temp_directory="$(mktemp -d)"
+target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
