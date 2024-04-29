@@ -25,7 +25,7 @@ display_macos_warning() {
     printf '%s\n%s\n' \
       "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
       "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
-    if ! is_running_in_ci; then
+    if [ "${unattended}" = false ] && ! is_running_in_ci; then
       printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
       read -r _
     fi
