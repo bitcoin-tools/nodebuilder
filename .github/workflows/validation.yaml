@@ -4,12 +4,13 @@ on:
   push:
     branches: [ master ]
     paths:
+      - .github/workflows/*.yaml
       - Dockerfile
-      - dependencies.txt
+      - config/*.yaml
+      - dependencies/*.txt
+      - dockerfiles/Dockerfile_*
       - nodebuilder
       - test/test_bitcoin
-      - .github/workflows/*.yaml
-      - dockerfiles/Dockerfile_*
   issues:
     types: [ opened ]
   schedule:
@@ -18,17 +19,34 @@ on:
 env:
   TERM: xterm
 jobs:
-  bash-lint:
-    name: Lint the bash
+  dependencies-check:
+    name: Check depencencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          config-file: './config/dependency-review.yaml'
+          base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
+          head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+  shell-lint:
+    name: Check shell code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Lint with shellcheck
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@2.0.0
+        env:
+          SHELLCHECK_OPTS: -s sh
         with:
           ignore_names: offloadcoredata usei2p usetor
       - name: Lint with shfmt
-        uses: luizm/action-sh-checker@master
+        uses: luizm/action-sh-checker@v0.8.0
         env:
           SHFMT_OPTS: -i 2 -sr
         with:
@@ -36,7 +54,7 @@ jobs:
           sh_checker_exclude: offloadcoredata usei2p usetor
 
   yaml-lint:
-    name: Lint the yaml
+    name: Check yaml code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,36 +65,50 @@ jobs:
         shell: bash
 
   dockerfile-lint:
-    name: Lint the Dockerfile
+    name: Check Dockerfile code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: lint
+      - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
           target: Dockerfile dockerfiles/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  markdown-lint:
+    name: Check markdown code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint markdown
+        uses: avto-dev/markdown-lint@v1
+        with:
+          #rules: '/lint/rules/changelog.js'
+          config: 'config/markdownlint.yaml'
+          args: '*/*.md'
+          #ignore: './one_file.md ./another_file.md' # multiple files must be separated with single space
+
   markdown-links:
-    name: Check the links
+    name: Check hyperlinks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run markdown-link-check on documentation
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
+          config-file: 'config/markdown-link-check.json' 
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
-    name: Check the spelling
+    name: Check spelling
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: rojopolis/spellcheck-github-actions@v0
         name: Spell check markdown files with PySpelling
         with:
-          config_path: config/.spellcheck.yaml
+          config_path: config/spellcheck.yaml
           output_file: spellcheck-output.txt
       - uses: actions/upload-artifact@v4
         if: '!cancelled()'
@@ -84,48 +116,100 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-  run-nodebuilder:
-    name: Run on ${{ matrix.friendly-name }}
+  pause-if-master-commit:
+    name: Pause on master commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep for the GitHub cache-control max-age duration
+        run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
+
+  run-nodebuilder-baremetal:
+    name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
+    needs: [dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04, macos-14, macos-13]
+        job-purpose: [Compile, Test, Test-compile]
+        os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
         include:
+          - job-purpose: Compile
+            binary-path: './nodebuilder --compile'
+          - job-purpose: Test
+            binary-path: './test/test_nodebuilder'
+          - job-purpose: Test-compile
+            binary-path: './test/test_nodebuilder --compile'
+          - os: ubuntu-22.04
+            os-friendly-name: Ubuntu 22 [x86_64]
+            check-version-command: grep "VERSION\|ID" /etc/os-release
+            remove-snap-command: sudo apt remove --assume-yes snap
+            install-upgrades-command: >-
+              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
+              && sudo apt-get update --option 'Acquire::Retries=5'
+              && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
+            cache-path: |
+              /var/cache/apt/archives/*.deb
+              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
+              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
+              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
+              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
+              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           - os: ubuntu-latest
-            friendly-name: Ubuntu 22
-            check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
-            install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-          - os: ubuntu-20.04
-            friendly-name: Ubuntu 20
-            check-version-command: grep "VERSION\|ID" /etc/os-release && uname -a
-            install-upgrades-command: sudo apt-get update && sudo NEEDRESTART_MODE=a apt-get dist-upgrade -y
-          - os: macos-14
-            friendly-name: macOS 14 arm64
-            check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
+            os-friendly-name: Ubuntu LTS [x86_64]
+            check-version-command: grep "VERSION\|ID" /etc/os-release
+            remove-snap-command: sudo apt remove --assume-yes snap
+            install-upgrades-command: >-
+              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
+              && sudo apt-get update --option 'Acquire::Retries=5'
+              && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
+            cache-path: |
+              /var/cache/apt/archives/*.deb
+              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
+              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
+              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
+              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
+              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
           - os: macos-13
-            friendly-name: macOS 13 x86_64
-            check-version-command: sw_vers | grep Version | awk '{print $2}' && uname -a
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
+            os-friendly-name: macOS 13 [x86_64]
+            check-version-command: sw_vers | grep Version | awk '{print $2}'
+          - os: macos-14
+            os-friendly-name: macOS 14 [arm64]
+            check-version-command: sw_vers | grep Version | awk '{print $2}'
     steps:
       - name: Check the current OS version
-        run: ${{ matrix.check-version-command }}
+        run: ${{ matrix.check-version-command }} && uname -a
       - uses: actions/checkout@v4
+      - name: Change owner of apt archives
+        if: contains(matrix.os, 'ubuntu')
+        run: sudo chown -R "$(whoami)" /var/cache/apt/archives
+      - name: Cache system archives
+        if: matrix.cache-path != null
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.cache-path }}
+          key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
+          restore-keys: cache-updates-${{ matrix.os }}
+      - name: Remove the snap package
+        if: matrix.remove-snap-command != null
+        run: ${{ matrix.remove-snap-command }}
       - name: Install system upgrades
-        run: ${{ matrix.install-upgrades-command }}
         if: matrix.install-upgrades-command != null
-      - name: Run nodebuilder
+        run: ${{ matrix.install-upgrades-command }}
+      - name: Run ${{ matrix.binary-path }}
+        run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
-        run: /bin/bash -x ./nodebuilder
 
   run-nodebuilder-docker:
-    name: Run in ${{ matrix.container }} container
+    name: Run container ${{ matrix.container }}
+    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        container: [Alpine, Fedora, Manjaro, Ubuntu]
+        container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, RHEL UBI, Ubuntu, openSUSE]
         include:
           - container: Alpine
             dockerfile: ./dockerfiles/Dockerfile_alpine
+          - container: Amazon
+            dockerfile: ./dockerfiles/Dockerfile_amazon
           - container: Arch
             dockerfile: ./dockerfiles/Dockerfile_arch
           - container: Debian
@@ -134,11 +218,12 @@ jobs:
             dockerfile: ./dockerfiles/Dockerfile_fedora
           - container: Manjaro
             dockerfile: ./dockerfiles/Dockerfile_manjaro
+          - container: RHEL UBI
+            dockerfile: ./dockerfiles/Dockerfile_rhel_ubi
           - container: Ubuntu
             dockerfile: ./Dockerfile
           - container: openSUSE
             dockerfile: ./dockerfiles/Dockerfile_opensuse
-    needs: [bash-lint, yaml-lint, dockerfile-lint, markdown-links, markdown-spellcheck]
     steps:
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a

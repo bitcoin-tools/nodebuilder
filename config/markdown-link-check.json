@@ -1,0 +1,8 @@
+{
+  "projectBaseUrl":"${workspaceFolder}",
+  "timeout": "30s",
+  "retryOn429": true,
+  "retryCount": 5,
+  "fallbackRetryDelay": "120s",
+  "aliveStatusCodes": [200, 206]
+}

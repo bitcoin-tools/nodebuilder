@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1
-# Fedora is known for its proactive security and commitment to open-source software.
-# This Dockerfile is a good choice for modern and resource-rich environments.
-FROM fedora:39@sha256:61864fd19bbd64d620f338eb11dae9e8759bf7fa97302ac6c43865c48dccd679
+# RHEL UBI is an enterprise-grade Linux distribution with long-term support.
+# This Dockerfile is ideal for enterprise applications requiring strong support and stability.
+FROM registry.access.redhat.com/ubi8/ubi:8.9@sha256:edc34f89cf9c818c2fb28b8ea1780f384db563ce4293dc0ab8e73ec01791e5af
 ENV TERM=xterm
 
-# Define the dependencies URL
+# Define the  dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt
 
 # Check the current environment

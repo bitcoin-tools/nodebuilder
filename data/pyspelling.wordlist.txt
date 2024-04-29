@@ -8,8 +8,10 @@ Hrnls
 JWWeatherman
 LTS
 Manjaro
+MiB
 Parmanode
 PaymentRequired
+POSIX
 Proxmox
 PySpelling
 README
@@ -31,13 +33,16 @@ ayeowch
 bitcoinconsensus
 bitcoind
 bitnodes
+blockchain
 cd
 chainstate
+chmod
 ci
 cli
 conf
 debian
 dockerfilelint
+dockerfiles
 dr
 dylib
 enpdJIY
@@ -47,6 +52,7 @@ fsSL
 github
 guix
 gz
+gzip
 html
 https
 installmanual
@@ -57,6 +63,7 @@ linux
 macOS
 macos
 manjaro
+manpages
 md
 mktemp
 mvdan
@@ -88,6 +95,7 @@ usr
 util
 vscode
 wZM
+wget
 wordlist
 yaml
 yeticold

@@ -5,7 +5,7 @@ FROM archlinux:latest@sha256:fed6efe803e79d94544f93607e4afec1056cfd9bee5744c965e
 ENV TERM=xterm
 
 # Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt
 
 # Check the current environment
 RUN uname -a \
@@ -20,4 +20,4 @@ RUN pacman -Sy --noconfirm 'sudo' \
   | xargs pacman -Sy --noconfirm
 
 # Download and execute the script
-RUN /bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+RUN /bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"

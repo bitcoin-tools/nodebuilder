@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Fedora is known for its proactive security and commitment to open-source software.
-# This Dockerfile is a good choice for modern and resource-rich environments.
-FROM fedora:39@sha256:61864fd19bbd64d620f338eb11dae9e8759bf7fa97302ac6c43865c48dccd679
+# Amazon Linux is a Linux server operating system from AWS, optimized for EC2.
+# This Dockerfile is ideal for applications that are deployed on AWS and require seamless integration.
+FROM amazonlinux:2023
 ENV TERM=xterm
 
 # Define the dependencies URL
@@ -16,8 +16,10 @@ RUN uname -a \
 
 # Install system updates and dependencies
 RUN dnf makecache \
+  && dnf --allowerasing --assumeyes install findutils \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs dnf --assumeyes install \
+  | awk '{if ($0 == "gnupg") print "gnupg2"; else print $0;}' \
+  | xargs dnf --allowerasing --assumeyes install \
   && dnf clean all
 
 # Download and execute the script
