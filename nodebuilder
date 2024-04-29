@@ -350,11 +350,13 @@ throw_error() {
   exit 1
 }
 
-temp_directory=""
-unattended=false
-prune_value="-1"
 target_bitcoin_version="27.0"
-target_bitcoin_architecture="$(uname -m)"
+
+temp_directory=""
+compile_bitcoin=false
+prune_value="-1"
+unattended=false
+unit_tests=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -370,7 +372,7 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -c | --compile)
-    compile_bitcoin="true"
+    compile_bitcoin=true
     ;;
   -h | --help)
     print_usage
@@ -406,16 +408,17 @@ while [ $# -gt 0 ]; do
   shift
 done
 
+[ "${unit_tests}" = "true" ] && run_unit_tests
+
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
 trap handle_sigint INT
-
-[ "${unit_tests}" = "true" ] && run_unit_tests
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 temp_directory="$(mktemp -d)"
+target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
@@ -590,7 +593,7 @@ esac
 
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "ok."
-elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = "alpine" ]; then
+elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alpine" ]; then
   printf '%s\n  %s' "no." "Ensuring compile dependencies... "
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
