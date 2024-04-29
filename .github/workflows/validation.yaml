@@ -179,6 +179,7 @@ jobs:
         uses: dorny/paths-filter@v3
         id: changes-baremetal
         with:
+          token: ${{ github.token }}
           filters: |
             src:
               - '.github/workflows/*.yaml'
