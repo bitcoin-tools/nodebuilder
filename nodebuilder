@@ -307,7 +307,8 @@ is_valid_bitcoin_version() {
 }
 
 log_error() {
-  printf '\n%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
+  [ get_cursor_column -gt 0 ] && printf '\n'
+  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
 
 print_usage() {
