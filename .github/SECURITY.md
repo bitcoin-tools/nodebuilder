@@ -1,6 +1,6 @@
 # Security Policy
 
-This project is committed to maintaining the highest level of security. We strive to follow industry best practices to ensure a balance between security and convenience.
+This project stries to follow industry best practices to ensure a balance between a high level of security and user convenience.
 
 ## Supported Versions
 
