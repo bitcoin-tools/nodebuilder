@@ -89,11 +89,11 @@ test_get_cursor_column() {
   col=$(find_cursor_column)
   [ "$col" -ne 1 ] && throw_error "Failed: Expected 1, got $col"
 
-    # Test when cursor is at the end of the string "test"
+  # Test when cursor is at the end of the string "test"
   printf '\n%s' "test"
   col=$(find_cursor_column)
   [ "$col" -ne 5 ] && throw_error "Failed: Expected 5, got $col"
-  
+
   printf '%s\n' "All tests passed"
   return 0
 }
