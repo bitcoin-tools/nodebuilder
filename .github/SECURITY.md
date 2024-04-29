@@ -15,6 +15,6 @@ Please ensure you're running one of these versions to benefit from the most rece
 
 We greatly appreciate your help in identifying and reporting security vulnerabilities.
 
-If you discover a security vulnerability, please report it through our [GitHub Security Advisories](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
+If you discover a critical security vulnerability, please responsibly disclose by creating a [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
 
-If you prefer to communicate outside of GitHub, you can create an issue asking to connect over a secure channel.
+If you prefer to communicate outside of GitHub, create a (private) security advisory or (public) issue asking to connect over a secure channel.
