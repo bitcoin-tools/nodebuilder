@@ -175,6 +175,18 @@ jobs:
             os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
     steps:
+      - name: Check paths of modified files
+        uses: dorny/paths-filter@v3
+        id: changes-baremetal
+        with:
+          filters: |
+            src:
+              - '.github/workflows/*.yaml'
+              - '.github/workflows/*.yml'
+              - 'config/**'
+              - 'dependencies/**'
+              - 'test/test_nodebuilder'
+              - 'nodebuilder'
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - uses: actions/checkout@v4
@@ -195,6 +207,7 @@ jobs:
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
+        if: steps.changes-baremetal.outputs.src == 'true'
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
 
@@ -225,10 +238,25 @@ jobs:
           - container: openSUSE
             dockerfile: ./dockerfiles/Dockerfile_opensuse
     steps:
+      - name: Check paths of modified files
+        uses: dorny/paths-filter@v3
+        id: changes-containers
+        with:
+          filters: |
+            src:
+              - '.github/workflows/*.yaml'
+              - '.github/workflows/*.yml'
+              - 'config/**'
+              - 'dependencies/**'
+              - 'dockerfiles/**'
+              - 'test/test_nodebuilder'
+              - 'Dockerfile'
+              - 'nodebuilder'
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
       - uses: actions/checkout@v4
       - name: Run the docker image
+        if: steps.changes-containers.outputs.src == 'true'
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
