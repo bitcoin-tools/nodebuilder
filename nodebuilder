@@ -76,9 +76,10 @@ get_cursor_column() {
   # Set raw mode, no echo, immediate read
   stty raw -echo min 0 time 10
   # Send ANSII escape code to request cursor position
-  echo "\033[6n" > /dev/tty
-  IFS=';' read -r stty_row stty_column
+  printf "\033[6n" > /dev/tty
+  IFS=';' read -r stty_row stty_colum
   stty "$stored_stty_settings"
+  unset stty_row
   printf '%s' "$stty_column"
 }
 
