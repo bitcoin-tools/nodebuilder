@@ -392,7 +392,7 @@ while [ $# -gt 0 ]; do
     prune_value="$2"
     shift
     ;;
-  -t|--test)
+  -t | --test)
     unit_tests=true
     ;;
   -u | --unattended)
@@ -406,18 +406,16 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-
-[ "${unit_tests}" = "true" ] && run_unit_tests
-
-temp_directory="$(mktemp -d)"
-
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
 trap handle_sigint INT
+
+[ "${unit_tests}" = "true" ] && run_unit_tests
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
+temp_directory="$(mktemp -d)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
