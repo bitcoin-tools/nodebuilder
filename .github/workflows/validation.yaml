@@ -183,7 +183,6 @@ jobs:
             src:
               - '.github/workflows/*.yaml'
               - '.github/workflows/*.yml'
-              - 'config/**'
               - 'dependencies/**'
               - 'test/test_nodebuilder'
               - 'nodebuilder'
@@ -246,7 +245,6 @@ jobs:
             src:
               - '.github/workflows/*.yaml'
               - '.github/workflows/*.yml'
-              - 'config/**'
               - 'dependencies/**'
               - 'dockerfiles/**'
               - 'test/test_nodebuilder'
