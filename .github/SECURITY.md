@@ -6,7 +6,7 @@ This project is committed to maintaining the highest level of security. We striv
 
 We are currently providing security updates for the following versions:
 
-- The the most recent release version
+- The most recent release version / tag
 - The latest commit on the `master` branch
 
 Please ensure you're running one of these versions to benefit from the most recent security updates.
