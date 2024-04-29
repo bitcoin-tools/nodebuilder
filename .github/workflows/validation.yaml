@@ -175,11 +175,11 @@ jobs:
             os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
     steps:
+      - uses: actions/checkout@v4
       - name: Check paths of modified files
         uses: dorny/paths-filter@v3
         id: changes-baremetal
         with:
-          token: ${{ github.token }}
           filters: |
             src:
               - '.github/workflows/*.yaml'
@@ -189,7 +189,6 @@ jobs:
               - 'nodebuilder'
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
-      - uses: actions/checkout@v4
       - name: Change owner of apt archives
         if: contains(matrix.os, 'ubuntu')
         run: sudo chown -R "$(whoami)" /var/cache/apt/archives
@@ -238,6 +237,7 @@ jobs:
           - container: openSUSE
             dockerfile: ./dockerfiles/Dockerfile_opensuse
     steps:
+      - uses: actions/checkout@v4
       - name: Check paths of modified files
         uses: dorny/paths-filter@v3
         id: changes-containers
@@ -253,7 +253,6 @@ jobs:
               - 'nodebuilder'
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
-      - uses: actions/checkout@v4
       - name: Run the docker image
         if: steps.changes-containers.outputs.src == 'true'
         timeout-minutes: 120
