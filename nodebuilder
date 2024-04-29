@@ -25,7 +25,7 @@ display_macos_warning() {
     printf '%s\n%s\n' \
       "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
       "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
-    if ! is_running_in_ci; then
+    if [ "${unattended:-false}" = false ] && ! is_running_in_ci; then
       printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
       read -r _
     fi
@@ -69,6 +69,33 @@ ensure_curl_dependency() {
     esac
     printf '%s\n' "ok."
   fi
+}
+
+get_cursor_column() {
+  stored_stty_settings=$(stty -g)
+  # Set raw mode, no echo, immediate read
+  stty raw -echo min 0 time 10
+  # Send ANSII escape code to request cursor position
+  printf "\033[6n" > /dev/tty
+  # System will print the cursor's row and column
+  IFS=';' read -r _ stty_column
+  stty "$stored_stty_settings"
+  printf '%s' "$stty_column"
+}
+
+test_get_cursor_column() {
+  # Test when cursor is at the start of a line
+  printf '\n'
+  col=$(find_cursor_column)
+  [ "$col" -ne 1 ] && throw_error "Failed: Expected 1, got $col"
+
+  # Test when cursor is at the end of the string "test"
+  printf '\n%s' "test"
+  col=$(find_cursor_column)
+  [ "$col" -ne 5 ] && throw_error "Failed: Expected 5, got $col"
+
+  printf '%s\n' "All tests passed"
+  return 0
 }
 
 get_free_space_in_mib() {
@@ -296,7 +323,9 @@ is_valid_bitcoin_version() {
 }
 
 log_error() {
-  printf '\n%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
+  test_get_cursor_column
+  [ "$(get_cursor_column)" -gt 0 ] && printf '\n'
+  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
 
 print_usage() {
@@ -840,7 +869,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
 [Desktop Entry]
 Name=Bitcoin Core
 Comment=Launch Bitcoin Core
-Exec=bitcoin-qt %u || bitcoind --daemonwait
+Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt; else bitcoind --daemonwait; fi'
 Icon=${shortcut_image_file}
 Terminal=false
 StartupWMClass=Bitcoin Core
