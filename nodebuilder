@@ -309,6 +309,11 @@ print_usage() {
   printf '%s\n' "-u, --unattended        Run in non-interactive mode"
 }
 
+run_unit_tests() {
+  # TODO: add unit tests
+  return 0
+}
+
 set_bitcoin_core_option() (
   option="$1"
   value="$2"
@@ -388,8 +393,7 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -t|--test)
-    unit_test=true
-    shift
+    unit_tests=true
     ;;
   -u | --unattended)
     unattended=true
@@ -401,6 +405,9 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+
+[ "${unit_tests}" = "true" ] && run_unit_tests
 
 temp_directory="$(mktemp -d)"
 
