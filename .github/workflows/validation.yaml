@@ -72,7 +72,7 @@ jobs:
       - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile docker/Dockerfile*
+          target: docker/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
