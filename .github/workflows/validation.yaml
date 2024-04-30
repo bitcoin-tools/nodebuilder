@@ -214,7 +214,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, RHEL UBI, Ubuntu, openSUSE]
+        container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, Red Hat, Ubuntu, openSUSE]
         include:
           - container: Alpine
             dockerfile: Dockerfile_alpine
@@ -228,7 +228,7 @@ jobs:
             dockerfile: Dockerfile_fedora
           - container: Manjaro
             dockerfile: Dockerfile_manjaro
-          - container: RHEL UBI
+          - container: Red Hat
             dockerfile: Dockerfile_redhat
           - container: Ubuntu
             dockerfile: Dockerfile_ubuntu
