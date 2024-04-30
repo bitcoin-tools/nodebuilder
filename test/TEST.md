@@ -28,7 +28,7 @@ Documentation changes must have the six verification checks passing. (No need to
 
 - [markdown-link-check](https://github.com/tcort/markdown-link-check) extracts links from markdown texts and checks whether each link is alive (200 OK) or dead.
 
-- [PySpelling](https://facelessuser.github.io/pyspelling/) which will check for typos in the markdown files. If you see any false-positives during the CI check, add the words to [our whitelist](../data/pyspelling.wordlist.txt)
+- [PySpelling](https://facelessuser.github.io/pyspelling/) which will check for typos in the markdown files. If you see any false-positives during the CI check, add the words to [our whitelist](../resources/data/pyspelling.wordlist.txt)
 
 After passing those six checks, GitHub Actions will then:
 
