@@ -335,7 +335,7 @@ print_usage() {
 
 run_unit_tests() {
   printf '%s' "Testing get_cursor_column..."
-  test_get_cursor_column
+  test_update_cursor_column
   printf '%s\n' "PASS"
   return 0
 }
