@@ -3,12 +3,16 @@
 Create a secure Bitcoin Core node with ease.
 
 Run the following command in Terminal:
-```
-/bin/bash -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+
+```sh
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder)"
 ```
 
 ## Table of Contents
 
+- [Usage](#usage)
+  - [Docker Container](#docker-container)
+  - [Optional Arguments](#optional-arguments)
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
   - [Which Parts of My System Does This Script Touch?](#which-parts-of-my-system-does-this-script-touch)
@@ -17,23 +21,71 @@ Run the following command in Terminal:
 - [Contributing](#contributing)
 - [License](#license)
 
+## Usage
+
+As mentioned above, start the script from the command line. Open Terminal and run:
+
+```sh
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder)"
+```
+
+Or you can download the script to your local system, set permissions, and run it:
+
+```sh
+wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder
+chmod u+x nodebuilder
+./nodebuilder
+```
+
+### Docker Container
+
+A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distributions: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and Red Hat.
+
+To the Ubuntu base image, clone the repository and build the default container.
+```
+git clone https://github.com/bitcoin-tools/nodebuilder
+cd nodebuilder/
+docker build .
+```
+
+To use an [alternative base image](dockerfiles/), clone the repository and build a different container.
+```
+git clone https://github.com/bitcoin-tools/nodebuilder
+cd nodebuilder/
+docker build -f dockerfiles/Dockerfile_that_you_choose .
+```
+
+For example, run `docker build -f dockerfiles/Dockerfile_alpine .` to use Alpine Linux.
+
+### Optional Arguments
+
+`nodebuilder` supports optional arguments to override the default semi-automated settings:
+
+| Short | Long Version | Description |
+|:-----:|:-------------|:------------|
+| `-b` | `--bitcoin-version` | Specify the Bitcoin version. Requires one argument, for example: `-b 26.0` |
+| `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
+| `-h` | `--help` | Display the help message. _Overrides all other arguments._ |
+| `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
+| `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
+
+You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattended with a 50000 MiB prune:
+
+```sh
+./nodebuilder -b 26.0 -c -p 50000 -u
+./nodebuilder --bitcoin-version 26.0 --compile --prune 50000 --unattended
+```
+
 ## Prerequisites
 
 1. An active internet connection (of course)
-3. A POSIX-compatible operating system:
+3. A POSIX-compatible operating system
+   - Linux - [Alpine](https://wiki.alpinelinux.org/wiki/Installation), [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview), [Fedora](https://fedoraproject.org/workstation/download), [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
    - [macOS](https://apple.com/macos)
-   - Linux
-      - [Alpine](https://wiki.alpinelinux.org/wiki/Installation)
-      - [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
-      - [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview)
-      - [Fedora](https://fedoraproject.org/workstation/download)
-      - [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
-   - Any other system that can run a Docker container
-      - Use the [default Dockerfile](./Dockerfile)
-      - Or an [alternate Dockerfile](./dockerfiles/)
-6. `curl`, which is installed by default on macOS, or you can install with a package manager
+   - Or, any system that can run [Docker](./dockerfiles/)
+6. `curl`, which the script will attempt to automatically install or you can install with a package manager
 
-This POSIX-compliant script installs several common runtime dependencies that aren't defined in POSIX.
+This POSIX-compliant script installs a minimal number of [runtime dependencies](./dependencies/) that aren't defined in POSIX.
 
 ## What Does This Script Do?
 

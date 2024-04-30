@@ -16,7 +16,10 @@ check_internet() {
   check_int_address=$1
   check_int_port="443"
   check_int_timeout="10"
-  curl --silent --output /dev/null --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
+  # shellcheck disable=SC2015
+  command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+    torsocks curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null ||
+    curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
 }
 
 display_macos_warning() {
@@ -24,7 +27,7 @@ display_macos_warning() {
     printf '%s\n%s\n' \
       "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
       "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
-    if ! is_running_in_ci; then
+    if [ "${unattended:-false}" = false ] && ! is_running_in_ci; then
       printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
       read -r _
     fi
@@ -70,6 +73,33 @@ ensure_curl_dependency() {
   fi
 }
 
+get_cursor_column() {
+  stored_stty_settings=$(stty -g)
+  # Set raw mode, no echo, immediate read
+  stty raw -echo min 0 time 10
+  # Send ANSII escape code to request cursor position
+  printf "\033[6n" > /dev/tty
+  # System will print the cursor's row and column
+  IFS=';' read -r _ stty_column
+  stty "$stored_stty_settings"
+  printf '%s' "$stty_column"
+}
+
+test_get_cursor_column() {
+  # Test when cursor is at the start of a line
+  printf '\n'
+  col=$(find_cursor_column)
+  [ "$col" -ne 1 ] && throw_error "Failed: Expected 1, got $col"
+
+  # Test when cursor is at the end of the string "test"
+  printf '\n%s' "test"
+  col=$(find_cursor_column)
+  [ "$col" -ne 5 ] && throw_error "Failed: Expected 5, got $col"
+
+  printf '%s\n' "All tests passed"
+  return 0
+}
+
 get_free_space_in_mib() {
   if [ "$(uname -s)" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -100,6 +130,25 @@ get_os_release_type() (
   fi
 )
 
+# shellcheck disable=SC2317
+handle_error() {
+  log_error "Failed to run line $1."
+  handle_exit
+  exit 1
+}
+
+# shellcheck disable=SC2317
+handle_exit() {
+  [ -n "${temp_directory:-}" ] && rm -rf -- "${temp_directory:?}"/
+}
+
+# shellcheck disable=SC2317
+handle_sigint() {
+  printf '\n%s\n' "Detected Ctrl+C. Exiting."
+  handle_exit
+  exit 0
+}
+
 install_build_dependencies_apk() {
   apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qtbase-x11 qt5-qttools-dev |
     grep -v "ICU with non-English locales" -A2 -B1 || true
@@ -125,7 +174,9 @@ install_build_dependencies_zypper() {
 
 install_runtime_dependencies_apk() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_apk.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add
   else
@@ -136,7 +187,9 @@ install_runtime_dependencies_apk() {
 install_runtime_dependencies_aptget() {
   check_dpkg_lock
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_aptget.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
   else
@@ -177,7 +230,9 @@ install_runtime_dependencies_darwin() {
 
 install_runtime_dependencies_dnf() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
   else
@@ -187,7 +242,9 @@ install_runtime_dependencies_dnf() {
 
 install_runtime_dependencies_pacman() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null
   else
@@ -197,7 +254,9 @@ install_runtime_dependencies_pacman() {
 
 install_runtime_dependencies_zypper() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
-  dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
   else
@@ -292,6 +351,28 @@ is_valid_bitcoin_version() {
   return 1
 }
 
+log_error() {
+  [ "$(get_cursor_column)" -gt 0 ] && printf '\n'
+  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
+}
+
+print_usage() {
+  printf '%s\n\n' "Usage: $0 [options]"
+  printf '%s\n' "Options:"
+  printf '%s\n' "-b, --bitcoin-version   Specify the Bitcoin version"
+  printf '%s\n' "-c, --compile           Build Bitcoin from source"
+  printf '%s\n' "-h, --help              Display this help message"
+  printf '%s\n' "-p, --prune             Set a prune value in MiB"
+  printf '%s\n' "-u, --unattended        Run in non-interactive mode"
+}
+
+run_unit_tests() {
+  printf '%s' "Testing get_cursor_column..."
+  test_get_cursor_column
+  printf '%s\n' "PASS"
+  return 0
+}
+
 set_bitcoin_core_option() (
   option="$1"
   value="$2"
@@ -316,39 +397,6 @@ set_if_unset_bitcoin_core_option() (
   fi
 )
 
-log_error() {
-  printf '\n%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
-}
-
-# shellcheck disable=SC2317
-handle_exit() {
-  [ -n "${temp_directory:-}" ] && rm -rf -- "${temp_directory:?}"/
-}
-
-# shellcheck disable=SC2317
-handle_error() {
-  log_error "Failed to run line $1."
-  handle_exit
-  exit 1
-}
-
-# shellcheck disable=SC2317
-handle_sigint() {
-  printf '\n%s\n' "Detected Ctrl+C. Exiting."
-  handle_exit
-  exit 0
-}
-
-print_usage() {
-  printf '%s\n\n' "Usage: $0 [options]"
-  printf '%s\n' "Options:"
-  printf '%s\n' "-b, --bitcoin-version   Speficy the Bitcoin version"
-  printf '%s\n' "-c, --compile           Build Bitcoin from source"
-  printf '%s\n' "-h, --help              Display this help message"
-  printf '%s\n' "-p, --prune             Set a prune value in MiB"
-  printf '%s\n' "-u, --unattended        Run in non-interactive mode"
-}
-
 throw_error() {
   if [ $# -gt 1 ]; then
     log_error "$@"
@@ -361,11 +409,13 @@ throw_error() {
   exit 1
 }
 
-temp_directory=""
-unattended=false
-prune_value="-1"
 target_bitcoin_version="27.0"
-target_bitcoin_architecture="$(uname -m)"
+
+temp_directory=""
+compile_bitcoin=false
+prune_value="-1"
+unattended=false
+unit_tests=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -381,7 +431,7 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -c | --compile)
-    compile_bitcoin="true"
+    compile_bitcoin=true
     ;;
   -h | --help)
     print_usage
@@ -403,6 +453,9 @@ while [ $# -gt 0 ]; do
     prune_value="$2"
     shift
     ;;
+  -t | --test)
+    unit_tests=true
+    ;;
   -u | --unattended)
     unattended=true
     ;;
@@ -414,7 +467,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-temp_directory="$(mktemp -d)"
+[ "${unit_tests}" = "true" ] && run_unit_tests
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error ${LINENO:-}; fi' EXIT
 trap handle_sigint INT
@@ -423,6 +476,8 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
+temp_directory="$(mktemp -d)"
+target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
@@ -449,7 +504,7 @@ Linux)
   target_bitcoin_operating_system="linux-gnu"
   bitcoin_core_data_dir="${HOME}/.bitcoin"
   ensure_curl_dependency
-  printf '%s' "Checking the internet status... "
+  printf '%s' "Checking internet status... "
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
     check_internet 9.9.9.9 ||
@@ -538,7 +593,7 @@ Linux)
     if [ -n "${install_runtime_command_function}" ]; then
       "${install_runtime_command_function}"
     else
-      throw_error "This version of Linux is not supported."
+      throw_error "Unknown package manager. This version of Linux is not supported."
     fi
     ;;
   esac
@@ -547,7 +602,7 @@ Linux)
 Darwin)
   target_bitcoin_operating_system="apple-darwin"
   bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s\n%s' "Detected: running on macOS." "Checking the internet status... "
+  printf '%s\n%s' "Detected: running on macOS." "Checking internet status... "
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
     check_internet 9.9.9.9 ||
@@ -571,7 +626,7 @@ Darwin)
     sudo reboot
     exit 0
   fi
-  printf '%s\n%s' "ok." "Checking for git... "
+  printf '%s' "Checking for git... "
   install_runtime_dependencies_darwin
   printf '%s\n' "ok."
   ;;
@@ -609,9 +664,9 @@ case "${target_bitcoin_version}" in
 esac
 
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
-  printf '%s\n' "found."
-elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = "alpine" ]; then
-  printf '%s\n  %s' "not found." "Ensuring compile dependencies... "
+  printf '%s\n' "ok."
+elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alpine" ]; then
+  printf '%s\n  %s' "no." "Ensuring compile dependencies... "
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
   case "$(get_os_release_type)" in
@@ -655,9 +710,12 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
     ;;
   esac
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
-  git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
+  # shellcheck disable=SC2015
+  command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+    torsocks git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}" ||
+    git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
   cd "${compile_directory}"/
-  printf '%s\n  %s' "ok." "Analyzing hardware confgiruation... "
+  printf '%s\n  %s' "ok." "Analyzing hardware configuration... "
   ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
   grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
@@ -676,12 +734,12 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   else
     compile_jobs_count="$(($(nproc) + 1))"
   fi
-  make --jobs "${compile_jobs_count}" > /dev/null
+  make --jobs "${compile_jobs_count}" > /dev/null 2>&1
   printf '%s\n  %s' "ok." "Running compile checks, please wait... "
   make --jobs "${compile_jobs_count}" check > /dev/null 2> "${stderr_compile_log_file}"
   # exclude the two lines before and after "Ran 3 tests in " in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${stderr_compile_log_file}" >&2
-  printf '%s\n  %s' "ok." "Installing Bitcoin... "
+  printf '%s\n  %s' "ok." "Installing Bitcoin Core... "
   make install > /dev/null 2>&1 || sudo make install > /dev/null
   printf '%s\n' "ok."
   cd - > /dev/null
@@ -689,7 +747,7 @@ elif [ "${compile_bitcoin:-"false"}" = "true" ] || [ "$(get_os_release_type)" = 
   rm -rf "${compile_directory:?}"/
   current_bitcoin_version="${target_bitcoin_version}"
 else
-  printf '%s\n' "not found."
+  printf '%s\n' "no."
   bitcoin_core_extract_dir="${temp_directory}/bitcoin-core"
   bitcoin_install_bin_source="${bitcoin_core_extract_dir}/bin"
   bitcoin_install_lib_source="${bitcoin_core_extract_dir}/lib"
@@ -719,9 +777,18 @@ else
     guix_sigs_temporary_dir="${temp_directory}/guix.sigs"
     guix_sigs_destination_dir="${HOME}/Downloads/guix.sigs"
     printf '  %s' "Downloading Bitcoin Core... "
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
-    curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
+    if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ]; then
+      torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}" ||
+        curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
+      torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}" ||
+        curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
+      torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}" ||
+        curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
+    else
+      curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
+      curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
+      curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
+    fi
     printf '%s\n' "ok."
 
     printf '  %s' "Validating the checksum... "
@@ -746,7 +813,10 @@ else
     if [ -d "${guix_sigs_destination_dir}"/ ]; then
       gpg --quiet --import "${guix_sigs_destination_dir}"/builder-keys/*.gpg
     else
-      git clone --single-branch --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
+      # shellcheck disable=SC2015
+      command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+        torsocks git clone --single-branch --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}" ||
+        git clone --single-branch --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
       gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
     fi
     gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
@@ -828,7 +898,12 @@ if [ "$(uname -s)" != "Darwin" ]; then
   shortcut_filename="bitcoin_core.desktop"
 
   [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
-  [ -f "${shortcut_image_file}" ] || curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}"
+  if ! [ -f "${shortcut_image_file}" ]; then
+    # shellcheck disable=SC2015
+    command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+      torsocks curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}" ||
+      curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}"
+  fi
 
   ## Create .desktop on the user's Desktop and "Show Applications" directories
   [ -d "${desktop_path}" ] || mkdir -p "${desktop_path}"
@@ -837,7 +912,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
 [Desktop Entry]
 Name=Bitcoin Core
 Comment=Launch Bitcoin Core
-Exec=bitcoin-qt %u || bitcoind --daemonwait
+Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt; else bitcoind --daemonwait; fi'
 Icon=${shortcut_image_file}
 Terminal=false
 StartupWMClass=Bitcoin Core

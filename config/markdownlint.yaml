@@ -1,0 +1,6 @@
+# This is the configuration file for the markdown lint job in the Validation CI workflow.
+
+default: true # includes/excludes all rules by default
+
+# Line length <https://github.com/DavidAnson/markdownlint/blob/master/doc/Rules.md#md013>
+MD013: false

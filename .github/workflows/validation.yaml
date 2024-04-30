@@ -30,9 +30,10 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          config-file: './config/dependency-review-config.yaml'
+          config-file: './config/dependency-review.yaml'
           base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
           head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
   shell-lint:
     name: Check shell code
     runs-on: ubuntu-latest
@@ -68,12 +69,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: lint
+      - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
           target: Dockerfile dockerfiles/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  markdown-lint:
+    name: Check markdown code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint markdown
+        uses: avto-dev/markdown-lint@v1
+        with:
+          #rules: '/lint/rules/changelog.js'
+          config: 'config/markdownlint.yaml'
+          args: '*/*.md'
+          #ignore: './one_file.md ./another_file.md' # multiple files must be separated with single space
 
   markdown-links:
     name: Check hyperlinks
@@ -83,6 +97,7 @@ jobs:
       - name: Run markdown-link-check on documentation
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
+          config-file: 'config/markdown-link-check.json' 
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
@@ -93,7 +108,7 @@ jobs:
       - uses: rojopolis/spellcheck-github-actions@v0
         name: Spell check markdown files with PySpelling
         with:
-          config_path: config/.spellcheck.yaml
+          config_path: config/spellcheck.yaml
           output_file: spellcheck-output.txt
       - uses: actions/upload-artifact@v4
         if: '!cancelled()'
@@ -110,17 +125,19 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [dependencies-check, shell-lint, yaml-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        job-purpose: [Compile, Test]
+        job-purpose: [Compile, Test, Test-compile]
         os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
         include:
           - job-purpose: Compile
             binary-path: './nodebuilder --compile'
           - job-purpose: Test
             binary-path: './test/test_nodebuilder'
+          - job-purpose: Test-compile
+            binary-path: './test/test_nodebuilder --compile'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
@@ -162,13 +179,25 @@ jobs:
             install-upgrades-command: softwareupdate --list && softwareupdate --install --recommended
             cache-path: /Library/Updates
     steps:
+      - uses: actions/checkout@v4
+      - name: Check paths of modified files
+        uses: dorny/paths-filter@v3
+        id: changes-baremetal
+        with:
+          filters: |
+            src:
+              - '.github/workflows/*.yaml'
+              - '.github/workflows/*.yml'
+              - 'dependencies/**'
+              - 'test/test_nodebuilder'
+              - 'nodebuilder'
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
-      - uses: actions/checkout@v4
       - name: Change owner of apt archives
         if: contains(matrix.os, 'ubuntu')
         run: sudo chown -R "$(whoami)" /var/cache/apt/archives
       - name: Cache system archives
+        if: matrix.cache-path != null
         uses: actions/cache@v4
         with:
           path: ${{ matrix.cache-path }}
@@ -181,16 +210,17 @@ jobs:
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
+        if: steps.changes-baremetal.outputs.src == 'true'
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, RHEL UBI, Ubuntu, openSUSE]
+        container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, Red Hat, Ubuntu, openSUSE]
         include:
           - container: Alpine
             dockerfile: ./dockerfiles/Dockerfile_alpine
@@ -204,17 +234,31 @@ jobs:
             dockerfile: ./dockerfiles/Dockerfile_fedora
           - container: Manjaro
             dockerfile: ./dockerfiles/Dockerfile_manjaro
-          - container: RHEL UBI
-            dockerfile: ./dockerfiles/Dockerfile_rhel_ubi
+          - container: Red Hat
+            dockerfile: ./dockerfiles/Dockerfile_redhat
           - container: Ubuntu
             dockerfile: ./Dockerfile
           - container: openSUSE
             dockerfile: ./dockerfiles/Dockerfile_opensuse
     steps:
+      - uses: actions/checkout@v4
+      - name: Check paths of modified files
+        uses: dorny/paths-filter@v3
+        id: changes-containers
+        with:
+          filters: |
+            src:
+              - '.github/workflows/*.yaml'
+              - '.github/workflows/*.yml'
+              - 'dependencies/**'
+              - 'dockerfiles/**'
+              - 'test/test_nodebuilder'
+              - 'Dockerfile'
+              - 'nodebuilder'
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
-      - uses: actions/checkout@v4
       - name: Run the docker image
+        if: steps.changes-containers.outputs.src == 'true'
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
