@@ -1,6 +1,6 @@
-## Changes and Documentation
+## Describe the changes and your approach
 
-*Briefly describe the changes and why you took this approach.*
+<!-- Answer here -->
 
 ## Verification Checklist
 
