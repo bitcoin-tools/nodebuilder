@@ -74,7 +74,7 @@ ensure_curl_dependency() {
 update_cursor_column() {
   stty -echo
   printf '%s' "$(tput u7)"
-  IFS=';' read -rs _ cursor_column _
+  IFS=';' read -r _ cursor_column _
   cursor_column="${cursor_column%R}"
   stty echo
 }
@@ -83,12 +83,12 @@ test_update_cursor_column() {
   # Test when cursor is at the start of a line
   printf '\n'
   update_cursor_column
-  [ "${cursor_column}" -ne 1 ] && throw_error "Failed: Expected 1, got ${cursor_colum}"
+  [ "${cursor_column}" -ne 1 ] && throw_error "Failed: Expected 1, got ${cursor_column}"
 
   # Test when cursor is at the end of the string "test"
   printf '\n%s' "test"
   update_cursor_column
-  [ "${cursor_column}" -ne 5 ] && throw_error "Failed: Expected 5, got ${cursor_colum}"
+  [ "${cursor_column}" -ne 5 ] && throw_error "Failed: Expected 5, got ${cursor_column}"
 
   printf '%s\n' "All tests passed"
   return 0
