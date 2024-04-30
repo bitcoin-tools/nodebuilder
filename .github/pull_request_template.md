@@ -1,6 +1,6 @@
 ## Changes and Documentation
 
-*Briefly describe the major changes and why you took this approach.*
+*Briefly describe the changes and why you took this approach.*
 
 Required (choose one) - Does this change involve documentation?
 
