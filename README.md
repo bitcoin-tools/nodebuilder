@@ -39,7 +39,7 @@ chmod u+x nodebuilder
 
 ### Docker Container
 
-The Docker container can either run on Ubuntu (default) or on an alternative Linux distributions: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and RHEL UBI.
+The Docker container can either run on Ubuntu (default) or on an alternative Linux distributions: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and Red Hat.
 
 To build the default Ubuntu container, clone the repository and run:
 ```
