@@ -4,7 +4,7 @@ This project strives to follow industry best practices, ensuring a balance betwe
 
 ## Supported Versions
 
-We are currently providing security updates for the following versions:
+We are providing security updates for the following versions:
 
 - The two most recent [releases](https://github.com/bitcoin-tools/nodebuilder/releases)
 - All releases from the last 30 days
@@ -12,8 +12,12 @@ We are currently providing security updates for the following versions:
 
 ## Reporting a Vulnerability
 
-We greatly appreciate your help in identifying and reporting security vulnerabilities.
+We appreciate your help in identifying and reporting vulnerabilities.
 
-If you discover a critical security vulnerability, please responsibly disclose by creating a [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
+Please responsibly disclose any critical vulnerabilities by opening a [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
 
-If you prefer to communicate outside of GitHub, create a (private) security advisory or (public) issue asking to connect over a secure channel.
+If you prefer to communicate outside of GitHub, please open a security advisory asking to connect over your preferred channel like Signal, Telegram, or PGP.
+
+For general suggestions on how to improve the security posture, please open an issue.
+
+Please note: this is an unfunded volunteer project and can't pay any bug bounties.
