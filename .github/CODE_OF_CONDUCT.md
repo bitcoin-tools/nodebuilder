@@ -14,7 +14,7 @@ Being a dick.
 
 ## Reporting
 
-Either start a public [discussion](https://github.com/bitcoin-tools/nodebuilder/discussions) and tag the agressor or open a private [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
+Either start a public [discussion](https://github.com/bitcoin-tools/nodebuilder/discussions) and tag the agressor or open a [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
 
 ## Enforcement
 
