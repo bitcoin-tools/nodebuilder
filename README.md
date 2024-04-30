@@ -45,7 +45,7 @@ To the Ubuntu base image, clone the repository and build the default container.
 
 ```
 git clone https://github.com/bitcoin-tools/nodebuilder
-cd nodebuilder/
+cd nodebuilder/docker/
 docker build .
 ```
 
@@ -53,11 +53,11 @@ To use an [alternative base image](docker/), clone the repository and build a di
 
 ```
 git clone https://github.com/bitcoin-tools/nodebuilder
-cd nodebuilder/
-docker build -f docker/Dockerfile_that_you_choose .
+cd nodebuilder/docker/
+docker build -f Dockerfile_that_you_choose .
 ```
 
-For example, to use Alpine Linux, run `docker build -f docker/Dockerfile_alpine .`.
+For example, to run nodebuilder on Alpine Linux, run `docker build -f Dockerfile_alpine .`.
 
 ### Optional Arguments
 
