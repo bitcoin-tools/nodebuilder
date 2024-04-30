@@ -233,7 +233,7 @@ jobs:
           - container: RHEL UBI
             dockerfile: ./docker/Dockerfile_redhat
           - container: Ubuntu
-            dockerfile: ./Dockerfile
+            dockerfile: ./docker/Dockerfile_ubuntu
           - container: openSUSE
             dockerfile: ./docker/Dockerfile_opensuse
     steps:
