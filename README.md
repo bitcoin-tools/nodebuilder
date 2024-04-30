@@ -29,7 +29,7 @@ As mentioned above, start the script from the command line. Open Terminal and ru
 sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder)"
 ```
 
-Or you can download the script to your local system, set permissions, and run it:
+Or download the script to your local system, set permissions, and run it:
 
 ```sh
 wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder
@@ -49,15 +49,11 @@ cd nodebuilder/docker/
 docker build .
 ```
 
-To use an [alternative base image](docker/), clone the repository and build a different container.
+To use an [alternative base image](docker/), clone the repository and build a different container. For example, to run nodebuilder on Alpine Linux, run:
 
 ```
-git clone https://github.com/bitcoin-tools/nodebuilder
-cd nodebuilder/docker/
-docker build -f Dockerfile_that_you_choose .
+docker build -f Dockerfile_alpine .
 ```
-
-For example, to run nodebuilder on Alpine Linux, run `docker build -f Dockerfile_alpine .`.
 
 ### Optional Arguments
 
