@@ -72,15 +72,11 @@ ensure_curl_dependency() {
 }
 
 get_cursor_column() {
-  stored_stty_settings=$(stty -g)
-  # Set no character echoing
   stty -echo
-  # Send ANSII escape code to request cursor position
-  printf "\033[6n"
-  # System will print the cursor's row and column
-  IFS=';' read -d R -a pos
-  stty "$stored_stty_settings"
-  printf '%s' "${pos[1]}"
+  printf "$(tput u7)"
+  IFS=';' read -d R -rs _ column _
+  stty echo
+  printf '%s' "$column"
 }
 
 test_get_cursor_column() {
