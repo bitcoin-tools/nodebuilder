@@ -5,12 +5,11 @@ on:
     branches: [ master ]
     paths:
       - .github/workflows/*.yaml
-      - Dockerfile
       - config/*.yaml
       - dependencies/*.txt
       - docker/Dockerfile*
-      - nodebuilder
       - test/test_bitcoin
+      - nodebuilder
   issues:
     types: [ opened ]
   schedule:
@@ -231,7 +230,7 @@ jobs:
           - container: Red Hat
             dockerfile: Dockerfile_redhat
           - container: Ubuntu
-            dockerfile: Dockerfile_ubuntu
+            dockerfile: Dockerfile
           - container: openSUSE
             dockerfile: Dockerfile_opensuse
     steps:
@@ -245,9 +244,8 @@ jobs:
               - '.github/workflows/*.yaml'
               - '.github/workflows/*.yml'
               - 'dependencies/**'
-              - 'docker/**'
+              - 'docker/Dockerfile*'
               - 'test/test_nodebuilder'
-              - 'Dockerfile'
               - 'nodebuilder'
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
