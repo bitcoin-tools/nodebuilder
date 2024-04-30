@@ -8,7 +8,7 @@ on:
       - Dockerfile
       - config/*.yaml
       - dependencies/*.txt
-      - docker/Dockerfile_*
+      - docker/Dockerfile*
       - nodebuilder
       - test/test_bitcoin
   issues:
@@ -217,23 +217,23 @@ jobs:
         container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, RHEL UBI, Ubuntu, openSUSE]
         include:
           - container: Alpine
-            dockerfile: docker/Dockerfile_alpine
+            dockerfile: Dockerfile_alpine
           - container: Amazon
-            dockerfile: docker/Dockerfile_amazon
+            dockerfile: Dockerfile_amazon
           - container: Arch
-            dockerfile: docker/Dockerfile_arch
+            dockerfile: Dockerfile_arch
           - container: Debian
-            dockerfile: docker/Dockerfile_debian
+            dockerfile: Dockerfile_debian
           - container: Fedora
-            dockerfile: docker/Dockerfile_fedora
+            dockerfile: Dockerfile_fedora
           - container: Manjaro
-            dockerfile: docker/Dockerfile_manjaro
+            dockerfile: Dockerfile_manjaro
           - container: RHEL UBI
-            dockerfile: docker/Dockerfile_redhat
+            dockerfile: Dockerfile_redhat
           - container: Ubuntu
-            dockerfile: docker/Dockerfile_ubuntu
+            dockerfile: Dockerfile_ubuntu
           - container: openSUSE
-            dockerfile: docker/Dockerfile_opensuse
+            dockerfile: Dockerfile_opensuse
     steps:
       - uses: actions/checkout@v4
       - name: Check paths of modified files
@@ -257,5 +257,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: docker/${{ matrix.dockerfile }}
           push: false
