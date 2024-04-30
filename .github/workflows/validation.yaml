@@ -30,7 +30,7 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          config-file: './resources/config/dependency-review.yaml'
+          config-file: 'resources/config/dependency-review.yaml'
           base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
           head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
@@ -106,8 +106,8 @@ jobs:
       - uses: rojopolis/spellcheck-github-actions@v0
         name: Spell check markdown files with PySpelling
         with:
-          config_path: resources/config/spellcheck.yaml
-          output_file: spellcheck-output.txt
+          config_path: 'resources/config/spellcheck.yaml'
+          output_file: 'spellcheck-output.txt'
       - uses: actions/upload-artifact@v4
         if: '!cancelled()'
         with:
