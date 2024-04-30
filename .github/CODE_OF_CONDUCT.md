@@ -1,6 +1,6 @@
 # Code of Conduct
 
-Focus on our shared mission: to change the world.
+Focus on our shared mission to change the world.
 
 ![No one quits.](https://qph.cf2.quoracdn.net/main-qimg-79802de9a8264c8af5419866e94c0c1d)
 
