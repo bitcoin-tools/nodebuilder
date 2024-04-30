@@ -858,9 +858,15 @@ if [ "$(uname -s)" != "Darwin" ]; then
   [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
   if ! [ -f "${shortcut_image_file}" ]; then
     # shellcheck disable=SC2015
-    command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-      torsocks curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}" ||
-      curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}"
+    if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+      torsocks curl --head --fail --silent --show-error --location "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200" ||
+      curl --head --fail --silent --show-error --location "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200"; then
+      command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+        torsocks curl --fail --silent --show-error --location --output "${shortcut_image_file}" "${shortcut_image_source}" ||
+        curl --fail --silent --show-error --location --output "${shortcut_image_file}" "${shortcut_image_source}"
+    else
+      throw_error "Bitcoin image file doesn't exist at ${shortcut_image_source}"
+    fi
   fi
 
   ## Create .desktop on the user's Desktop and "Show Applications" directories
