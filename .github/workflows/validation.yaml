@@ -84,10 +84,8 @@ jobs:
       - name: Lint markdown
         uses: avto-dev/markdown-lint@v1
         with:
-          #rules: '/lint/rules/changelog.js'
           config: 'config/markdownlint.yaml'
           args: '*/*.md'
-          #ignore: './one_file.md ./another_file.md' # multiple files must be separated with single space
 
   markdown-links:
     name: Check hyperlinks
@@ -219,23 +217,23 @@ jobs:
         container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, RHEL UBI, Ubuntu, openSUSE]
         include:
           - container: Alpine
-            dockerfile: ./docker/Dockerfile_alpine
+            dockerfile: docker/Dockerfile_alpine
           - container: Amazon
-            dockerfile: ./docker/Dockerfile_amazon
+            dockerfile: docker/Dockerfile_amazon
           - container: Arch
-            dockerfile: ./docker/Dockerfile_arch
+            dockerfile: docker/Dockerfile_arch
           - container: Debian
-            dockerfile: ./docker/Dockerfile_debian
+            dockerfile: docker/Dockerfile_debian
           - container: Fedora
-            dockerfile: ./docker/Dockerfile_fedora
+            dockerfile: docker/Dockerfile_fedora
           - container: Manjaro
-            dockerfile: ./docker/Dockerfile_manjaro
+            dockerfile: docker/Dockerfile_manjaro
           - container: RHEL UBI
-            dockerfile: ./docker/Dockerfile_redhat
+            dockerfile: docker/Dockerfile_redhat
           - container: Ubuntu
-            dockerfile: ./docker/Dockerfile_ubuntu
+            dockerfile: docker/Dockerfile_ubuntu
           - container: openSUSE
-            dockerfile: ./docker/Dockerfile_opensuse
+            dockerfile: docker/Dockerfile_opensuse
     steps:
       - uses: actions/checkout@v4
       - name: Check paths of modified files
