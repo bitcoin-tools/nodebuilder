@@ -451,7 +451,7 @@ temp_directory="$(mktemp -d)"
 target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
+shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
 
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
