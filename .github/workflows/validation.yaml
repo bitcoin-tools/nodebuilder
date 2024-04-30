@@ -8,7 +8,7 @@ on:
       - Dockerfile
       - config/*.yaml
       - dependencies/*.txt
-      - dockerfiles/Dockerfile_*
+      - docker/Dockerfile_*
       - nodebuilder
       - test/test_bitcoin
   issues:
@@ -72,7 +72,7 @@ jobs:
       - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile dockerfiles/Dockerfile*
+          target: Dockerfile docker/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -219,23 +219,23 @@ jobs:
         container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, RHEL UBI, Ubuntu, openSUSE]
         include:
           - container: Alpine
-            dockerfile: ./dockerfiles/Dockerfile_alpine
+            dockerfile: ./docker/Dockerfile_alpine
           - container: Amazon
-            dockerfile: ./dockerfiles/Dockerfile_amazon
+            dockerfile: ./docker/Dockerfile_amazon
           - container: Arch
-            dockerfile: ./dockerfiles/Dockerfile_arch
+            dockerfile: ./docker/Dockerfile_arch
           - container: Debian
-            dockerfile: ./dockerfiles/Dockerfile_debian
+            dockerfile: ./docker/Dockerfile_debian
           - container: Fedora
-            dockerfile: ./dockerfiles/Dockerfile_fedora
+            dockerfile: ./docker/Dockerfile_fedora
           - container: Manjaro
-            dockerfile: ./dockerfiles/Dockerfile_manjaro
+            dockerfile: ./docker/Dockerfile_manjaro
           - container: RHEL UBI
-            dockerfile: ./dockerfiles/Dockerfile_rhel_ubi
+            dockerfile: ./docker/Dockerfile_redhat
           - container: Ubuntu
             dockerfile: ./Dockerfile
           - container: openSUSE
-            dockerfile: ./dockerfiles/Dockerfile_opensuse
+            dockerfile: ./docker/Dockerfile_opensuse
     steps:
       - uses: actions/checkout@v4
       - name: Check paths of modified files
@@ -247,7 +247,7 @@ jobs:
               - '.github/workflows/*.yaml'
               - '.github/workflows/*.yml'
               - 'dependencies/**'
-              - 'dockerfiles/**'
+              - 'docker/**'
               - 'test/test_nodebuilder'
               - 'Dockerfile'
               - 'nodebuilder'
