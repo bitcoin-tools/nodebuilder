@@ -39,22 +39,23 @@ chmod u+x nodebuilder
 
 ### Docker Container
 
-The Docker container can either run on Ubuntu (default) or on an alternative Linux distributions: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and Red Hat.
+A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distributions: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and Red Hat.
 
-To build the default Ubuntu container, clone the repository and run:
+To the Ubuntu base image, clone the repository and build the default container.
 ```
+git clone https://github.com/bitcoin-tools/nodebuilder
+cd nodebuilder/
 docker build .
 ```
 
-To use an alternative Dockerfiles, clone the repository and run:
+To use an [alternative base image](dockerfiles/), clone the repository and build a different container.
 ```
+git clone https://github.com/bitcoin-tools/nodebuilder
+cd nodebuilder/
 docker build -f dockerfiles/Dockerfile_that_you_choose .
 ```
 
-For example here's the command to  run a container on Alpine Linux:
-```
-docker build -f dockerfiles/Dockerfile_alpine .
-```
+For example, run `docker build -f dockerfiles/Dockerfile_alpine .` to use Alpine Linux.
 
 ### Optional Arguments
 
