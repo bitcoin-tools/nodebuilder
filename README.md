@@ -67,8 +67,8 @@ You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattend
       - [Fedora](https://fedoraproject.org/workstation/download)
       - [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
    - Any other system that can run a Docker container
-      - Use the [default Dockerfile](./Dockerfile)
-      - Or an [alternate Dockerfile](./dockerfiles/)
+      - Use the [default Dockerfile](Dockerfile)
+      - Or an [alternate Dockerfile](docker/)
 6. `curl`, which is installed by default on macOS, or you can install with a package manager
 
 This POSIX-compliant script installs several common runtime dependencies that aren't defined in POSIX.
