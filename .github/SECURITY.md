@@ -1,15 +1,14 @@
 # Security Policy
 
-This project stries to follow industry best practices to ensure a balance between a high level of security and user convenience.
+This project strives to follow industry best practices, ensuring a balance between a high level of security and user convenience.
 
 ## Supported Versions
 
 We are currently providing security updates for the following versions:
-
-- The most recent release version / tag
 - The latest commit on the `master` branch
+- The two most recent release versions / tags
+- Any release version / tag from the last 30 days
 
-Please ensure you're running one of these versions to benefit from the most recent security updates.
 
 ## Reporting a Vulnerability
 
