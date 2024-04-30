@@ -31,7 +31,7 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/node
 Or you can download the script to your local system, set permissions, and run it:
 
 ```sh
-wget https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
+wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder
 chmod u+x nodebuilder
 ./nodebuilder
 ```
