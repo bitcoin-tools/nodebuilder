@@ -866,6 +866,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
         curl --fail --silent --show-error --location --output "${shortcut_image_file}" "${shortcut_image_source}"
     else
       throw_error "Bitcoin image file doesn't exist at ${shortcut_image_source}"
+    fi
   fi
 
   ## Create .desktop on the user's Desktop and "Show Applications" directories
