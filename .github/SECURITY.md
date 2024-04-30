@@ -7,7 +7,7 @@ This project strives to follow industry best practices, ensuring a balance betwe
 We are currently providing security updates for the following versions:
 
 - The two most recent [releases](https://github.com/bitcoin-tools/nodebuilder/releases)
-- All release from the last 30 days
+- All releases from the last 30 days
 - All `master` branch [commits](https://github.com/bitcoin-tools/nodebuilder/commits/master/) since the latest release
 
 ## Reporting a Vulnerability
