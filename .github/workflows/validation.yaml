@@ -5,9 +5,10 @@ on:
     branches: [ master ]
     paths:
       - .github/workflows/*.yaml
-      - config/*.yaml
       - dependencies/*.txt
-      - docker/Dockerfile*
+      - docker/Dockerfile_*
+      - resources/config/*.json
+      - resources/config/*.yaml
       - test/test_bitcoin
       - nodebuilder
   issues:
@@ -29,7 +30,7 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          config-file: './config/dependency-review.yaml'
+          config-file: './resources/config/dependency-review.yaml'
           base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
           head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
@@ -83,7 +84,7 @@ jobs:
       - name: Lint markdown
         uses: avto-dev/markdown-lint@v1
         with:
-          config: 'config/markdownlint.yaml'
+          config: 'resources/config/markdownlint.yaml'
           args: '*/*.md'
 
   markdown-links:
@@ -94,7 +95,7 @@ jobs:
       - name: Run markdown-link-check on documentation
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
-          config-file: 'config/markdown-link-check.json' 
+          config-file: 'resources/config/markdown-link-check.json' 
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
@@ -105,7 +106,7 @@ jobs:
       - uses: rojopolis/spellcheck-github-actions@v0
         name: Spell check markdown files with PySpelling
         with:
-          config_path: config/spellcheck.yaml
+          config_path: resources/config/spellcheck.yaml
           output_file: spellcheck-output.txt
       - uses: actions/upload-artifact@v4
         if: '!cancelled()'
