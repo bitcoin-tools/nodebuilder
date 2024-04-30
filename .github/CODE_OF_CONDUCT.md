@@ -14,11 +14,11 @@ Being a dick.
 
 ## Reporting
 
-Either start a public [discussion](https://github.com/bitcoin-tools/nodebuilder/discussions) and tag the agressor or open a [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
+Tag the agressor in a public [discussion](https://github.com/bitcoin-tools/nodebuilder/discussions) or open a [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
 
 ## Enforcement
 
-Violators will be drawn and quartered.
+Suspected violators will be drawn and quartered then given a fair trial.
 
 ## Further Reading
 
