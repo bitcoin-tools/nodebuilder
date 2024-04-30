@@ -11,6 +11,7 @@ Run the following command in Terminal:
 ## Table of Contents
 
 - [Usage](#usage)
+  - [Docker Container](#docker-container)
   - [Optional Arguments](#optional-arguments)
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
@@ -20,7 +21,7 @@ Run the following command in Terminal:
 - [Contributing](#contributing)
 - [License](#license)
 
-# Usage
+## Usage
 
 As mentioned above, start the script from the command line. Open Terminal and run:
 
@@ -34,6 +35,25 @@ Or you can download the script to your local system, set permissions, and run it
 wget https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
 chmod u+x nodebuilder
 ./nodebuilder
+```
+
+### Docker Container
+
+The Docker container can either run on Ubuntu (default) or one of the alternative Linux base images: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and RHEL UBI.
+
+To build the default Ubuntu container, clone the repo and run:
+```
+docker build .
+```
+
+To use an alternative Dockerfiles, clone the repo and run:
+```
+docker build -f dockerfiles/Dockerfile_that_you_choose .
+```
+
+For example here's the command to  run a container on Alpine Linux:
+```
+docker build -f dockerfiles/Dockerfile_alpine .
 ```
 
 ### Optional Arguments
@@ -58,20 +78,13 @@ You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattend
 ## Prerequisites
 
 1. An active internet connection (of course)
-3. A POSIX-compatible operating system:
+3. A POSIX-compatible operating system
+   - Linux ([Alpine](https://wiki.alpinelinux.org/wiki/Installation), [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview), [Fedora](https://fedoraproject.org/workstation/download), [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/))
    - [macOS](https://apple.com/macos)
-   - Linux
-      - [Alpine](https://wiki.alpinelinux.org/wiki/Installation)
-      - [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
-      - [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview)
-      - [Fedora](https://fedoraproject.org/workstation/download)
-      - [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
-   - Any other system that can run a Docker container
-      - Use the [default Dockerfile](./Dockerfile)
-      - Or an [alternate Dockerfile](./dockerfiles/)
-6. `curl`, which is installed by default on macOS, or you can install with a package manager
+   - Or any system that can run a [Docker container](./dockerfiles/)
+6. `curl`, which you can install with a package manager
 
-This POSIX-compliant script installs several common runtime dependencies that aren't defined in POSIX.
+This POSIX-compliant script installs a minimal number of [runtime dependencies](./dependencies/) that aren't defined in POSIX.
 
 ## What Does This Script Do?
 
