@@ -30,4 +30,4 @@ RUN apt-get -qq update \
   && rm -rf /var/lib/apt/lists/*
 
 # Download and execute the script
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL})"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
