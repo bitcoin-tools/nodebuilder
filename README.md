@@ -65,6 +65,7 @@ docker build -f Dockerfile_alpine .
 | `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
 | `-h` | `--help` | Display the help message. _Overrides all other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
+| `-t` | `--test` | Run unit tests on functions. |
 | `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
 
 You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattended with a 50000 MiB prune:
