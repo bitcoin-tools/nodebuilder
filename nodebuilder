@@ -859,11 +859,11 @@ if [ "$(uname -s)" != "Darwin" ]; then
   if ! [ -f "${shortcut_image_file}" ]; then
     # shellcheck disable=SC2015
     if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-      torsocks curl --head --fail --silent --show-error --location "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200" ||
-      curl --head --fail --silent --show-error --location "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200"; then
+      torsocks curl --head --fail --silent --show-error --location --retry 5 --retry-all-errors "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200" ||
+      curl --head --fail --silent --show-error --location --retry 5 --retry-all-errors "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200"; then
       command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-        torsocks curl --fail --silent --show-error --location --output "${shortcut_image_file}" "${shortcut_image_source}" ||
-        curl --fail --silent --show-error --location --output "${shortcut_image_file}" "${shortcut_image_source}"
+        torsocks curl --fail --silent --show-error --location --retry 5 --retry-all-errors --output "${shortcut_image_file}" "${shortcut_image_source}" ||
+        curl --fail --silent --show-error --location --retry 5 --retry-all-errors --output "${shortcut_image_file}" "${shortcut_image_source}"
     else
       throw_error "Bitcoin image file doesn't exist at ${shortcut_image_source}"
     fi
