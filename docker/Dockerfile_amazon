@@ -9,7 +9,7 @@ ARG NODEBUILDER_VERSION=v1.3.1
 
 # Define the nodebuilder URL
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-
+                    https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt
 
@@ -29,4 +29,4 @@ RUN dnf makecache \
   && dnf clean all
 
 # Download and execute the script
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL})"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
