@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# This script helps standardize the process of creating new releases
+# This script standardizes creating new GitHub releases and updating tags
 
 set -o errexit
 set -o nounset
@@ -27,11 +27,10 @@ throw_error() {
 open_url() {
   url="$1"
   case "$(uname -s)" in
-    Darwin*)  open "$url" ;;
-    Linux*)   xdg-open "$url" ;;
-    CYGWIN*|MINGW32*|MSYS*|MINGW*)  
-      throw_error "Windows is not supported." ;;
-    *)        echo "Unsupported OS, please open the URL manually: $url" ;;
+  Darwin*) open "$url" ;;
+  Linux*) xdg-open "$url" ;;
+  CYGWIN*|MINGW32*|MSYS*|MINGW*) start "$url" ;;
+  *) echo "Unsupported OS, please open the URL manually: $url" ;;
   esac
 }
 
@@ -67,7 +66,7 @@ prepare_to_push_changes() {
   git pull origin
 
   # Get the last release version
-  last_release_version=$(git describe --tags $(git rev-list --tags --max-count=1))
+  last_release_version="$(git describe --tags "$(git rev-list --tags --max-count=1)")"
   validate_semver "${last_release_version}"
 
   # Checkout the new release branch
@@ -90,7 +89,7 @@ validate_branch() {
   git fetch origin
 
   # Check if the branch exists on the remote repository
-  if ! git show-ref --verify --quiet refs/remotes/origin/$1; then
+  if ! git show-ref --verify --quiet refs/remotes/origin/"$1"; then
     throw_error "Branch $1 does not exist on origin. Please enter a valid branch."
   fi
 
@@ -112,15 +111,14 @@ REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
 
 # Check for dependencies
 for cmd in git sed find; do
-  if ! command -v "${cmd}" >/dev/null 2>&1; then
+  if ! command -v "${cmd}" > /dev/null 2>&1; then
     throw_error "${cmd} is not installed. Please install it and try again."
   fi
 done
 
 # Get the new release version
 new_release_version=""
-if [ -n "${NEW_RELEASE_VERSION}" ]
-then
+if [ -n "${NEW_RELEASE_VERSION}" ]; then
   new_release_version="${NEW_RELEASE_VERSION}"
   validate_semver "{new_release_version}"
 else
@@ -131,8 +129,7 @@ fi
 
 # Get the new release branch
 new_release_tag_branch=""
-if [ -n "${NEW_RELEASE_TAG_BRANCH}" ]
-then
+if [ -n "${NEW_RELEASE_TAG_BRANCH}" ]; then
   new_release_tag_branch="${NEW_RELEASE_TAG_BRANCH}"
   validate_branch "${new_release_tag_branch}"
 else
@@ -143,12 +140,16 @@ fi
 
 # Open the new beta pre-release page
 open_url "${REPO_URL}/releases/new?tag=${new_release_version}-beta&title=Release%20${new_release_version}%20(beta)&prerelease=1"
-printf '%s\n%s\n' "Publish the beta pre-release and then PRESS ENTER to continue when you're ready to create the draft release..."
+printf '%s\n%s' \
+  "Publish the beta pre-release." \
+  "Then PRESS ENTER to continue to create the draft release..."
 read -r _
 
 # Open the final release page
 open_url "${REPO_URL}/releases/new?tag=${new_release_version}&title=Release%20${new_release_version}"
-printf '%s\n%s\n' "Create the DRAFT release but DON'T PUBLISH. Then PRESS ENTER to continue when you're ready to create the draft release..."
+printf '%s\n%s' \
+  "Create the DRAFT release but DON'T PUBLISH." \
+  "Then PRESS ENTER to continue when you're ready to create the release tags pull request..."
 read -r _
 
 # Prepare to push changes
@@ -158,12 +159,19 @@ prepare_to_push_changes
 # Update version in files, commit changes, and open the new pull request page
 push_changes_to_branch "${last_release_version}" "${new_release_version}-beta"
 open_url "${REPO_URL}/pull/new/${new_release_tag_branch}?title=feat(release): update Dockerfiles and README to ${new_release_version} tag"
-printf '%s\n%s\n%s\n' "We have now updated the beta tag and pushed the changes." "Create the draft pull request and test the beta tag though CI and manually." "Then PRESS ENTER to continue when you're ready to remove the beta tag and publish the release..."
+printf '%s\n%s\n%s' \
+  "We have now updated the beta tag and pushed the changes." \
+  "Create the draft pull request and test the beta tag though CI and manually." \
+  "Then PRESS ENTER to continue when you're ready to remove the beta tag and publish the release..."
 read -r _
 
 # Update version in files and commit changes
 push_changes_to_branch "${new_release_version}-beta" "${new_release_version}"
-printf '%s\n%s\n%s\n' "We have now set the release tag and pushed the changes." "Review the draft pull request and test though CI and manually." "WARNING: Merging the pull request will break production until the tag is created." "Then PRESS ENTER to continue when you're ready to remove the beta tag and publish the release..."
+printf '%s\n%s\n%s\n%s' \
+  "We have now set the release tag and pushed the changes." \
+  "Review the draft pull request, test, and merge when ready." \
+  "WARNING: Merging  will break production until the tag is created in the next step." \
+  "Then PRESS ENTER to continue when you're ready to remove the beta tag and publish the release..."
 read -r _
 
 # Final message
