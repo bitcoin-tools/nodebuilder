@@ -4,6 +4,12 @@
 FROM registry.access.redhat.com/ubi8/ubi:8.9@sha256:edc34f89cf9c818c2fb28b8ea1780f384db563ce4293dc0ab8e73ec01791e5af
 ENV TERM=xterm
 
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument
+ARG NODEBUILDER_VERSION=v1.4.0
+
+# Define the nodebuilder URL
+ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt
 
@@ -21,4 +27,4 @@ RUN dnf makecache \
   && dnf clean all
 
 # Download and execute the script
-RUN /bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

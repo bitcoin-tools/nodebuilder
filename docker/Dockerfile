@@ -4,6 +4,12 @@
 FROM ubuntu:22.04@sha256:77906da86b60585ce12215807090eb327e7386c8fafb5402369e421f44eff17e
 ENV TERM=xterm
 
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument
+ARG NODEBUILDER_VERSION=v1.4.0
+
+# Define the nodebuilder URL
+ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_aptget.txt
 
@@ -24,4 +30,4 @@ RUN apt-get -qq update \
   && rm -rf /var/lib/apt/lists/*
 
 # Download and execute the script
-RUN /bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
