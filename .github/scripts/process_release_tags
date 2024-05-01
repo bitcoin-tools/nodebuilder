@@ -112,17 +112,17 @@ REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
 
 # Check for dependencies
 for cmd in git sed find; do
-  if ! command -v $cmd >/dev/null 2>&1; then
-    throw_error "$cmd is not installed. Please install it and try again."
+  if ! command -v "${cmd}" >/dev/null 2>&1; then
+    throw_error "${cmd} is not installed. Please install it and try again."
   fi
 done
 
 # Get the new release version
 new_release_version=""
-if [ -n ${NEW_RELEASE_VERSION} ]
+if [ -n "${NEW_RELEASE_VERSION}" ]
 then
-  new_release_version=${NEW_RELEASE_VERSION}
-  validate_semver "{new_release_version}
+  new_release_version="${NEW_RELEASE_VERSION}"
+  validate_semver "{new_release_version}"
 else
   printf '%s' "Enter the new release version: "
   read -r new_release_version
