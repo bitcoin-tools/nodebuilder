@@ -4,6 +4,12 @@
 FROM amazonlinux:2023
 ENV TERM=xterm
 
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument
+ARG NODEBUILDER_VERSION=v1.3.1
+
+# Define the nodebuilder URL
+ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt
 
@@ -23,4 +29,4 @@ RUN dnf makecache \
   && dnf clean all
 
 # Download and execute the script
-RUN /bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL})"

@@ -4,6 +4,12 @@
 FROM opensuse/leap:15.5@sha256:bd0fcef5afdc37936fd102ade71522d30b68364e724cb84083bc64d036b995b4
 ENV TERM=xterm
 
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument
+ARG NODEBUILDER_VERSION=v1.3.1
+
+# Define the nodebuilder URL
+ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt
 
@@ -21,4 +27,4 @@ RUN zypper refresh \
   | xargs zypper --non-interactive install
 
 # Download and execute the script
-RUN /bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL})"

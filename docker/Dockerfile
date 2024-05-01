@@ -7,11 +7,11 @@ ENV TERM=xterm
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
 ARG NODEBUILDER_VERSION=v1.3.1
 
-# Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_aptget.txt
-
 # Define the nodebuilder URL
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
+# Define the dependencies URL
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_aptget.txt
 
 # Check the current environment
 RUN uname -a \
