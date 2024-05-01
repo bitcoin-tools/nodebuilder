@@ -110,8 +110,9 @@ REPO_PATH="${HOME}/Documents/GitHub/nodebuilder"
 REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
 
 # Check if REPO_PATH is a valid Git repository
-[ -d "${REPO_PATH}" ] && git -C "${REPO_PATH}" rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
+if [ ! -d "${REPO_PATH}" ] || ! git -C "${REPO_PATH}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   throw_error "Invalid git repository path: ${REPO_PATH}"
+fi
 
 # Check if REPO_URL is a valid URL
 echo "${REPO_URL}" | grep -qE '^https?://' ||
