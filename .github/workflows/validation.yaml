@@ -5,12 +5,11 @@ on:
     branches: [ master ]
     paths:
       - .github/workflows/*.yaml
-      - Dockerfile
       - config/*.yaml
       - dependencies/*.txt
-      - dockerfiles/Dockerfile_*
-      - nodebuilder
+      - docker/Dockerfile*
       - test/test_bitcoin
+      - nodebuilder
   issues:
     types: [ opened ]
   schedule:
@@ -72,7 +71,7 @@ jobs:
       - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile dockerfiles/Dockerfile*
+          target: docker/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -84,10 +83,8 @@ jobs:
       - name: Lint markdown
         uses: avto-dev/markdown-lint@v1
         with:
-          #rules: '/lint/rules/changelog.js'
           config: 'config/markdownlint.yaml'
           args: '*/*.md'
-          #ignore: './one_file.md ./another_file.md' # multiple files must be separated with single space
 
   markdown-links:
     name: Check hyperlinks
@@ -219,23 +216,23 @@ jobs:
         container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, Red Hat, Ubuntu, openSUSE]
         include:
           - container: Alpine
-            dockerfile: ./dockerfiles/Dockerfile_alpine
+            dockerfile: Dockerfile_alpine
           - container: Amazon
-            dockerfile: ./dockerfiles/Dockerfile_amazon
+            dockerfile: Dockerfile_amazon
           - container: Arch
-            dockerfile: ./dockerfiles/Dockerfile_arch
+            dockerfile: Dockerfile_arch
           - container: Debian
-            dockerfile: ./dockerfiles/Dockerfile_debian
+            dockerfile: Dockerfile_debian
           - container: Fedora
-            dockerfile: ./dockerfiles/Dockerfile_fedora
+            dockerfile: Dockerfile_fedora
           - container: Manjaro
-            dockerfile: ./dockerfiles/Dockerfile_manjaro
+            dockerfile: Dockerfile_manjaro
           - container: Red Hat
-            dockerfile: ./dockerfiles/Dockerfile_redhat
+            dockerfile: Dockerfile_redhat
           - container: Ubuntu
-            dockerfile: ./Dockerfile
+            dockerfile: Dockerfile
           - container: openSUSE
-            dockerfile: ./dockerfiles/Dockerfile_opensuse
+            dockerfile: Dockerfile_opensuse
     steps:
       - uses: actions/checkout@v4
       - name: Check paths of modified files
@@ -247,9 +244,8 @@ jobs:
               - '.github/workflows/*.yaml'
               - '.github/workflows/*.yml'
               - 'dependencies/**'
-              - 'dockerfiles/**'
+              - 'docker/Dockerfile*'
               - 'test/test_nodebuilder'
-              - 'Dockerfile'
               - 'nodebuilder'
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
@@ -259,5 +255,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: docker/${{ matrix.dockerfile }}
           push: false
