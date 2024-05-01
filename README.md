@@ -168,7 +168,7 @@ Inspiration for this project came from these Open Source projects:
 
 Please open an issue for any bug reports or feature requests. You can see the list of open issues [here](https://github.com/bitcoin-tools/nodebuilder/issues).
 
-If you plan to submit a pull request, please first look over our automated and manual [test procedures](test/README.md).
+If you plan to submit a pull request, please first look over our automated and manual [test procedures](test/TEST.md).
 
 ## License
 
