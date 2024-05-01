@@ -109,6 +109,10 @@ validate_semver() {
 REPO_PATH="${HOME}/Documents/GitHub/nodebuilder"
 REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
 
+# Check if REPO_PATH is a valid Git repository
+[ -d "${REPO_PATH}" ] && git -C "${REPO_PATH}" rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
+  throw_error "Invalid repository path: ${REPO_PATH}. Please enter a valid Git repository path."
+
 # Check for dependencies
 for cmd in git sed find; do
   if ! command -v "${cmd}" > /dev/null 2>&1; then
