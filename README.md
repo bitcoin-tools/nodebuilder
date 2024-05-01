@@ -5,7 +5,7 @@ Create a secure Bitcoin Core node with ease.
 Run the following command in Terminal:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder)"
 ```
 
 ## Table of Contents
@@ -26,13 +26,13 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/node
 As mentioned above, start the script from the command line. Open Terminal and run:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder)"
 ```
 
 Or download the script to your local system, set permissions, and run it:
 
 ```sh
-wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder
+wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder
 chmod u+x nodebuilder
 ./nodebuilder
 ```
@@ -65,6 +65,7 @@ docker build -f Dockerfile_alpine .
 | `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
 | `-h` | `--help` | Display the help message. _Overrides all other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
+| `-t` | `--test` | Run unit tests on functions. |
 | `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
 
 You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattended with a 50000 MiB prune:
