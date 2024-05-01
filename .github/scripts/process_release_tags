@@ -119,10 +119,10 @@ done
 
 # Get the new release version
 new_release_version=""
-if [ -n "${NEW_RELEASE_VERSION}" ]
+if [ -n ${NEW_RELEASE_VERSION} ]
 then
-  new_release_version="${NEW_RELEASE_VERSION}"
-  validate_semver "${new_release_version}"
+  new_release_version=${NEW_RELEASE_VERSION}
+  validate_semver "{new_release_version}
 else
   printf '%s' "Enter the new release version: "
   read -r new_release_version
