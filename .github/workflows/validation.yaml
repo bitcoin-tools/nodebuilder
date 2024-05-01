@@ -43,15 +43,12 @@ jobs:
         uses: ludeeus/action-shellcheck@2.0.0
         env:
           SHELLCHECK_OPTS: -s sh
-        with:
-          ignore_names: offloadcoredata usei2p usetor
       - name: Lint with shfmt
         uses: luizm/action-sh-checker@v0.8.0
         env:
           SHFMT_OPTS: -i 2 -sr
         with:
           sh_checker_shellcheck_disable: true
-          sh_checker_exclude: offloadcoredata usei2p usetor
 
   yaml-lint:
     name: Check yaml code
