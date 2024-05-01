@@ -645,9 +645,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
     install_build_dependencies_zypper
     ;;
   Darwin)
-    sudo printf '' &&
-      NONINTERACTIVE=1 /bin/bash -c \
-      "$(curl --fail --silent --show-error --location --retry 5 --retry-all-errors \
+    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 --retry-all-errors \
       https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
     brew install --quiet automake boost libevent libtool pkg-config python qrencode qt@5 > /dev/null
     ;;
