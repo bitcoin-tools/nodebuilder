@@ -897,12 +897,14 @@ EOF
   printf '%s\n' "ok."
 fi
 
+# If bitcoin.conf doesn't already exist, use default settings
+[ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
 bitcoin_core_config_file="${bitcoin_core_data_dir}/bitcoin.conf"
 if [ ! -f "${bitcoin_core_config_file}" ]; then
   printf '%s' "Setting the default node behavior... "
-  [ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
-  set_bitcoin_core_option "server" "1"
+  is_running_in_ci && set_bitcoin_core_option "debug" "net"
   set_bitcoin_core_option "mempoolfullrbf" "1"
+  set_bitcoin_core_option "server" "1"
   printf '%s\n' "ok."
 fi
 
