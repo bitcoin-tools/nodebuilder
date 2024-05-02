@@ -5,6 +5,8 @@ on:
     branches: [ master ]
   issues:
     types: [ opened ]
+  release:
+    types: [ created, published ]
   schedule:
     - cron: '52 3,9,15,21 * * *'
   workflow_dispatch:
