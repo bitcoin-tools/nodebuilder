@@ -21,6 +21,7 @@ env:
   TERM: xterm
 jobs:
   changes:
+    name: Check for file changes
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
