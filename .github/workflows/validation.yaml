@@ -30,6 +30,7 @@ jobs:
       dependencies: ${{ steps.filter.outputs.dependencies }}
       dockerfiles: ${{ steps.filter.outputs.dockerfiles }}
       markdown: ${{ steps.filter.outputs.markdown }}
+      helpers: ${{ steps.filter.outputs.helpers }}
       shell: ${{ steps.filter.outputs.shell }}
       spelling: ${{ steps.filter.outputs.spelling }}
     steps:
@@ -46,10 +47,11 @@ jobs:
             - 'dependencies/**'
           dockerfiles:
             - 'docker/Dockerfile*'
+          helpers:
+            - '.github/scripts/**'
           markdown:
             - '**/*.md'
           shell:
-            - '.github/scripts/process_release_tags'
             - 'test/test_nodebuilder'
             - 'nodebuilder'
           spelling:
@@ -73,7 +75,7 @@ jobs:
   shell-lint:
     name: Lint the shell code
     needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.shell == 'true' }}
+    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.helpers == 'true' || needs.changes.outputs.shell == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
