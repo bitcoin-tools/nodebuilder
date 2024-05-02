@@ -39,7 +39,7 @@ throw_error() {
 }
 
 compile_bitcoin="false"
-GIT_REF=''
+GIT_REF_SHORT_NAME=''
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -50,12 +50,19 @@ while [ $# -gt 0 ]; do
     print_usage
     exit 0
     ;;
-  -r | --ref)
-    [ -z "$2" ] && throw_error "No argument supplied for -r|--ref" "${LINENO}"
-    GIT_REF=$2
-    [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" != "true" ] && throw_error "Not inside a Git repository" "${LINENO}"
-    [ "$(basename "$(git rev-parse --show-toplevel)")" != "nodebuilder" ] && throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
-    git show-ref --quiet --verify "$GIT_REF" || throw_error "$GIT_REF is not a valid ref" "${LINENO}"
+-r | --ref)
+    [ -z "$2" ] &&
+      throw_error "No argument supplied for -r|--ref" "${LINENO}"
+    GIT_REF_SHORT_NAME=$2
+    [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" != "true" ] &&
+      throw_error "Not inside a Git repository" "${LINENO}"
+    [ "$(basename "$(git rev-parse --show-toplevel)")" != "nodebuilder" ] &&
+      throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
+    if ! git show-ref --quiet --verify refs/heads/$GIT_REF_SHORT_NAME &&
+      ! git show-ref --quiet --verify refs/tags/$GIT_REF_SHORT_NAME &&
+      ! git cat-file -e $GIT_REF_SHORT_NAME^{commit}; then
+        throw_error "$GIT_REF_SHORT_NAME is not a valid branch, tag, or commit" "${LINENO}"
+    fi
     shift
     ;;
   *)
@@ -72,7 +79,7 @@ tail_pid=$!
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
 NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
-NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF:-master}/nodebuilder"
+NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
 wget "${NODEBUILDER_BINARY_URL}"
 chmod u+x nodebuilder
