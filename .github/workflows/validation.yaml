@@ -208,7 +208,7 @@ jobs:
             binary-path: './test/test_nodebuilder --compile'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
-            check-version-command: grep "VERSION\|ID" /etc/os-release
+            check-version-command: cat /etc/os-release
             remove-snap-command: sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
@@ -224,7 +224,7 @@ jobs:
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
-            check-version-command: grep "VERSION\|ID" /etc/os-release
+            check-version-command: cat /etc/os-release
             remove-snap-command: sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
@@ -240,16 +240,21 @@ jobs:
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: macos-13
             os-friendly-name: macOS 13 [x86_64]
-            check-version-command: sw_vers | grep Version | awk '{print $2}'
+            check-version-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string
             path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
           - os: macos-14
             os-friendly-name: macOS 14 [arm64]
-            check-version-command: sw_vers | grep Version | awk '{print $2}'
+            check-version-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string
             path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
     steps:
       - uses: actions/checkout@v4
-      - name: Check the current OS version
-        run: ${{ matrix.check-version-command }} && uname -a
+      - name: Check the current environment
+        run: |
+          uname -a
+          ${{ matrix.check-version-command }}
+          df -h
+          grep Mem /proc/meminfo
+          date -u
       - name: Change owner of apt archives
         if: contains(matrix.os, 'ubuntu')
         run: sudo chown -R "$(whoami)" /var/cache/apt/archives
