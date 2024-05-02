@@ -198,14 +198,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        job-purpose: [Compile, Test, Test-compile]
+        job-purpose: [Compile, Test-package, Test-source]
         os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
         include:
-          - job-purpose: Compile
-            binary-path: './nodebuilder --compile'
-          - job-purpose: Test
+          - job-purpose: Test-package
             binary-path: './test/test_nodebuilder --ref ${GITHUB_SHA}'
-          - job-purpose: Test-compile
+          - job-purpose: Test-source
             binary-path: './test/test_nodebuilder --compile --ref ${GITHUB_SHA}'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
