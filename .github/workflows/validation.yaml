@@ -221,7 +221,7 @@ jobs:
               /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
-            path-to-bitcoin-log: '${{ env.HOME }}/.bitcoin/debug.log'
+            path-to-bitcoin-log: '${{ runner.HOME }}/.bitcoin/debug.log'
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
@@ -237,15 +237,15 @@ jobs:
               /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
-            path-to-bitcoin-log: '${{ env.HOME }}/.bitcoin/debug.log'
+            path-to-bitcoin-log: '${{ runner.HOME }}/.bitcoin/debug.log'
           - os: macos-13
             os-friendly-name: macOS 13 [x86_64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
-            path-to-bitcoin-log: '${{ env.HOME }}/Library/Application Support/Bitcoin/debug.log'
+            path-to-bitcoin-log: '${{ runner.HOME }}/Library/Application Support/Bitcoin/debug.log'
           - os: macos-14
             os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
-            path-to-bitcoin-log: '${{ env.HOME }}/Library/Application Support/Bitcoin/debug.log'
+            path-to-bitcoin-log: '${{ runner.HOME }}/Library/Application Support/Bitcoin/debug.log'
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
