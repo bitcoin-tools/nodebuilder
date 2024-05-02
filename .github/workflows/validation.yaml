@@ -5,6 +5,7 @@ on:
     branches: [ master ]
     paths:
       - .github/workflows/*.yaml
+      - .github/scripts/*
       - dependencies/*.txt
       - docker/Dockerfile_*
       - resources/config/*.json
