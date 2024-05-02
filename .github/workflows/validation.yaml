@@ -6,7 +6,7 @@ on:
   issues:
     types: [ opened ]
   schedule:
-    - cron: '0 3,9,15,21 * * *'
+    - cron: '52 3,9,15,21 * * *'
   workflow_dispatch:
 env:
   TERM: xterm
