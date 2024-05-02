@@ -47,9 +47,10 @@ jobs:
             - 'nodebuilder'
           spelling-whitelist:
             - 'resources/data/pyspelling.wordlist.txt'
-          yaml
+          yaml:
             - '.github/workflows/*.yaml'
             - '.github/workflows/*.yml'
+
   dependencies-check:
     name: Check depencencies
     runs-on: ubuntu-latest
