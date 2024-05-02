@@ -3,15 +3,6 @@ on:
   pull_request:
   push:
     branches: [ master ]
-    paths:
-      - .github/workflows/*.yaml
-      - .github/scripts/*
-      - dependencies/*.txt
-      - docker/Dockerfile_*
-      - resources/config/*.json
-      - resources/config/*.yaml
-      - test/test_bitcoin
-      - nodebuilder
   issues:
     types: [ opened ]
   schedule:
@@ -20,6 +11,45 @@ on:
 env:
   TERM: xterm
 jobs:
+  changes:
+    name: Check for file changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      ci: ${{ steps.filter.outputs.ci }}
+      dependencies: ${{ steps.filter.outputs.dependencies }}
+      dockerfiles: ${{ steps.filter.outputs.dockerfiles }}
+      markdown: ${{ steps.filter.outputs.markdown }}
+      helpers: ${{ steps.filter.outputs.helpers }}
+      shell: ${{ steps.filter.outputs.shell }}
+      spelling: ${{ steps.filter.outputs.spelling }}
+      test: ${{ steps.filter.outputs.test }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          ci:
+            - '.github/workflows/*.yaml'
+            - '.github/workflows/*.yml'
+            - 'resources/config/**'
+          dependencies:
+            - 'dependencies/**'
+          dockerfiles:
+            - 'docker/Dockerfile*'
+          helpers:
+            - '.github/scripts/**'
+          markdown:
+            - '**/*.md'
+          shell:
+            - 'nodebuilder'
+          spelling:
+            - 'resources/data/pyspelling.wordlist.txt'
+          test:
+            - 'test/test_nodebuilder'
+
   dependencies-check:
     name: Check depencencies
     runs-on: ubuntu-latest
@@ -37,6 +67,14 @@ jobs:
 
   shell-lint:
     name: Lint the shell code
+    needs: changes
+    if: >-
+      ${{ 
+        needs.changes.outputs.ci == 'true' || 
+        needs.changes.outputs.helpers == 'true' || 
+        needs.changes.outputs.shell == 'true' || 
+        needs.changes.outputs.test == 'true' 
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +85,8 @@ jobs:
 
   yaml-lint:
     name: Lint the yaml code
+    needs: changes
+    if: ${{ needs.changes.outputs.ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,6 +98,12 @@ jobs:
 
   dockerfile-lint:
     name: Lint the Dockerfile code
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dockerfiles == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,6 +116,12 @@ jobs:
 
   markdown-lint:
     name: Lint the markdown formatting
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -81,6 +133,12 @@ jobs:
 
   markdown-links:
     name: Check hyperlinks
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true' 
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -92,6 +150,13 @@ jobs:
 
   markdown-spellcheck:
     name: Check spelling
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true' ||
+        needs.changes.outputs.spelling == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,7 +180,13 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
+      }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -166,17 +237,6 @@ jobs:
             check-version-command: sw_vers | grep Version | awk '{print $2}'
     steps:
       - uses: actions/checkout@v4
-      - name: Check paths of modified files
-        uses: dorny/paths-filter@v3
-        id: changes-baremetal
-        with:
-          filters: |
-            src:
-              - '.github/workflows/*.yaml'
-              - '.github/workflows/*.yml'
-              - 'dependencies/**'
-              - 'test/test_nodebuilder'
-              - 'nodebuilder'
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - name: Change owner of apt archives
@@ -196,13 +256,18 @@ jobs:
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
-        if: steps.changes-baremetal.outputs.src == 'true'
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dockerfiles == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -228,22 +293,9 @@ jobs:
             dockerfile: Dockerfile_opensuse
     steps:
       - uses: actions/checkout@v4
-      - name: Check paths of modified files
-        uses: dorny/paths-filter@v3
-        id: changes-containers
-        with:
-          filters: |
-            src:
-              - '.github/workflows/*.yaml'
-              - '.github/workflows/*.yml'
-              - 'dependencies/**'
-              - 'docker/Dockerfile*'
-              - 'test/test_nodebuilder'
-              - 'nodebuilder'
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
       - name: Run the docker image
-        if: steps.changes-containers.outputs.src == 'true'
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
