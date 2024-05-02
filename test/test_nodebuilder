@@ -24,11 +24,33 @@ kill_tail_process() {
 print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' "Options:"
-  printf '%s\n' "-c, --compile           Build Bitcoin from source"
-  printf '%s\n' "-h, --help              Display this help message"
+  printf '%s\n' "-c, --compile      Build Bitcoin from source"
+  printf '%s\n' "-h, --help         Display this help message"
+  printf '%s\n' "-r, --ref          Choose a git tef to test"
+}
+
+throw_error() {
+  if [ -z "$2" ]; then
+    echo "ERROR: $1" >&2
+  else
+    echo "ERROR at line $2: $1" >&2
+  fi
+  exit 1
+}
+
+validate_git_ref_short_name() {
+  [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ] ||
+    throw_error "Not inside a Git repository" "${LINENO}"
+  [ "$(basename "$(git rev-parse --show-toplevel)")" = "nodebuilder" ] ||
+    throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
+  git pull origin ||
+    throw_error "Unable to pull git changes" "${LINENO}"
+  git rev-parse --quiet --verify "$1" ||
+    throw_error "$1 is not a valid branch, tag, or commit" "${LINENO}"
 }
 
 compile_bitcoin="false"
+GIT_REF_SHORT_NAME=''
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -39,9 +61,15 @@ while [ $# -gt 0 ]; do
     print_usage
     exit 0
     ;;
+  -r | --ref)
+    [ -z "$2" ] &&
+      throw_error "No argument supplied for -r|--ref" "${LINENO}"
+    GIT_REF_SHORT_NAME="$2"
+    validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
+    shift
+    ;;
   *)
-    printf '%s\n%s\n' "Error: '$1' is invalid." "Use -h or --help for available options."
-    exit 1
+    throw_error "'$1' is invalid. Use -h or --help for available options."
     ;;
   esac
   shift
@@ -53,7 +81,10 @@ tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
-wget https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
+NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
+NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
+
+wget "${NODEBUILDER_BINARY_URL}"
 chmod u+x nodebuilder
 if [ "${compile_bitcoin}" = 'true' ]; then
   ./nodebuilder --compile \
@@ -114,7 +145,8 @@ for message in \
   fi
 done
 
-if [ "${compile_bitcoin}" = "true" ] || [ "$(grep "^ID=" /etc/os-release | cut -d= -f2)" = "alpine" ]; then
+if [ "${compile_bitcoin}" = "true" ] ||
+  { [ -f /etc/os-release ] && [ "$(grep "^ID=" /etc/os-release | cut -d= -f2)" = "alpine" ]; }; then
   for message in \
     "Ensuring compile dependencies... ok.$" \
     "Downloading Bitcoin source code... ok.$" \
