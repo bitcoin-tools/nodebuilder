@@ -6,7 +6,7 @@ on:
   issues:
     types: [ opened ]
   schedule:
-    - cron: '0 10,22 * * *'
+    - cron: '0 3,9,15,21 * * *'
   workflow_dispatch:
 env:
   TERM: xterm
@@ -221,6 +221,7 @@ jobs:
               /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
+            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
@@ -236,12 +237,15 @@ jobs:
               /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
+            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: macos-13
             os-friendly-name: macOS 13 [x86_64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
+            path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
           - os: macos-14
             os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
+            path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
@@ -277,6 +281,11 @@ jobs:
           }}
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
+      - name: Save Bitcoin Core log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.job-purpose }}-${{ matrix.os }}-bitcoin-debug.log
+          path: ${{ matrix.path-to-bitcoin-log }}
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
