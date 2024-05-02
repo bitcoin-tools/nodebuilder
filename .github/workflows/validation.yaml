@@ -20,6 +20,37 @@ on:
 env:
   TERM: xterm
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+    # For pull requests it's not necessary to checkout the code
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          ci-config:
+            - 'resources/config/**'
+          dependencies:
+            - 'dependencies/**'
+          dockerfiles:
+            - 'docker/Dockerfile*'
+          markdown:
+            - '**/*.md'
+          shell:
+            - '.github/scripts/process_release_tags'
+            - 'test/test_nodebuilder'
+            - 'nodebuilder'
+          spelling-whitelist:
+            - 'resources/data/pyspelling.wordlist.txt'
+          yaml
+            - '.github/workflows/*.yaml'
+            - '.github/workflows/*.yml'
+
   dependencies-check:
     name: Check depencencies
     runs-on: ubuntu-latest
@@ -37,6 +68,8 @@ jobs:
 
   shell-lint:
     name: Lint the shell code
+    needs: changes
+    if: ${{ needs.changes.outputs.shell == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +80,8 @@ jobs:
 
   yaml-lint:
     name: Lint the yaml code
+    needs: changes
+    if: ${{ needs.changes.outputs.yaml == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,6 +93,8 @@ jobs:
 
   dockerfile-lint:
     name: Lint the Dockerfile code
+    needs: changes
+    if: ${{ needs.changes.outputs.dockerfiles == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,6 +107,8 @@ jobs:
 
   markdown-lint:
     name: Lint the markdown formatting
+    needs: changes
+    if: ${{ needs.changes.outputs.markdown == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -81,6 +120,8 @@ jobs:
 
   markdown-links:
     name: Check hyperlinks
+    needs: changes
+    if: ${{ needs.changes.outputs.markdown == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -92,6 +133,8 @@ jobs:
 
   markdown-spellcheck:
     name: Check spelling
+    needs: changes
+    if: ${{ needs.changes.outputs.markdown == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,7 +158,8 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    if: ${{ needs.changes.outputs.shell == 'true' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -168,15 +212,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check paths of modified files
         uses: dorny/paths-filter@v3
-        id: changes-baremetal
-        with:
-          filters: |
-            src:
-              - '.github/workflows/*.yaml'
-              - '.github/workflows/*.yml'
-              - 'dependencies/**'
-              - 'test/test_nodebuilder'
-              - 'nodebuilder'
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - name: Change owner of apt archives
@@ -202,7 +237,8 @@ jobs:
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    if: ${{ needs.changes.outputs.dockerfiles == 'true' || needs.changes.outputs.shell == 'true' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -228,22 +264,9 @@ jobs:
             dockerfile: Dockerfile_opensuse
     steps:
       - uses: actions/checkout@v4
-      - name: Check paths of modified files
-        uses: dorny/paths-filter@v3
-        id: changes-containers
-        with:
-          filters: |
-            src:
-              - '.github/workflows/*.yaml'
-              - '.github/workflows/*.yml'
-              - 'dependencies/**'
-              - 'docker/Dockerfile*'
-              - 'test/test_nodebuilder'
-              - 'nodebuilder'
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
       - name: Run the docker image
-        if: steps.changes-containers.outputs.src == 'true'
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
