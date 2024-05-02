@@ -178,16 +178,9 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-  pause-if-master-commit:
-    name: Pause on master commits
-    runs-on: ubuntu-latest
-    steps:
-      - name: Sleep for the GitHub cache-control max-age duration
-        run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
-
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
@@ -277,7 +270,7 @@ jobs:
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint, pause-if-master-commit]
+    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
