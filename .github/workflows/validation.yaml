@@ -208,7 +208,7 @@ jobs:
             binary-path: './test/test_nodebuilder --compile'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
-            check-version-command: cat /etc/os-release && grep Mem /proc/meminfo && lscpu
+            check-version-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-snap-command: sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
@@ -224,7 +224,7 @@ jobs:
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
-            check-version-command: cat /etc/os-release && grep Mem /proc/meminfo && lscpu
+            check-version-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-snap-command: sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
