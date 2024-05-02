@@ -45,7 +45,7 @@ validate_git_ref_short_name() {
     throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
   git pull origin ||
     throw_error "Unable to pull git changes" "${LINENO}"
-  git rev-parse --quiet --verify $1 ||
+  git rev-parse --quiet --verify "$1" ||
     throw_error "$1 is not a valid branch, tag, or commit" "${LINENO}"
 }
 
@@ -64,8 +64,8 @@ while [ $# -gt 0 ]; do
   -r | --ref)
     [ -z "$2" ] &&
       throw_error "No argument supplied for -r|--ref" "${LINENO}"
-    GIT_REF_SHORT_NAME=$2
-    validate_git_ref_short_name $GIT_REF_SHORT_NAME
+    GIT_REF_SHORT_NAME="$2"
+    validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
     shift
     ;;
   *)
