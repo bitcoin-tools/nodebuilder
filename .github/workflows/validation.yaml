@@ -260,7 +260,14 @@ jobs:
         if: matrix.remove-snap-command != null
         run: ${{ matrix.remove-snap-command }}
       - name: Install system upgrades
-        if: matrix.install-upgrades-command != null
+        if: >-
+          ${{ 
+            matrix.install-upgrades-command != null &&
+            (
+              needs.changes.outputs.shell == 'true' ||
+              needs.changes.outputs.test == 'true'
+            )
+          }}
         run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
         if: >-
