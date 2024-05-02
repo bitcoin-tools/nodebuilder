@@ -37,7 +37,7 @@ throw_error() {
   fi
   exit 1
 }
-                                  
+
 compile_bitcoin="false"
 git_ref=''
 
@@ -53,7 +53,7 @@ while [ $# -gt 0 ]; do
   -r | --ref)
     [ -z "$2" ] && throw_error "No argument supplied for -r|--ref" "${LINENO}"
     git_ref=$2
-    [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ] && throw_error "Not inside a Git repository" "${LINENO}"
+    [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" != "true" ] && throw_error "Not inside a Git repository" "${LINENO}"
     [ "$(basename "$(git rev-parse --show-toplevel)")" != "nodebuilder" ] && throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
     git show-ref --quiet --verify "$git_ref" || throw_error "$git_ref is not a valid ref" "${LINENO}"
     shift
