@@ -19,7 +19,7 @@ jobs:
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
       dependencies: ${{ steps.filter.outputs.dependencies }}
-      dockerfiles: ${{ steps.filter.outputs.dockerfiles }}
+      docker: ${{ steps.filter.outputs.docker }}
       markdown: ${{ steps.filter.outputs.markdown }}
       helpers: ${{ steps.filter.outputs.helpers }}
       shell: ${{ steps.filter.outputs.shell }}
@@ -37,7 +37,7 @@ jobs:
             - 'resources/config/**'
           dependencies:
             - 'dependencies/**'
-          dockerfiles:
+          docker:
             - 'docker/Dockerfile*'
           helpers:
             - '.github/scripts/**'
@@ -70,10 +70,11 @@ jobs:
     needs: changes
     if: >-
       ${{ 
-        needs.changes.outputs.ci == 'true' || 
-        needs.changes.outputs.helpers == 'true' || 
-        needs.changes.outputs.shell == 'true' || 
-        needs.changes.outputs.test == 'true' 
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.helpers == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -86,7 +87,13 @@ jobs:
   yaml-lint:
     name: Lint the yaml code
     needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -102,7 +109,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.dockerfiles == 'true'
+        needs.changes.outputs.docker == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -180,7 +187,7 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint, pause-if-master-commit]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
@@ -256,16 +263,21 @@ jobs:
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
+        if: >-
+          ${{
+            needs.changes.outputs.shell == 'true' ||
+            needs.changes.outputs.test == 'true'
+          }}
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint, pause-if-master-commit]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.dockerfiles == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
     runs-on: ubuntu-latest
@@ -296,6 +308,11 @@ jobs:
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
       - name: Run the docker image
+        if: >-
+          ${{
+            needs.changes.outputs.docker == 'true' ||
+            needs.changes.outputs.shell == 'true'
+          }}
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
