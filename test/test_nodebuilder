@@ -43,9 +43,6 @@ validate_git_ref_short_name() {
     throw_error "Not inside a Git repository" "${LINENO}"
   [ "$(basename "$(git rev-parse --show-toplevel)")" = "nodebuilder" ] ||
     throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
-  git checkout master
-  git pull origin ||
-    throw_error "Unable to pull git changes" "${LINENO}"
   git rev-parse --quiet --verify "$1" ||
     throw_error "$1 is not a valid branch, tag, or commit" "${LINENO}"
 }
