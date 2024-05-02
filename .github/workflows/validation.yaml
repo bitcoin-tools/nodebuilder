@@ -205,7 +205,7 @@ jobs:
           - job-purpose: Test
             binary-path: './test/test_nodebuilder --ref ${GITHUB_SHA}'
           - job-purpose: Test-compile
-            binary-path: './test/test_nodebuilder --ref ${GITHUB_SHA} --compile'
+            binary-path: './test/test_nodebuilder --compile --ref ${GITHUB_SHA}'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
