@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# A console output test script for nodebuilder
+# A console output functional test script for nodebuilder
 set -o errexit
 set -o nounset
 

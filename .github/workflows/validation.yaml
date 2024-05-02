@@ -6,7 +6,7 @@ on:
   issues:
     types: [ opened ]
   schedule:
-    - cron: '0 10,22 * * *'
+    - cron: '0 3,9,15,21 * * *'
   workflow_dispatch:
 env:
   TERM: xterm
@@ -19,7 +19,7 @@ jobs:
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
       dependencies: ${{ steps.filter.outputs.dependencies }}
-      dockerfiles: ${{ steps.filter.outputs.dockerfiles }}
+      docker: ${{ steps.filter.outputs.docker }}
       markdown: ${{ steps.filter.outputs.markdown }}
       helpers: ${{ steps.filter.outputs.helpers }}
       shell: ${{ steps.filter.outputs.shell }}
@@ -37,7 +37,7 @@ jobs:
             - 'resources/config/**'
           dependencies:
             - 'dependencies/**'
-          dockerfiles:
+          docker:
             - 'docker/Dockerfile*'
           helpers:
             - '.github/scripts/**'
@@ -70,10 +70,11 @@ jobs:
     needs: changes
     if: >-
       ${{ 
-        needs.changes.outputs.ci == 'true' || 
-        needs.changes.outputs.helpers == 'true' || 
-        needs.changes.outputs.shell == 'true' || 
-        needs.changes.outputs.test == 'true' 
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.helpers == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -86,7 +87,13 @@ jobs:
   yaml-lint:
     name: Lint the yaml code
     needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -102,7 +109,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.dockerfiles == 'true'
+        needs.changes.outputs.docker == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -180,7 +187,7 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint, pause-if-master-commit]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
@@ -214,6 +221,7 @@ jobs:
               /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
+            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
@@ -229,12 +237,15 @@ jobs:
               /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
+            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: macos-13
             os-friendly-name: macOS 13 [x86_64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
+            path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
           - os: macos-14
             os-friendly-name: macOS 14 [arm64]
             check-version-command: sw_vers | grep Version | awk '{print $2}'
+            path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
@@ -253,19 +264,36 @@ jobs:
         if: matrix.remove-snap-command != null
         run: ${{ matrix.remove-snap-command }}
       - name: Install system upgrades
-        if: matrix.install-upgrades-command != null
+        if: >-
+          ${{ 
+            matrix.install-upgrades-command != null &&
+            (
+              needs.changes.outputs.shell == 'true' ||
+              needs.changes.outputs.test == 'true'
+            )
+          }}
         run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
+        if: >-
+          ${{
+            needs.changes.outputs.shell == 'true' ||
+            needs.changes.outputs.test == 'true'
+          }}
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
+      - name: Save Bitcoin Core log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.job-purpose }}-${{ matrix.os }}-bitcoin-debug.log
+          path: ${{ matrix.path-to-bitcoin-log }}
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint, pause-if-master-commit]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.dockerfiles == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
     runs-on: ubuntu-latest
@@ -296,6 +324,11 @@ jobs:
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
       - name: Run the docker image
+        if: >-
+          ${{
+            needs.changes.outputs.docker == 'true' ||
+            needs.changes.outputs.shell == 'true'
+          }}
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
