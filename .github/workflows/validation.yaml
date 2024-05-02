@@ -68,7 +68,13 @@ jobs:
   shell-lint:
     name: Lint the shell code
     needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.helpers == 'true' || needs.changes.outputs.shell == 'true' || needs.changes.outputs.test == 'true' }}
+    if: >-
+      ${{ 
+        needs.changes.outputs.ci == 'true' || 
+        needs.changes.outputs.helpers == 'true' || 
+        needs.changes.outputs.shell == 'true' || 
+        needs.changes.outputs.test == 'true' 
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -93,7 +99,11 @@ jobs:
   dockerfile-lint:
     name: Lint the Dockerfile code
     needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.dockerfiles == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dockerfiles == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -107,7 +117,11 @@ jobs:
   markdown-lint:
     name: Lint the markdown formatting
     needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.markdown == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -120,7 +134,11 @@ jobs:
   markdown-links:
     name: Check hyperlinks
     needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.markdown == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true' 
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -133,7 +151,12 @@ jobs:
   markdown-spellcheck:
     name: Check spelling
     needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.markdown == 'true' || needs.changes.outputs.spelling == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true' ||
+        needs.changes.outputs.spelling == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -158,7 +181,12 @@ jobs:
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
     needs: [changes, dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
-    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.shell == 'true' || needs.changes.outputs.test == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
+      }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -234,7 +262,12 @@ jobs:
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
     needs: [changes, dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
-    if: ${{ needs.changes.outputs.ci == 'true' || needs.changes.outputs.dockerfiles == 'true' || needs.changes.outputs.shell == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dockerfiles == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
