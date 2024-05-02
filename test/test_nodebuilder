@@ -24,11 +24,22 @@ kill_tail_process() {
 print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' "Options:"
-  printf '%s\n' "-c, --compile           Build Bitcoin from source"
-  printf '%s\n' "-h, --help              Display this help message"
+  printf '%s\n' "-c, --compile      Build Bitcoin from source"
+  printf '%s\n' "-h, --help         Display this help message"
+  printf '%s\n' "-r, --ref          Choose a git tef to test"
 }
 
+throw_error() {
+  if [ -z "$2" ]; then
+    echo "ERROR: $1" >&2
+  else
+    echo "ERROR at line $2: $1" >&2
+  fi
+  exit 1
+}
+                                  
 compile_bitcoin="false"
+git_ref=''
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -39,9 +50,16 @@ while [ $# -gt 0 ]; do
     print_usage
     exit 0
     ;;
+  -r | --ref)
+    [ -z "$2" ] && throw_error "No argument supplied for -r|--ref" "${LINENO}"
+    git_ref=$2
+    [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ] && throw_error "Not inside a Git repository" "${LINENO}"
+    [ "$(basename "$(git rev-parse --show-toplevel)")" != "nodebuilder" ] && throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
+    git show-ref --quiet --verify "$git_ref" || throw_error "$git_ref is not a valid ref" "${LINENO}"
+    shift
+    ;;
   *)
-    printf '%s\n%s\n' "Error: '$1' is invalid." "Use -h or --help for available options."
-    exit 1
+    throw_error "'$1' is invalid. Use -h or --help for available options."
     ;;
   esac
   shift
