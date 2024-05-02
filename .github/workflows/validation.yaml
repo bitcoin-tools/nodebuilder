@@ -5,7 +5,10 @@ on:
     branches: [ master ]
   issues:
     types: [ opened ]
+  release:
+    types: [ created, published ]
   schedule:
+    # run every 6 hours at 0352, 0952, 1552, and 2152 UTC
     - cron: '52 3,9,15,21 * * *'
   workflow_dispatch:
 env:
@@ -178,16 +181,9 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-  pause-if-master-commit:
-    name: Pause on master commits
-    runs-on: ubuntu-latest
-    steps:
-      - name: Sleep for the GitHub cache-control max-age duration
-        run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
-
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
@@ -197,15 +193,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        job-purpose: [Compile, Test, Test-compile]
+        job-purpose: [Test-package, Test-source]
         os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
         include:
-          - job-purpose: Compile
-            binary-path: './nodebuilder --compile'
-          - job-purpose: Test
-            binary-path: './test/test_nodebuilder'
-          - job-purpose: Test-compile
-            binary-path: './test/test_nodebuilder --compile'
+          - job-purpose: Test-package
+            binary-path: './test/test_nodebuilder --ref ${GITHUB_SHA}'
+          - job-purpose: Test-source
+            binary-path: './test/test_nodebuilder --compile --ref ${GITHUB_SHA}'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
@@ -281,7 +275,7 @@ jobs:
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint, pause-if-master-commit]
+    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
@@ -319,6 +313,6 @@ jobs:
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
-          build-args: NODEBUILDER_VERSION=${{ github.head_ref || github.ref_name || 'master' }}
+          build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .
           file: docker/${{ matrix.dockerfile }}
