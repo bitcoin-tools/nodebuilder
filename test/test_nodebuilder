@@ -39,7 +39,7 @@ throw_error() {
 }
 
 compile_bitcoin="false"
-git_ref=''
+GIT_REF=''
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -52,10 +52,10 @@ while [ $# -gt 0 ]; do
     ;;
   -r | --ref)
     [ -z "$2" ] && throw_error "No argument supplied for -r|--ref" "${LINENO}"
-    git_ref=$2
+    GIT_REF=$2
     [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" != "true" ] && throw_error "Not inside a Git repository" "${LINENO}"
     [ "$(basename "$(git rev-parse --show-toplevel)")" != "nodebuilder" ] && throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
-    git show-ref --quiet --verify "$git_ref" || throw_error "$git_ref is not a valid ref" "${LINENO}"
+    git show-ref --quiet --verify "$GIT_REF" || throw_error "$GIT_REF is not a valid ref" "${LINENO}"
     shift
     ;;
   *)
@@ -71,7 +71,10 @@ tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
-wget https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
+NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
+NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF:-master}/nodebuilder"
+
+wget "${NODEBUILDER_BINARY_URL}"
 chmod u+x nodebuilder
 if [ "${compile_bitcoin}" = 'true' ]; then
   ./nodebuilder --compile \
