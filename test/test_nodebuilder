@@ -114,7 +114,7 @@ for message in \
   fi
 done
 
-if [ "${compile_bitcoin}" = "true" ] || 
+if [ "${compile_bitcoin}" = "true" ] ||
   { [ -f /etc/os-release ] && [ "$(grep "^ID=" /etc/os-release | cut -d= -f2)" = "alpine" ]; }; then
   for message in \
     "Ensuring compile dependencies... ok.$" \
