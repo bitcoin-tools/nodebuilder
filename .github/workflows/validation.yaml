@@ -214,8 +214,6 @@ jobs:
             check-version-command: sw_vers | grep Version | awk '{print $2}'
     steps:
       - uses: actions/checkout@v4
-      - name: Check paths of modified files
-        uses: dorny/paths-filter@v3
       - name: Check the current OS version
         run: ${{ matrix.check-version-command }} && uname -a
       - name: Change owner of apt archives
@@ -235,7 +233,6 @@ jobs:
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
-        if: steps.changes-baremetal.outputs.src == 'true'
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
 
