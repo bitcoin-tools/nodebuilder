@@ -247,6 +247,6 @@ jobs:
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
-          build-args: NODEBUILDER_VERSION=master
+          build-args: NODEBUILDER_VERSION=${{ github.head_ref || github.ref_name || 'master' }}
           context: .
           file: docker/${{ matrix.dockerfile }}
