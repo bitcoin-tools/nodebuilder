@@ -30,7 +30,7 @@ body:
       label: Optional Additional Details
       description: |
         Please provide additional context, such as runtime entironment details and screenshots.
-        PRIVATY NOTE - remove exif metadata from images before uploading to GitHub.
+        PRIVATY NOTE - remove Exif metadata from images before uploading.
       placeholder: Be as detailed as you prefer...
     validations:
       required: false
