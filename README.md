@@ -11,8 +11,8 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/node
 ## Table of Contents
 
 - [Usage](#usage)
-  - [Docker Container](#docker-container)
-  - [Optional Arguments](#optional-arguments)
+  - [(Optional) Docker Container](#optional-docker-container)
+  - [(Optional) Command-Line Arguments](#optional-command-line-arguments)
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
   - [Which Parts of My System Does This Script Touch?](#which-parts-of-my-system-does-this-script-touch)
@@ -37,7 +37,7 @@ chmod u+x nodebuilder
 ./nodebuilder
 ```
 
-### Docker Container
+### (Optional) Docker Container
 
 A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distributions: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and Red Hat.
 
@@ -55,7 +55,7 @@ To use an [alternative base image](docker/), clone the repository and build a di
 docker build -f Dockerfile_alpine .
 ```
 
-### Optional Arguments
+### (Optional) Command-Line Arguments
 
 `nodebuilder` supports optional arguments to override the default semi-automated settings:
 
@@ -82,6 +82,7 @@ You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattend
    - Linux - [Alpine](https://wiki.alpinelinux.org/wiki/Installation), [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview), [Fedora](https://fedoraproject.org/workstation/download), [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
    - [macOS](https://apple.com/macos)
    - Or, any system that can run [Docker](./docker/)
+   - Windows users can either run nodebuilder in WSL (Windows Subsystem for Linux) or in a [Docker container](#docker-container)
 6. `curl`, which the script will attempt to automatically install or you can install with a package manager
 
 This POSIX-compliant script installs a minimal number of [runtime dependencies](./dependencies/) that aren't defined in POSIX.
