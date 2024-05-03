@@ -62,6 +62,7 @@ body:
         - Linux
         - Mac
         - Windows
+        - GitHub Actions CI
         - Other (specify in the field below)
         - Not applicable
     validations:
