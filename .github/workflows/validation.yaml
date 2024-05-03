@@ -272,7 +272,7 @@ jobs:
       - name: If test fails, run nodebuilder ${{ matrix.additional-args }}
         if: steps.test-nodebuilder.outcome == 'failure'
         env:
-          CI_NODEBUILDER_URL: https://github.com/bitcoin/tools/nodebuilder/raw/master/nodebuilder
+          CI_NODEBUILDER_URL: https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
         run: |
           wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
           chmod u+x nodebuilder
