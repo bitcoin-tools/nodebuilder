@@ -266,7 +266,7 @@ jobs:
         run: ${{ matrix.install-upgrades-command }}
       - name: Test the console output ${{ matrix.additional-args }}
         id: test-nodebuilder
-        run: /bin/sh -x ./test/test_nodebuilder --ref ${GITHUB_SHA} ${{ matrix.additional-args }}
+        run: /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" ${{ matrix.additional-args }}
         timeout-minutes: 120
         continue-on-error: true
       - name: If test fails, run nodebuilder ${{ matrix.additional-args }}
