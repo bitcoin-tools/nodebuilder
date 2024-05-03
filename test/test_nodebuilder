@@ -94,7 +94,7 @@ else
     2> test_output_stderr.txt
 fi
 # TODO: don't sleep 30, do something better
-[ -f "${HOME}/.bitcoin/bitcoin.pid ] && bitcoin-cli stop && sleep 30
+[ -f "${HOME}/.bitcoin/bitcoin.pid" ] && bitcoin-cli stop && sleep 30
 rm nodebuilder
 kill_tail_process
 
