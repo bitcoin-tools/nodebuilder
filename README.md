@@ -1,8 +1,8 @@
 # Bitcoin Core Node Builder
 
-Create a secure Bitcoin Core node with ease.
+Run a secure Bitcoin Core node with ease.
 
-Run the following command in Terminal:
+Copy-paste the following command into Terminal:
 
 ```sh
 sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder)"
