@@ -38,7 +38,7 @@ body:
     attributes:
       label: "Optional Screenshots"
       description: Add relevant screenshots here to help clarify the bug.
-      placeholder: ![DESCRIPTION](LINK.png)
+      placeholder: "![DESCRIPTION](LINK.png)"
     validations:
       required: false
   - type: textarea
