@@ -20,6 +20,7 @@ ShellCheck
 StopAndDecrypt
 TxQ
 VSCode
+WSL
 Westgate
 Yeow
 acknowledgements
