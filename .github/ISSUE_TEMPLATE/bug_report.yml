@@ -5,7 +5,7 @@ labels: bug
 body:
   - type: markdown
     attributes:
-      value: "Bug Report Submission Form"
+      value: "## Bug Report Submission Form"
   - type: textarea
     id: expected
     attributes:
@@ -74,4 +74,4 @@ body:
       required: false
   - type: markdown
     attributes:
-      value: "Thank you for submitting a bug report."
+      value: "## Thank you for submitting a bug report."
