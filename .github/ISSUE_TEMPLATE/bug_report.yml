@@ -76,4 +76,4 @@ body:
       required: false
   - type: markdown
     attributes:
-      value: "### Thank you for submitting a bug report."
+      value: "#### Thank you for submitting a bug report."
