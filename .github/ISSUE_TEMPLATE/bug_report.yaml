@@ -39,7 +39,8 @@ body:
       label: "Optional Screenshots"
       description: |
         Add relevant screenshots here to help clarify the bug.
-        PRIVATY NOTE - remove Exif metadata from images before uploading.
+
+        PRIVATY NOTE - Please remove Exif metadata from images before uploading.
       placeholder: "![DESCRIPTION](LINK.png)"
     validations:
       required: false
