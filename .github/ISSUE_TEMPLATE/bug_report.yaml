@@ -59,10 +59,11 @@ body:
       description: What is the impacted environment(s)?
       multiple: true
       options:
-        - Linux
+        - Linux (specify distro below)
         - Mac
         - Windows
-        - Other (specify in the field below)
+        - GitHub Actions CI
+        - Other (specify details below)
         - Not applicable
     validations:
       required: false
