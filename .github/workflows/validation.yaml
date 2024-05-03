@@ -190,29 +190,6 @@ jobs:
         needs.changes.outputs.shell == 'true' ||
         needs.changes.outputs.test == 'true'
       }}
-    env:
-      UBUNTU_CHECK_VERSION_COMMAND: |
-        cat /etc/os-release
-        lscpu
-        grep Mem /proc/meminfo
-      UBUNTU_REMOVE_SNAP_COMMAND: sudo apt remove --assume-yes snap
-      UBUNTU_INSTALL_UPGRADES_COMMAND: >-
-        sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
-        && sudo apt-get update --option 'Acquire::Retries=5'
-        && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
-      UBUNTU_CACHE_PATH: |
-        /var/cache/apt/archives/*.deb
-        /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
-        /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
-        /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
-        /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
-        /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
-      UBUNTU_BITCOIN_LOGS: '/home/runner/.bitcoin/debug.log'
-      MACOS_CHECK_VERSION_COMMAND: |
-        sw_vers
-        sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string
-        memory_pressure -Q
-      MACOS_BITCOIN_LOGS: '/home/runner/Library/Application Support/Bitcoin/debug.log'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -225,26 +202,41 @@ jobs:
             binary-path: './test/test_nodebuilder --compile --ref ${GITHUB_SHA}'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
-            check-version-command: ${{ env.UBUNTU_CHECK_VERSION_COMMAND }}
-            remove-snap-command: ${{ env.UBUNTU_REMOVE_SNAP_COMMAND }}
-            install-upgrades-command: ${{ env.UBUNTU_INSTALL_UPGRADES_COMMAND }}
-            cache-path: ${{ env.UBUNTU_CACHE_PATH }}
-            path-to-bitcoin-log: ${{ env.UBUNTU_BITCOIN_LOGS }}
+            check-version-command: |
+              cat /etc/os-release
+              lscpu
+              grep Mem /proc/meminfo
+            remove-snap-command: sudo apt remove --assume-yes snap
+            install-upgrades-command: >-
+              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
+              && sudo apt-get update --option 'Acquire::Retries=5'
+              && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
+            cache-path: |
+              /var/cache/apt/archives/*.deb
+              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
+              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
+              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
+              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
+              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
+            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: ubuntu-latest
             os-friendly-name: Ubuntu LTS [x86_64]
-            check-version-command: ${{ env.UBUNTU_CHECK_VERSION_COMMAND }}
-            remove-snap-command: ${{ env.UBUNTU_REMOVE_SNAP_COMMAND }}
-            install-upgrades-command: ${{ env.UBUNTU_INSTALL_UPGRADES_COMMAND }}
-            cache-path: ${{ env.UBUNTU_CACHE_PATH }}
-            path-to-bitcoin-log: ${{ env.UBUNTU_BITCOIN_LOGS }}
+            check-version-command: ${{ matrix['ubuntu-22.04'].check-version-command }}
+            remove-snap-command: ${{ matrix['ubuntu-22.04'].remove-snap-command }}
+            install-upgrades-command: ${{ matrix['ubuntu-22.04'].install-upgrades-command }}
+            cache-path: ${{ matrix['ubuntu-22.04'].cache-path }}
+            path-to-bitcoin-log: ${{ matrix['ubuntu-22.04'].path-to-bitcoin-log }}
           - os: macos-13
             os-friendly-name: macOS 13 [x86_64]
-            check-version-command: ${{ env.MACOS_CHECK_VERSION_COMMAND }}
-            path-to-bitcoin-log: ${{ env.MACOS_BITCOIN_LOGS }}
+            check-version-command: |
+              sw_vers
+              sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string
+              memory_pressure -Q
+            path-to-bitcoin-log: '/home/runner/Library/Application Support/Bitcoin/debug.log'
           - os: macos-14
             os-friendly-name: macOS 14 [arm64]
-            check-version-command: ${{ env.MACOS_CHECK_VERSION_COMMAND }}
-            path-to-bitcoin-log: ${{ env.MACOS_BITCOIN_LOGS }}
+            check-version-command: ${{ matrix['macos-13'].check-version-command }}
+            path-to-bitcoin-log: ${{ matrix['macos-13'].path-to-bitcoin-log }}
     steps:
       - uses: actions/checkout@v4
       - name: Check the current environment
