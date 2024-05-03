@@ -31,7 +31,7 @@ body:
       description: |
         Please provide additional context, such as runtime entironment details and screenshots.
 
-        PRIVATY NOTE - remove Exif metadata from images before uploading.
+        PRIVATY NOTE - Please remove Exif metadata from images before uploading.
       placeholder: Be as detailed as you prefer...
     validations:
       required: false
