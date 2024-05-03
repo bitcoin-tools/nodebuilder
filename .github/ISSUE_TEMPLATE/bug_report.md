@@ -16,17 +16,11 @@ assignees: ''
 ## Steps to Reproduce the Problem
 
   1.
-  1.
-  1.
+  2.
+  3.
 
 ## Specifications
 
   - Version:
   - Platform:
   - Subsystem:
-
- - Environment [e.g. bare metal, docker]
- - Release [e.g. 1.0.0]
-
-**Additional context**
-Add any other context about the problem here.
