@@ -5,7 +5,7 @@ labels: bug
 body:
   - type: markdown
     attributes:
-      value: "**nodebuilder** Bug Report Submission Form"
+      value: "Bug Report Submission Form"
   - type: textarea
     id: expected
     attributes:
