@@ -10,7 +10,7 @@ body:
     id: problem
     attributes:
       label: Describe the Problem
-      description: What painpoint are you experiencing?
+      description: What pain-point are you experiencing?
       placeholder: A short, explicit description...
     validations:
       required: true
@@ -20,7 +20,7 @@ body:
       label: Describe the Solution
       description: |
         How would you solve the problem?
-        Please also describe any alternativesolutions.
+        Please also describe any alternative solutions.
       placeholder: A short, explicit description...
     validations:
       required: true
