@@ -95,7 +95,7 @@ else
 fi
 
 # TODO: don't sleep 30, do something better
-if ([ "$(uname -s)" = "Darwin" ] && [ -f "${HOME}/Library/Application Support/Bitcoin/bitcoin.pid" ]) ||
+if { [ "$(uname -s)" = "Darwin" ] && [ -f "${HOME}/Library/Application Support/Bitcoin/bitcoin.pid" ]; } ||
   [ -f "${HOME}/.bitcoin/bitcoin.pid" ]; then
   bitcoin-cli stop
   sleep 30
