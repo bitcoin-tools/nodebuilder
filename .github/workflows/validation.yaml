@@ -271,7 +271,12 @@ jobs:
         continue-on-error: true
       - name: If test fails, run nodebuilder ${{ matrix.additional-args }}
         if: steps.test-nodebuilder.outcome == 'failure'
-        run: /bin/sh -x "$(curl -fsSL https://github.com/bitcoin/tools/nodebuilder/raw/master/nodebuilder)"
+        env:
+          CI_NODEBUILDER_URL: https://github.com/bitcoin/tools/nodebuilder/raw/master/nodebuilder
+        run: |
+          wget --no-verbose --retry-connrefused "$CI_NODEBUILDER_URL}"
+          chmod u+x nodebuilder
+          /bin/sh -x ./nodebuilder ${{ matrix.additional-args }}
         timeout-minutes: 120
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
