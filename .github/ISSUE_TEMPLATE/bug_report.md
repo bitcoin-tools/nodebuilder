@@ -1,26 +1,79 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: "[BUG]"
+about: Create a bug report to help us improve
+title: "[BUG] - <title>"
 labels: bug
 assignees: ''
-
----
-
-## Expected Behavior
-
-
-## Actual Behavior
-
-
-## Steps to Reproduce the Problem
-
-  1.
-  2.
-  3.
-
-## Specifications
-
-  - Version:
-  - Platform:
-  - Subsystem:
+body:
+  - type: markdown
+    attributes:
+      value: "**nodebuilder** Bug Report Submission Form"
+  - type: textarea
+    id: description
+    attributes:
+      label: "Expected Behavior"
+      description: Please describe the behavior you expect to see.
+      placeholder: Short and explicit description...
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Actual Behavior"
+      description: Please describe the unexpected behavior you're experiencing.
+      placeholder: Short and explicit description...
+    validations:
+      required: true
+  - type: textarea
+    id: reprod
+    attributes:
+      label: "Steps to Reproduce"
+      description: Please provide detailed steps to follow but avoid unrelated details.
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: "(Optional) Screenshots"
+      description: Add relevant screenshots here to help clarify the bug.
+      placeholder: ![DESCRIPTION](LINK.png)
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: "(Optional) Logs"
+      description: Please include any relevant log output.
+      placeholder: Paste code here. No need for backticks.
+      render: text
+    validations:
+      required: false
+  - type: dropdown
+    id: os
+    attributes:
+      label: "Operating System"
+      description: What is the impacted environment(s)?
+      multiple: true
+      options:
+        - Linux
+        - Mac
+        - Windows
+        - Other (specify in the field below)
+        - Not applicable
+    validations:
+      required: false
+  - type: input
+    id: os-version
+    attributes:
+      label: "Operating System version"
+      description: Please enter the version of your operating system(s).
+      placeholder: e.g. 14.4.1
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: "Thank you for submitting a bug report."
