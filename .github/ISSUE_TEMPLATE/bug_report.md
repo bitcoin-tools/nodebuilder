@@ -7,20 +7,24 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+## Expected Behavior
 
 
-**Steps to Reproduce**
+## Actual Behavior
 
 
-**Expected behavior**
+## Steps to Reproduce the Problem
 
+  1.
+  1.
+  1.
 
-**Screenshots (optional)**
+## Specifications
 
+  - Version:
+  - Platform:
+  - Subsystem:
 
-**Desktop (please complete the following information):**
- - OS: [e.g. Debian]
  - Environment [e.g. bare metal, docker]
  - Release [e.g. 1.0.0]
 
