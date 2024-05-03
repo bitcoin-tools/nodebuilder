@@ -46,7 +46,9 @@ body:
     attributes:
       label: "(Optional) Logs"
       description: Please include any relevant log output.
-      placeholder: Paste code here. No need for backticks.
+      placeholder: |
+        Copy-paste the logs here.
+        (No need for backticks.)
       render: text
     validations:
       required: false
