@@ -37,7 +37,9 @@ body:
     id: screenshot
     attributes:
       label: "Optional Screenshots"
-      description: Add relevant screenshots here to help clarify the bug.
+      description: |
+        Add relevant screenshots here to help clarify the bug.
+        PRIVATY NOTE - remove Exif metadata from images before uploading.
       placeholder: "![DESCRIPTION](LINK.png)"
     validations:
       required: false
