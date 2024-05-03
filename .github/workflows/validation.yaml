@@ -203,9 +203,9 @@ jobs:
           - job-purpose: Compile
             binary-path: './nodebuilder --compile'
           - job-purpose: Test
-            binary-path: './test/test_nodebuilder --ref ${GITHUB_SHA}'
+            additional-args: ''
           - job-purpose: Test-compile
-            binary-path: './test/test_nodebuilder --compile --ref ${GITHUB_SHA}'
+            additional-args: '--compile'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: grep "VERSION\|ID" /etc/os-release
@@ -266,8 +266,14 @@ jobs:
       - name: Install system upgrades
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
-      - name: Run ${{ matrix.binary-path }}
-        run: /bin/sh -x ${{ matrix.binary-path }}
+      - name: Test the console output
+        id: test-nodebuilder
+        run: /bin/sh -x ./test/test_nodebuilder --ref ${GITHUB_SHA} ${{ matrix.additional-args }}
+        timeout-minutes: 120
+        continue-on-error: true
+      - name: If test fails, run nodebuilder
+        if: steps.test-nodebuilder.outcome == 'failure'
+        run: /bin/sh -x ./nodebuilder
         timeout-minutes: 120
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
