@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest an idea
+title: '[FEAT] - '
+labels: 'feature'
+body:
+  - type: markdown
+    attributes:
+      value: "## Feature Request Submission Form"
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Describe the problem you're having"
+      description: asdf
+      placeholder: Short and explicit description...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Describe the solution you'd like to see"
+      description: |
+        asdf
+        asdf
+        asdf
+        Please also describe any alternatives you've considered.
+      placeholder: Short and explicit description...
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: "Optional additional details"
+      description: |
+        Please provide additional context, such as runtime entironment details and screenshots.
+        PRIVATY NOTE - remove exif metadata from images before uploading to GitHuv
+      placeholder: Be as detailed as you like here...
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: "#### Thank you for submitting a feature request."
