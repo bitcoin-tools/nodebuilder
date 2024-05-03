@@ -82,7 +82,7 @@ trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
 NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
-wget "${NODEBUILDER_BINARY_URL}"
+[ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
 chmod u+x nodebuilder
 if [ "${compile_bitcoin}" = 'true' ]; then
   ./nodebuilder --compile \
