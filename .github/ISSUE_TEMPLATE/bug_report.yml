@@ -7,7 +7,7 @@ body:
     attributes:
       value: "**nodebuilder** Bug Report Submission Form"
   - type: textarea
-    id: description
+    id: expected
     attributes:
       label: "Expected Behavior"
       description: Please describe the behavior you expect to see.
@@ -15,7 +15,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: description
+    id: actual
     attributes:
       label: "Actual Behavior"
       description: Please describe the unexpected behavior you're experiencing.
