@@ -203,7 +203,10 @@ jobs:
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22 [x86_64]
             check-version-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
-            remove-snap-command: sudo snap remove --purge firefox
+            remove-snap-command: |
+              sudo snap remove --purge firefox
+              sudo apt remove --assume-yes firefox
+              sudo apt remove --assume-yes snap
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
