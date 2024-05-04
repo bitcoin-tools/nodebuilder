@@ -20,7 +20,7 @@ kill_tail_process() {
     kill -SIGTERM "${tail_pid}" ||
       kill -SIGINT "${tail_pid}" ||
       kill -SIGHUP "${tail_pid}" ||
-      kill -SIGKILL "${tail_pid}" 
+      kill -SIGKILL "${tail_pid}"
   fi
 }
 
