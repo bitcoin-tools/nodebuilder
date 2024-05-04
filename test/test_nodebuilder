@@ -107,7 +107,7 @@ fi
 [ -f nodebuilder ] && rm nodebuilder
 kill_tail_process
 
-# Stop Bitcoin Core
+# Stop Bitcoin Core>>>>>>> master
 if [ -f "${bitcoind_pid_path}" ]; then
   if command -v bitcoin-cli > /dev/null 2>&1; then
     bitcoin-cli stop
@@ -120,7 +120,7 @@ fi
 if [ -s test_output_stderr.txt ]; then
   printf '%s\n' "Printing the contents of stderr:"
   cat test_output_stderr.txt
-  printf '%s\n' "FAILURE: Detected runtime errors."
+  printf '\n%s\n' "FAILURE: Detected runtime errors."
   exit 1
 fi
 
