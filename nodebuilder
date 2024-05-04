@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
-# shellcheck disable=2317
 set -o errexit
 set -o nounset
 
@@ -780,7 +779,6 @@ else
         git clone --single-branch --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
       gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
     fi
-    exit 1
     gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
     if [ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]; then
       printf '%s\n' "${gpg_good_signature_count} good."
