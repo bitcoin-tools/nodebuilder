@@ -286,7 +286,7 @@ jobs:
           path: ${{ matrix.path-to-bitcoin-log }}
       - name: If test failed, fail the job
         if: steps.test-nodebuilder.outcome == 'failure'
-        run: exit 1
+        run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
