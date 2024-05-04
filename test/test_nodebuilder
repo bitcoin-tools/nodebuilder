@@ -17,10 +17,10 @@ handle_error() {
 
 kill_tail_process() {
   if kill -0 "${tail_pid}" > /dev/null 2>&1; then
-    kill -SIGTERM "${tail_pid}" ||
-      kill -SIGINT "${tail_pid}" ||
-      kill -SIGHUP "${tail_pid}" ||
-      kill -SIGKILL "${tail_pid}"
+    kill -TERM "${tail_pid}" ||
+      kill -INT "${tail_pid}" ||
+      kill -HUP "${tail_pid}" ||
+      kill -KILL "${tail_pid}"
   fi
 }
 
