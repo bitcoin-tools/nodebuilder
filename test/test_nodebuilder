@@ -82,6 +82,13 @@ trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
 NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
+case "$(uname -s)" in
+Darwin) bitcoind_pid_path="${HOME}/Library/Application Support/Bitcoin/bitcoind.pid" ;;
+Linux) bitcoind_pid_path="${HOME}/.bitcoin/bitcoind.pid" ;;
+MINGW*) throw_error "Windows is not supported." ;;
+*) throw_error "Your operating system is not supported." ;;
+esac
+
 wget "${NODEBUILDER_BINARY_URL}"
 chmod u+x nodebuilder
 if [ "${compile_bitcoin}" = 'true' ]; then
@@ -94,13 +101,12 @@ else
     2> test_output_stderr.txt
 fi
 
-# TODO: don't sleep 30, do something better
-if { [ "$(uname -s)" = "Darwin" ] && [ -f "${HOME}/Library/Application Support/Bitcoin/bitcoin.pid" ]; } ||
-  [ -f "${HOME}/.bitcoin/bitcoin.pid" ]; then
+# Stop Bitcoin Core after nodebuilder completes
+if [ -f "${bitcoind_pid_path" ]; then
   bitcoin-cli stop
-  sleep 30
+  while [ -f "${bitcoind_pid_path" ]; do sleep 2; done
 fi
-rm nodebuilder
+[ -f nodebuilder ] && rm nodebuilder
 kill_tail_process
 
 if [ -s test_output_stderr.txt ]; then
