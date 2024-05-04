@@ -83,11 +83,12 @@ NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
 NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
 case "$(uname -s)" in
-Darwin) bitcoind_pid_path="${HOME}/Library/Application Support/Bitcoin/bitcoind.pid" ;;
-Linux) bitcoind_pid_path="${HOME}/.bitcoin/bitcoind.pid" ;;
+Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
+Linux) bitcoin_data_directory="${HOME}/.bitcoin" ;;
 MINGW*) throw_error "Windows is not supported." ;;
 *) throw_error "Your operating system is not supported." ;;
 esac
+bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 
 [ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
 [ -x nodebuilder ] || chmod u+x nodebuilder
@@ -103,7 +104,7 @@ fi
 [ -f nodebuilder ] && rm nodebuilder
 kill_tail_process
 
-# Stop Bitcoin Core after nodebuilder completes
+# Stop Bitcoin Core>>>>>>> master
 if [ -f "${bitcoind_pid_path}" ]; then
   if command -v bitcoin-cli > /dev/null 2>&1; then
     bitcoin-cli stop
