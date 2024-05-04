@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest an idea
+title: '[FEAT] - '
+labels: 'feature'
+body:
+  - type: markdown
+    attributes:
+      value: "## Feature Request Submission Form"
+  - type: textarea
+    id: problem
+    attributes:
+      label: Describe the Problem
+      description: What pain-point are you experiencing?
+      placeholder: A short, explicit description...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the Solution
+      description: |
+        How would you solve the problem?
+        Please also describe any alternative solutions.
+      placeholder: A short, explicit description...
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Optional Additional Details
+      description: |
+        Please provide additional context, such as runtime entironment details and screenshots.
+
+        PRIVATY NOTE - Please remove Exif metadata from images before uploading.
+      placeholder: Be as detailed as you prefer...
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: "#### Thank you for submitting a feature request."
