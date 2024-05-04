@@ -1,44 +1,42 @@
-# Contributing Guidelines
+# Contributor Guidelines
 
-Thank you for your interest in helping to improve the project.
+Thank you for your interest.
 
-## How Can I Contribute?
+The three biggest ways you can help are to start discussions, create issues and to submit pull requests.
 
-### Reporting Bugs
+## Start a Discussion
 
-To report a bug, please visit [here](https://github.com/bitcoin-tools/nodebuilder/issues/new?labels=bug&projects=&template=bug_report.yaml&title=%5BBUG%5D+-+).
+Please open a [discussion](https://github.com/bitcoin-tools/nodebuilder/discussions) for any open-ended conversations or questions.
 
-### Documentation Improvements
+If you're not sure if something should be a discussion or an issue, start off with a discussion.
 
-For documentation improvements, please visit [here](https://github.com/bitcoin-tools/nodebuilder/issues/new?labels=documentation&projects=&template=documentation.yaml&title=%5BDOCS%5D).
+## Report an Issue
 
-### Feature Requests
+**Reporting Bugs** - To report a bug, please visit [here](https://github.com/bitcoin-tools/nodebuilder/issues/new?labels=bug&projects=&template=bug_report.yaml&title=%5BBUG%5D+-+).
 
-To request a new feature, please visit [here](https://github.com/bitcoin-tools/nodebuilder/issues/new?assignees=&labels=feature&projects=&template=feature_request.yaml&title=%5BFEAT%5D+-+).
+**Documentation Improvements** - For documentation improvements, please visit [here](https://github.com/bitcoin-tools/nodebuilder/issues/new?labels=documentation&projects=&template=documentation.yaml&title=%5BDOCS%5D).
 
-### Security Vulnerabilities
+**Feature Requests** - To request a new feature, please visit [here](https://github.com/bitcoin-tools/nodebuilder/issues/new?assignees=&labels=feature&projects=&template=feature_request.yaml&title=%5BFEAT%5D+-+).
 
-Please review the [security policy](https://github.com/bitcoin-tools/nodebuilder/security/policy).
+**Security Vulnerabilities** - Please review the [security policy](https://github.com/bitcoin-tools/nodebuilder/security/policy) and submit a vulnerability report [here](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
 
-Submit a vulnerability report [here](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
+## Submit a Pull request
 
-### Pull Requests
+Each pull request must be linked to an open issue.
 
-Each pull request must be linked to an open issue. Add the issue number to the PR description.
+Fill out the required fields in the template.
 
 PRIVACY NOTE - If you include screenshots, be sure to remove Exif metadata.
 
-## Styleguides
-
-### Commit Messages
+### Commit Messages Styleguide
 
 Use [Conventional Commits](https://www.conventionalcommits.org/).
 
-For example, a commit message might look like this: `feat(button): add a warning color to button`.
+For example, a commit message might look like this: `feat(ui): simplify the free space warning`.
 
 ### Shell Styleguide
 
-All shell scripts must adhere to POSIX-compatible shell scripting standards.
+Shell scripts must be POSIX-compatible and pass `shellcheck` and `shfmt` linters.
 
 ### Documentation Styleguide
 
