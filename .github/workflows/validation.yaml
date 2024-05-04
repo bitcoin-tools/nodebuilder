@@ -269,11 +269,12 @@ jobs:
         run: /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" ${{ matrix.additional-args }}
         timeout-minutes: 120
         continue-on-error: true
-      - name: If functional test failed, debug nodebuilder ${{ matrix.additional-args }}
+      - name: If test failed, debug nodebuilder ${{ matrix.additional-args }}
         if: steps.test-nodebuilder.outcome == 'failure'
         env:
           CI_NODEBUILDER_URL: https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
         run: |
+          rm /usr/local/bin/*bitcoin*
           wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
           chmod u+x nodebuilder
           /bin/sh -x ./nodebuilder ${{ matrix.additional-args }}
@@ -283,7 +284,7 @@ jobs:
         with:
           name: ${{ matrix.job-purpose }}-${{ matrix.os }}-bitcoin-debug.log
           path: ${{ matrix.path-to-bitcoin-log }}
-      - name: If functional test failed, fail the job
+      - name: If test failed, fail the job
         if: steps.test-nodebuilder.outcome == 'failure'
         run: exit 1
 
