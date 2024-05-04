@@ -1,6 +1,6 @@
 name: Bug report
 description: Create a bug report to help us improve
-title: "[BUG] - <title>"
+title: "[BUG] - "
 labels: bug
 body:
   - type: markdown
@@ -37,7 +37,10 @@ body:
     id: screenshot
     attributes:
       label: "Optional Screenshots"
-      description: Add relevant screenshots here to help clarify the bug.
+      description: |
+        Add relevant screenshots here to help clarify the bug.
+
+        PRIVATY NOTE - Please remove Exif metadata from images before uploading.
       placeholder: "![DESCRIPTION](LINK.png)"
     validations:
       required: false
@@ -59,10 +62,11 @@ body:
       description: What is the impacted environment(s)?
       multiple: true
       options:
-        - Linux
+        - Linux (specify distro below)
         - Mac
         - Windows
-        - Other (specify in the field below)
+        - GitHub Actions CI
+        - Other (specify details below)
         - Not applicable
     validations:
       required: false

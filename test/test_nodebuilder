@@ -89,8 +89,8 @@ MINGW*) throw_error "Windows is not supported." ;;
 *) throw_error "Your operating system is not supported." ;;
 esac
 
-wget "${NODEBUILDER_BINARY_URL}"
-chmod u+x nodebuilder
+[ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
+[ -x nodebuilder ] || chmod u+x nodebuilder
 if [ "${compile_bitcoin}" = 'true' ]; then
   ./nodebuilder --compile \
     > test_output_stdout.txt \
