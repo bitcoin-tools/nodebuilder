@@ -220,6 +220,7 @@ jobs:
             os-friendly-name: Ubuntu LTS
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
+            install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
               && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
