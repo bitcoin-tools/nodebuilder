@@ -1,18 +1,18 @@
 # Bitcoin Core Node Builder
 
-Create a secure Bitcoin Core node with ease.
+Run a secure Bitcoin Core node with ease.
 
-Run the following command in Terminal:
+Copy-paste the following command into Terminal:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder)"
 ```
 
 ## Table of Contents
 
 - [Usage](#usage)
-  - [Docker Container](#docker-container)
-  - [Optional Arguments](#optional-arguments)
+  - [(Optional) Docker Container](#optional-docker-container)
+  - [(Optional) Command-Line Arguments](#optional-command-line-arguments)
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
   - [Which Parts of My System Does This Script Touch?](#which-parts-of-my-system-does-this-script-touch)
@@ -26,38 +26,36 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/node
 As mentioned above, start the script from the command line. Open Terminal and run:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder)"
 ```
 
-Or you can download the script to your local system, set permissions, and run it:
+Or download the script to your local system, set permissions, and run it:
 
 ```sh
-wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.3.1/nodebuilder
+wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder
 chmod u+x nodebuilder
 ./nodebuilder
 ```
 
-### Docker Container
+### (Optional) Docker Container
 
-A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distributions: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and Red Hat.
+A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distribution: Alpine, Amazon, Arch, Debian, Fedora, Manjaro, openSUSE, and Red Hat.
 
 To the Ubuntu base image, clone the repository and build the default container.
+
 ```
 git clone https://github.com/bitcoin-tools/nodebuilder
-cd nodebuilder/
+cd nodebuilder/docker/
 docker build .
 ```
 
-To use an [alternative base image](dockerfiles/), clone the repository and build a different container.
+To use an [alternative base image](docker/), clone the repository and build a different container. For example, to run nodebuilder on Alpine Linux, run:
+
 ```
-git clone https://github.com/bitcoin-tools/nodebuilder
-cd nodebuilder/
-docker build -f dockerfiles/Dockerfile_that_you_choose .
+docker build -f Dockerfile_alpine .
 ```
 
-For example, run `docker build -f dockerfiles/Dockerfile_alpine .` to use Alpine Linux.
-
-### Optional Arguments
+### (Optional) Command-Line Arguments
 
 `nodebuilder` supports optional arguments to override the default semi-automated settings:
 
@@ -67,6 +65,7 @@ For example, run `docker build -f dockerfiles/Dockerfile_alpine .` to use Alpine
 | `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
 | `-h` | `--help` | Display the help message. _Overrides all other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
+| `-t` | `--test` | Run unit tests on functions. |
 | `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
 
 You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattended with a 50000 MiB prune:
@@ -82,7 +81,8 @@ You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattend
 3. A POSIX-compatible operating system
    - Linux - [Alpine](https://wiki.alpinelinux.org/wiki/Installation), [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview), [Fedora](https://fedoraproject.org/workstation/download), [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
    - [macOS](https://apple.com/macos)
-   - Or, any system that can run [Docker](./dockerfiles/)
+   - Or, any system that can run [Docker](./docker/)
+   - On Windows, either run nodebuilder in WSL (Windows Subsystem for Linux) or in a [Docker container](#optional-docker-container)
 6. `curl`, which the script will attempt to automatically install or you can install with a package manager
 
 This POSIX-compliant script installs a minimal number of [runtime dependencies](./dependencies/) that aren't defined in POSIX.
@@ -168,7 +168,7 @@ Inspiration for this project came from these Open Source projects:
 
 Please open an issue for any bug reports or feature requests. You can see the list of open issues [here](https://github.com/bitcoin-tools/nodebuilder/issues).
 
-If you plan to submit a pull request, please first look over our automated and manual [test procedures](test/README.md).
+If you plan to submit a pull request, please first look over our automated and manual [test procedures](test/TEST.md).
 
 ## License
 

@@ -18,7 +18,7 @@ check_internet() {
   check_int_timeout="10"
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-    torsocks curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null ||
+    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null ||
     curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
 }
 
@@ -88,12 +88,12 @@ get_cursor_column() {
 test_get_cursor_column() {
   # Test when cursor is at the start of a line
   printf '\n'
-  col=$(find_cursor_column)
+  col=$(get_cursor_column)
   [ "$col" -ne 1 ] && throw_error "Failed: Expected 1, got $col"
 
   # Test when cursor is at the end of the string "test"
   printf '\n%s' "test"
-  col=$(find_cursor_column)
+  col=$(get_cursor_column)
   [ "$col" -ne 5 ] && throw_error "Failed: Expected 5, got $col"
 
   printf '%s\n' "All tests passed"
@@ -175,8 +175,8 @@ install_build_dependencies_zypper() {
 install_runtime_dependencies_apk() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_apk.txt"
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add
   else
@@ -188,8 +188,8 @@ install_runtime_dependencies_aptget() {
   check_dpkg_lock
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_aptget.txt"
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
   else
@@ -231,8 +231,8 @@ install_runtime_dependencies_darwin() {
 install_runtime_dependencies_dnf() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt"
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
   else
@@ -243,8 +243,8 @@ install_runtime_dependencies_dnf() {
 install_runtime_dependencies_pacman() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt"
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null
   else
@@ -255,8 +255,8 @@ install_runtime_dependencies_pacman() {
 install_runtime_dependencies_zypper() {
   dependencies_url="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 --retry-delay 10 "${dependencies_url}")
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${dependencies_url}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${dependencies_url}")
   if [ -n "${dependencies}" ]; then
     printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
   else
@@ -363,6 +363,7 @@ print_usage() {
   printf '%s\n' "-c, --compile           Build Bitcoin from source"
   printf '%s\n' "-h, --help              Display this help message"
   printf '%s\n' "-p, --prune             Set a prune value in MiB"
+  printf '%s\n' "-t, --test              Run unit tests on functions"
   printf '%s\n' "-u, --unattended        Run in non-interactive mode"
 }
 
@@ -480,7 +481,7 @@ temp_directory="$(mktemp -d)"
 target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
-shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/data/bitcoin.png"
+shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
 
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
@@ -686,7 +687,8 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
     install_build_dependencies_zypper
     ;;
   Darwin)
-    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
+    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
+      https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
     brew install --quiet automake boost libevent libtool pkg-config python qrencode qt@5 > /dev/null
     ;;
   *)
@@ -778,16 +780,16 @@ else
     guix_sigs_destination_dir="${HOME}/Downloads/guix.sigs"
     printf '  %s' "Downloading Bitcoin Core... "
     if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ]; then
-      torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}" ||
-        curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
-      torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}" ||
-        curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
-      torsocks curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}" ||
-        curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
+      torsocks curl --fail --silent --show-error --location --retry 2 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
+      torsocks curl --fail --silent --show-error --location --retry 2 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
+      torsocks curl --fail --silent --show-error --location --retry 2 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
     else
-      curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
-      curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
-      curl --fail --silent --show-error --location --retry 5 --retry-delay 10 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
+      curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
+      curl --fail --silent --show-error --location --retry 5 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
+      curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
     fi
     printf '%s\n' "ok."
 
@@ -900,9 +902,15 @@ if [ "$(uname -s)" != "Darwin" ]; then
   [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
   if ! [ -f "${shortcut_image_file}" ]; then
     # shellcheck disable=SC2015
-    command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-      torsocks curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}" ||
-      curl --silent --show-error --location --fail --output "${shortcut_image_file}" "${shortcut_image_source}"
+    if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+      torsocks curl --fail --silent --show-error --location --retry 2 --head "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200" ||
+      curl --fail --silent --show-error --location --retry 5 --head "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200"; then
+      command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+        torsocks curl --fail --silent --show-error --location --retry 2 --output "${shortcut_image_file}" "${shortcut_image_source}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${shortcut_image_file}" "${shortcut_image_source}"
+    else
+      throw_error "Bitcoin image file doesn't exist at ${shortcut_image_source}"
+    fi
   fi
 
   ## Create .desktop on the user's Desktop and "Show Applications" directories
@@ -931,12 +939,14 @@ EOF
   printf '%s\n' "ok."
 fi
 
+# If bitcoin.conf doesn't already exist, use default settings
+[ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
 bitcoin_core_config_file="${bitcoin_core_data_dir}/bitcoin.conf"
 if [ ! -f "${bitcoin_core_config_file}" ]; then
   printf '%s' "Setting the default node behavior... "
-  [ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
-  set_bitcoin_core_option "server" "1"
+  is_running_in_ci && set_bitcoin_core_option "debug" "net"
   set_bitcoin_core_option "mempoolfullrbf" "1"
+  set_bitcoin_core_option "server" "1"
   printf '%s\n' "ok."
 fi
 

@@ -1,14 +1,10 @@
-## Changes and Documentation
+## Describe the changes and your approach
 
-*Briefly describe the changes and why you took this approach.*
-
-Required (choose one) - Does this change involve documentation?
-
-- [ ] Yes
-- [ ] No
+<!-- Answer here -->
 
 ## Verification Checklist
 
-- [ ] I approve the code changes after a complete review.
+- [ ] I performed a self-review of my changes and approve them.
+- [ ] I checked of the [automated test results](https://github.com/bitcoin-tools/nodebuilder/actions) for any irregularities.
 - [ ] I manually tested the code changes on my local environment.
-- [ ] I reviewed the results of the [automated tests](https://github.com/bitcoin-tools/nodebuilder/actions) for any irregularities.
+- [ ] I considered changes to the [README](https://github.com/bitcoin-tools/nodebuilder/blob/master/README.md) or [test](https://github.com/bitcoin-tools/nodebuilder/blob/master/test/TEST.md) docs. (Check if not applicable.)
