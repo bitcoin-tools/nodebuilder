@@ -3,22 +3,56 @@ on:
   pull_request:
   push:
     branches: [ master ]
-    paths:
-      - .github/workflows/*.yaml
-      - Dockerfile
-      - config/*.yaml
-      - dependencies/*.txt
-      - dockerfiles/Dockerfile_*
-      - nodebuilder
-      - test/test_bitcoin
   issues:
     types: [ opened ]
+  release:
+    types: [ created, published ]
   schedule:
-    - cron: '0 10,22 * * *'
+    # run every 6 hours at 0352, 0952, 1552, and 2152 UTC
+    - cron: '52 3,9,15,21 * * *'
   workflow_dispatch:
 env:
   TERM: xterm
 jobs:
+  changes:
+    name: Check for file changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      ci: ${{ steps.filter.outputs.ci }}
+      dependencies: ${{ steps.filter.outputs.dependencies }}
+      docker: ${{ steps.filter.outputs.docker }}
+      markdown: ${{ steps.filter.outputs.markdown }}
+      helpers: ${{ steps.filter.outputs.helpers }}
+      shell: ${{ steps.filter.outputs.shell }}
+      spelling: ${{ steps.filter.outputs.spelling }}
+      test: ${{ steps.filter.outputs.test }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          ci:
+            - '.github/workflows/*.yaml'
+            - '.github/workflows/*.yml'
+            - 'resources/config/**'
+          dependencies:
+            - 'dependencies/**'
+          docker:
+            - 'docker/Dockerfile*'
+          helpers:
+            - '.github/scripts/**'
+          markdown:
+            - '**/*.md'
+          shell:
+            - 'nodebuilder'
+          spelling:
+            - 'resources/data/pyspelling.wordlist.txt'
+          test:
+            - 'test/test_nodebuilder'
+
   dependencies-check:
     name: Check depencencies
     runs-on: ubuntu-latest
@@ -30,31 +64,39 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          config-file: './config/dependency-review.yaml'
+          config-file: 'resources/config/dependency-review.yaml'
           base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
           head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
   shell-lint:
-    name: Check shell code
+    name: Lint the shell code
+    needs: changes
+    if: >-
+      ${{ 
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.helpers == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Lint with shellcheck
-        uses: ludeeus/action-shellcheck@2.0.0
-        env:
-          SHELLCHECK_OPTS: -s sh
-        with:
-          ignore_names: offloadcoredata usei2p usetor
-      - name: Lint with shfmt
+      - name: Lint with shellcheck and shfmt
         uses: luizm/action-sh-checker@v0.8.0
         env:
           SHFMT_OPTS: -i 2 -sr
-        with:
-          sh_checker_shellcheck_disable: true
-          sh_checker_exclude: offloadcoredata usei2p usetor
 
   yaml-lint:
-    name: Check yaml code
+    name: Lint the yaml code
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -65,83 +107,103 @@ jobs:
         shell: bash
 
   dockerfile-lint:
-    name: Check Dockerfile code
+    name: Lint the Dockerfile code
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.docker == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.0.0
         with:
-          target: Dockerfile dockerfiles/Dockerfile*
+          target: docker/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   markdown-lint:
-    name: Check markdown code
+    name: Lint the markdown formatting
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Lint markdown
         uses: avto-dev/markdown-lint@v1
         with:
-          #rules: '/lint/rules/changelog.js'
-          config: 'config/markdownlint.yaml'
+          config: 'resources/config/markdownlint.yaml'
           args: '*/*.md'
-          #ignore: './one_file.md ./another_file.md' # multiple files must be separated with single space
 
   markdown-links:
     name: Check hyperlinks
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true' 
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run markdown-link-check on documentation
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
-          config-file: 'config/markdown-link-check.json' 
+          config-file: 'resources/config/markdown-link-check.json' 
           use-verbose-mode: 'yes'
 
   markdown-spellcheck:
     name: Check spelling
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.markdown == 'true' ||
+        needs.changes.outputs.spelling == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: rojopolis/spellcheck-github-actions@v0
         name: Spell check markdown files with PySpelling
         with:
-          config_path: config/spellcheck.yaml
-          output_file: spellcheck-output.txt
+          config_path: 'resources/config/spellcheck.yaml'
+          output_file: 'spellcheck-output.txt'
       - uses: actions/upload-artifact@v4
         if: '!cancelled()'
         with:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
-  pause-if-master-commit:
-    name: Pause on master commits
-    runs-on: ubuntu-latest
-    steps:
-      - name: Sleep for the GitHub cache-control max-age duration
-        run: if [ "${{ github.ref }}" = "refs/heads/master" ]; then sleep 5m; fi
-
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [dependencies-check, shell-lint, yaml-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, shell-lint, yaml-lint]
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
+      }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        job-purpose: [Compile, Test, Test-compile]
+        job-purpose: [Test-package, Test-source]
         os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
         include:
-          - job-purpose: Compile
-            binary-path: './nodebuilder --compile'
-          - job-purpose: Test
-            binary-path: './test/test_nodebuilder'
-          - job-purpose: Test-compile
-            binary-path: './test/test_nodebuilder --compile'
+          - job-purpose: Test-package
+            binary-path: './test/test_nodebuilder --ref ${GITHUB_SHA}'
+          - job-purpose: Test-source
+            binary-path: './test/test_nodebuilder --compile --ref ${GITHUB_SHA}'
           - os: ubuntu-22.04
-            os-friendly-name: Ubuntu 22 [x86_64]
-            check-version-command: grep "VERSION\|ID" /etc/os-release
-            remove-snap-command: sudo apt remove --assume-yes snap
+            os-friendly-name: Ubuntu 22
+            check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
+            remove-firefox-command: sudo apt-get remove --assume-yes firefox
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
@@ -153,10 +215,11 @@ jobs:
               /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
+            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: ubuntu-latest
-            os-friendly-name: Ubuntu LTS [x86_64]
-            check-version-command: grep "VERSION\|ID" /etc/os-release
-            remove-snap-command: sudo apt remove --assume-yes snap
+            os-friendly-name: Ubuntu LTS
+            check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
+            remove-firefox-command: sudo apt-get remove --assume-yes firefox
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
@@ -168,27 +231,23 @@ jobs:
               /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
+            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: macos-13
-            os-friendly-name: macOS 13 [x86_64]
-            check-version-command: sw_vers | grep Version | awk '{print $2}'
+            os-friendly-name: macOS 13
+            check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
+            path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
           - os: macos-14
             os-friendly-name: macOS 14 [arm64]
-            check-version-command: sw_vers | grep Version | awk '{print $2}'
+            check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
+            path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
     steps:
       - uses: actions/checkout@v4
-      - name: Check paths of modified files
-        uses: dorny/paths-filter@v3
-        id: changes-baremetal
-        with:
-          filters: |
-            src:
-              - '.github/workflows/*.yaml'
-              - '.github/workflows/*.yml'
-              - 'dependencies/**'
-              - 'test/test_nodebuilder'
-              - 'nodebuilder'
-      - name: Check the current OS version
-        run: ${{ matrix.check-version-command }} && uname -a
+      - name: Check the current environment
+        run: |
+          uname -a
+          ${{ matrix.check-environment-command }}
+          df -h
+          date -u
       - name: Change owner of apt archives
         if: contains(matrix.os, 'ubuntu')
         run: sudo chown -R "$(whoami)" /var/cache/apt/archives
@@ -200,64 +259,60 @@ jobs:
           key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
           restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
-        if: matrix.remove-snap-command != null
-        run: ${{ matrix.remove-snap-command }}
+        if: matrix.remove-firefox-command != null
+        run: ${{ matrix.remove-firefox-command }}
       - name: Install system upgrades
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
       - name: Run ${{ matrix.binary-path }}
-        if: steps.changes-baremetal.outputs.src == 'true'
         run: /bin/sh -x ${{ matrix.binary-path }}
         timeout-minutes: 120
+      - name: Save Bitcoin Core log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.job-purpose }}-${{ matrix.os }}-bitcoin-debug.log
+          path: ${{ matrix.path-to-bitcoin-log }}
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
-    needs: [dependencies-check, shell-lint, yaml-lint, dockerfile-lint, markdown-lint, markdown-spellcheck, pause-if-master-commit]
+    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, Red Hat, Ubuntu, openSUSE]
         include:
           - container: Alpine
-            dockerfile: ./dockerfiles/Dockerfile_alpine
+            dockerfile: Dockerfile_alpine
           - container: Amazon
-            dockerfile: ./dockerfiles/Dockerfile_amazon
+            dockerfile: Dockerfile_amazon
           - container: Arch
-            dockerfile: ./dockerfiles/Dockerfile_arch
+            dockerfile: Dockerfile_arch
           - container: Debian
-            dockerfile: ./dockerfiles/Dockerfile_debian
+            dockerfile: Dockerfile_debian
           - container: Fedora
-            dockerfile: ./dockerfiles/Dockerfile_fedora
+            dockerfile: Dockerfile_fedora
           - container: Manjaro
-            dockerfile: ./dockerfiles/Dockerfile_manjaro
+            dockerfile: Dockerfile_manjaro
           - container: Red Hat
-            dockerfile: ./dockerfiles/Dockerfile_redhat
+            dockerfile: Dockerfile_redhat
           - container: Ubuntu
-            dockerfile: ./Dockerfile
+            dockerfile: Dockerfile
           - container: openSUSE
-            dockerfile: ./dockerfiles/Dockerfile_opensuse
+            dockerfile: Dockerfile_opensuse
     steps:
       - uses: actions/checkout@v4
-      - name: Check paths of modified files
-        uses: dorny/paths-filter@v3
-        id: changes-containers
-        with:
-          filters: |
-            src:
-              - '.github/workflows/*.yaml'
-              - '.github/workflows/*.yml'
-              - 'dependencies/**'
-              - 'dockerfiles/**'
-              - 'test/test_nodebuilder'
-              - 'Dockerfile'
-              - 'nodebuilder'
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
       - name: Run the docker image
-        if: steps.changes-containers.outputs.src == 'true'
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
+          build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .
-          file: ${{ matrix.dockerfile }}
-          push: false
+          file: docker/${{ matrix.dockerfile }}

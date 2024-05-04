@@ -1,0 +1,29 @@
+name: Documentation
+description: Suggest an improvement to the documentation
+title: "[DOCS]"
+labels: documentation
+body:
+  - type: markdown
+    attributes:
+      value: "## Docuementation Improvement Request Form"
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of Change
+      description: |
+        Which documentation could be improved?
+        For example, README or test/TEST.md.
+        Is anything factually incorrect?
+        Do you see any typos to fix?
+      placeholder: Answer here...
+    validations:
+      required: true
+  - type: textarea
+    id: draft
+    attributes:
+      label: Optional Draft of Changes
+      description: Please help by typing out a draft of the changes you'd like to see.
+      placeholder: Optionally answer here...
+  - type: markdown
+    attributes:
+      value: "#### Thank you for submitting a documentation change request."

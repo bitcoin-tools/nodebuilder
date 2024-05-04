@@ -2,7 +2,7 @@
 
 # Add a comment directly to any PR (also in validation.yaml, requires permissions: pull-requests: write)
 # Possible values are "always", "on-failure", and "never"
-comment_summary_in_pr: always
+comment_summary_in_pr: on-failure
 
 # Possible values are "critical", "high", "moderate", "low"
 fail_on_severity: low

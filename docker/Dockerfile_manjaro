@@ -4,6 +4,12 @@
 FROM manjarolinux/base:20240227@sha256:369753d82cfddfb500e9ef756334e0323508172c31041ea30501530cb5b24c12
 ENV TERM=xterm
 
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument
+ARG NODEBUILDER_VERSION=v1.4.0
+
+# Define the nodebuilder URL
+ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
 # Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt
 
@@ -19,4 +25,4 @@ RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs pacman -Sy --noconfirm
 
 # Download and execute the script
-RUN /bin/sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder)"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
