@@ -85,7 +85,8 @@ jobs:
       - name: Lint with shellcheck and shfmt
         uses: luizm/action-sh-checker@v0.8.0
         env:
-          SHFMT_OPTS: -i 2 -sr
+          SHELLCHECK_OPTS: --enable all
+          SHFMT_OPTS: --indent 2 --space-redirects
 
   yaml-lint:
     name: Lint the yaml code
