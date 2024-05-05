@@ -134,7 +134,7 @@ for message in \
   "Checking free space in home directory... [0-9]+ [GM]iB.$" \
   "Starting Bitcoin Core... ok.$" \
   "Checking the RPC status... ok.$" \
-  "..........$" \
+  "This screen will refresh in 10 seconds..........." \
   "Syncing the block headers \((first|second) pass\).$" \
   "Sync progress:      [0-9]+\.[0-9]{3} %$" \
   "Blocks remaining:   [0-9]*$" \
