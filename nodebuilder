@@ -384,7 +384,7 @@ readonly VALID_BITCOIN_VERSION_LIST="0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 27.0"
 
-target_bitcoin_version="27.0"
+readonly target_bitcoin_version="27.0"
 
 TEMP_DIRECTORY=""
 compile_bitcoin=false
@@ -454,8 +454,8 @@ readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 readonly TEMP_DIRECTORY="$(mktemp -d)"
 readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
-shortcut_image_file="${USER_DATA_DIRECTORY}/images/bitcoin.png"
-shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
+readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin.png"
+readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
 
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
@@ -476,8 +476,8 @@ clear
 case "$(uname -s)" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
-  target_bitcoin_operating_system="linux-gnu"
-  bitcoin_core_data_dir="${HOME}/.bitcoin"
+  readonly TARGET_BITCOIN_OPERATING_SYSTEM="linux-gnu"
+  readonly BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   ensure_curl_dependency
   printf '%s' "Checking internet status... "
   ( (check_internet 1.1.1.1 ||
@@ -577,8 +577,8 @@ Linux)
   printf '%s\n' "ok."
   ;;
 Darwin)
-  target_bitcoin_operating_system="apple-darwin"
-  bitcoin_core_data_dir="${HOME}/Library/Application Support/Bitcoin"
+  readonly TARGET_BITCOIN_OPERATING_SYSTEM="apple-darwin"
+  readonly BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
   printf '%s\n%s' "Detected: running on macOS." "Checking internet status... "
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
@@ -629,8 +629,8 @@ if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ];
   printf '%s\n' "ok."
 elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alpine" ]; then
   printf '%s\n  %s' "no." "Ensuring compile dependencies... "
-  compile_directory="${TEMP_DIRECTORY}/compile_bitcoin"
-  stderr_compile_log_file="${TEMP_DIRECTORY}/stderr_install.log"
+  readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
+  readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   case "$(get_os_release_type)" in
   alpine)
     install_build_dependencies_apk
@@ -675,22 +675,22 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-    torsocks git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}" ||
-    git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
-  cd "${compile_directory}"/
+    torsocks git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${COMPILE_DIRECTORY}" ||
+    git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${COMPILE_DIRECTORY}"
+  cd "${COMPILE_DIRECTORY}"/
   printf '%s\n  %s' "ok." "Analyzing hardware configuration... "
-  ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
-  grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
+  ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+  grep -v "build-aux" "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
   if [ "$(get_os_release_type)" = "Darwin" ]; then
-    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   else
-    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
+    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   fi
   grep -v \
     -e "libzmq" \
     -e "xgettext" \
-    "${stderr_compile_log_file}" >&2 || true
+    "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' "ok." "Compiling source code, please wait... "
   if [ "$(get_os_release_type)" = "Darwin" ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
@@ -699,42 +699,42 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
   fi
   make --jobs "${compile_jobs_count}" > /dev/null 2>&1
   printf '%s\n  %s' "ok." "Running compile checks, please wait... "
-  make --jobs "${compile_jobs_count}" check > /dev/null 2> "${stderr_compile_log_file}"
+  make --jobs "${compile_jobs_count}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   # exclude the two lines before and after "Ran 3 tests in " in make check's stdout
-  sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${stderr_compile_log_file}" >&2
+  sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
   printf '%s\n  %s' "ok." "Installing Bitcoin Core... "
   make install > /dev/null 2>&1 || sudo make install > /dev/null
   printf '%s\n' "ok."
   cd - > /dev/null
-  rm "${stderr_compile_log_file}"
-  rm -rf "${compile_directory:?}"/
+  rm "${STDERR_COMPILE_LOG_FILE}"
+  rm -rf "${COMPILE_DIRECTORY:?}"/
   current_bitcoin_version="${target_bitcoin_version}"
 else
   printf '%s\n' "no."
-  bitcoin_core_extract_dir="${TEMP_DIRECTORY}/bitcoin-core"
-  bitcoin_install_bin_source="${bitcoin_core_extract_dir}/bin"
-  bitcoin_install_lib_source="${bitcoin_core_extract_dir}/lib"
-  bitcoin_install_include_source="${bitcoin_core_extract_dir}/include"
-  bitcoin_install_man_source="${bitcoin_core_extract_dir}/share/man/man1"
-  bitcoin_install_destination="/usr/local"
-  bitcoin_install_bin_destination="${bitcoin_install_destination}/bin"
-  bitcoin_install_lib_destination="${bitcoin_install_destination}/lib"
-  bitcoin_install_include_destination="${bitcoin_install_destination}/include"
-  bitcoin_install_man_destination="${bitcoin_install_destination}/share/man/man1"
+  readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
+  readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
+  readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
+  readonly BITCOIN_INSTALL_INCLUDE_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/include"
+  readonly BITCOIN_INSTALL_MAN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/share/man/man1"
+  readonly BITCOIN_INSTALL_DESTINATION="/usr/local"
+  readonly BITCOIN_INSTALL_BIN_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/bin"
+  readonly BITCOIN_INSTALL_LIB_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/lib"
+  readonly BITCOIN_INSTALL_INCLUDE_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/include"
+  readonly BITCOIN_INSTALL_MAN_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/share/man/man1"
 
-  bitcoin_tarball_filename="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${target_bitcoin_operating_system}.tar.gz"
-  bitcoin_tarball_destination_file="${HOME}/Downloads/${bitcoin_tarball_filename}"
+  readonly BITCOIN_TARBALL_FILENAME="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${TARGET_BITCOIN_OPERATING_SYSTEM}.tar.gz"
+  readonly BITCOIN_TARBALL_DESTINATION_PATH="${HOME}/Downloads/${BITCOIN_TARBALL_FILENAME}"
 
-  if ! [ -f "${bitcoin_tarball_destination_file}" ]; then
+  if ! [ -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ]; then
     bitcoin_source="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
-    bitcoin_tarball_file_source="${bitcoin_source}/${bitcoin_tarball_filename}"
+    bitcoin_tarball_file_source="${bitcoin_source}/${BITCOIN_TARBALL_FILENAME}"
     bitcoin_hash_filename="SHA256SUMS"
     bitcoin_hash_file_source="${bitcoin_source}/${bitcoin_hash_filename}"
     gpg_signatures_filename="SHA256SUMS.asc"
     gpg_signatures_file_source="${bitcoin_source}/${gpg_signatures_filename}"
     gpg_good_signatures_required="7"
     guix_sigs_repo="https://github.com/bitcoin-core/guix.sigs.git"
-    bitcoin_tarball_temporary_file="${TEMP_DIRECTORY}/${bitcoin_tarball_filename}"
+    bitcoin_tarball_temporary_file="${TEMP_DIRECTORY}/${BITCOIN_TARBALL_FILENAME}"
     bitcoin_hash_file="${TEMP_DIRECTORY}/${bitcoin_hash_filename}"
     gpg_signatures_file="${TEMP_DIRECTORY}/${gpg_signatures_filename}"
     guix_sigs_temporary_dir="${TEMP_DIRECTORY}/guix.sigs"
@@ -757,9 +757,9 @@ else
     printf '  %s' "Validating the checksum... "
     cd "${TEMP_DIRECTORY}"/
     if command -v sha256sum > /dev/null; then
-      sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
+      sha256_check="$(grep "${BITCOIN_TARBALL_FILENAME}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
     elif command -v shasum > /dev/null; then
-      sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | shasum -a 256 --check 2> /dev/null)"
+      sha256_check="$(grep "${BITCOIN_TARBALL_FILENAME}" "${bitcoin_hash_filename}" | shasum -a 256 --check 2> /dev/null)"
     else
       throw_error "Either 'sha256sum' or 'shasum' must on PATH."
     fi
@@ -786,8 +786,8 @@ else
     gpgconf --kill gpg-agent
     if [ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]; then
       printf '%s\n' "${gpg_good_signature_count} good."
-      [ -d "$(dirname "${bitcoin_tarball_destination_file}")" ] || mkdir -p "$(dirname "${bitcoin_tarball_destination_file}")"
-      mv "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_destination_file}"
+      [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
+      mv "${bitcoin_tarball_temporary_file}" "${BITCOIN_TARBALL_DESTINATION_PATH}"
       [ -d "${guix_sigs_destination_dir}"/ ] || mv "${guix_sigs_temporary_dir}" "${guix_sigs_destination_dir}"
       rm "${bitcoin_hash_file}"
       rm "${gpg_signatures_file}"
@@ -797,15 +797,15 @@ else
   fi
 
   printf '  %s' "Extracting Bitcoin Core... "
-  [ -d "${bitcoin_core_extract_dir}"/ ] || mkdir "${bitcoin_core_extract_dir}"
-  tar -xzf "${bitcoin_tarball_destination_file}" -C "${bitcoin_core_extract_dir}"/ --strip-components=1
+  [ -d "${BITCOIN_CORE_EXTRACT_DIR}"/ ] || mkdir "${BITCOIN_CORE_EXTRACT_DIR}"
+  tar -xzf "${BITCOIN_TARBALL_DESTINATION_PATH}" -C "${BITCOIN_CORE_EXTRACT_DIR}"/ --strip-components=1
   printf '%s\n' "ok."
 
   printf '  %s' "Running the unit tests... "
   if [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
-    codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
+    codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
   fi
-  unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
+  unit_test_response="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
   case "${unit_test_response}" in
   *"No errors detected"*) ;;
   *)
@@ -814,43 +814,43 @@ else
     ;;
   esac
   printf '%s\n  %s' "ok." "Installing Bitcoin Core... "
-  [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || throw_error "Unable to create directory ${bitcoin_install_lib_destination}."
+  [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] || mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null || sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" || throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
   case "$(uname -s)" in
   Linux)
-    sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
-    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
-    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
-    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin" ldconfig -n "${bitcoin_install_lib_destination}"
+    sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.so.0.0.0 "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.so.0.0.0
+    (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
+    (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin" ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
     ;;
   Darwin)
-    sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.0.dylib "${bitcoin_install_lib_destination}"/libbitcoinconsensus.0.dylib
-    (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
+    sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.0.dylib "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.0.dylib
+    (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
     sudo update_dyld_shared_cache
 
     if [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
       for bitcoin_executable in bitcoin-cli bitcoin-qt bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do
-        codesign -s - "${bitcoin_install_bin_source}/${bitcoin_executable}"
+        codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}"
       done
     fi
     ;;
   esac
 
-  [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_bin_destination}" || throw_error "Unable to create directory ${bitcoin_install_bin_destination}."
+  [ -d "${BITCOIN_INSTALL_BIN_DESTINATION}" ] || mkdir -p "${BITCOIN_INSTALL_BIN_DESTINATION}" 2> /dev/null || sudo mkdir "${BITCOIN_INSTALL_BIN_DESTINATION}" || throw_error "Unable to create directory ${BITCOIN_INSTALL_BIN_DESTINATION}."
   for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet test_bitcoin; do
-    sudo install -c "${bitcoin_install_bin_source}/${bitcoin_executable}" "${bitcoin_install_bin_destination}/"
+    sudo install -c "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}" "${BITCOIN_INSTALL_BIN_DESTINATION}/"
   done
 
-  [ -d "${bitcoin_install_include_destination}" ] || mkdir -p "${bitcoin_install_include_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_include_destination}" || throw_error "Unable to create directory ${bitcoin_install_include_destination}."
-  sudo install -c -m 644 "${bitcoin_install_include_source}"/bitcoinconsensus.h "${bitcoin_install_include_destination}/"
+  [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] || mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null || sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" || throw_error "Unable to create directory ${BITCOIN_INSTALL_INCLUDE_DESTINATION}."
+  sudo install -c -m 644 "${BITCOIN_INSTALL_INCLUDE_SOURCE}"/bitcoinconsensus.h "${BITCOIN_INSTALL_INCLUDE_DESTINATION}/"
 
-  [ -d "${bitcoin_install_man_destination}" ] || mkdir -p "${bitcoin_install_man_destination}" 2> /dev/null || sudo mkdir -p "${bitcoin_install_man_destination}" || throw_error "Unable to create directory ${bitcoin_install_man_destination}."
+  [ -d "${BITCOIN_INSTALL_MAN_DESTINATION}" ] || mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" 2> /dev/null || sudo mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" || throw_error "Unable to create directory ${BITCOIN_INSTALL_MAN_DESTINATION}."
   for man_page in bitcoind.1 bitcoin-qt.1 bitcoin-cli.1 bitcoin-tx.1 bitcoin-util.1 bitcoin-wallet.1; do
-    sudo install -c -m 644 "${bitcoin_install_man_source}/${man_page}" "${bitcoin_install_man_destination}/"
+    sudo install -c -m 644 "${BITCOIN_INSTALL_MAN_SOURCE}/${man_page}" "${BITCOIN_INSTALL_MAN_DESTINATION}/"
   done
   printf '%s\n' "ok."
 
   printf '  %s' "Removing installation files... "
-  rm -r "${bitcoin_core_extract_dir:?}/"
+  rm -r "${BITCOIN_CORE_EXTRACT_DIR:?}/"
   rm -r "${TEMP_DIRECTORY:?}/"
   printf '%s\n' "ok."
 fi
@@ -861,17 +861,17 @@ if [ "$(uname -s)" != "Darwin" ]; then
   applications_path="${USER_DATA_DIRECTORY}/applications"
   shortcut_filename="bitcoin_core.desktop"
 
-  [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
-  if ! [ -f "${shortcut_image_file}" ]; then
+  [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
+  if ! [ -f "${SHORTCUT_IMAGE_FILE}" ]; then
     # shellcheck disable=SC2015
     if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-      torsocks curl --fail --silent --show-error --location --retry 2 --head "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200" ||
-      curl --fail --silent --show-error --location --retry 5 --head "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200"; then
+      torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q "HTTP/[0-9.]* 200" ||
+      curl --fail --silent --show-error --location --retry 5 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q "HTTP/[0-9.]* 200"; then
       command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-        torsocks curl --fail --silent --show-error --location --retry 2 --output "${shortcut_image_file}" "${shortcut_image_source}" ||
-        curl --fail --silent --show-error --location --retry 5 --output "${shortcut_image_file}" "${shortcut_image_source}"
+        torsocks curl --fail --silent --show-error --location --retry 2 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}"
     else
-      throw_error "Bitcoin image file doesn't exist at ${shortcut_image_source}"
+      throw_error "Bitcoin image file doesn't exist at ${SHORTCUT_IMAGE_SOURCE}"
     fi
   fi
 
@@ -883,7 +883,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
 Name=Bitcoin Core
 Comment=Launch Bitcoin Core
 Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt; else bitcoind --daemonwait; fi'
-Icon=${shortcut_image_file}
+Icon=${SHORTCUT_IMAGE_FILE}
 Terminal=false
 StartupWMClass=Bitcoin Core
 Type=Application
@@ -902,8 +902,8 @@ EOF
 fi
 
 # If bitcoin.conf doesn't already exist, use default settings
-[ -d "${bitcoin_core_data_dir}"/ ] || mkdir "${bitcoin_core_data_dir}"/
-bitcoin_core_config_file="${bitcoin_core_data_dir}/bitcoin.conf"
+[ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
+bitcoin_core_config_file="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 if [ ! -f "${bitcoin_core_config_file}" ]; then
   printf '%s' "Setting the default node behavior... "
   is_running_in_ci && set_bitcoin_core_option "debug" "net"
@@ -950,8 +950,8 @@ Darwin) ;; #TODO: Add macOS memory check
 esac
 
 printf '%s' "Checking data already synced... "
-bitcoin_core_blocks_dir="${bitcoin_core_data_dir}/blocks"
-bitcoin_core_chainstate_dir="${bitcoin_core_data_dir}/chainstate"
+bitcoin_core_blocks_dir="${BITCOIN_DATA_DIRECTORY}/blocks"
+bitcoin_core_chainstate_dir="${BITCOIN_DATA_DIRECTORY}/chainstate"
 blocks_size_in_mib="0"
 chainstate_size_in_mib="0"
 if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
