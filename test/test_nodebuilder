@@ -17,7 +17,10 @@ handle_error() {
 
 kill_tail_process() {
   if kill -0 "${tail_pid}" > /dev/null 2>&1; then
-    kill -INT "${tail_pid}"
+    kill -TERM "${tail_pid}" ||
+      kill -INT "${tail_pid}" ||
+      kill -HUP "${tail_pid}" ||
+      kill -KILL "${tail_pid}"
   fi
 }
 
@@ -82,6 +85,14 @@ trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
 NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
+case "$(uname -s)" in
+Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
+Linux) bitcoin_data_directory="${HOME}/.bitcoin" ;;
+MINGW*) throw_error "Windows is not supported." ;;
+*) throw_error "Your operating system is not supported." ;;
+esac
+bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
+
 [ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
 [ -x nodebuilder ] || chmod u+x nodebuilder
 if [ "${compile_bitcoin}" = 'true' ]; then
@@ -93,13 +104,23 @@ else
     > test_output_stdout.txt \
     2> test_output_stderr.txt
 fi
-rm nodebuilder
+[ -f nodebuilder ] && rm nodebuilder
 kill_tail_process
+
+# Stop Bitcoin Core>>>>>>> master
+if [ -f "${bitcoind_pid_path}" ]; then
+  if command -v bitcoin-cli > /dev/null 2>&1; then
+    bitcoin-cli stop
+    while [ -f "${bitcoind_pid_path}" ]; do sleep 2; done
+  else
+    throw_error "Can't find bitcoin-cli in PATH."
+  fi
+fi
 
 if [ -s test_output_stderr.txt ]; then
   printf '%s\n' "Printing the contents of stderr:"
   cat test_output_stderr.txt
-  printf '%s\n' "FAILURE: Detected runtime errors."
+  printf '\n%s\n' "FAILURE: Detected runtime errors."
   exit 1
 fi
 
@@ -113,7 +134,7 @@ for message in \
   "Checking free space in home directory... [0-9]+ [GM]iB.$" \
   "Starting Bitcoin Core... ok.$" \
   "Checking the RPC status... ok.$" \
-  "..........$" \
+  "This screen will refresh in 10 seconds..........." \
   "Syncing the block headers \((first|second) pass\).$" \
   "Sync progress:      [0-9]+\.[0-9]{3} %$" \
   "Blocks remaining:   [0-9]*$" \

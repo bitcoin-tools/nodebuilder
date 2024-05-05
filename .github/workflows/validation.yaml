@@ -112,7 +112,8 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.docker == 'true'
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.shell == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -197,9 +198,9 @@ jobs:
         os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
         include:
           - job-purpose: Test-package
-            binary-path: './test/test_nodebuilder --ref ${GITHUB_SHA}'
+            additional-args: ''
           - job-purpose: Test-source
-            binary-path: './test/test_nodebuilder --compile --ref ${GITHUB_SHA}'
+            additional-args: '--compile'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
@@ -268,14 +269,31 @@ jobs:
       - name: Install system upgrades
         if: matrix.install-upgrades-command != null
         run: ${{ matrix.install-upgrades-command }}
-      - name: Run ${{ matrix.binary-path }}
-        run: /bin/sh -x ${{ matrix.binary-path }}
+      - name: Test the console output ${{ matrix.additional-args }}
+        id: test-nodebuilder
+        run: /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" ${{ matrix.additional-args }}
+        timeout-minutes: 120
+        continue-on-error: true
+      - name: If test failed, debug nodebuilder ${{ matrix.additional-args }}
+        if: steps.test-nodebuilder.outcome == 'failure'
+        env:
+          CI_NODEBUILDER_URL: https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
+        run: |
+          if [ -n "$(ls /usr/local/bin/*bitcoin*)" ]; then
+            rm /usr/local/bin/*bitcoin*
+          fi
+          wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
+          chmod u+x nodebuilder
+          /bin/sh -x ./nodebuilder ${{ matrix.additional-args }}
         timeout-minutes: 120
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.job-purpose }}-${{ matrix.os }}-bitcoin-debug.log
           path: ${{ matrix.path-to-bitcoin-log }}
+      - name: If test failed, fail the job
+        if: steps.test-nodebuilder.outcome == 'failure'
+        run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-docker:
     name: Run container ${{ matrix.container }}
