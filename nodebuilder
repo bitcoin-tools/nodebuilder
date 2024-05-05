@@ -781,7 +781,7 @@ else
     fi
     gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
     gpgconf --kill gpg-agent
-    pgrep --exact "keyboxd" > /dev/null && gpgconf --kill keyboxd
+    pgrep "^keyboxd$" > /dev/null && gpgconf --kill keyboxd
     if [ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]; then
       printf '%s\n' "${gpg_good_signature_count} good."
       [ -d "$(dirname "${bitcoin_tarball_destination_file}")" ] || mkdir -p "$(dirname "${bitcoin_tarball_destination_file}")"
