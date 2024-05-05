@@ -1062,7 +1062,7 @@ if [ "${ibd_status}" = true ]; then
       "This screen will refresh in ${SLEEP_TIME} seconds."
   fi
   sleep_count=1
-  while [ "${sleep_count}" -le ${SLEEP_TIME}" ]; do
+  while [ "${sleep_count}" -le "${SLEEP_TIME}" ]; do
     sleep 1
     printf '%s' "."
     sleep_count=$((sleep_count + 1))
