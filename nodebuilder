@@ -785,7 +785,8 @@ else
       gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
     fi
     gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
-    gpgconf --kill gpg-agent
+    pgrep "^gpg-agent$" > /dev/null && gpgconf --kill gpg-agent
+    pgrep "^keyboxd$" > /dev/null && gpgconf --kill keyboxd
     if [ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]; then
       printf '%s\n' "${gpg_good_signature_count} good."
       [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
@@ -1049,7 +1050,7 @@ if ! bitcoin-cli --rpcwait --rpcwaittimeout="${rpc_timeout}" getrpcinfo > /dev/n
 fi
 printf '%s\n' "ok."
 
-sleep_time="10"
+readonly SLEEP_TIME="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
 ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
@@ -1064,13 +1065,13 @@ if [ "${ibd_status}" = true ]; then
     printf '%s\n%s\n%s' \
       "ok." \
       "Close this Terminal window by clicking on the \"X\"." \
-      "This screen will refresh in ${sleep_time} seconds."
+      "This screen will refresh in ${SLEEP_TIME} seconds."
   fi
-  i=1
-  while [ "$i" -le 10 ]; do
+  sleep_count=1
+  while [ "${sleep_count}" -le "${SLEEP_TIME}" ]; do
     sleep 1
     printf '%s' "."
-    i=$((i + 1))
+    sleep_count=$((sleep_count + 1))
   done
   printf '\n'
 else
@@ -1130,8 +1131,8 @@ while [ "${ibd_status}" = true ]; do
 
   printf '%s\n\n' "Synchronizing can take weeks on a slow connection."
   printf '%s\n' "Close this Terminal window by clicking on the \"X\"."
-  printf '%s' "This screen will refresh in ${sleep_time} seconds."
-  sleep "${sleep_time}"
+  printf '%s' "This screen will refresh in ${SLEEP_TIME} seconds."
+  sleep "${SLEEP_TIME}"
 
   blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
   printf '\n'
