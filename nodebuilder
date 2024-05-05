@@ -833,6 +833,7 @@ else
     ;;
   *)
     throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
+    ;;
   esac
 
   [ -d "${bitcoin_install_bin_destination}" ] || mkdir -p "${bitcoin_install_bin_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_bin_destination}" || throw_error "Unable to create directory ${bitcoin_install_bin_destination}."
