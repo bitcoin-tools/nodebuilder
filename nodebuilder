@@ -203,8 +203,8 @@ install_runtime_dependencies_darwin() {
     readonly CLT_INSTALL_IN_PROGRESS="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
     sudo touch "${CLT_INSTALL_IN_PROGRESS}"
     readonly CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
-    readonly CLT_LABEL
-    CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
+    # shellcheck disable=SC2155
+    readonly CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
     if [ -n "${CLT_LABEL}" ]; then
       sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" > /dev/null
     else
@@ -451,8 +451,10 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-readonly TEMP_DIRECTORY && TEMP_DIRECTORY="$(mktemp -d)"
-readonly TARGET_ARCHITECTURE && TARGET_ARCHITECTURE="$(uname -m)"
+# shellcheck disable=SC2155
+readonly TEMP_DIRECTORY="$(mktemp -d)"
+# shellcheck disable=SC2155
+readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
 readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin.png"
 readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
