@@ -452,9 +452,9 @@ readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 readonly TEMP_DIRECTORY="$(mktemp -d)"
-target_bitcoin_architecture="$(uname -m)"
-user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
-shortcut_image_file="${user_data_dir}/images/bitcoin.png"
+readonly TARGET_ARCHITECTURE="$(uname -m)"
+readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
+shortcut_image_file="${USER_DATA_DIRECTORY}/images/bitcoin.png"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
 
 if is_running_in_container; then
@@ -722,7 +722,7 @@ else
   bitcoin_install_include_destination="${bitcoin_install_destination}/include"
   bitcoin_install_man_destination="${bitcoin_install_destination}/share/man/man1"
 
-  bitcoin_tarball_filename="bitcoin-${target_bitcoin_version}-${target_bitcoin_architecture}-${target_bitcoin_operating_system}.tar.gz"
+  bitcoin_tarball_filename="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${target_bitcoin_operating_system}.tar.gz"
   bitcoin_tarball_destination_file="${HOME}/Downloads/${bitcoin_tarball_filename}"
 
   if ! [ -f "${bitcoin_tarball_destination_file}" ]; then
@@ -802,7 +802,7 @@ else
   printf '%s\n' "ok."
 
   printf '  %s' "Running the unit tests... "
-  if [ "${target_bitcoin_architecture}" = "arm64" ]; then
+  if [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
     codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
   fi
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
@@ -827,7 +827,7 @@ else
     (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
     sudo update_dyld_shared_cache
 
-    if [ "${target_bitcoin_architecture}" = "arm64" ]; then
+    if [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
       for bitcoin_executable in bitcoin-cli bitcoin-qt bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do
         codesign -s - "${bitcoin_install_bin_source}/${bitcoin_executable}"
       done
@@ -858,7 +858,7 @@ fi
 if [ "$(uname -s)" != "Darwin" ]; then
   printf '%s' "Creating application shortcuts... "
   desktop_path="${HOME}/Desktop"
-  applications_path="${user_data_dir}/applications"
+  applications_path="${USER_DATA_DIRECTORY}/applications"
   shortcut_filename="bitcoin_core.desktop"
 
   [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
