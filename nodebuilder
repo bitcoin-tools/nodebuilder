@@ -200,7 +200,8 @@ install_runtime_dependencies_darwin() {
     printf '%s\n%s' "not found." "Installing git via the Xcode Command Line Tools... "
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
-    sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+    readonly CLT_INSTALL_IN_PROGRESS="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
+    sudo touch "${CLT_INSTALL_IN_PROGRESS}"
     readonly CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
     readonly CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
     if [ -n "${CLT_LABEL}" ]; then
@@ -208,7 +209,7 @@ install_runtime_dependencies_darwin() {
     else
       throw_error "Failed to install git. Cannot find a compatible Xcode Command Line Tools package."
     fi
-    sudo rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+    sudo rm "${CLT_INSTALL_IN_PROGRESS}"
 
     if command -v git > /dev/null 2>&1; then
       printf '%s\n' "ok."
