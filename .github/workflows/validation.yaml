@@ -85,7 +85,7 @@ jobs:
       - name: Lint with shellcheck and shfmt
         uses: luizm/action-sh-checker@v0.8.0
         env:
-          SHELLCHECK_OPTS: --enable add-default-case, avoid-nullary-conditions, check-extra-masked-returns, check-unassigned-uppercase, deprecate-which, quote-safe-variables, require-variable-braces
+          SHELLCHECK_OPTS: --enable add-default-case,avoid-nullary-conditions,check-extra-masked-returns,check-unassigned-uppercase,deprecate-which,quote-safe-variables,require-variable-braces
           SHFMT_OPTS: --indent 2 --space-redirects
 
   yaml-lint:
