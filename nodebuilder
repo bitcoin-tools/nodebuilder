@@ -670,10 +670,11 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
     ;;
   esac
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
+  BITCOIN_CORE_REPO="https://github.com/bitcoin/bitcoin.git"
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-    torsocks git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}" ||
-    git clone --branch "v${target_bitcoin_version}" --single-branch --depth 1 --quiet -c advice.detachedHead=false https://github.com/bitcoin/bitcoin.git "${compile_directory}"
+    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${compile_directory}" ||
+    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${compile_directory}"
   cd "${compile_directory}"/
   printf '%s\n  %s' "ok." "Analyzing hardware configuration... "
   ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
@@ -775,8 +776,8 @@ else
     else
       # shellcheck disable=SC2015
       command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-        torsocks git clone --single-branch --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}" ||
-        git clone --single-branch --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
+        torsocks git clone --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}" ||
+        git clone --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
       gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
     fi
     gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
