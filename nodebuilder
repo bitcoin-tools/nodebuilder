@@ -137,7 +137,7 @@ handle_error() {
 
 # shellcheck disable=SC2317
 handle_exit() {
-  [ -n "${temp_directory:-}" ] && rm -rf -- "${temp_directory:?}"/
+  [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
 }
 
 # shellcheck disable=SC2317
@@ -269,7 +269,7 @@ install_system_updates_apk() {
 
 install_system_updates_aptget() {
   check_dpkg_lock
-  readonly STDERR_INSTALL_LOG_FILE="${temp_directory}/stderr_install.log"
+  readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
   grep -v "apt-utils" "${STDERR_INSTALL_LOG_FILE}" >&2 || true
   rm "${STDERR_INSTALL_LOG_FILE}"
@@ -386,7 +386,7 @@ readonly VALID_BITCOIN_VERSION_LIST="0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
 
 target_bitcoin_version="27.0"
 
-temp_directory=""
+TEMP_DIRECTORY=""
 compile_bitcoin=false
 prune_value="-1"
 unattended=false
@@ -451,7 +451,7 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-temp_directory="$(mktemp -d)"
+readonly TEMP_DIRECTORY="$(mktemp -d)"
 target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
@@ -629,8 +629,8 @@ if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ];
   printf '%s\n' "ok."
 elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alpine" ]; then
   printf '%s\n  %s' "no." "Ensuring compile dependencies... "
-  compile_directory="${temp_directory}/compile_bitcoin"
-  stderr_compile_log_file="${temp_directory}/stderr_install.log"
+  compile_directory="${TEMP_DIRECTORY}/compile_bitcoin"
+  stderr_compile_log_file="${TEMP_DIRECTORY}/stderr_install.log"
   case "$(get_os_release_type)" in
   alpine)
     install_build_dependencies_apk
@@ -711,7 +711,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
   current_bitcoin_version="${target_bitcoin_version}"
 else
   printf '%s\n' "no."
-  bitcoin_core_extract_dir="${temp_directory}/bitcoin-core"
+  bitcoin_core_extract_dir="${TEMP_DIRECTORY}/bitcoin-core"
   bitcoin_install_bin_source="${bitcoin_core_extract_dir}/bin"
   bitcoin_install_lib_source="${bitcoin_core_extract_dir}/lib"
   bitcoin_install_include_source="${bitcoin_core_extract_dir}/include"
@@ -734,10 +734,10 @@ else
     gpg_signatures_file_source="${bitcoin_source}/${gpg_signatures_filename}"
     gpg_good_signatures_required="7"
     guix_sigs_repo="https://github.com/bitcoin-core/guix.sigs.git"
-    bitcoin_tarball_temporary_file="${temp_directory}/${bitcoin_tarball_filename}"
-    bitcoin_hash_file="${temp_directory}/${bitcoin_hash_filename}"
-    gpg_signatures_file="${temp_directory}/${gpg_signatures_filename}"
-    guix_sigs_temporary_dir="${temp_directory}/guix.sigs"
+    bitcoin_tarball_temporary_file="${TEMP_DIRECTORY}/${bitcoin_tarball_filename}"
+    bitcoin_hash_file="${TEMP_DIRECTORY}/${bitcoin_hash_filename}"
+    gpg_signatures_file="${TEMP_DIRECTORY}/${gpg_signatures_filename}"
+    guix_sigs_temporary_dir="${TEMP_DIRECTORY}/guix.sigs"
     guix_sigs_destination_dir="${HOME}/Downloads/guix.sigs"
     printf '  %s' "Downloading Bitcoin Core... "
     if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ]; then
@@ -755,7 +755,7 @@ else
     printf '%s\n' "ok."
 
     printf '  %s' "Validating the checksum... "
-    cd "${temp_directory}"/
+    cd "${TEMP_DIRECTORY}"/
     if command -v sha256sum > /dev/null; then
       sha256_check="$(grep "${bitcoin_tarball_filename}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
     elif command -v shasum > /dev/null; then
@@ -767,7 +767,7 @@ else
     case "${sha256_check}" in
     *"OK"*) ;;
     *)
-      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${bitcoin_hash_file}."
+      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${bitcoin_hash_file}."
       ;;
     esac
     printf '%s\n' "ok."
@@ -792,7 +792,7 @@ else
       rm "${bitcoin_hash_file}"
       rm "${gpg_signatures_file}"
     else
-      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${temp_directory}/${gpg_signatures_file}."
+      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${gpg_signatures_file}."
     fi
   fi
 
@@ -851,7 +851,7 @@ else
 
   printf '  %s' "Removing installation files... "
   rm -r "${bitcoin_core_extract_dir:?}/"
-  rm -r "${temp_directory:?}/"
+  rm -r "${TEMP_DIRECTORY:?}/"
   printf '%s\n' "ok."
 fi
 
