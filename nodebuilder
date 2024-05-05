@@ -11,13 +11,13 @@ check_dpkg_lock() {
 }
 
 check_internet() {
-  check_int_address=$1
-  check_int_port="443"
-  check_int_timeout="10"
+  check_internet_address=$1
+  readonly CHECK_INTERNET_PORT="443"
+  readonly CHECK_INTERNET_TIMEOUT="10"
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
-    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null ||
-    curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
+    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" https://"${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null ||
+    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" https://"${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
 }
 
 display_macos_warning() {
