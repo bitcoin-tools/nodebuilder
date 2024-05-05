@@ -119,7 +119,8 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.docker == 'true'
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.shell == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
