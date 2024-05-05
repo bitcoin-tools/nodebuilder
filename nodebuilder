@@ -201,10 +201,10 @@ install_runtime_dependencies_darwin() {
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
     sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-    clt_label_command="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
-    clt_label="$(/bin/sh -c "${clt_label_command}")"
-    if [ -n "${clt_label}" ]; then
-      sudo /usr/sbin/softwareupdate -i "${clt_label}" > /dev/null
+    readonly CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
+    readonly CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
+    if [ -n "${CLT_LABEL}" ]; then
+      sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" > /dev/null
     else
       throw_error "Failed to install git. Cannot find a compatible Xcode Command Line Tools package."
     fi
