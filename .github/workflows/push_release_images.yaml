@@ -45,5 +45,5 @@ jobs:
         dockerfile: ${{ matrix.config.dockerfile }}
         push: true
         tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}-${{ env.NODEBUILDER_VERSION }}
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}:latest
