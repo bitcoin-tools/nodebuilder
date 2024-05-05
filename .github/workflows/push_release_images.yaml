@@ -50,5 +50,5 @@ jobs:
         tags: |
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}-${{ env.NODEBUILDER_VERSION }}
-          ${{ matrix.config.container == 'ubuntu' ? '${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest' : '' }}
-          ${{ matrix.config.container == 'ubuntu' ? '${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NODEBUILDER_VERSION }}' : '' }}
+          ${{ matrix.config.container == 'ubuntu' && '${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest' || '' }}
+          ${{ matrix.config.container == 'ubuntu' && '${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NODEBUILDER_VERSION }}' || '' }}
