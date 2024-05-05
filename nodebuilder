@@ -1045,7 +1045,7 @@ if ! bitcoin-cli --rpcwait --rpcwaittimeout="${rpc_timeout}" getrpcinfo > /dev/n
 fi
 printf '%s\n' "ok."
 
-sleep_time="10"
+readonly SLEEP_TIME="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
 ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
@@ -1062,11 +1062,11 @@ if [ "${ibd_status}" = true ]; then
       "Close this Terminal window by clicking on the \"X\"." \
       "This screen will refresh in ${sleep_time} seconds."
   fi
-  i=1
-  while [ "$i" -le 10 ]; do
+  sleep_count=1
+  while [ "${sleep_count}" -le "${SLEEP_TIME}" ]; do
     sleep 1
     printf '%s' "."
-    i=$((i + 1))
+    sleep_count=$((sleep_count + 1))
   done
   printf '\n'
 else
