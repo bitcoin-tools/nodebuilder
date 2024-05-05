@@ -203,7 +203,8 @@ install_runtime_dependencies_darwin() {
     readonly CLT_INSTALL_IN_PROGRESS="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
     sudo touch "${CLT_INSTALL_IN_PROGRESS}"
     readonly CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
-    readonly CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
+    readonly CLT_LABEL
+    CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
     if [ -n "${CLT_LABEL}" ]; then
       sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" > /dev/null
     else
@@ -252,7 +253,7 @@ install_runtime_dependencies_pacman() {
 }
 
 install_runtime_dependencies_zypper() {
-   readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
+  readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
@@ -451,8 +452,8 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-readonly TEMP_DIRECTORY="$(mktemp -d)"
-readonly TARGET_ARCHITECTURE="$(uname -m)"
+readonly TEMP_DIRECTORY && TEMP_DIRECTORY="$(mktemp -d)"
+readonly TARGET_ARCHITECTURE && TARGET_ARCHITECTURE="$(uname -m)"
 readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
 readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin.png"
 readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
