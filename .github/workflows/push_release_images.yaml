@@ -42,7 +42,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        dockerfile: ${{ matrix.config.dockerfile }}
+        file: docker/${{ matrix.config.dockerfile }}
         push: true
         tags: |
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}
