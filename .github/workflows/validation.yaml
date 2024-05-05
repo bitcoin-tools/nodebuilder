@@ -275,7 +275,7 @@ jobs:
           CI_NODEBUILDER_URL: https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
         run: |
           if [ -n "$(ls /usr/local/bin/*bitcoin*)" ]; then
-            rm "/usr/local/bin/*bitcoin*"
+            rm /usr/local/bin/*bitcoin*
           fi
           wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
           chmod u+x nodebuilder
