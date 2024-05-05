@@ -387,7 +387,6 @@ readonly VALID_BITCOIN_VERSION_LIST="0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
 
 readonly target_bitcoin_version="27.0"
 
-TEMP_DIRECTORY=""
 compile_bitcoin=false
 prune_value="-1"
 unattended=false
