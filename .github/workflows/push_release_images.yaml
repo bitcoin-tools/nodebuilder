@@ -25,14 +25,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Extract tag name
-      id: get_tag
       run: |
         if [[ "${{ github.event_name }}" == "release" ]]; then
-          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "NODEBUILDER_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
         else
-          VERSION="$(git describe --tags)"
+          echo "NODEBUILDER_VERSION=$(git describe --tags)" >> $GITHUB_ENV
         fi
-        echo "::set-output name=VERSION::${VERSION}"
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Login to DockerHub
@@ -44,8 +42,8 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ${{ matrix.config.dockerfile }}
+        dockerfile: ${{ matrix.config.dockerfile }}
         push: true
         tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}-${{ steps.get_tag.outputs.VERSION }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}-${{ env.NODEBUILDER_VERSION }}
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}:latest
