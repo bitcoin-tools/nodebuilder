@@ -24,6 +24,8 @@ jobs:
           - {container: 'opensuse', dockerfile: 'Dockerfile_opensuse'}
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Extract tag name
       run: |
         if [[ "${{ github.event_name }}" == "release" ]]; then
