@@ -449,7 +449,8 @@ readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 temp_directory="$(mktemp -d)"
-readonly OPERATING_SYSTEM_RELEASE="$(get_os_release)"
+readonly OPERATING_SYSTEM="$(uname -s)"
+  readonly OPERATING_SYSTEM_RELEASE="$(get_os_release)"
 target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
@@ -471,7 +472,7 @@ else
 fi
 
 clear
-case "$(uname -s)" in
+case "${OPERATING_SYSTEM}" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
   target_bitcoin_operating_system="linux-gnu"
@@ -485,7 +486,7 @@ Linux)
     check_internet bitcoincore.org) ||
     throw_error "Check for active internet failed."
   printf '%s\n%s' "ok." "Performing a system upgrade... "
-  case "$(get_os_release_type)" in
+  case "${OPERATING_SYSTEM_RELEASE}" in
   alpine)
     install_system_updates_apk
     ;;
@@ -535,7 +536,7 @@ Linux)
   printf '%s\n' "ok."
 
   printf '%s' "Ensuring runtime dependencies... "
-  case "$(get_os_release_type)" in
+  case "${OPERATING_SYSTEM_RELEASE}" in
   alpine)
     install_runtime_dependencies_apk
     ;;
@@ -855,7 +856,7 @@ else
   printf '%s\n' "ok."
 fi
 
-if [ "$(uname -s)" != "Darwin" ]; then
+if [ "${OPERATING_SYSTEM}" != "Darwin" ]; then
   printf '%s' "Creating application shortcuts... "
   desktop_path="${HOME}/Desktop"
   applications_path="${user_data_dir}/applications"
@@ -912,7 +913,7 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
   printf '%s\n' "ok."
 fi
 
-case "$(uname -s)" in
+case "${OPERATING_SYSTEM}" in
 Darwin) ;; #TODO: Add macOS memory check
 *)
   printf '%s' "Checking the memory on your system... "
