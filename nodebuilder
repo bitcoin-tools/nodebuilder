@@ -449,6 +449,7 @@ readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 temp_directory="$(mktemp -d)"
+readonly OPERATING_SYSTEM_RELEASE="$(get_os_release)"
 target_bitcoin_architecture="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
