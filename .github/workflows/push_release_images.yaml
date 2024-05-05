@@ -32,7 +32,7 @@ jobs:
         else
           VERSION="$(git describe --tags)"
         fi
-        echo ::set-output name=VERSION::${VERSION}
+        echo "::set-output name=VERSION::${VERSION}"
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Login to DockerHub
@@ -44,7 +44,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        dockerfile: ${{ matrix.config.dockerfile }}
+        file: ${{ matrix.config.dockerfile }}
         push: true
         tags: |
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}-${{ steps.get_tag.outputs.VERSION }}
