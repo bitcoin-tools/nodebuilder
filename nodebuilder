@@ -22,7 +22,7 @@ check_internet() {
 }
 
 display_macos_warning() {
-  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+  if [ "${OPERATING_SYSTEM}" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
     printf '%s\n%s\n' \
       "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
       "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
@@ -115,7 +115,7 @@ get_memory_metric_in_mib() (
 )
 
 get_os_release_type() (
-  if [ "$(uname -s)" = "Darwin" ]; then
+  if [ "${OPERATING_SYSTEM}" = "Darwin" ]; then
     printf '%s\n' "Darwin"
   else
     os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
@@ -933,14 +933,14 @@ Darwin) ;; #TODO: Add macOS memory check
     set_if_unset_bitcoin_core_option "dbcache" "4"
     set_if_unset_bitcoin_core_option "maxmempool" "5"
     set_if_unset_bitcoin_core_option "maxconnections" "4"
-    [ "$(uname -s)" = "Linux" ] && export MALLOC_ARENA_MAX=1
+    [ "${OPERATING_SYSTEM}" = "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((4 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
     printf '%s' "Configuring for reduced memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "100"
     set_if_unset_bitcoin_core_option "maxmempool" "50"
     set_if_unset_bitcoin_core_option "maxconnections" "10"
-    [ "$(uname -s)" = "Linux" ] && export MALLOC_ARENA_MAX=1
+    [ "${OPERATING_SYSTEM}" = "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((8 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
     printf '%s' "Configuring for conservative memory usage... "
@@ -957,14 +957,14 @@ bitcoin_core_chainstate_dir="${bitcoin_core_data_dir}/chainstate"
 blocks_size_in_mib="0"
 chainstate_size_in_mib="0"
 if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
-  if [ "$(uname -s)" = "Darwin" ]; then
+  if [ "${OPERATING_SYSTEM}" = "Darwin" ]; then
     blocks_size_in_mib=$(du -d0 -m "${bitcoin_core_blocks_dir}" | cut -f1)
   else
     blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_blocks_dir}" | cut -f1)
   fi
 fi
 if [ -d "${bitcoin_core_chainstate_dir}"/ ]; then
-  if [ "$(uname -s)" = "Darwin" ]; then
+  if [ "${OPERATING_SYSTEM}" = "Darwin" ]; then
     chainstate_size_in_mib=$(du -d0 -m "${bitcoin_core_chainstate_dir}" | cut -f1)
   else
     chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
@@ -1036,7 +1036,7 @@ if is_running_in_ci ||
   is_running_in_container ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
-elif [ "$(uname -s)" = "Darwin" ]; then
+elif [ "${OPERATING_SYSTEM}" = "Darwin" ]; then
   nohup bitcoin-qt > /dev/null 2>&1 < /dev/null &
 else
   setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
@@ -1056,7 +1056,7 @@ ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 if [ "${ibd_status}" = true ]; then
   if ! is_running_in_container; then
     printf '%s' "Disabling system sleep, suspend, and hibernate... "
-    if [ "$(uname -s)" = "Darwin" ]; then
+    if [ "${OPERATING_SYSTEM}" = "Darwin" ]; then
       caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
     else
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
@@ -1102,7 +1102,7 @@ while [ "${ibd_status}" = true ]; do
     printf 'Sync progress:      %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
 
-    if [ "$(uname -s)" = "Darwin" ]; then
+    if [ "${OPERATING_SYSTEM}" = "Darwin" ]; then
       printf 'Current chain tip:  %s\n' "$(/bin/date -r "${last_block_time}" | cut -c 5-)"
     else
       printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
