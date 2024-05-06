@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
+# shellcheck disable=SC2155
 set -o errexit
 set -o nounset
 
@@ -15,13 +16,13 @@ check_internet() {
   check_int_port="443"
   check_int_timeout="10"
   # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+  command -v torsocks > /dev/null 2>&1 && [ "${TARGET_OPERATING_SYSTEM}" != 'Darwin' ] &&
     torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null ||
     curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
 }
 
 display_macos_warning() {
-  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+  if [ "${TARGET_KERNEL}" = "Darwin" ] && [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
     printf '%s\n%s\n' \
       "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
       "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
@@ -35,7 +36,7 @@ display_macos_warning() {
 ensure_curl_dependency() {
   if ! command -v curl > /dev/null; then
     printf '%s' "Installing curl depencency... "
-    case "$(get_os_release_type)" in
+    case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       apk --quiet add curl
       ;;
@@ -99,7 +100,7 @@ test_get_cursor_column() {
 }
 
 get_free_space_in_mib() {
-  if [ "$(uname -s)" = "Darwin" ]; then
+  if [ "${TARGET_KERNEL}" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
   else
     df --output=avail --block-size="1MiB" "${HOME}" | sed 1d
@@ -113,8 +114,8 @@ get_memory_metric_in_mib() (
     '$0 ~ metric { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
 )
 
-get_os_release_type() (
-  if [ "$(uname -s)" = "Darwin" ]; then
+get_operating_system() (
+  if [ "${TARGET_KERNEL}" = "Darwin" ]; then
     printf '%s\n' "Darwin"
   else
     os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
@@ -449,7 +450,9 @@ readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 temp_directory="$(mktemp -d)"
-target_bitcoin_architecture="$(uname -m)"
+readonly TARGET_KERNEL="$(uname -s)"
+readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
+readonly TARGET_ARCHITECTURE="$(uname -m)"
 user_data_dir="${XDG_DATA_HOME:-${HOME}/.local/share}"
 shortcut_image_file="${user_data_dir}/images/bitcoin.png"
 shortcut_image_source="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
@@ -470,7 +473,7 @@ else
 fi
 
 clear
-case "$(uname -s)" in
+case "${TARGET_KERNEL}" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
   target_bitcoin_operating_system="linux-gnu"
@@ -484,7 +487,7 @@ Linux)
     check_internet bitcoincore.org) ||
     throw_error "Check for active internet failed."
   printf '%s\n%s' "ok." "Performing a system upgrade... "
-  case "$(get_os_release_type)" in
+  case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
     install_system_updates_apk
     ;;
@@ -534,7 +537,7 @@ Linux)
   printf '%s\n' "ok."
 
   printf '%s' "Ensuring runtime dependencies... "
-  case "$(get_os_release_type)" in
+  case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
     install_runtime_dependencies_apk
     ;;
@@ -624,11 +627,11 @@ esac
 
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "ok."
-elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alpine" ]; then
+elif [ "${compile_bitcoin:-false}" = true ] || [ "${TARGET_OPERATING_SYSTEM}" = "alpine" ]; then
   printf '%s\n  %s' "no." "Ensuring compile dependencies... "
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
-  case "$(get_os_release_type)" in
+  case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
     install_build_dependencies_apk
     ;;
@@ -672,7 +675,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   readonly BITCOIN_CORE_REPO="https://github.com/bitcoin/bitcoin.git"
   # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+  command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
     torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${compile_directory}" ||
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${compile_directory}"
   cd "${compile_directory}"/
@@ -680,7 +683,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
   ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
   grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
-  if [ "$(get_os_release_type)" = "Darwin" ]; then
+  if [ "${TARGET_KERNEL}" = "Darwin" ]; then
     ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
   else
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
@@ -690,7 +693,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
     -e "xgettext" \
     "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Compiling source code, please wait... "
-  if [ "$(get_os_release_type)" = "Darwin" ]; then
+  if [ "${TARGET_OPERATING_SYSTEM}" = "Darwin" ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
   else
     compile_jobs_count="$(($(nproc) + 1))"
@@ -720,7 +723,7 @@ else
   bitcoin_install_include_destination="${bitcoin_install_destination}/include"
   bitcoin_install_man_destination="${bitcoin_install_destination}/share/man/man1"
 
-  bitcoin_tarball_filename="bitcoin-${target_bitcoin_version}-${target_bitcoin_architecture}-${target_bitcoin_operating_system}.tar.gz"
+  bitcoin_tarball_filename="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${target_bitcoin_operating_system}.tar.gz"
   bitcoin_tarball_destination_file="${HOME}/Downloads/${bitcoin_tarball_filename}"
 
   if ! [ -f "${bitcoin_tarball_destination_file}" ]; then
@@ -738,7 +741,7 @@ else
     guix_sigs_temporary_dir="${temp_directory}/guix.sigs"
     guix_sigs_destination_dir="${HOME}/Downloads/guix.sigs"
     printf '  %s' "Downloading Bitcoin Core... "
-    if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ]; then
+    if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
       torsocks curl --fail --silent --show-error --location --retry 2 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}" ||
         curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
       torsocks curl --fail --silent --show-error --location --retry 2 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}" ||
@@ -775,7 +778,7 @@ else
       gpg --quiet --import "${guix_sigs_destination_dir}"/builder-keys/*.gpg
     else
       # shellcheck disable=SC2015
-      command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+      command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
         torsocks git clone --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}" ||
         git clone --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
       gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
@@ -801,7 +804,7 @@ else
   printf '%s\n' "ok."
 
   printf '  %s' "Running the unit tests... "
-  if [ "${target_bitcoin_architecture}" = "arm64" ]; then
+  if [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
     codesign -s - "${bitcoin_install_bin_source}"/test_bitcoin
   fi
   unit_test_response="$("${bitcoin_install_bin_source}"/test_bitcoin 2>&1)"
@@ -814,7 +817,7 @@ else
   esac
   printf '%s\n  %s' "ok." "Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || throw_error "Unable to create directory ${bitcoin_install_lib_destination}."
-  case "$(uname -s)" in
+  case "${TARGET_KERNEL}" in
   Linux)
     sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
     (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
@@ -826,7 +829,7 @@ else
     (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
     sudo update_dyld_shared_cache
 
-    if [ "${target_bitcoin_architecture}" = "arm64" ]; then
+    if [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
       for bitcoin_executable in bitcoin-cli bitcoin-qt bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do
         codesign -s - "${bitcoin_install_bin_source}/${bitcoin_executable}"
       done
@@ -854,7 +857,7 @@ else
   printf '%s\n' "ok."
 fi
 
-if [ "$(uname -s)" != "Darwin" ]; then
+if [ "${TARGET_KERNEL}" != "Darwin" ]; then
   printf '%s' "Creating application shortcuts... "
   desktop_path="${HOME}/Desktop"
   applications_path="${user_data_dir}/applications"
@@ -863,10 +866,10 @@ if [ "$(uname -s)" != "Darwin" ]; then
   [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
   if ! [ -f "${shortcut_image_file}" ]; then
     # shellcheck disable=SC2015
-    if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+    if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
       torsocks curl --fail --silent --show-error --location --retry 2 --head "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200" ||
       curl --fail --silent --show-error --location --retry 5 --head "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200"; then
-      command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+      command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
         torsocks curl --fail --silent --show-error --location --retry 2 --output "${shortcut_image_file}" "${shortcut_image_source}" ||
         curl --fail --silent --show-error --location --retry 5 --output "${shortcut_image_file}" "${shortcut_image_source}"
     else
@@ -911,7 +914,7 @@ if [ ! -f "${bitcoin_core_config_file}" ]; then
   printf '%s\n' "ok."
 fi
 
-case "$(uname -s)" in
+case "${TARGET_KERNEL}" in
 Darwin) ;; #TODO: Add macOS memory check
 *)
   printf '%s' "Checking the memory on your system... "
@@ -930,14 +933,14 @@ Darwin) ;; #TODO: Add macOS memory check
     set_if_unset_bitcoin_core_option "dbcache" "4"
     set_if_unset_bitcoin_core_option "maxmempool" "5"
     set_if_unset_bitcoin_core_option "maxconnections" "4"
-    [ "$(uname -s)" = "Linux" ] && export MALLOC_ARENA_MAX=1
+    [ "${TARGET_KERNEL}" = "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((4 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
     printf '%s' "Configuring for reduced memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "100"
     set_if_unset_bitcoin_core_option "maxmempool" "50"
     set_if_unset_bitcoin_core_option "maxconnections" "10"
-    [ "$(uname -s)" = "Linux" ] && export MALLOC_ARENA_MAX=1
+    [ "${TARGET_KERNEL}" = "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
   elif [ "${memory_total_in_mib}" -le $((8 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
     printf '%s' "Configuring for conservative memory usage... "
@@ -954,14 +957,14 @@ bitcoin_core_chainstate_dir="${bitcoin_core_data_dir}/chainstate"
 blocks_size_in_mib="0"
 chainstate_size_in_mib="0"
 if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
-  if [ "$(uname -s)" = "Darwin" ]; then
+  if [ "${TARGET_KERNEL}" = "Darwin" ]; then
     blocks_size_in_mib=$(du -d0 -m "${bitcoin_core_blocks_dir}" | cut -f1)
   else
     blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_blocks_dir}" | cut -f1)
   fi
 fi
 if [ -d "${bitcoin_core_chainstate_dir}"/ ]; then
-  if [ "$(uname -s)" = "Darwin" ]; then
+  if [ "${TARGET_KERNEL}" = "Darwin" ]; then
     chainstate_size_in_mib=$(du -d0 -m "${bitcoin_core_chainstate_dir}" | cut -f1)
   else
     chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
@@ -1033,7 +1036,7 @@ if is_running_in_ci ||
   is_running_in_container ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
   bitcoind --daemonwait > /dev/null
-elif [ "$(uname -s)" = "Darwin" ]; then
+elif [ "${TARGET_KERNEL}" = "Darwin" ]; then
   nohup bitcoin-qt > /dev/null 2>&1 < /dev/null &
 else
   setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
@@ -1053,7 +1056,7 @@ ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 if [ "${ibd_status}" = true ]; then
   if ! is_running_in_container; then
     printf '%s' "Disabling system sleep, suspend, and hibernate... "
-    if [ "$(uname -s)" = "Darwin" ]; then
+    if [ "${TARGET_KERNEL}" = "Darwin" ]; then
       caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
     else
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
@@ -1099,7 +1102,7 @@ while [ "${ibd_status}" = true ]; do
     printf 'Sync progress:      %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
 
-    if [ "$(uname -s)" = "Darwin" ]; then
+    if [ "${TARGET_KERNEL}" = "Darwin" ]; then
       printf 'Current chain tip:  %s\n' "$(/bin/date -r "${last_block_time}" | cut -c 5-)"
     else
       printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
