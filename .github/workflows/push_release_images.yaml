@@ -59,7 +59,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: docker/
+        context: ./docker
         file: Dockerfile_${{ matrix.container }}
         # Only push the image if the release is not a prerelease beta
         push: ${{ !github.event.release.prerelease }}
@@ -85,7 +85,7 @@ jobs:
     - name: Build and push Ubuntu Docker image
       uses: docker/build-push-action@v5
       with:
-        context: docker/
+        context: ./docker
         file: Dockerfile
         # Only push the image if the release is not a prerelease beta
         push: ${{ !github.event.release.prerelease }}
