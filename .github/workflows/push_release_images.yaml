@@ -1,6 +1,6 @@
 name: Build and Push Docker Image
 env:
-  IMAGE_NAME: nodebuilder
+  DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodebuilder
 on:
   release:
     types: [ prereleased, published ]
@@ -48,8 +48,8 @@ jobs:
       # Set the tags for the {container}-{version} and {container}
       # For example: alpine-v1.4.0 and alpine
       run: |
-        TAGS="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.container }}-${{ env.NODEBUILDER_VERSION }}"
-        TAGS="${TAGS},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.container }}"
+        TAGS="${{ env.DOCKERHUB_REPO }}:${{ matrix.container }}-${{ env.NODEBUILDER_VERSION }}"
+        TAGS="${TAGS},${{ env.DOCKERHUB_REPO }}:${{ matrix.container }}"
         echo "IMAGE_TAGS=${TAGS}" >> "${GITHUB_ENV}"
     - name: Login to DockerHub
       uses: docker/login-action@v3
@@ -92,7 +92,8 @@ jobs:
         # Set the tags for the ubuntu-{version}, ubuntu, {version}, and 'latest'
         # For example, ubuntu-v1.4.0, ubuntu, v1.4.0, and latest
         tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:ubuntu-${{ needs.build-and-push.outputs.nodebuilder-version }}
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:ubuntu
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.nodebuilder-version }}
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          ${{ env.DOCKERHUB_REPO }}:ubuntu-${{ needs.build-and-push.outputs.nodebuilder-version }}
+          ${{ env.DOCKERHUB_REPO }}:ubuntu
+          ${{ env.DOCKERHUB_REPO }}:${{ needs.build-and-push.outputs.nodebuilder-version }}
+          ${{ env.DOCKERHUB_REPO }}:latest
+    - name: Cleanup Docker environment
