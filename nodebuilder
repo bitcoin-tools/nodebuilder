@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
-# shellcheck disable=SC2155
 set -o errexit
 set -o nounset
 
@@ -204,7 +203,6 @@ install_runtime_dependencies_darwin() {
     readonly CLT_INSTALL_IN_PROGRESS="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
     sudo touch "${CLT_INSTALL_IN_PROGRESS}"
     readonly CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
-    # shellcheck disable=SC2155
     readonly CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
     if [ -n "${CLT_LABEL}" ]; then
       sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" > /dev/null
@@ -452,9 +450,7 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-# shellcheck disable=SC2155
 readonly TEMP_DIRECTORY="$(mktemp -d)"
-# shellcheck disable=SC2155
 readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
@@ -732,74 +728,74 @@ else
   readonly BITCOIN_TARBALL_DESTINATION_PATH="${HOME}/Downloads/${BITCOIN_TARBALL_FILENAME}"
 
   if ! [ -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ]; then
-    bitcoin_source="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
-    bitcoin_tarball_file_source="${bitcoin_source}/${BITCOIN_TARBALL_FILENAME}"
-    bitcoin_hash_filename="SHA256SUMS"
-    bitcoin_hash_file_source="${bitcoin_source}/${bitcoin_hash_filename}"
-    gpg_signatures_filename="SHA256SUMS.asc"
-    gpg_signatures_file_source="${bitcoin_source}/${gpg_signatures_filename}"
-    gpg_good_signatures_required="7"
-    guix_sigs_repo="https://github.com/bitcoin-core/guix.sigs.git"
-    bitcoin_tarball_temporary_file="${TEMP_DIRECTORY}/${BITCOIN_TARBALL_FILENAME}"
-    bitcoin_hash_file="${TEMP_DIRECTORY}/${bitcoin_hash_filename}"
-    gpg_signatures_file="${TEMP_DIRECTORY}/${gpg_signatures_filename}"
-    guix_sigs_temporary_dir="${TEMP_DIRECTORY}/guix.sigs"
-    guix_sigs_destination_dir="${HOME}/Downloads/guix.sigs"
+    readonly BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
+    readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
+    readonly BITCOIN_HASH_FILENAME="SHA256SUMS"
+    readonly BITCOIN_HASH_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_HASH_FILENAME}"
+    readonly GPG_SIGNATURES_FILENAME="SHA256SUMS.asc"
+    readonly GPG_SIGNATURES_FILE_SOURCE="${BITCOIN_SOURCE}/${GPG_SIGNATURES_FILENAME}"
+    readonly GPG_GOOD_SIGNATURES_REQUIRED="7"
+    readonly GUIX_SIGS_REPO="https://github.com/bitcoin-core/guix.sigs.git"
+    readonly BITCOIN_TARBALL_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/${BITCOIN_TARBALL_FILENAME}"
+    readonly BITCOIN_HASH_FILE="${TEMP_DIRECTORY}/${BITCOIN_HASH_FILENAME}"
+    readonly GPG_SIGNATURES_FILE="${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILENAME}"
+    readonly GUIX_SIGS_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/guix.sigs"
+    readonly GUIX_SIGS_DESTINATION_DIRECTORY="${HOME}/Downloads/guix.sigs"
     printf '  %s' "Downloading Bitcoin Core... "
     if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
-      torsocks curl --fail --silent --show-error --location --retry 2 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}" ||
-        curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
-      torsocks curl --fail --silent --show-error --location --retry 2 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}" ||
-        curl --fail --silent --show-error --location --retry 5 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
-      torsocks curl --fail --silent --show-error --location --retry 2 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}" ||
-        curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
+      torsocks curl --fail --silent --show-error --location --retry 2 --output "${BITCOIN_HASH_FILE}" "${BITCOIN_HASH_FILE_SOURCE}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${BITCOIN_HASH_FILE}" "${BITCOIN_HASH_FILE_SOURCE}"
+      torsocks curl --fail --silent --show-error --location --retry 2 --output "${GPG_SIGNATURES_FILE}" "${GPG_SIGNATURES_FILE_SOURCE}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${GPG_SIGNATURES_FILE}" "${GPG_SIGNATURES_FILE_SOURCE}"
+      torsocks curl --fail --silent --show-error --location --retry 2 --output "${BITCOIN_TARBALL_TEMPORARY_DIRECTORY}" "${BITCOIN_TARBALL_FILE_SOURCE}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${BITCOIN_TARBALL_TEMPORARY_DIRECTORY}" "${BITCOIN_TARBALL_FILE_SOURCE}"
     else
-      curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
-      curl --fail --silent --show-error --location --retry 5 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}"
-      curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_tarball_temporary_file}" "${bitcoin_tarball_file_source}"
+      curl --fail --silent --show-error --location --retry 5 --output "${BITCOIN_HASH_FILE}" "${BITCOIN_HASH_FILE_SOURCE}"
+      curl --fail --silent --show-error --location --retry 5 --output "${GPG_SIGNATURES_FILE}" "${GPG_SIGNATURES_FILE_SOURCE}"
+      curl --fail --silent --show-error --location --retry 5 --output "${BITCOIN_TARBALL_TEMPORARY_DIRECTORY}" "${BITCOIN_TARBALL_FILE_SOURCE}"
     fi
     printf '%s\n' "ok."
 
     printf '  %s' "Validating the checksum... "
     cd "${TEMP_DIRECTORY}"/
     if command -v sha256sum > /dev/null; then
-      sha256_check="$(grep "${BITCOIN_TARBALL_FILENAME}" "${bitcoin_hash_filename}" | sha256sum --check 2> /dev/null)"
+      readonly SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
     elif command -v shasum > /dev/null; then
-      sha256_check="$(grep "${BITCOIN_TARBALL_FILENAME}" "${bitcoin_hash_filename}" | shasum -a 256 --check 2> /dev/null)"
+      readonly SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
     else
       throw_error "Either 'sha256sum' or 'shasum' must on PATH."
     fi
     cd "${HOME}"/
-    case "${sha256_check}" in
+    case "${SHA256_CHECK}" in
     *"OK"*) ;;
     *)
-      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${bitcoin_hash_file}."
+      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${BITCOIN_HASH_FILE}."
       ;;
     esac
     printf '%s\n' "ok."
 
     printf '  %s' "Validating the signatures... "
-    if [ -d "${guix_sigs_destination_dir}"/ ]; then
-      gpg --quiet --import "${guix_sigs_destination_dir}"/builder-keys/*.gpg
+    if [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ]; then
+      gpg --quiet --import "${GUIX_SIGS_DESTINATION_DIRECTORY}"/builder-keys/*.gpg
     else
       # shellcheck disable=SC2015
       command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-        torsocks git clone --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}" ||
-        git clone --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
-      gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
+        torsocks git clone --depth 1 --quiet "${GUIX_SIGS_REPO}" "${GUIX_SIGS_TEMPORARY_DIRECTORY}" ||
+        git clone --depth 1 --quiet "${GUIX_SIGS_REPO}" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
+      gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
     fi
-    gpg_good_signature_count=$(gpg --verify "${gpg_signatures_file}" 2>&1 | grep -c "^gpg: Good signature from ")
+    readonly GPG_GOOD_SIGNATURE_COUNT=$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c "^gpg: Good signature from ")
     pgrep "^gpg-agent$" > /dev/null && gpgconf --kill gpg-agent
     pgrep "^keyboxd$" > /dev/null && gpgconf --kill keyboxd
-    if [ "${gpg_good_signature_count}" -ge "${gpg_good_signatures_required}" ]; then
-      printf '%s\n' "${gpg_good_signature_count} good."
+    if [ "${GPG_GOOD_SIGNATURE_COUNT}" -ge "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
+      printf '%s\n' "${GPG_GOOD_SIGNATURE_COUNT} good."
       [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
-      mv "${bitcoin_tarball_temporary_file}" "${BITCOIN_TARBALL_DESTINATION_PATH}"
-      [ -d "${guix_sigs_destination_dir}"/ ] || mv "${guix_sigs_temporary_dir}" "${guix_sigs_destination_dir}"
-      rm "${bitcoin_hash_file}"
-      rm "${gpg_signatures_file}"
+      mv "${BITCOIN_TARBALL_TEMPORARY_DIRECTORY}" "${BITCOIN_TARBALL_DESTINATION_PATH}"
+      [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ] || mv "${GUIX_SIGS_TEMPORARY_DIRECTORY}" "${GUIX_SIGS_DESTINATION_DIRECTORY}"
+      rm "${BITCOIN_HASH_FILE}"
+      rm "${GPG_SIGNATURES_FILE}"
     else
-      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${gpg_signatures_file}."
+      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILE}."
     fi
   fi
 
@@ -812,11 +808,11 @@ else
   if [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
     codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
   fi
-  unit_test_response="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
-  case "${unit_test_response}" in
+  readonly UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
+  case "${UNIT_TEST_RESPONSE}" in
   *"No errors detected"*) ;;
   *)
-    printf '%s\n' "\n${unit_test_response}"
+    printf '%s\n' "\n${UNIT_TEST_RESPONSE}"
     throw_error "Unit tests failed."
     ;;
   esac
