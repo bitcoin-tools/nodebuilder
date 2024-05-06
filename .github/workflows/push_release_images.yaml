@@ -9,48 +9,45 @@ on:
     branches: [ push_docker_images_test ]
 jobs:
   build-and-push:
-    name : Push ${{ matrix.config.container }} image
+    name : Push ${{ matrix.container }} image
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        config:
-          - {container: 'alpine', dockerfile: 'Dockerfile_alpine'}
-          - {container: 'amazon', dockerfile: 'Dockerfile_amazon'}
-          - {container: 'arch', dockerfile: 'Dockerfile_arch'}
-          - {container: 'debian', dockerfile: 'Dockerfile_debian'}
-          - {container: 'fedora', dockerfile: 'Dockerfile_fedora'}
-          - {container: 'manjaro', dockerfile: 'Dockerfile_manjaro'}
-          - {container: 'redhat', dockerfile: 'Dockerfile_redhat'}
-          - {container: 'ubuntu', dockerfile: 'Dockerfile'}
-          - {container: 'opensuse', dockerfile: 'Dockerfile_opensuse'}
+        container:
+          - alpine
+          - amazon
+          - arch
+          - debian
+          - fedora
+          - manjaro
+          - redhat
+          - opensuse
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout with history to get latest tag
+      if: ${{ github.event_name != 'release' }}
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Find nodebuilder version tag
+      # If the event is a release, get the tag from GITHUB_REF
+      # Otherwise, find the most recent release tag instead of using the commit SHA
       run: |
-        # If the event is a release, use the tag name as the version
-        # Otherwise, use the latest tag as the version
         if [[ "${{ github.event_name }}" == "release" ]]; then
           echo "NODEBUILDER_VERSION=${GITHUB_REF#refs/tags/}" >> "${GITHUB_ENV}"
         else
           echo "NODEBUILDER_VERSION=$(git describe --tags --abbrev=0)" >> "${GITHUB_ENV}"
         fi
-    - uses: actions/checkout@v4
+    - name: Checkout the latest release tag
+      uses: actions/checkout@v4
       with:
         ref: ${{ env.NODEBUILDER_VERSION }}
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Set container image tags
+      # Set the tags for the container and container-version
       run: |
-        # Set the tags for the container and container-version
-        TAGS="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}"
-        TAGS="${TAGS},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.config.container }}-${{ env.NODEBUILDER_VERSION }}"
-        # If it's the Ubuntu image, add the latest and version-specific tags
-        if [[ "${{ matrix.config.container }}" == "ubuntu" ]]; then
-          TAGS="${TAGS},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest"
-          TAGS="${TAGS},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NODEBUILDER_VERSION }}"
-        fi
+        TAGS="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.container }}-${{ env.NODEBUILDER_VERSION }}"
+        TAGS="${TAGS},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.container }}"
         echo "IMAGE_TAGS=${TAGS}" >> "${GITHUB_ENV}"
     - name: Login to DockerHub
       uses: docker/login-action@v3
@@ -61,8 +58,17 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: docker/${{ matrix.config.dockerfile }}
-        # Only push the image if it's a full release or a manual dispatch
-        # push: ${{ (github.event_name == 'release' && !github.event.release.prerelease) || github.event_name == 'workflow_dispatch' }}
-        push: true
+        file: docker/Dockerfile_${{ matrix.container }}
+        push: ${{ !github.event.release.prerelease }}
         tags: ${{ env.IMAGE_TAGS }}
+    - name: Build and push Ubuntu Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile_ubuntu
+        push: ${{ !github.event.release.prerelease }}
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:ubuntu-${{ env.NODEBUILDER_VERSION }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:ubuntu
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NODEBUILDER_VERSION }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
