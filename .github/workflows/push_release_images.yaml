@@ -69,7 +69,7 @@ jobs:
       nodebuilder-version: ${{ env.NODEBUILDER_VERSION }}
 
   build-and-push-ubuntu:
-    name: Push ${{ env.DEFAULT_IMAGE }} default image
+    name: Push ubuntu default image
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
