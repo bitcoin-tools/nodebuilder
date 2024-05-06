@@ -675,7 +675,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "{OPERATING_SYSTEM_RELEASE}" = 
   printf '%s\n  %s' "ok." "Downloading Bitcoin source code... "
   readonly BITCOIN_CORE_REPO="https://github.com/bitcoin/bitcoin.git"
   # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+  command -v torsocks > /dev/null 2>&1 && [ "${OPERATING_SYSTEM}" != 'Darwin' ] &&
     torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${compile_directory}" ||
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${compile_directory}"
   cd "${compile_directory}"/
@@ -683,7 +683,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "{OPERATING_SYSTEM_RELEASE}" = 
   ./autogen.sh > /dev/null 2> "${stderr_compile_log_file}"
   grep -v "build-aux" "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Configuring the build environment... "
-  if [ "$(get_os_release_type)" = "Darwin" ]; then
+  if [ "${OPERATING_SYSTEM}" = "Darwin" ]; then
     ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
   else
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${stderr_compile_log_file}"
