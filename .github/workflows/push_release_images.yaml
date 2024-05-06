@@ -59,8 +59,8 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: ./docker
-        file: Dockerfile_${{ matrix.container }}
+        context: .
+        file: docker/Dockerfile_${{ matrix.container }}
         # Only push the image if the release is not a prerelease beta
         push: ${{ !github.event.release.prerelease }}
         tags: ${{ env.IMAGE_TAGS }}
@@ -85,8 +85,8 @@ jobs:
     - name: Build and push Ubuntu Docker image
       uses: docker/build-push-action@v5
       with:
-        context: ./docker
-        file: Dockerfile
+        context: .
+        file: docker/Dockerfile
         # Only push the image if the release is not a prerelease beta
         push: ${{ !github.event.release.prerelease }}
         # Set the tags for the ubuntu-{version}, ubuntu, {version}, and 'latest'
