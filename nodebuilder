@@ -100,7 +100,7 @@ test_get_cursor_column() {
 }
 
 get_free_space_in_mib() {
-  if [ "$(uname -s)" = "Darwin" ]; then
+  if [ "${OPERATING_SYSTEM}" = "Darwin" ]; then
     /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
   else
     df --output=avail --block-size="1MiB" "${HOME}" | sed 1d
@@ -817,7 +817,7 @@ else
   esac
   printf '%s\n  %s' "ok." "Installing Bitcoin Core... "
   [ -d "${bitcoin_install_lib_destination}" ] || mkdir -p "${bitcoin_install_lib_destination}" 2> /dev/null || sudo mkdir "${bitcoin_install_lib_destination}" || throw_error "Unable to create directory ${bitcoin_install_lib_destination}."
-  case "$(uname -s)" in
+  case "${OPERATING_SYSTEM}" in
   Linux)
     sudo cp "${bitcoin_install_lib_source}"/libbitcoinconsensus.so.0.0.0 "${bitcoin_install_lib_destination}"/libbitcoinconsensus.so.0.0.0
     (cd "${bitcoin_install_lib_destination}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
