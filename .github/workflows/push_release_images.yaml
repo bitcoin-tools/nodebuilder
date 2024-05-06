@@ -44,7 +44,6 @@ jobs:
           TAGS="${TAGS},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest"
           TAGS="${TAGS},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NODEBUILDER_VERSION }}"
         fi
-        TAGS=$(echo $TAGS | tr ',' '\n')
         echo "TAGS=${TAGS}" >> "${GITHUB_ENV}"
     - name: Login to DockerHub
       uses: docker/login-action@v3 
