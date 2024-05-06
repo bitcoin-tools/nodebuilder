@@ -16,7 +16,7 @@ check_internet() {
   check_int_port="443"
   check_int_timeout="10"
   # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+  command -v torsocks > /dev/null 2>&1 && [ "${OPERATING_SYSTEM_RELEASE}" != 'Darwin' ] &&
     torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null ||
     curl --silent --output /dev/null --retry 5 --connect-timeout "${check_int_timeout}" https://"${check_int_address}:${check_int_port}" > /dev/null
 }
@@ -36,7 +36,7 @@ display_macos_warning() {
 ensure_curl_dependency() {
   if ! command -v curl > /dev/null; then
     printf '%s' "Installing curl depencency... "
-    case "$(get_os_release_type)" in
+    case "${OPERATING_SYSTEM_RELEASE}" in
     alpine)
       apk --quiet add curl
       ;;
@@ -631,7 +631,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
   printf '%s\n  %s' "no." "Ensuring compile dependencies... "
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
-  case "$(get_os_release_type)" in
+  case "${OPERATING_SYSTEM_RELEASE}" in
   alpine)
     install_build_dependencies_apk
     ;;
@@ -693,7 +693,7 @@ elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alp
     -e "xgettext" \
     "${stderr_compile_log_file}" >&2 || true
   printf '%s\n  %s' "ok." "Compiling source code, please wait... "
-  if [ "$(get_os_release_type)" = "Darwin" ]; then
+  if [ "${OPERATING_SYSTEM_RELEASE}" = "Darwin" ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
   else
     compile_jobs_count="$(($(nproc) + 1))"
