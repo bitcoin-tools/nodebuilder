@@ -956,25 +956,27 @@ esac
 
 printf '%s' "Checking data already synced... "
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
-readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
-blocks_size_in_mib="0"
-chainstate_size_in_mib="0"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
-    blocks_size_in_mib=$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)
+    readonly INITIAL_BLOCKS_SIZE_IN_MIB=$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)
   else
-    blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)
+    readonly INITIAL_BLOCKS_SIZE_IN_MIB=$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)
   fi
+else
+  readonly INITIAL_BLOCKS_SIZE_IN_MIB="0" 
 fi
+readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
 if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
-    chainstate_size_in_mib=$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)
+    readonly INITIAL_CHAINSTATE_SIZE_IN_MIB=$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)
   else
-    chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)
+    readonly INITIAL_CHAINSTATE_SIZE_IN_MIB=$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)
   fi
+else
+  readonly INITIAL_CHAINSTATE_SIZE_IN_MIB="0"
 fi
-data_already_synced_in_mib=$((blocks_size_in_mib + chainstate_size_in_mib))
-printf '%s\n' "$((data_already_synced_in_mib / MIB_TO_GIB)) GiB."
+readonly INITIAL_DATA_ALREADY_SYNCED_IN_MIB=$((INITIAL_BLOCKS_SIZE_IN_MIB + INITIAL_CHAINSTATE_SIZE_IN_MIB))
+printf '%s\n' "$((INITIAL_DATA_ALREADY_SYNCED_IN_MIB / MIB_TO_GIB)) GiB."
 
 printf '%s' "Checking free space in home directory... "
 free_space_in_mib="$(get_free_space_in_mib)"
@@ -991,38 +993,38 @@ readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB=$((ARCHIVAL_NODE_REQUIRED_DISK_IN_GI
 
 # check if the user wants to disable pruning
 if [ "${prune_value}" -eq 0 ]; then
-  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB}" ]; then
-    throw_error "Not enough storage to disable pruning. Free up ${ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB} GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+  if [ "$((free_space_in_mib + INITIAL_DATA_ALREADY_SYNCED_IN_MIB))" -lt "${ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB}" ]; then
+    throw_error "Not enough storage to disable pruning. Free up ${ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB} GiB or use a positive value less than $((free_space_in_mib + INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) \(MiB\)."
   fi
   printf '  %s' "Configuring with the disabled prune option... "
   set_bitcoin_core_option "prune" "${prune_value}"
   printf '%s\n' "ok."
 # check if the user passed in a prune value
 elif [ "${prune_value}" -gt 0 ]; then
-  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${prune_value}" ]; then
-    throw_error "Prune value ${prune_value} too large. Run without setting prune or use a value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+  if [ "$((free_space_in_mib + INITIAL_DATA_ALREADY_SYNCED_IN_MIB))" -lt "${prune_value}" ]; then
+    throw_error "Prune value ${prune_value} too large. Run without setting prune or use a value less than $((free_space_in_mib + INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) \(MiB\)."
   fi
   printf '  %s' "Configuring with the ${prune_value} MiB prune option... "
   set_bitcoin_core_option "prune" "${prune_value}"
   printf '%s\n' "ok."
 # check that a prune value doesn't already exist in the config file
 elif [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
-  if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - data_already_synced_in_mib)) ]; then
+  if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     printf '  %s\n' "Your node will run as an unpruned full node."
     set_bitcoin_core_option "prune" "0"
-  elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 80 - data_already_synced_in_mib)) ]; then
+  elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 80 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     throw_error "You are too low on disk space to run Bitcoin Core."
   else
-    if [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 40 - data_already_synced_in_mib)) ]; then
+    if [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 40 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
       printf '  %s\n  %s\n' "Your disk space is low." "Setting blocks-only mode and the minimum 0.55 GiB prune."
       set_bitcoin_core_option "blocksonly" "1"
       readonly PRUNE_AMOUNT_IN_MIB="550"
     else
-      if [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 12 - data_already_synced_in_mib)) ]; then
+      if [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 12 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
         readonly PRUNE_RATIO=20
-      elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 4 - data_already_synced_in_mib)) ]; then
+      elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 4 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
         readonly PRUNE_RATIO=40
-      elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB * 3 / 4 - data_already_synced_in_mib)) ]; then
+      elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB * 3 / 4 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
         readonly PRUNE_RATIO=60
       else
         readonly PRUNE_RATIO=80
