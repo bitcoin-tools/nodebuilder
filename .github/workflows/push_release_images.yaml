@@ -96,4 +96,3 @@ jobs:
           ${{ env.DOCKERHUB_REPO }}:ubuntu
           ${{ env.DOCKERHUB_REPO }}:${{ needs.build-and-push.outputs.nodebuilder-version }}
           ${{ env.DOCKERHUB_REPO }}:latest
-    - name: Cleanup Docker environment
