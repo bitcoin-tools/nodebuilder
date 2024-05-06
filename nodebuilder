@@ -27,7 +27,7 @@ display_macos_warning() {
     printf '%s\n%s\n' \
       "WARNING: Your operating system has an unpatched security vulnerability called GoFetch." \
       "Avoid performing any security-critical actions and consider switching to Ubuntu Linux."
-    if [ "${unattended:-false}" = false ] && ! is_running_in_ci; then
+    if [ "${unattended:-false}" = "false" ] && ! is_running_in_ci; then
       printf '%s' "PRESS ENTER to continue or press Ctrl+C to exit... "
       read -r _
     fi
@@ -215,7 +215,7 @@ install_runtime_dependencies_darwin() {
 
     if command -v git > /dev/null 2>&1; then
       printf '%s\n' "ok."
-    elif [ "${unattended}" = true ]; then
+    elif [ "${unattended}" = "true" ]; then
       throw_error "Failed to install Xcode Command Line Tools. Try re-running without -u/--unattended or manually installing git."
     else
       printf '%s\n%s\n' "failed." "Installing the Command Line Tools (expect a popup window)."
@@ -529,7 +529,7 @@ Linux)
   # Reboot the system unless it's running in CI/CD
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n' "REBOOT REQUIRED to upgrade the following:" "$(cat /var/run/reboot-required.pkgs)"
-    if [ "${unattended}" = false ]; then
+    if [ "${unattended}" = "false" ]; then
       printf '\n%s' "PRESS ENTER to reboot or press Ctrl+C to exit... "
       read -r _
     fi
@@ -630,7 +630,7 @@ esac
 
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "ok."
-elif [ "${compile_bitcoin:-false}" = true ] || [ "${TARGET_OPERATING_SYSTEM}" = "alpine" ]; then
+elif [ "${compile_bitcoin:-false}" = "true" ] || [ "${TARGET_OPERATING_SYSTEM}" = "alpine" ]; then
   printf '%s\n  %s' "no." "Ensuring compile dependencies... "
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
@@ -1058,7 +1058,7 @@ readonly SLEEP_TIME="10"
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
 ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
-if [ "${ibd_status}" = true ]; then
+if [ "${ibd_status}" = "true" ]; then
   if ! is_running_in_container; then
     printf '%s' "Disabling system sleep, suspend, and hibernate... "
     if [ "${TARGET_KERNEL}" = "Darwin" ]; then
@@ -1082,7 +1082,7 @@ else
   printf '  %s\n' "Your node has already synced the blockchain."
 fi
 
-while [ "${ibd_status}" = true ]; do
+while [ "${ibd_status}" = "true" ]; do
   blocks=$(echo "${blockchain_info}" | jq '.blocks')
   headers=$(echo "${blockchain_info}" | jq '.headers')
   last_block_time=$(echo "${blockchain_info}" | jq '.time')
