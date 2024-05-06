@@ -201,6 +201,7 @@ jobs:
       }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         job-purpose: [Test-package, Test-source]
         os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
@@ -310,6 +311,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, Red Hat, Ubuntu, openSUSE]
         include:
