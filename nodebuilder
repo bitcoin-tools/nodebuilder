@@ -862,9 +862,9 @@ fi
 
 if [ "${TARGET_KERNEL}" != "Darwin" ]; then
   printf '%s' "Creating application shortcuts... "
-  desktop_path="${HOME}/Desktop"
-  applications_path="${USER_DATA_DIRECTORY}/applications"
-  shortcut_filename="bitcoin_core.desktop"
+  readonly DESKTOP_PATH="${HOME}/Desktop"
+  readonly APPLICATIONS_PATH="${USER_DATA_DIRECTORY}/applications"
+  readonly SHORTCUT_FILENAME="bitcoin_core.desktop"
 
   [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
   if ! [ -f "${SHORTCUT_IMAGE_FILE}" ]; then
@@ -881,9 +881,9 @@ if [ "${TARGET_KERNEL}" != "Darwin" ]; then
   fi
 
   ## Create .desktop on the user's Desktop and "Show Applications" directories
-  [ -d "${desktop_path}" ] || mkdir -p "${desktop_path}"
-  [ -d "${applications_path}" ] || mkdir -p "${applications_path}"
-  cat << EOF | tee "${applications_path}"/"${shortcut_filename}" > "${desktop_path}"/"${shortcut_filename}"
+  [ -d "${DESKTOP_PATH}" ] || mkdir -p "${DESKTOP_PATH}"
+  [ -d "${APPLICATIONS_PATH}" ] || mkdir -p "${APPLICATIONS_PATH}"
+  cat << EOF | tee "${APPLICATIONS_PATH}"/"${SHORTCUT_FILENAME}" > "${DESKTOP_PATH}"/"${SHORTCUT_FILENAME}"
 [Desktop Entry]
 Name=Bitcoin Core
 Comment=Launch Bitcoin Core
@@ -895,13 +895,13 @@ Type=Application
 Categories=Application;
 MimeType=application/bitcoin-paymentrequest;application/bitcoin-payment;application/bitcoin-paymentack;x-scheme-handler/bitcoin;
 EOF
-  chmod u+x "${applications_path}"/"${shortcut_filename}"
-  chmod u+x "${desktop_path}"/"${shortcut_filename}"
+  chmod u+x "${APPLICATIONS_PATH}"/"${SHORTCUT_FILENAME}"
+  chmod u+x "${DESKTOP_PATH}"/"${SHORTCUT_FILENAME}"
   ## Make the desktop shortcut trusted
   if is_running_in_ci || is_running_in_container; then
     :
   else
-    gio set "${desktop_path}"/"${shortcut_filename}" "metadata::trusted" true
+    gio set "${DESKTOP_PATH}"/"${SHORTCUT_FILENAME}" "metadata::trusted" true
   fi
   printf '%s\n' "ok."
 fi
@@ -921,31 +921,31 @@ case "${TARGET_KERNEL}" in
 Darwin) ;; #TODO: Add macOS memory check
 *)
   printf '%s' "Checking the memory on your system... "
-  physical_memory_total_in_mib="$(get_memory_metric_in_mib 'MemTotal')"
-  physical_memory_free_in_mib="$(get_memory_metric_in_mib 'MemAvailable')"
-  swap_memory_total_in_mib="$(get_memory_metric_in_mib 'SwapTotal')"
-  swap_memory_free_in_mib="$(get_memory_metric_in_mib 'SwapFree')"
-  memory_total_in_mib=$((physical_memory_total_in_mib + swap_memory_total_in_mib))
-  memory_free_in_mib=$((physical_memory_free_in_mib + swap_memory_free_in_mib))
+  readonly PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')"
+  readonly PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')"
+  readonly SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')"
+  readonly SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')"
+  readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
+  readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
   printf '%0.1f of %0.1f GiB free.\n' \
-    "$(awk -v mem_free_mib="${memory_free_in_mib}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_free_mib / mib_gib_factor}')" \
-    "$(awk -v mem_total_mib="${memory_total_in_mib}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_total_mib / mib_gib_factor}')"
+    "$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_free_mib / mib_gib_factor}')" \
+    "$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_total_mib / mib_gib_factor}')"
 
-  if [ "${memory_total_in_mib}" -le $((2 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "64" ]; then
+  if [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le "64" ]; then
     printf '%s' "Configuring for minimal memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "4"
     set_if_unset_bitcoin_core_option "maxmempool" "5"
     set_if_unset_bitcoin_core_option "maxconnections" "4"
     [ "${TARGET_KERNEL}" = "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
-  elif [ "${memory_total_in_mib}" -le $((4 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "128" ]; then
+  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le "128" ]; then
     printf '%s' "Configuring for reduced memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "100"
     set_if_unset_bitcoin_core_option "maxmempool" "50"
     set_if_unset_bitcoin_core_option "maxconnections" "10"
     [ "${TARGET_KERNEL}" = "Linux" ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' "ok."
-  elif [ "${memory_total_in_mib}" -le $((8 * MIB_TO_GIB)) ] || [ "${memory_free_in_mib}" -le "256" ]; then
+  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((8 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le "256" ]; then
     printf '%s' "Configuring for conservative memory usage... "
     set_if_unset_bitcoin_core_option "dbcache" "225"
     set_if_unset_bitcoin_core_option "maxmempool" "150"
@@ -955,22 +955,22 @@ Darwin) ;; #TODO: Add macOS memory check
 esac
 
 printf '%s' "Checking data already synced... "
-bitcoin_core_blocks_dir="${BITCOIN_DATA_DIRECTORY}/blocks"
-bitcoin_core_chainstate_dir="${BITCOIN_DATA_DIRECTORY}/chainstate"
+readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
+readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
 blocks_size_in_mib="0"
 chainstate_size_in_mib="0"
-if [ -d "${bitcoin_core_blocks_dir}"/ ]; then
+if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
-    blocks_size_in_mib=$(du -d0 -m "${bitcoin_core_blocks_dir}" | cut -f1)
+    blocks_size_in_mib=$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)
   else
-    blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_blocks_dir}" | cut -f1)
+    blocks_size_in_mib=$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)
   fi
 fi
-if [ -d "${bitcoin_core_chainstate_dir}"/ ]; then
+if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
-    chainstate_size_in_mib=$(du -d0 -m "${bitcoin_core_chainstate_dir}" | cut -f1)
+    chainstate_size_in_mib=$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)
   else
-    chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${bitcoin_core_chainstate_dir}" | cut -f1)
+    chainstate_size_in_mib=$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)
   fi
 fi
 data_already_synced_in_mib=$((blocks_size_in_mib + chainstate_size_in_mib))
@@ -986,13 +986,13 @@ printf '%s\n' "$((free_space_in_mib / MIB_TO_GIB)) GiB."
 ## The higher this number is, the more likely a node will be to prune.
 ## The sweet spot is about 50 to 100 GB more than the size of blocks/ + chainstate/,
 ## which, as of June 2023, is around 522 GiB.
-archival_node_required_disk_in_gib="686"
-archival_node_required_disk_in_mib=$((archival_node_required_disk_in_gib * MIB_TO_GIB))
+readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB="686"
+readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB=$((ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB * MIB_TO_GIB))
 
 # check if the user wants to disable pruning
 if [ "${prune_value}" -eq 0 ]; then
-  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${archival_node_required_disk_in_mib}" ]; then
-    throw_error "Not enough storage to disable pruning. Free up ${archival_node_required_disk_in_gib} GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
+  if [ "$((data_already_synced_in_mib + free_space_in_mib))" -lt "${ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB}" ]; then
+    throw_error "Not enough storage to disable pruning. Free up ${ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB} GiB or use a positive value less than $((data_already_synced_in_mib + free_space_in_mib)) \(MiB\)."
   fi
   printf '  %s' "Configuring with the disabled prune option... "
   set_bitcoin_core_option "prune" "${prune_value}"
@@ -1007,30 +1007,30 @@ elif [ "${prune_value}" -gt 0 ]; then
   printf '%s\n' "ok."
 # check that a prune value doesn't already exist in the config file
 elif [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = "0" ]; then
-  if [ "${free_space_in_mib}" -ge $((archival_node_required_disk_in_mib - data_already_synced_in_mib)) ]; then
+  if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - data_already_synced_in_mib)) ]; then
     printf '  %s\n' "Your node will run as an unpruned full node."
     set_bitcoin_core_option "prune" "0"
-  elif [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 80 - data_already_synced_in_mib)) ]; then
+  elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 80 - data_already_synced_in_mib)) ]; then
     throw_error "You are too low on disk space to run Bitcoin Core."
   else
-    if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 40 - data_already_synced_in_mib)) ]; then
+    if [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 40 - data_already_synced_in_mib)) ]; then
       printf '  %s\n  %s\n' "Your disk space is low." "Setting blocks-only mode and the minimum 0.55 GiB prune."
       set_bitcoin_core_option "blocksonly" "1"
-      prune_amount_in_mib="550"
+      readonly PRUNE_AMOUNT_IN_MIB="550"
     else
-      if [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 12 - data_already_synced_in_mib)) ]; then
-        prune_ratio=20
-      elif [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib / 4 - data_already_synced_in_mib)) ]; then
-        prune_ratio=40
-      elif [ "${free_space_in_mib}" -lt $((archival_node_required_disk_in_mib * 3 / 4 - data_already_synced_in_mib)) ]; then
-        prune_ratio=60
+      if [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 12 - data_already_synced_in_mib)) ]; then
+        readonly PRUNE_RATIO=20
+      elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 4 - data_already_synced_in_mib)) ]; then
+        readonly PRUNE_RATIO=40
+      elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB * 3 / 4 - data_already_synced_in_mib)) ]; then
+        readonly PRUNE_RATIO=60
       else
-        prune_ratio=80
+        readonly PRUNE_RATIO=80
       fi
-      prune_amount_in_mib=$((free_space_in_mib * prune_ratio / 100))
-      printf '  Pruning to %d GiB (%d%% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf.\n' "$((prune_amount_in_mib / MIB_TO_GIB))" "${prune_ratio}"
+      readonly PRUNE_AMOUNT_IN_MIB=$((free_space_in_mib * PRUNE_RATIO / 100))
+      printf '  Pruning to %d GiB (%d%% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf.\n' "$((PRUNE_AMOUNT_IN_MIB / MIB_TO_GIB))" "${PRUNE_RATIO}"
     fi
-    set_bitcoin_core_option "prune" "${prune_amount_in_mib}"
+    set_bitcoin_core_option "prune" "${PRUNE_AMOUNT_IN_MIB}"
   fi
 fi
 
@@ -1046,9 +1046,9 @@ else
 fi
 
 printf '%s\n  %s' "ok." "Checking the RPC status... "
-rpc_timeout=60
-if ! bitcoin-cli --rpcwait --rpcwaittimeout="${rpc_timeout}" getrpcinfo > /dev/null; then
-  throw_error "RPC communication failed after ${rpc_timeout} seconds"
+readonly BITCOIN_RPC_TIMEOUT=60
+if ! bitcoin-cli --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
+  throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds"
 fi
 printf '%s\n' "ok."
 
