@@ -627,7 +627,7 @@ esac
 
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' "ok."
-elif [ "${compile_bitcoin:-false}" = true ] || [ "$(get_os_release_type)" = "alpine" ]; then
+elif [ "${compile_bitcoin:-false}" = true ] || [ "{OPERATING_SYSTEM_RELEASE}" = "alpine" ]; then
   printf '%s\n  %s' "no." "Ensuring compile dependencies... "
   compile_directory="${temp_directory}/compile_bitcoin"
   stderr_compile_log_file="${temp_directory}/stderr_install.log"
@@ -866,10 +866,10 @@ if [ "${OPERATING_SYSTEM}" != "Darwin" ]; then
   [ -d "$(dirname "${shortcut_image_file}")" ] || mkdir -p "$(dirname "${shortcut_image_file}")"
   if ! [ -f "${shortcut_image_file}" ]; then
     # shellcheck disable=SC2015
-    if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+    if command -v torsocks > /dev/null 2>&1 && [ "{OPERATING_SYSTEM}" != 'Darwin' ] &&
       torsocks curl --fail --silent --show-error --location --retry 2 --head "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200" ||
       curl --fail --silent --show-error --location --retry 5 --head "${shortcut_image_source}" | grep -q "HTTP/[0-9.]* 200"; then
-      command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+      command -v torsocks > /dev/null 2>&1 && [ "{OPERATING_SYSTEM}" != 'Darwin' ] &&
         torsocks curl --fail --silent --show-error --location --retry 2 --output "${shortcut_image_file}" "${shortcut_image_source}" ||
         curl --fail --silent --show-error --location --retry 5 --output "${shortcut_image_file}" "${shortcut_image_source}"
     else
