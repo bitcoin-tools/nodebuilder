@@ -1,6 +1,8 @@
 #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
+# shellcheck disable=SC2155
+
 set -o errexit
 set -o nounset
 
