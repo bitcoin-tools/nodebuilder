@@ -12,6 +12,7 @@ jobs:
     name : Push ${{ matrix.container }} image
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         container:
           - alpine
@@ -44,7 +45,8 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Set container image tags
-      # Set the tags for the container and container-version
+      # Set the tags for the {container}-{version} and {container}
+      # For example: alpine-v1.4.0 and alpine
       run: |
         TAGS="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.container }}-${{ env.NODEBUILDER_VERSION }}"
         TAGS="${TAGS},${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ matrix.container }}"
@@ -57,18 +59,40 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
-        file: docker/Dockerfile_${{ matrix.container }}
+        context: docker/
+        file: Dockerfile_${{ matrix.container }}
+        # Only push the image if the release is not a prerelease beta
         push: ${{ !github.event.release.prerelease }}
         tags: ${{ env.IMAGE_TAGS }}
+    outputs:
+      nodebuilder-version: ${{ env.NODEBUILDER_VERSION }}
+
+  build-and-push-ubuntu:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the latest release tag
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ needs.build-and-push.outputs.nodebuilder-version }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build and push Ubuntu Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
-        file: docker/Dockerfile_ubuntu
+        context: docker/
+        file: Dockerfile
+        # Only push the image if the release is not a prerelease beta
         push: ${{ !github.event.release.prerelease }}
+        # Set the tags for the ubuntu-{version}, ubuntu, {version}, and 'latest'
+        # For example, ubuntu-v1.4.0, ubuntu, v1.4.0, and latest
         tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:ubuntu-${{ env.NODEBUILDER_VERSION }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:ubuntu-${{ needs.build-and-push.outputs.nodebuilder-version }}
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:ubuntu
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.NODEBUILDER_VERSION }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.nodebuilder-version }}
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
