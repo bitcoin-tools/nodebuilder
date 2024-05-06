@@ -958,19 +958,19 @@ printf '%s' "Checking data already synced... "
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
-    readonly INITIAL_BLOCKS_SIZE_IN_MIB=$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)
+    readonly INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
   else
-    readonly INITIAL_BLOCKS_SIZE_IN_MIB=$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)
+    readonly INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
   fi
 else
-  readonly INITIAL_BLOCKS_SIZE_IN_MIB="0" 
+  readonly INITIAL_BLOCKS_SIZE_IN_MIB="0"
 fi
 readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
 if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
-    readonly INITIAL_CHAINSTATE_SIZE_IN_MIB=$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)
+    readonly INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
   else
-    readonly INITIAL_CHAINSTATE_SIZE_IN_MIB=$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)
+    readonly INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size="1MiB" "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
   fi
 else
   readonly INITIAL_CHAINSTATE_SIZE_IN_MIB="0"
