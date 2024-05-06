@@ -281,6 +281,7 @@ jobs:
     name: Run container ${{ matrix.container }}
     needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
+      github.event.action != 'prerelease' &&
       github.event.action != 'published' &&
       (needs.changes.outputs.ci == 'true' ||
       needs.changes.outputs.docker == 'true' ||
