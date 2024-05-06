@@ -741,7 +741,7 @@ else
     guix_sigs_temporary_dir="${temp_directory}/guix.sigs"
     guix_sigs_destination_dir="${HOME}/Downloads/guix.sigs"
     printf '  %s' "Downloading Bitcoin Core... "
-    if command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ]; then
+    if command -v torsocks > /dev/null 2>&1 && [ "${OPERATING_SYSTEM}" != 'Darwin' ]; then
       torsocks curl --fail --silent --show-error --location --retry 2 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}" ||
         curl --fail --silent --show-error --location --retry 5 --output "${bitcoin_hash_file}" "${bitcoin_hash_file_source}"
       torsocks curl --fail --silent --show-error --location --retry 2 --output "${gpg_signatures_file}" "${gpg_signatures_file_source}" ||
@@ -778,7 +778,7 @@ else
       gpg --quiet --import "${guix_sigs_destination_dir}"/builder-keys/*.gpg
     else
       # shellcheck disable=SC2015
-      command -v torsocks > /dev/null 2>&1 && [ "$(get_os_release_type)" != 'Darwin' ] &&
+      command -v torsocks > /dev/null 2>&1 && [ "${OPERATING_SYSTEM}" != 'Darwin' ] &&
         torsocks git clone --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}" ||
         git clone --depth 1 --quiet "${guix_sigs_repo}" "${guix_sigs_temporary_dir}"
       gpg --quiet --import "${guix_sigs_temporary_dir}"/builder-keys/*.gpg
