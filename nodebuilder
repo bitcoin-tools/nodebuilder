@@ -45,7 +45,7 @@ ensure_curl_dependency() {
       sudo apt-get install -y curl > /dev/null
       ;;
     fedora | rhel | centos*)
-      sudo dnf install curl > /dev/null
+      sudo dnf install --assumeyes --skip-broken curl > /dev/null
       ;;
     arch | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
@@ -59,7 +59,7 @@ ensure_curl_dependency() {
       elif command -v apt-get > /dev/null; then
         sudo apt-get -qq install -y curl > /dev/null
       elif command -v dnf > /dev/null; then
-        sudo dnf install curl > /dev/null
+        sudo dnf --assumeyes --skip-broken install curl > /dev/null
       elif command -v pacman > /dev/null; then
         sudo pacman -Syu --needed --noconfirm curl > /dev/null
       elif command -v zypper > /dev/null; then
@@ -161,7 +161,7 @@ install_build_dependencies_aptget() {
 }
 
 install_build_dependencies_dnf() {
-  sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel > /dev/null
+  sudo dnf --assumeyes --skip-broken install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel > /dev/null
 }
 
 install_build_dependencies_pacman() {
@@ -235,7 +235,7 @@ install_runtime_dependencies_dnf() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
   if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+    printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --skip-broken --quiet install > /dev/null
   else
     throw_error "The list of dependencies is empty."
   fi
@@ -278,7 +278,7 @@ install_system_updates_aptget() {
 }
 
 install_system_updates_dnf() {
-  sudo dnf clean all && sudo dnf --assumeyes --quiet upgrade > /dev/null
+  sudo dnf clean all && sudo dnf --assumeyes --skip-broken --quiet upgrade > /dev/null
 }
 
 install_system_updates_pacman() {
