@@ -3,6 +3,7 @@
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "onboarding": false,
   "platform": "github",
+  "rebaseWhen": "behind-base",
   "requireConfig": "optional",
   "repositories": [
     "bitcoin-tools/nodebuilder"
