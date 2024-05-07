@@ -59,10 +59,10 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
+      timeout-minutes: 360
       with:
         context: .
         file: docker/Dockerfile_${{ matrix.container }}
-        timeout-minutes: 360
         build-args: NODEBUILDER_VERSION=${{ env.NODEBUILDER_VERSION }}
         # Push if the CI run isn't from a beta prerelease
         push: ${{ !github.event.release.prerelease }}
@@ -88,10 +88,10 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
+      timeout-minutes: 360
       with:
         context: .
         file: docker/Dockerfile
-        timeout-minutes: 360
         build-args: NODEBUILDER_VERSION=${{ needs.build-and-push.outputs.nodebuilder-version }}
         # Push if the CI run isn't from a beta prerelease
         push: ${{ !github.event.release.prerelease }}
