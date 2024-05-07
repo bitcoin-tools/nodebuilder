@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Debian is the foundation of countless other distributions, including Ubuntu and Linux Mint.
 # This Dockerfile is ideal for users who want a stable, secure, and lightweight environment.
-FROM debian:bookworm-slim@sha256:155280b00ee0133250f7159b567a07d7cd03b1645714c3a7458b2287b0ca83cb
+FROM debian:buster-slim@sha256:09bdc82c64e5e106d3f97cc8d834ef30eb46fab5fdbfde488aec554e94cd83a7
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
