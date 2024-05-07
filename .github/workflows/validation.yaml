@@ -319,6 +319,8 @@ jobs:
             dockerfile: Dockerfile_fedora
           - container: Manjaro
             dockerfile: Dockerfile_manjaro
+          - container: Oracle Linux
+            dockerfile: Dockerfile_oraclelinux
           - container: Red Hat
             dockerfile: Dockerfile_redhat
           - container: Ubuntu
