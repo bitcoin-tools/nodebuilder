@@ -278,7 +278,7 @@ install_system_updates_aptget() {
 }
 
 install_system_updates_dnf() {
-  sudo dnf --assumeyes --quiet upgrade > /dev/null
+  sudo dnf clean all && sudo dnf --assumeyes --quiet upgrade > /dev/null
 }
 
 install_system_updates_pacman() {
