@@ -1,10 +1,10 @@
 #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
-# shellcheck disable=SC2155
 
 set -o errexit
 set -o nounset
+# shellcheck disable=SC2155
 
 check_dpkg_lock() {
   if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; then
@@ -65,7 +65,7 @@ ensure_curl_dependency() {
       elif command -v zypper > /dev/null; then
         sudo zypper --non-interactive --quiet install curl > /dev/null
       else
-        throw_error "PACKAGE MANAGER NOT FOUND. Please research how to install 'curl'."
+        throw_error "PACKAGE MANAGER NOT FOUND. Please open an issue at github com bitcoin-tools nodebuilder."
       fi
       ;;
     esac
@@ -119,11 +119,11 @@ get_operating_system() (
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
     printf '%s\n' "Darwin"
   else
-    os_release_id_like=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
-    os_release_id=$(grep "^ID=" /etc/os-release | cut -d= -f2)
+    OS_RELEASE_ID_LIKE=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
+    OS_RELEASE_ID=$(grep "^ID=" /etc/os-release | cut -d= -f2)
 
-    if [ -n "${os_release_id_like}" ] || [ -n "${os_release_id}" ]; then
-      printf '%s\n' "${os_release_id_like:-${os_release_id}}"
+    if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
+      printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
     else
       throw_error "Failed to determine OS release type"
     fi
@@ -388,10 +388,10 @@ readonly VALID_BITCOIN_VERSION_LIST="0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
 
 readonly target_bitcoin_version="27.0"
 
-compile_bitcoin=false
+compile_bitcoin="false"
 prune_value="-1"
-unattended=false
-unit_tests=false
+unattended="false"
+unit_tests="false"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -407,7 +407,7 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -c | --compile)
-    compile_bitcoin=true
+    compile_bitcoin="true"
     ;;
   -h | --help)
     print_usage
@@ -430,10 +430,10 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -t | --test)
-    unit_tests=true
+    unit_tests="true"
     ;;
   -u | --unattended)
-    unattended=true
+    unattended="true"
     ;;
   *)
     printf '%s\n%s\n' "Error: '$1' is invalid." "Use -h or --help for available options."
