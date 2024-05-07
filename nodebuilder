@@ -1,10 +1,10 @@
 #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
+# shellcheck disable=SC2155
 
 set -o errexit
 set -o nounset
-# shellcheck disable=SC2155
 
 check_dpkg_lock() {
   if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; then
