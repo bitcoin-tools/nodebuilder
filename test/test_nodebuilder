@@ -107,11 +107,17 @@ fi
 [ -f nodebuilder ] && rm nodebuilder
 kill_tail_process
 
-# Stop Bitcoin Core>>>>>>> master
+# Stop Bitcoin Core
 if [ -f "${bitcoind_pid_path}" ]; then
+  read -r bitcoind_pid < "${bitcoind_pid_path}"
   if command -v bitcoin-cli > /dev/null 2>&1; then
     bitcoin-cli stop
-    while [ -f "${bitcoind_pid_path}" ]; do sleep 2; done
+    while [ -f "${bitcoind_pid_path}" ]; do
+      sleep 2
+      # TODO: debug intermittent stalled stop issue
+      # shellcheck disable=SC2009
+      ps aux | grep "${bitcoind_pid}"
+    done
   else
     throw_error "Can't find bitcoin-cli in PATH."
   fi
