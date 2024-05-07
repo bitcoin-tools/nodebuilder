@@ -119,8 +119,8 @@ get_operating_system() (
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
     printf '%s\n' "Darwin"
   else
-    OS_RELEASE_ID_LIKE=$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)
-    OS_RELEASE_ID=$(grep "^ID=" /etc/os-release | cut -d= -f2)
+    readonly OS_RELEASE_ID_LIKE="$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)"
+    readonly OS_RELEASE_ID="$(grep "^ID=" /etc/os-release | cut -d= -f2)"
 
     if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
       printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
@@ -308,9 +308,7 @@ is_running_in_container() {
 }
 
 is_valid_bitcoin_version() {
-  if [ -z "$1" ]; then
-    throw_error "No arguemnt passed into is_valid_bitcoin_version"
-  fi
+  [ -z "$1" ] && throw_error "No arguemnt passed into is_valid_bitcoin_version()."
   bitcoin_version_to_check="$1"
   for version in ${VALID_BITCOIN_VERSION_LIST}; do
     if [ "${bitcoin_version_to_check}" = "${version}" ]; then
