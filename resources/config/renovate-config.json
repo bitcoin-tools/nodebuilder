@@ -6,5 +6,5 @@
   "requireConfig": "optional",
   "repositories": [
     "bitcoin-tools/nodebuilder"
-  ],
+  ]
 }
