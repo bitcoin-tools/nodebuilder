@@ -115,6 +115,7 @@ if [ -f "${bitcoind_pid_path}" ]; then
     while [ -f "${bitcoind_pid_path}" ]; do
       sleep 2
       # TODO: debug intermittent stalled stop issue
+      # shellcheck disable=SC2009
       ps aux | grep "${bitcoind_pid}"
     done
   else
