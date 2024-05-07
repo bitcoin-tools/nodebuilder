@@ -1,4 +1,10 @@
 {
+  "username": "renovate-release",
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "onboarding": false,
-  "requireConfig": false,
+  "platform": "github",
+  "requireConfig": "optional",
+  "repositories": [
+    "bitcoin-tools/nodebuilder"
+  ],
 }
