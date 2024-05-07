@@ -14,6 +14,15 @@ on:
 env:
   TERM: xterm
 jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Run Renovate
+        uses: renovatebot/github-action@v40.1.11
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN }}
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
