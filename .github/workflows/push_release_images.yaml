@@ -60,6 +60,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
+        build-args: NODEBUILDER_VERSION=${{ env.NODEBUILDER_VERSION }}
         context: .
         file: docker/Dockerfile_${{ matrix.container }}
         # Only push the image if the release is not a prerelease beta
@@ -87,6 +88,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
+        build-args: NODEBUILDER_VERSION=${{ needs.build-and-push.outputs.nodebuilder-version }}
         context: .
         file: docker/Dockerfile
         # Only push the image if the release is not a prerelease beta
