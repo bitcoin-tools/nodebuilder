@@ -62,8 +62,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Renovate
-        env:
-          LOG_LEVEL: debug
         uses: renovatebot/github-action@v40.1.11
         with:
           configurationFile: 'resources/config/renovate-config.json'
