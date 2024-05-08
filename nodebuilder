@@ -47,7 +47,7 @@ ensure_curl_dependency() {
     fedora* | rhel | centos* | rocky | ol)
       sudo dnf install curl > /dev/null
       ;;
-    arch | endeavouros | manjaro)
+    arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
       ;;
     suse | *opensuse*)
@@ -498,7 +498,7 @@ Linux)
   fedora* | rhel | centos* | rocky | ol)
     install_system_updates_dnf
     ;;
-  arch | endeavouros | manjaro)
+  arch | endeavouros | garuda | manjaro)
     install_system_updates_pacman
     ;;
   suse | *opensuse*)
@@ -548,7 +548,7 @@ Linux)
   fedora* | rhel | centos* | rocky | ol)
     install_runtime_dependencies_dnf
     ;;
-  arch | endeavouros | manjaro)
+  arch | endeavouros | garuda | manjaro)
     install_runtime_dependencies_pacman
     ;;
   suse | *opensuse*)
@@ -642,7 +642,7 @@ elif [ "${compile_bitcoin:-false}" = "true" ] || [ "${TARGET_OPERATING_SYSTEM}" 
   fedora* | rhel | centos* | rocky | ol)
     install_build_dependencies_dnf
     ;;
-  arch | endeavouros | manjaro)
+  arch | endeavouros | garuda | manjaro)
     install_build_dependencies_pacman
     ;;
   suse | *opensuse*)
