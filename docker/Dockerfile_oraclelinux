@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Oracle Linux is known for its robustness and performance.
 # This Dockerfile is a good choice for modern and resource-rich environments.
-FROM oraclelinux:9-slim@sha256:e03b64c2e77451f749f87bc5efb258348c2919624a721df1eaa8ba85b532d0be
+FROM oraclelinux:9@sha256:2c8e7831ba7d71ba78094f331018bc1760ea7c02c4a9f0b59864b5f2a2055189
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
