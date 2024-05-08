@@ -315,8 +315,6 @@ jobs:
             dockerfile: Dockerfile_arch
           - container: Debian
             dockerfile: Dockerfile_debian
-          - container: EndeavourOS
-            dockerfile: Dockerfile_endeavouros
           - container: Fedora
             dockerfile: Dockerfile_fedora
           - container: Manjaro
