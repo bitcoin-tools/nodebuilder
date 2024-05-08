@@ -20,7 +20,7 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies
-RUN swupd bundle-add curl \
+RUN swupd bundle-add curl devpkg-libxcb \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs swupd bundle-add \
   && swupd clean
