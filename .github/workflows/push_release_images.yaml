@@ -22,8 +22,10 @@ jobs:
           - debian
           - fedora
           - manjaro
-          - redhat
           - opensuse
+          - oraclelinux
+          - redhat
+          - rockylinux
     steps:
     - name: Checkout with history to get latest tag
       if: ${{ github.event_name != 'release' }}
