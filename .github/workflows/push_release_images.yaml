@@ -17,7 +17,7 @@ jobs:
       matrix:
         container:
           - alpine
-          - amazon
+          - amazonlinux
           - arch
           - debian
           - fedora
