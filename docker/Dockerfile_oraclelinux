@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Manjaro focuses on user-friendliness and accessibility.
-# This Dockerfile is ideal for users who want a balance of control and convenience.
-FROM manjarolinux/base:latest@sha256:fa53a82b9d73dee71dff3fcb7d456afedf1d5ac31d8918431538938001866273
+# Oracle Linux is known for its robustness and performance.
+# This Dockerfile is a good choice for modern and resource-rich environments.
+FROM oraclelinux:9@sha256:2c8e7831ba7d71ba78094f331018bc1760ea7c02c4a9f0b59864b5f2a2055189
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
@@ -11,7 +11,7 @@ ARG NODEBUILDER_VERSION=v1.4.0
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 
 # Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt
 
 # Check the current environment
 RUN uname -a \
@@ -21,8 +21,10 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies
-RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs pacman -Sy --noconfirm
+RUN dnf makecache \
+  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
+  | xargs dnf --assumeyes install \
+  && dnf clean all
 
 # Download and execute the script
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

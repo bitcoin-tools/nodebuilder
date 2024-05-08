@@ -61,6 +61,11 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+      - name: Renovate
+        uses: renovatebot/github-action@v40.1.11
+        with:
+          configurationFile: 'resources/config/renovate-config.json'
+          token: ${{ secrets.RENOVATE_TOKEN }}
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
@@ -305,7 +310,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [Alpine, Amazon Linux, Arch, Debian, Fedora, Manjaro, Red Hat, Ubuntu, openSUSE]
+        container: [Alpine, Amazon Linux, Arch, Debian, Fedora, Manjaro, Oracle Linux, Red Hat, Rocky Linux, Ubuntu, openSUSE]
         include:
           - container: Alpine
             dockerfile: Dockerfile_alpine
@@ -319,8 +324,12 @@ jobs:
             dockerfile: Dockerfile_fedora
           - container: Manjaro
             dockerfile: Dockerfile_manjaro
+          - container: Oracle Linux
+            dockerfile: Dockerfile_oraclelinux
           - container: Red Hat
             dockerfile: Dockerfile_redhat
+          - container: Rocky Linux
+            dockerfile: Dockerfile_rockylinux
           - container: Ubuntu
             dockerfile: Dockerfile
           - container: openSUSE
