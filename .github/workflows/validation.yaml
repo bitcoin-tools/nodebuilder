@@ -46,10 +46,9 @@ jobs:
             - '.github/scripts/**'
           markdown:
             - '**/*.md'
+            - 'resources/data/pyspelling.wordlist.txt'
           shell:
             - 'nodebuilder'
-          spelling:
-            - 'resources/data/pyspelling.wordlist.txt'
           test:
             - 'test/test_nodebuilder'
 
@@ -130,8 +129,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  markdown-lint:
-    name: Lint the markdown formatting
+  markdown-checks:
+    name: Check the documentation
     needs: changes
     if: >-
       ${{
@@ -141,43 +140,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Lint markdown
+      - name: Lint the markdown
         uses: avto-dev/markdown-lint@v1
         with:
           config: 'resources/config/markdownlint.yaml'
           args: '*/*.md'
-
-  markdown-links:
-    name: Check hyperlinks
-    needs: changes
-    if: >-
-      ${{
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.markdown == 'true' 
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run markdown-link-check on documentation
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
-        with:
-          config-file: 'resources/config/markdown-link-check.json' 
-          use-verbose-mode: 'yes'
-
-  markdown-spellcheck:
-    name: Check spelling
-    needs: changes
-    if: >-
-      ${{
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.markdown == 'true' ||
-        needs.changes.outputs.spelling == 'true'
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: rojopolis/spellcheck-github-actions@v0
-        name: Spell check markdown files with PySpelling
+      - name: Check spelling
+        uses: rojopolis/spellcheck-github-actions@v0
         with:
           config_path: 'resources/config/spellcheck.yaml'
           output_file: 'spellcheck-output.txt'
@@ -186,6 +155,17 @@ jobs:
         with:
           name: Spellcheck Output
           path: spellcheck-output.txt
+
+  markdown-links:
+    name: Check hyperlinks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run markdown-link-check on documentation
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          config-file: 'resources/config/markdown-link-check.json' 
+          use-verbose-mode: 'yes'
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
