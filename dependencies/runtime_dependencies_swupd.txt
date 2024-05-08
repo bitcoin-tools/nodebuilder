@@ -3,6 +3,5 @@ git
 gnupg
 gzip
 jq
-libxcb-dev
+devpkg-libxcb
 sudo
-tar
