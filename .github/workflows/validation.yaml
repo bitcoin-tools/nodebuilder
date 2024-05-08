@@ -314,7 +314,7 @@ jobs:
         include:
           - container: Alpine
             dockerfile: Dockerfile_alpine
-          - container: Amazon
+          - container: Amazon Linux
             dockerfile: Dockerfile_amazonlinux
           - container: Arch
             dockerfile: Dockerfile_arch
