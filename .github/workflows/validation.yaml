@@ -130,6 +130,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   markdown-checks:
+    name: Check the documentation
     needs: changes
     if: >-
       ${{
