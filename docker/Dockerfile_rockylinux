@@ -22,6 +22,8 @@ RUN uname -a \
 
 # Install system updates and dependencies
 RUN dnf makecache \
+  && dnf --assumeyes remove curl-minimal \
+  && dnf ---assumeyes install curl \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs dnf --assumeyes install \
   && dnf clean all
