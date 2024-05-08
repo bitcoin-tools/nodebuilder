@@ -112,11 +112,17 @@ if [ -f "${bitcoind_pid_path}" ]; then
   read -r bitcoind_pid < "${bitcoind_pid_path}"
   if command -v bitcoin-cli > /dev/null 2>&1; then
     bitcoin-cli stop
+    bitcoind_stop_sleep_seconds="2"
+    bitcoind_stop_sleep_counter="0"
     while [ -f "${bitcoind_pid_path}" ]; do
-      sleep 2
+      sleep "${bitcoind_stop_sleep_seconds}"
       # TODO: debug intermittent stalled stop issue
       # shellcheck disable=SC2009
       ps aux | grep "${bitcoind_pid}"
+      bitcoind_sleep_counter=$((bitcoind_sleep_counter + 1))
+      if [ "$((bitcoind_stop_sleep_seconds * bitcoind_sleep_counter ))" -ge 3600 ]; then
+        throw_error "Stopping Bitcoin Core took over an hour"
+      fi
     done
   else
     throw_error "Can't find bitcoin-cli in PATH."
