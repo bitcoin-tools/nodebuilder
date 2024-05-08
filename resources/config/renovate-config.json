@@ -3,7 +3,7 @@
     "bitcoin-tools"
   ],
   "automerge": true,
-  "automergeType": "branch"
+  "automergeType": "branch",
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "onboarding": false,
   "packageRules": [
