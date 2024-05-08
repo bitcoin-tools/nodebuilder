@@ -4,6 +4,12 @@
   ],
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "onboarding": false,
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["docker"],
+      "groupName": "docker"
+    }
+  ],
   "platform": "github",
   "rebaseWhen": "behind-base",
   "requireConfig": "optional",
