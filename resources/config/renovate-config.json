@@ -2,6 +2,8 @@
   "assignees":[
     "bitcoin-tools"
   ],
+  "automerge": true,
+  "automergeType": "branch"
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "onboarding": false,
   "packageRules": [
