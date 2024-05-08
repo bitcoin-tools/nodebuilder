@@ -22,6 +22,16 @@ check_internet() {
     curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" https://"${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
 }
 
+clear_the_terminal() {
+  if command -v clear > /dev/null 2>&1; then
+    clear
+  elif command -v tput > /dev/null 2>&1; then
+    tput clear
+  else
+    printf "\033c"
+  fi
+}
+
 display_macos_warning() {
   if [ "${TARGET_KERNEL}" = "Darwin" ] && [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
     printf '%s\n%s\n' \
@@ -473,7 +483,7 @@ else
   sudo --validate
 fi
 
-clear
+clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
@@ -1095,7 +1105,7 @@ while [ "${ibd_status}" = "true" ]; do
 
   free_space_in_mib=$(get_free_space_in_mib)
 
-  clear
+  clear_the_terminal
   if [ "${headers}" -eq 0 ]; then
     printf '%s\n' 'Syncing the block headers (first pass).'
   elif [ "${blocks}" -eq 0 ]; then
