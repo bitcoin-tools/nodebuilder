@@ -545,7 +545,7 @@ Linux)
   debian | ubuntu)
     install_runtime_dependencies_aptget
     ;;
-  fedora | rhel)
+  fedora* | rhel | centos* | rocky | ol)
     install_runtime_dependencies_dnf
     ;;
   arch | manjaro)
@@ -639,7 +639,7 @@ elif [ "${compile_bitcoin:-false}" = "true" ] || [ "${TARGET_OPERATING_SYSTEM}" 
   debian | ubuntu)
     install_build_dependencies_aptget
     ;;
-  fedora | rhel)
+  fedora* | rhel | centos* | rocky | ol)
     install_build_dependencies_dnf
     ;;
   arch | manjaro)
