@@ -495,7 +495,7 @@ Linux)
   debian | ubuntu)
     install_system_updates_aptget
     ;;
-  fedora | rhel | centos*)
+  fedora | rhel | centos* | rocky)
     install_system_updates_dnf
     ;;
   arch | manjaro)
