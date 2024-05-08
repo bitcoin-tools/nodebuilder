@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Clear Linux is known for its minimalistic approach and is optimized for performance and security.
-FROM clearlinux:latest
+FROM clearlinux:latest@sha256:c249665dc979bc2ce2afededebb4e308a1fc29a602c9c8b642f3c7e1c04b07b2
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
