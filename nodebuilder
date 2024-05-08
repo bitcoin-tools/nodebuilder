@@ -22,6 +22,16 @@ check_internet() {
     curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" https://"${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
 }
 
+clear_the_terminal() {
+  if command -v clear > /dev/null 2>&1; then
+    clear
+  elif command -v tput > /dev/null 2>&1; then
+    tput clear
+  else
+    printf "\033c"
+  fi
+}
+
 display_macos_warning() {
   if [ "${TARGET_KERNEL}" = "Darwin" ] && [ "${TARGET_ARCHITECTURE}" = "arm64" ]; then
     printf '%s\n%s\n' \
@@ -47,7 +57,7 @@ ensure_curl_dependency() {
     fedora* | rhel | centos* | rocky | ol)
       sudo dnf install curl > /dev/null
       ;;
-    arch | endeavouros | manjaro)
+    arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
       ;;
     suse | *opensuse*)
@@ -473,7 +483,7 @@ else
   sudo --validate
 fi
 
-clear
+clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
   printf '%s\n' "Detected: running on Linux."
@@ -498,7 +508,7 @@ Linux)
   fedora* | rhel | centos* | rocky | ol)
     install_system_updates_dnf
     ;;
-  arch | endeavouros | manjaro)
+  arch | endeavouros | garuda | manjaro)
     install_system_updates_pacman
     ;;
   suse | *opensuse*)
@@ -548,7 +558,7 @@ Linux)
   fedora* | rhel | centos* | rocky | ol)
     install_runtime_dependencies_dnf
     ;;
-  arch | endeavouros | manjaro)
+  arch | endeavouros | garuda | manjaro)
     install_runtime_dependencies_pacman
     ;;
   suse | *opensuse*)
@@ -642,7 +652,7 @@ elif [ "${compile_bitcoin:-false}" = "true" ] || [ "${TARGET_OPERATING_SYSTEM}" 
   fedora* | rhel | centos* | rocky | ol)
     install_build_dependencies_dnf
     ;;
-  arch | endeavouros | manjaro)
+  arch | endeavouros | garuda | manjaro)
     install_build_dependencies_pacman
     ;;
   suse | *opensuse*)
@@ -1095,7 +1105,7 @@ while [ "${ibd_status}" = "true" ]; do
 
   free_space_in_mib=$(get_free_space_in_mib)
 
-  clear
+  clear_the_terminal
   if [ "${headers}" -eq 0 ]; then
     printf '%s\n' 'Syncing the block headers (first pass).'
   elif [ "${blocks}" -eq 0 ]; then
