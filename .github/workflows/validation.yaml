@@ -305,7 +305,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, Red Hat, Ubuntu, openSUSE]
+        container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, Oracle Linux, Red Hat, Rocky Linux, Ubuntu, openSUSE]
         include:
           - container: Alpine
             dockerfile: Dockerfile_alpine
@@ -319,6 +319,8 @@ jobs:
             dockerfile: Dockerfile_fedora
           - container: Manjaro
             dockerfile: Dockerfile_manjaro
+          - container: Oracle Linux
+            dockerfile: Dockerfile_oraclelinux
           - container: Red Hat
             dockerfile: Dockerfile_redhat
           - container: Rocky Linux
