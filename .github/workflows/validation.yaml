@@ -309,7 +309,7 @@ jobs:
           - container: Oracle Linux
             dockerfile: Dockerfile_oraclelinux
           - container: Red Hat
-            dockerfile: Dockerfile_redhat
+            dockerfile: Dockerfile_rhel
           - container: Rocky Linux
             dockerfile: Dockerfile_rockylinux
           - container: Ubuntu
