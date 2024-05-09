@@ -27,4 +27,4 @@ RUN zypper refresh \
   | xargs zypper --non-interactive install
 
 # Download and execute the script
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN /bin/sh -x "$(curl -fsSL ${NODEBUILDER_URL} )"
