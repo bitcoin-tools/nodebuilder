@@ -55,13 +55,16 @@ ensure_curl_dependency() {
       sudo apt-get install -y curl > /dev/null
       ;;
     fedora* | rhel | centos* | rocky | ol)
-      sudo dnf install curl > /dev/null
+      sudo dnf install --assumeyes curl > /dev/null
       ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
       ;;
     suse | *opensuse*)
       sudo zypper --non-interactive --quiet install curl > /dev/null
+      ;;
+    clear-linux-os)
+      sudo swupd bundle-add curl > /dev/null
       ;;
     *)
       if command -v apk > /dev/null; then
@@ -178,6 +181,10 @@ install_build_dependencies_pacman() {
   echo "TODO: install_build_dependencies_pacman()"
 }
 
+install_build_dependencies_swupd() {
+  echo "TODO: install_build_dependencies_swupd()"
+}
+
 install_build_dependencies_zypper() {
   echo "TODO: install_build_dependencies_zypper()"
 }
@@ -263,6 +270,18 @@ install_runtime_dependencies_pacman() {
   fi
 }
 
+install_runtime_dependencies_swupd() {
+  readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_swupd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
+  if [ -n "${dependencies}" ]; then
+    printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
+  else
+    throw_error "The list of dependencies is empty."
+  fi
+}
+
 install_runtime_dependencies_zypper() {
   readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_zypper.txt"
   command -v torsocks > /dev/null 2>&1 &&
@@ -293,6 +312,10 @@ install_system_updates_dnf() {
 
 install_system_updates_pacman() {
   sudo pacman -Syu --noconfirm --quiet > /dev/null
+}
+
+install_system_updates_swupd() {
+  sudo swupd update --quiet > /dev/null
 }
 
 install_system_updates_zypper() {
@@ -514,6 +537,9 @@ Linux)
   suse | *opensuse*)
     install_system_updates_zypper
     ;;
+  clear-linux-os)
+    install_system_updates_swupd
+    ;;
   *)
     if command -v apk > /dev/null; then
       install_system_updates_apk
@@ -523,6 +549,8 @@ Linux)
       install_system_updates_dnf
     elif command -v pacman > /dev/null; then
       install_system_updates_pacman
+    elif command -v swupd > /dve/null; then
+      install_system_updates_swupd
     elif command -v zypper > /dev/null; then
       install_system_updates_zypper
     else
@@ -564,6 +592,9 @@ Linux)
   suse | *opensuse*)
     install_runtime_dependencies_zypper
     ;;
+  clear-linux-os)
+    install_runtime_dependencies_swupd
+    ;;
   *)
     install_runtime_command_function=""
     for package_manager in \
@@ -571,6 +602,7 @@ Linux)
       apt-get \
       dnf \
       pacman \
+      swupd \
       zypper; do
       if command -v "${package_manager}" > /dev/null; then
         install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
@@ -658,6 +690,9 @@ elif [ "${compile_bitcoin:-false}" = "true" ] || [ "${TARGET_OPERATING_SYSTEM}" 
   suse | *opensuse*)
     install_build_dependencies_zypper
     ;;
+  clear-linux-os)
+    install_build_dependencies_swupd
+    ;;
   Darwin)
     sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
       https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
@@ -670,6 +705,7 @@ elif [ "${compile_bitcoin:-false}" = "true" ] || [ "${TARGET_OPERATING_SYSTEM}" 
       apt-get \
       dnf \
       pacman \
+      swupd \
       zypper; do
       if command -v "${package_manager}" > /dev/null; then
         install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
