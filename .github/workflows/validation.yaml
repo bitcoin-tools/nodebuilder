@@ -33,24 +33,7 @@ jobs:
     - uses: dorny/paths-filter@v3
       id: filter
       with:
-        filters: |
-          ci:
-            - '.github/workflows/*.yaml'
-            - '.github/workflows/*.yml'
-            - 'resources/config/**'
-          dependencies:
-            - 'dependencies/**'
-          docker:
-            - 'docker/Dockerfile*'
-          helpers:
-            - '.github/scripts/**'
-          markdown:
-            - '**/*.md'
-            - 'resources/data/pyspelling.wordlist.txt'
-          shell:
-            - 'nodebuilder'
-          test:
-            - 'test/test_nodebuilder'
+        filters: resources/config/paths-filter.yaml
 
   dependencies-check:
     name: Check depencencies
