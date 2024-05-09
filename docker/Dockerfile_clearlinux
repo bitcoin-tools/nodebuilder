@@ -21,7 +21,7 @@ RUN uname -a \
 
 # Install system updates and dependencies
 RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs swupd bundle-add \
+  | xargs swupd bundle-add --quiet \
   && swupd clean
 
 # Download and execute the script
