@@ -1,0 +1,17 @@
+ci:
+  - '.github/workflows/*.yaml'
+  - '.github/workflows/*.yml'
+  - 'resources/config/**'
+dependencies:
+  - 'dependencies/**'
+docker:
+  - 'docker/Dockerfile*'
+helpers:
+  - '.github/scripts/**'
+markdown:
+  - '**/*.md'
+  - 'resources/data/pyspelling.wordlist.txt'
+shell:
+  - 'nodebuilder'
+test:
+  - 'test/test_nodebuilder'
