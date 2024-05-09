@@ -19,6 +19,7 @@ jobs:
           - alpine
           - amazonlinux
           - arch
+          - clearlinux
           - debian
           - fedora
           - manjaro
@@ -71,7 +72,6 @@ jobs:
         tags: ${{ env.IMAGE_TAGS }}
     outputs:
       nodebuilder-version: ${{ env.NODEBUILDER_VERSION }}
-
   build-and-push-ubuntu:
     name: Push ubuntu default image
     needs: build-and-push
