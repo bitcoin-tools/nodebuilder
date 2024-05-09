@@ -1,13 +1,13 @@
 name: Build and Push Docker Images
-env:
-  DEFAULT_IMAGE: ubuntu
-  DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodebuilder
 on:
   release:
     types: [ prereleased, published ]
   workflow_dispatch:
   pull_request:
     branches: [ push_docker_images_test ]
+env:
+  DEFAULT_IMAGE: ubuntu
+  DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodebuilder
 jobs:
   build-and-push:
     name : Push ${{ matrix.container }} image
