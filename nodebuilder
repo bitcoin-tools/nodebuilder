@@ -831,8 +831,8 @@ else
       gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
     fi
     readonly GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c "^gpg: Good signature from ")"
-    pgrep "^gpg-agent$" > /dev/null && gpgconf --kill gpg-agent
-    pgrep "^keyboxd$" > /dev/null && gpgconf --kill keyboxd
+    ps aux | grep -q "[g]pg-agent" > /dev/null && gpgconf --kill gpg-agent
+    ps aux | grep -q "[k]eyboxd" > /dev/null && gpgconf --kill keyboxd
     if [ "${GPG_GOOD_SIGNATURE_COUNT}" -ge "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
       printf '%s\n' "${GPG_GOOD_SIGNATURE_COUNT} good."
       [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
