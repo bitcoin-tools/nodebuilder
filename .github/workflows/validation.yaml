@@ -281,11 +281,11 @@ jobs:
     name: Run container ${{ matrix.container }}
     needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
-      ${{
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.docker == 'true' ||
-        needs.changes.outputs.shell == 'true'
-      }}
+      github.event.action != 'prerelease' &&
+      github.event.action != 'published' &&
+      (needs.changes.outputs.ci == 'true' ||
+      needs.changes.outputs.docker == 'true' ||
+      needs.changes.outputs.shell == 'true')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -309,7 +309,7 @@ jobs:
           - container: Oracle Linux
             dockerfile: Dockerfile_oraclelinux
           - container: Red Hat
-            dockerfile: Dockerfile_redhat
+            dockerfile: Dockerfile_rhel
           - container: Rocky Linux
             dockerfile: Dockerfile_rockylinux
           - container: Ubuntu
