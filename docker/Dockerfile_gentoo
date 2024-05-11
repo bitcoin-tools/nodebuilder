@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Gentoo is known for its flexibility and performance.
 # This Dockerfile offers a balance between stability, security, and modernity.
-FROM gentoo/stage3:latest
+FROM gentoo/stage3:latest@sha256:11c63ffc7dd21d1092c6a1ccce4459da03e459298593eedc7e2b25dd0f48c746
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
