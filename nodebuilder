@@ -488,8 +488,8 @@ readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
-readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin.png"
-readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
+readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
+readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin/bitcoin/raw/master/share/pixmaps/bitcoin128.png"
 
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
