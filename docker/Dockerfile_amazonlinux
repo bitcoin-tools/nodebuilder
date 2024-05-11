@@ -22,7 +22,7 @@ RUN uname -a \
 
 # Install system updates and dependencies
 RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install findutils procps \
+  && dnf --allowerasing --assumeyes install findutils \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | awk '{if ($0 == "gnupg") print "gnupg2"; else print $0;}' \
   | xargs dnf --allowerasing --assumeyes install \
