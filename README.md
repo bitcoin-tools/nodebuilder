@@ -85,12 +85,12 @@ You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattend
    - On Windows, either run nodebuilder in WSL (Windows Subsystem for Linux) or in a [Docker container](#optional-docker-container)
 6. `curl`, which the script will attempt to automatically install or you can install with a package manager
 
-This POSIX-compliant script installs a minimal number of [runtime dependencies](./dependencies/) that aren't defined in POSIX.
+This POSIX-compliant script installs a minimal number of [runtime dependencies](./resources/dependencies/) that aren't defined in POSIX.
 
 ## What Does This Script Do?
 
 The script performs the following actions:
-1. Update the system (including reboot, if required) and install [dependencies](./dependencies/).
+1. Update the system (including reboot, if required) and install [dependencies](./resources/dependencies/).
 2. Either download, validate, and extract Bitcoin Core or build directly from the source code.
 3. Set a prune for Bitcoin Core based on the disk free space.
 4. Create shortcuts for Bitcoin Core on the desktop and the "Show Applications" list.
@@ -102,7 +102,7 @@ The script performs the following actions:
 ### Which Parts of My System Does This Script Touch?
 
 This script modifies the following in your file system:
-- Any files related to installing system updates and [dependencies](./dependencies/)
+- Any files related to installing system updates and [dependencies](./resources/dependencies/)
 - The downloaded Bitcoin Core and validation files:
   - `<temporary_directory>/compile_bitcoin/`
   - `<temporary_directory>/bitcoin-<version>-<architecture>-linux-gnu.tar.gz`
@@ -130,7 +130,7 @@ This script modifies the following in your file system:
 
 An automated solution is in the backlog. For now, here are a series of manual steps to follow:
 
-- Uninstalling [runtime dependencies](./dependencies/) can be be tricky. This script installs a minimal number of dependencies like curl, gzip, sudo, and tar as a defensive security posture. For advanced users, if you compiled Bitcoin from source by either using the `-c/--compile` optional argument or by running on Alpine Linux,  please also review the build dependencies that were installed.
+- Uninstalling [runtime dependencies](./resources/dependencies/) can be be tricky. This script installs a minimal number of dependencies like curl, gzip, sudo, and tar as a defensive security posture. For advanced users, if you compiled Bitcoin from source by either using the `-c/--compile` optional argument or by running on Alpine Linux,  please also review the build dependencies that were installed.
 
 - To remove the downloaded Bitcoin Core installation and verification files, open the Files or Finder application, go to Downloads, and remove any files starting with `bitcoin-`. Also remove the directory named `guix.sigs`.
 
