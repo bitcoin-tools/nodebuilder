@@ -33,24 +33,7 @@ jobs:
     - uses: dorny/paths-filter@v3
       id: filter
       with:
-        filters: |
-          ci:
-            - '.github/workflows/*.yaml'
-            - '.github/workflows/*.yml'
-            - 'resources/config/**'
-          dependencies:
-            - 'dependencies/**'
-          docker:
-            - 'docker/Dockerfile*'
-          helpers:
-            - '.github/scripts/**'
-          markdown:
-            - '**/*.md'
-            - 'resources/data/pyspelling.wordlist.txt'
-          shell:
-            - 'nodebuilder'
-          test:
-            - 'test/test_nodebuilder'
+        filters: resources/config/paths-filter.yaml
 
   dependencies-check:
     name: Check depencencies
@@ -78,6 +61,7 @@ jobs:
     if: >-
       ${{ 
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.helpers == 'true' ||
         needs.changes.outputs.shell == 'true' ||
@@ -97,6 +81,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true' ||
         needs.changes.outputs.test == 'true'
@@ -116,6 +101,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
@@ -173,6 +159,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.shell == 'true' ||
         needs.changes.outputs.test == 'true'
       }}
@@ -284,8 +271,9 @@ jobs:
       github.event.action != 'prerelease' &&
       github.event.action != 'published' &&
       (needs.changes.outputs.ci == 'true' ||
-      needs.changes.outputs.docker == 'true' ||
-      needs.changes.outputs.shell == 'true')
+        needs.changes.outputs.dependencies == 'true' || 
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.shell == 'true')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

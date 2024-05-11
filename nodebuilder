@@ -417,7 +417,7 @@ readonly VALID_BITCOIN_VERSION_LIST="0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 27.0"
 
-readonly target_bitcoin_version="27.0"
+target_bitcoin_version="27.0"
 
 compile_bitcoin="false"
 prune_value="-1"
@@ -488,8 +488,8 @@ readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
-readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin.png"
-readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/data/bitcoin.png"
+readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
+readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin/bitcoin/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
 
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
