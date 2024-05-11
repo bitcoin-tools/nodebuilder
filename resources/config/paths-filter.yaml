@@ -3,7 +3,7 @@ ci:
   - '.github/workflows/*.yml'
   - 'resources/config/**'
 dependencies:
-  - 'dependencies/**'
+  - 'resources/dependencies/**'
 docker:
   - 'docker/Dockerfile*'
 helpers:
