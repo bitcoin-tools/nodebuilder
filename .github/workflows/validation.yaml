@@ -270,10 +270,12 @@ jobs:
     if: >-
       github.event.action != 'prerelease' &&
       github.event.action != 'published' &&
-      (needs.changes.outputs.ci == 'true' ||
+      (
+        needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' || 
         needs.changes.outputs.docker == 'true' ||
-        needs.changes.outputs.shell == 'true')
+        needs.changes.outputs.shell == 'true'
+      )
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
