@@ -57,6 +57,9 @@ ensure_curl_dependency() {
     fedora* | rhel | centos* | rocky | ol)
       sudo dnf install --assumeyes curl > /dev/null
       ;;
+    gentoo)
+      emerge-webrsync && emerge --quiet-build --quiet-fail --nospinner --oneshot curl
+      ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
       ;;
@@ -177,6 +180,11 @@ install_build_dependencies_dnf() {
   sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel > /dev/null
 }
 
+install_build_dependencies_emerge() {
+  xargs emerge --quiet-build --quiet-fail --nospinner --oneshot \
+    gcc-c++ libtool make autoconf automake python libevent linguist-tools boost sqlite qrencode qtcore qtgui > /dev/null
+}
+
 install_build_dependencies_pacman() {
   echo "TODO: install_build_dependencies_pacman()"
 }
@@ -258,6 +266,18 @@ install_runtime_dependencies_dnf() {
   fi
 }
 
+install_runtime_dependencies_emerge() {
+  readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_emerge.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
+  if [ -n "${dependencies}" ]; then
+    printf '%s\n' "${dependencies}" | xargs xargs emerge --quiet-build --quiet-fail --nospinner --oneshot
+  else
+    throw_error "The list of dependencies is empty."
+  fi
+}
+
 install_runtime_dependencies_pacman() {
   readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_pacman.txt"
   command -v torsocks > /dev/null 2>&1 &&
@@ -308,6 +328,10 @@ install_system_updates_aptget() {
 
 install_system_updates_dnf() {
   sudo dnf clean all && sudo dnf --assumeyes --quiet upgrade > /dev/null
+}
+
+install_system_updates_emerge() {
+  emerge-webrsync && emaint --auto sync --allrepos && emerge --ask --with-bdeps=y --verbose --update --deep --newuse @world
 }
 
 install_system_updates_pacman() {
@@ -531,6 +555,9 @@ Linux)
   fedora* | rhel | centos* | rocky | ol)
     install_system_updates_dnf
     ;;
+  gentoo)
+    install_system_updates_emerge
+    ;;
   arch | endeavouros | garuda | manjaro)
     install_system_updates_pacman
     ;;
@@ -547,6 +574,8 @@ Linux)
       install_system_updates_aptget
     elif command -v dnf > /dev/null; then
       install_system_updates_dnf
+    elif command -v emerge > /dev/null; then
+      install_system_updates_emerge
     elif command -v pacman > /dev/null; then
       install_system_updates_pacman
     elif command -v swupd > /dve/null; then
@@ -586,6 +615,9 @@ Linux)
   fedora* | rhel | centos* | rocky | ol)
     install_runtime_dependencies_dnf
     ;;
+  gentoo)
+    install_runtime_dependencies_emerge
+    ;;
   arch | endeavouros | garuda | manjaro)
     install_runtime_dependencies_pacman
     ;;
@@ -601,6 +633,7 @@ Linux)
       apk \
       apt-get \
       dnf \
+      emerge \
       pacman \
       swupd \
       zypper; do
@@ -684,6 +717,9 @@ elif [ "${compile_bitcoin:-false}" = "true" ] || [ "${TARGET_OPERATING_SYSTEM}" 
   fedora* | rhel | centos* | rocky | ol)
     install_build_dependencies_dnf
     ;;
+  gentoo)
+    install_build_dependencies_emerge
+    ;;
   arch | endeavouros | garuda | manjaro)
     install_build_dependencies_pacman
     ;;
@@ -704,6 +740,7 @@ elif [ "${compile_bitcoin:-false}" = "true" ] || [ "${TARGET_OPERATING_SYSTEM}" 
       apk \
       apt-get \
       dnf \
+      emerge \
       pacman \
       swupd \
       zypper; do
