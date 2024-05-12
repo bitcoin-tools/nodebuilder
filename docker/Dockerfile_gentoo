@@ -20,11 +20,5 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Install system updates and dependencies
-RUN mkdir -p /var/db/repos/gentoo \
-  && emerge-webrsync --quiet \
-  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
-
 # Download and execute the script
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
