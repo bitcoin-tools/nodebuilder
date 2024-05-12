@@ -1,6 +1,6 @@
+app-crypt/gnupg
 curl
 dev-vcs/git
-gnupg
 gzip
 jq
 libxcb
