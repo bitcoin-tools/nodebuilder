@@ -321,7 +321,7 @@ install_runtime_dependencies_dnf() {
 }
 
 install_runtime_dependencies_emerge() {
-  readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_emerge.txt"
+  readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/841-feat-add-support-and-dockerfile-for-gentoo-linux/resources/dependencies/runtime_dependencies_emerge.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
