@@ -167,23 +167,76 @@ handle_sigint() {
 }
 
 install_build_dependencies_apk() {
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qtbase-x11 qt5-qttools-dev |
+  apk --quiet add \
+    alpine-sdk \
+    libffi-dev \
+    autoconf \
+    automake \
+    db-dev \
+    boost \
+    boost-dev \
+    libtool \
+    libevent-dev \
+    libqrencode-dev \
+    qt5-qtbase \
+    qt5-qtbase-x11 \
+    qt5-qttools-dev |
     grep -v "ICU with non-English locales" -A2 -B1 || true
 }
 
 install_build_dependencies_aptget() {
-  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev qtbase5-dev qttools5-dev qttools5-dev-tools qtwayland5 libqrencode-dev > /dev/null
+  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends \
+    build-essential \
+    libtool \
+    autotools-dev \
+    automake \
+    pkg-config \
+    bsdmainutils \
+    python3 \
+    libevent-dev \
+    libboost-dev \
+    libsqlite3-dev \
+    qtbase5-dev \
+    qttools5-dev \
+    qttools5-dev-tools \
+    qtwayland5 \
+    libqrencode-dev \
+    > /dev/null
   # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
-  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12
+  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends \
+    gcc-12
 }
 
 install_build_dependencies_dnf() {
-  sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel > /dev/null
+  sudo dnf install \
+    autoconf \
+    automake \
+    boost-devel \
+    gcc-c++ \
+    libevent-devel \
+    libtool \
+    make \
+    python3 \
+    qrencode-devel \
+    qt5-qttools-devel \
+    qt5-qtbase-devel \
+    qt5-qtwayland \
+    sqlite-devel \
+    > /dev/null
 }
 
 install_build_dependencies_emerge() {
   xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet-build --quiet-fail --nospinner --oneshot \
-    gcc-c++ libtool make autoconf automake python libevent linguist-tools boost sqlite qrencode qtcore qtgui
+    dev-build/automake \
+    dev-build/libtool \
+    dev-build/make \
+    dev-db/sqlite \
+    dev-lang/python \
+    dev-libs/boost \
+    dev-libs/libevent \
+    media-gfx/qrencode \
+    dev-qt/linguist-tools \
+    dev-qt/qtgui
 }
 
 install_build_dependencies_pacman() {
