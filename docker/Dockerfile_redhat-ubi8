@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # RHEL UBI is an enterprise-grade Linux distribution with long-term support.
 # This Dockerfile is ideal for enterprise applications requiring strong support and stability.
-FROM redhat/ubi8:latest@sha256:83068ea81dd02717b8e39b55cdeb2c1b2c9a3db260f01381b991755d44b15073
+FROM redhat/ubi9:latest@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052951021caf429494
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
