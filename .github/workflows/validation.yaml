@@ -287,7 +287,7 @@ jobs:
           - container: Amazon Linux
             dockerfile: Dockerfile_amazonlinux
           - container: Arch
-            dockerfile: Dockerfile_arch
+            dockerfile: Dockerfile_archlinux
           - container: Clear Linux
             dockerfile: Dockerfile_clearlinux
           - container: Debian
@@ -295,11 +295,11 @@ jobs:
           - container: Fedora
             dockerfile: Dockerfile_fedora
           - container: Manjaro
-            dockerfile: Dockerfile_manjaro
+            dockerfile: Dockerfile_manjarolinux
           - container: Oracle Linux
             dockerfile: Dockerfile_oraclelinux
           - container: Red Hat
-            dockerfile: Dockerfile_rhel
+            dockerfile: Dockerfile_redhat
           - container: Rocky Linux
             dockerfile: Dockerfile_rockylinux
           - container: Ubuntu
