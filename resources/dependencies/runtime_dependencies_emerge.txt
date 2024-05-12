@@ -2,7 +2,7 @@ app-arch/gzip
 app-crypt/gnupg
 curl
 dev-vcs/git
-jq
+app-misc/jq
 libxcb
 procps
 sudo
