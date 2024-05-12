@@ -1,4 +1,5 @@
 app-arch/gzip
+app-arch/tar
 app-crypt/gnupg
 curl
 dev-vcs/git
@@ -6,4 +7,3 @@ app-misc/jq
 libxcb
 procps
 sudo
-tar
