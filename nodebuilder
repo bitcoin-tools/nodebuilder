@@ -533,13 +533,13 @@ readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
 readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
 readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin/bitcoin/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
 
-if is_running_in_container; then
-  printf '%s\n' "Detected: running in a container."
-fi
-
 if ! command -v sudo > /dev/null 2>&1; then
   ensure_sudo_dependency
   #throw_error "The dependency 'sudo' is not installed."
+fi
+
+if is_running_in_container; then
+  printf '%s\n' "Detected: running in a container."
 fi
 
 if is_running_in_ci ||
