@@ -23,8 +23,7 @@ RUN uname -a \
 # Install system updates and dependencies
 RUN emerge-webrsync \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --nospinner --oneshot --quiet-build --quiet-fail \
-  && eclean-dist
+  | xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --nospinner --oneshot --quiet-build --quiet-fail
 
 # Download and execute the script
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
