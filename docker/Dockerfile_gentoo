@@ -21,9 +21,9 @@ RUN uname -a \
   && date -u
 
 # Install sudo dependency
-RUN mkdir -p /var/db/repos/gentoo &&
-  emerge-webrsync --quiet &&
-  emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
+RUN mkdir -p /var/db/repos/gentoo \
+  && emerge-webrsync --quiet \
+  && emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
 
 # Download and execute the script
-RUN /bin/sh -c -x "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
