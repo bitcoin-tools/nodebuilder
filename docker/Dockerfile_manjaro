@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Manjaro focuses on user-friendliness and accessibility.
 # This Dockerfile is ideal for users who want a balance of control and convenience.
-FROM manjarolinux/base:latest@sha256:57a9589c80d79bfd76926e5f22efb8cfd9d5ac8c255739a7cb4ce1bad79f9dbc
+FROM manjarolinux/base:latest@sha256:1edf075c486ac8c7138b2e95ae772186405346d32e57c71d44b08e040728f650
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
