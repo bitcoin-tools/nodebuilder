@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Rocky Linux: An enterprise-grade operating system designed as a direct replacement for CentOS.
 # This Dockerfile is a good choice for modern and resource-rich environments.
-FROM rockylinux:9-slim@sha256:fd7b6d94cbed5850de718366678c734da9677fdfec651f4ecbb4f76c93f99cd2
+FROM rockylinux:9-minimal@sha256:605cdab3253819ad302dd4ba43c89d1d6bea2a380057b6cd20f58393d7eee36c
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
