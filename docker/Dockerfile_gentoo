@@ -11,7 +11,7 @@ ARG NODEBUILDER_VERSION=v1.4.0
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 
 # Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/841-feat-add-support-and-dockerfile-for-gentoo-linux/resources/dependencies/runtime_dependencies_portage.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/841-feat-add-support-and-dockerfile-for-gentoo-linux/resources/dependencies/runtime_dependencies_emerge.txt
 
 # Check the current environment
 RUN uname -a \
