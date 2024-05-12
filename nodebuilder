@@ -225,6 +225,7 @@ install_build_dependencies_dnf() {
 }
 
 install_build_dependencies_emerge() {
+  printf '\n'
   xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
     dev-build/automake \
     dev-build/libtool \
@@ -321,6 +322,7 @@ install_runtime_dependencies_dnf() {
 
 install_runtime_dependencies_emerge() {
   readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/841-feat-add-support-and-dockerfile-for-gentoo-linux/resources/dependencies/runtime_dependencies_emerge.txt"
+  printf '\n'
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
@@ -384,6 +386,7 @@ install_system_updates_dnf() {
 }
 
 install_system_updates_emerge() {
+  printf '\n'
   mkdir -p /var/db/repos/gentoo
   if ! emaint --auto --quiet sync; then
     sleep 15
