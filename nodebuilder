@@ -58,7 +58,6 @@ ensure_curl_dependency() {
       sudo dnf install --assumeyes curl > /dev/null
       ;;
     gentoo)
-      emerge-webrsync
       emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet-build --quiet-fail --nospinner --oneshot curl
       ;;
     arch | endeavouros | garuda | manjaro)
@@ -385,8 +384,7 @@ install_system_updates_dnf() {
 }
 
 install_system_updates_emerge() {
-  emerge-webrsync
-  #emaint sync
+  emaint --auto sync --quiet || { sleep 15; emerge-webrsync --quiet; }
   emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --with-bdeps=y --verbose --update --deep --newuse @world
 }
 
