@@ -384,6 +384,7 @@ install_system_updates_dnf() {
 }
 
 install_system_updates_emerge() {
+  mkdir -p /var/db/repos/gentoo
   if ! emaint --auto sync --quiet; then
     sleep 15
     emerge-webrsync --quiet
