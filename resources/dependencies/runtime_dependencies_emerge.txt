@@ -1,9 +1,8 @@
+app-admin/sudo
 app-arch/gzip
 app-arch/tar
 app-crypt/gnupg
-curl
-dev-vcs/git
 app-misc/jq
-libxcb
-procps
-sudo
+dev-vcs/git
+sys-process/procps
+x11-libs/libxcb
