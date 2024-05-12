@@ -386,7 +386,6 @@ install_system_updates_dnf() {
 
 install_system_updates_emerge() {
   emerge-webrsync
-  emaint --auto sync --allrepos
   emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --ask --with-bdeps=y --verbose --update --deep --newuse @world
 }
 
