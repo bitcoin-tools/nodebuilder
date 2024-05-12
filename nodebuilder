@@ -386,8 +386,8 @@ install_system_updates_dnf() {
 
 install_system_updates_emerge() {
   emerge-webrsync
-  emaint sync
-  emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --ask --with-bdeps=y --verbose --update --deep --newuse @world
+  #emaint sync
+  emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --with-bdeps=y --verbose --update --deep --newuse @world
 }
 
 install_system_updates_pacman() {
