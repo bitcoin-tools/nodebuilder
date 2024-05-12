@@ -22,7 +22,7 @@ RUN uname -a \
 
 # Install sudo dependency
 RUN mkdir -p /var/db/repos/gentoo \
-  && emerge-webrsync --quiet \
+  && emerge --sync --quiet \
   && emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
 
 # Download and execute the script
