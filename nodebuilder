@@ -58,7 +58,7 @@ ensure_curl_dependency() {
       sudo dnf install --assumeyes curl > /dev/null
       ;;
     gentoo)
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
+      emerge --sync --quiet && emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
       ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
@@ -226,6 +226,7 @@ install_build_dependencies_dnf() {
 
 install_build_dependencies_emerge() {
   printf '\n'
+  emerge --sync --quiet
   xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
     dev-build/automake \
     dev-build/libtool \
@@ -327,6 +328,7 @@ install_runtime_dependencies_emerge() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
   if [ -n "${dependencies}" ]; then
+    emerge --sync --quiet
     printf '%s\n' "${dependencies}" | xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
   else
     throw_error "The list of dependencies is empty."
@@ -388,10 +390,7 @@ install_system_updates_dnf() {
 install_system_updates_emerge() {
   printf '\n'
   mkdir -p /var/db/repos/gentoo
-  if ! emaint --auto --quiet sync; then
-    sleep 15
-    emerge-webrsync --quiet
-  fi
+  emerge --sync --quiet
   emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --update --deep --newuse @world
 }
 
