@@ -1,5 +1,5 @@
 curl
-git
+dev-vcs/git
 gnupg
 gzip
 jq
