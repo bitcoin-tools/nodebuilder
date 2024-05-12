@@ -23,7 +23,7 @@ RUN uname -a \
 # Install system updates and dependencies
 RUN emerge-webrsync \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs emerge --jobs "$(nproc)" --quiet-build --quiet-fail --nospinner --oneshot \
+  | xargs emerge --jobs "$(( $(nproc) + 2 ))" --load-average "$(nproc)" --nospinner --oneshot --quiet-build --quiet-fail \
   && eclean-dist
 
 # Download and execute the script
