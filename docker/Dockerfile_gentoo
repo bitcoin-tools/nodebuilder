@@ -21,7 +21,7 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies
-RUN emerge-webrsync \
+RUN emerge-webrsync --quiet \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
 
