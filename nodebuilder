@@ -384,8 +384,11 @@ install_system_updates_dnf() {
 }
 
 install_system_updates_emerge() {
-  emaint --auto sync --quiet || { sleep 15; emerge-webrsync --quiet; }
-  emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --with-bdeps=y --verbose --update --deep --newuse @world
+  if ! emaint --auto sync --quiet; then
+    sleep 15
+    emerge-webrsync --quiet
+  fi
+  emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --update --deep --newuse @world
 }
 
 install_system_updates_pacman() {
