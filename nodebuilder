@@ -393,6 +393,7 @@ install_system_updates_emerge() {
   emerge --sync --quiet
   emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --update --deep --newuse @world
   emerge --depclean --quiet
+  revdep-rebuild
 }
 
 install_system_updates_pacman() {
