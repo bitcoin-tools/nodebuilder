@@ -58,7 +58,7 @@ ensure_curl_dependency() {
       sudo dnf install --assumeyes curl > /dev/null
       ;;
     gentoo)
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet-build --quiet-fail --nospinner --oneshot curl
+      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail curl
       ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
@@ -225,7 +225,7 @@ install_build_dependencies_dnf() {
 }
 
 install_build_dependencies_emerge() {
-  xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet-build --quiet-fail --nospinner --oneshot \
+  xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
     dev-build/automake \
     dev-build/libtool \
     dev-build/make \
@@ -325,7 +325,7 @@ install_runtime_dependencies_emerge() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
   if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet-build --quiet-fail --nospinner --oneshot
+    printf '%s\n' "${dependencies}" | xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
   else
     throw_error "The list of dependencies is empty."
   fi
