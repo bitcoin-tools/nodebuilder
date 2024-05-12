@@ -18,14 +18,14 @@ jobs:
         container:
           - alpine
           - amazonlinux
-          - arch
+          - archlinux
           - clearlinux
           - debian
           - fedora
-          - manjaro
+          - manjarolinux
           - opensuse
           - oraclelinux
-          - rhel
+          - redhat
           - rockylinux
     steps:
     - name: Checkout with history to get latest tag
