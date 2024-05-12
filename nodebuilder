@@ -55,7 +55,7 @@ ensure_curl_dependency() {
       sudo apt-get install -y curl > /dev/null
       ;;
     fedora* | rhel | centos* | rocky | ol)
-      sudo dnf install --assumeyes curl > /dev/null
+      sudo dnf install --allowerasing --assumeyes curl > /dev/null
       ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
