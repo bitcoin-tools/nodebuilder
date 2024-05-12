@@ -289,7 +289,7 @@ jobs:
           - container: Amazon Linux
             dockerfile: Dockerfile_amazonlinux
           - container: Arch
-            dockerfile: Dockerfile_arch
+            dockerfile: Dockerfile_archlinux
           - container: Clear Linux
             dockerfile: Dockerfile_clearlinux
           - container: Debian
@@ -299,17 +299,17 @@ jobs:
           - container: Gentoo
             dockerfile: Dockerfile_gentoo
           - container: Manjaro
-            dockerfile: Dockerfile_manjaro
+            dockerfile: Dockerfile_manjarolinux
           - container: Oracle Linux
             dockerfile: Dockerfile_oraclelinux
           - container: Red Hat
-            dockerfile: Dockerfile_rhel
+            dockerfile: Dockerfile_redhat-ubi8
           - container: Rocky Linux
             dockerfile: Dockerfile_rockylinux
           - container: Ubuntu
             dockerfile: Dockerfile
           - container: openSUSE
-            dockerfile: Dockerfile_opensuse
+            dockerfile: Dockerfile_opensuse-leap
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
