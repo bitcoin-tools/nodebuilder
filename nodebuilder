@@ -392,6 +392,7 @@ install_system_updates_emerge() {
   mkdir -p /var/db/repos/gentoo
   emerge --sync --quiet
   emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --update --deep --newuse @world
+  emerge --depclean --quiet
 }
 
 install_system_updates_pacman() {
