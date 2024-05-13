@@ -1150,7 +1150,7 @@ if [ "${ibd_status}" = "true" ]; then
   if ! is_running_in_container; then
     printf '%s' "Disabling system sleep, suspend, and hibernate... "
     if [ "${TARGET_KERNEL}" = "Darwin" ]; then
-      caffeinate -sw "$(cat ~/Library/Application\ Support/Bitcoin/bitcoind.pid)" &
+      caffeinate -sw "$(cat "${BITCOIN_DATA_DIRECTORY}/bitcoind.pid")" &
     else
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
