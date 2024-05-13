@@ -389,7 +389,8 @@ install_system_updates_dnf() {
 
 install_system_updates_emerge() {
   printf '\n'
-  mkdir -p /var/db/repos/gentoo
+  readonly GENTOO_EBUILD_REPOSITORY="/var/db/repos/gentoo"
+  [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
   emerge --sync --quiet
   emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --update --deep --newuse @world
   emerge --depclean --quiet
