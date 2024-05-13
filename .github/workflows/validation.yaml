@@ -3,8 +3,6 @@ on:
   pull_request:
   push:
     branches: [ master ]
-  issues:
-    types: [ opened ]
   release:
     types: [ created, published ]
   schedule:
