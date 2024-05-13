@@ -3,7 +3,11 @@
     "bitcoin-tools"
   ],
   "automerge": true,
+  "automergeStrategy": "squash",
+  "dependencyDashboard": true, 
+  "internalChecksFilter":"strict",
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "minimumReleaseAge": "5 days",
   "onboarding": false,
   "packageRules": [
     {
