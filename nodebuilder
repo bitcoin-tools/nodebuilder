@@ -274,6 +274,7 @@ install_build_dependencies_emerge() {
         media-gfx/qrencode \
         dev-qt/linguist-tools \
         dev-qt/qtgui
+    fi
   fi
 }
 
