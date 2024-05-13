@@ -45,7 +45,7 @@ display_macos_warning() {
 }
 
 ensure_curl_dependency() {
-  if ! command -v curl > /dev/null; then
+  if ! command -v curl > /dev/null 2>&1; then
     printf '%s' "Installing curl depencency... "
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
@@ -55,7 +55,7 @@ ensure_curl_dependency() {
       sudo apt-get install -y curl > /dev/null
       ;;
     fedora* | rhel | centos* | rocky | ol)
-      sudo dnf install --assumeyes curl > /dev/null
+      sudo dnf install --allowerasing --assumeyes curl > /dev/null
       ;;
     gentoo)
       emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
@@ -87,6 +87,50 @@ ensure_curl_dependency() {
     esac
     printf '%s\n' "ok."
   fi
+  command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error on github com bitcoin-tools nodebuilder"
+}
+
+ensure_sudo_dependency() {
+  if ! command -v sudo > /dev/null 2>&1; then
+    printf '%s' "Installing sudo depencency... "
+    case "${TARGET_OPERATING_SYSTEM}" in
+    alpine)
+      apk --quiet add sudo
+      ;;
+    debian | ubuntu)
+      apt-get install -y sudo > /dev/null
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
+      dnf install --allowerasing --assumeyes sudo > /dev/null
+      ;;
+    arch | endeavouros | garuda | manjaro)
+      pacman -Syu --needed --noconfirm sudo > /dev/null
+      ;;
+    suse | *opensuse*)
+      zypper --non-interactive --quiet install sudo > /dev/null
+      ;;
+    clear-linux-os)
+      swupd bundle-add sudo > /dev/null
+      ;;
+    *)
+      if command -v apk > /dev/null; then
+        apk --quiet add sudo
+      elif command -v apt-get > /dev/null; then
+        apt-get -qq install -y sudo > /dev/null
+      elif command -v dnf > /dev/null; then
+        dnf install sudo > /dev/null
+      elif command -v pacman > /dev/null; then
+        pacman -Syu --needed --noconfirm sudo > /dev/null
+      elif command -v zypper > /dev/null; then
+        zypper --non-interactive --quiet install sudo > /dev/null
+      else
+        throw_error "PACKAGE MANAGER NOT FOUND. Please open an issue at github com bitcoin-tools nodebuilder."
+      fi
+      ;;
+    esac
+    printf '%s\n' "ok."
+  fi
+  command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error on github com bitcoin-tools nodebuilder."
 }
 
 get_cursor_column() {
@@ -614,13 +658,13 @@ readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
 readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
 readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin/bitcoin/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
 
+ensure_sudo_dependency
+
 if is_running_in_container; then
   printf '%s\n' "Detected: running in a container."
 fi
 
-if ! command -v sudo > /dev/null 2>&1; then
-  throw_error "The dependency 'sudo' is not installed."
-elif is_running_in_ci ||
+if is_running_in_ci ||
   is_running_in_container ||
   sudo --validate --noninteractive > /dev/null 2>&1; then
   :

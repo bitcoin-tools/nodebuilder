@@ -26,7 +26,7 @@ jobs:
           - manjarolinux
           - opensuse-leap
           - oraclelinux
-          - redhat-ubi8
+          - redhat-ubi9
           - rockylinux
     steps:
     - name: Checkout with history to get latest tag
