@@ -130,28 +130,24 @@ ensure_sudo_dependency() {
   command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error on github com bitcoin-tools nodebuilder."
 }
 
-get_cursor_column() {
-  stored_stty_settings=$(stty -g)
-  # Set raw mode, no echo, immediate read
-  stty raw -echo min 0 time 10
-  # Send ANSII escape code to request cursor position
-  printf "\033[6n" > /dev/tty
-  # System will print the cursor's row and column
-  IFS=';' read -r _ stty_column
-  stty "$stored_stty_settings"
-  printf '%s' "$stty_column"
+update_cursor_column() {
+  stty -echo
+  printf '%s' "$(tput u7)"
+  IFS=';' read -r _ cursor_column _
+  cursor_column="${cursor_column%R}"
+  stty echo
 }
 
-test_get_cursor_column() {
+test_update_cursor_column() {
   # Test when cursor is at the start of a line
   printf '\n'
-  col=$(get_cursor_column)
-  [ "$col" -ne 1 ] && throw_error "Failed: Expected 1, got $col"
+  update_cursor_column
+  [ "${cursor_column}" -ne 1 ] && throw_error "Failed: Expected 1, got ${cursor_column}"
 
   # Test when cursor is at the end of the string "test"
   printf '\n%s' "test"
-  col=$(get_cursor_column)
-  [ "$col" -ne 5 ] && throw_error "Failed: Expected 5, got $col"
+  update_cursor_column
+  [ "${cursor_column}" -ne 5 ] && throw_error "Failed: Expected 5, got ${cursor_column}"
 
   printf '%s\n' "All tests passed"
   return 0
@@ -396,7 +392,8 @@ is_valid_bitcoin_version() {
 }
 
 log_error() {
-  [ "$(get_cursor_column)" -gt 0 ] && printf '\n'
+  update_cursor_column
+  [ "${cursor_column}" -gt 1 ] && printf '\n'
   printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
 }
 
@@ -413,7 +410,7 @@ print_usage() {
 
 run_unit_tests() {
   printf '%s' "Testing get_cursor_column..."
-  test_get_cursor_column
+  test_update_cursor_column
   printf '%s\n' "PASS"
   return 0
 }
