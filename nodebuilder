@@ -227,7 +227,7 @@ install_build_dependencies_dnf() {
 install_build_dependencies_emerge() {
   printf '\n'
   emerge --sync --quiet
-  xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
+  xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
     dev-build/automake \
     dev-build/libtool \
     dev-build/make \
