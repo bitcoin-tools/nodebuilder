@@ -103,6 +103,9 @@ ensure_sudo_dependency() {
     fedora* | rhel | centos* | rocky | ol)
       dnf install --allowerasing --assumeyes sudo > /dev/null
       ;;
+    gentoo)
+      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
+      ;
     arch | endeavouros | garuda | manjaro)
       pacman -Syu --needed --noconfirm sudo > /dev/null
       ;;
