@@ -226,16 +226,7 @@ install_build_dependencies_dnf() {
 
 install_build_dependencies_emerge() {
   printf '\n'
-  readonly GENTOO_AUTOUNMASK_CONFIG_FILE="/etc/portage/package.use/zz-autounmask"
-  [ -f "${GENTOO_AUTOUNMASK_CONFIG_FILE}" ] || throw_error "Cannot locate ${GENTOO_AUTOUNMASK_CONFIG_FILE}"
-  for line in \
-    ">=media-libs/libglvnd-1.7.0 X" \
-    ">=x11-libs/libxkbcommon-1.7.0 X"; do
-    if ! grep -q "^${line}$" "${GENTOO_AUTOUNMASK_CONFIG_FILE}"; then
-      printf '%s\n' "${line}" >> "${GENTOO_AUTOUNMASK_CONFIG_FILE}"
-    fi
-  done
-  xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
+  if xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
     dev-build/automake \
     dev-build/libtool \
     dev-build/make \
@@ -245,7 +236,28 @@ install_build_dependencies_emerge() {
     dev-libs/libevent \
     media-gfx/qrencode \
     dev-qt/linguist-tools \
-    dev-qt/qtgui
+    dev-qt/qtgui; then
+    :
+  else
+    # Automatically update any config files
+    dispatch-conf -u
+    # Check if there are any files that need manual resolution
+    if [ -n "$(ls -A /etc/dispatch-conf.conf.d/_merge)" ]; then
+      throw_error "Please manually resolve configuration files with 'dispatch-conf' then re-run nodebuilder."
+    fi
+    # Try the install command again
+    xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
+      dev-build/automake \
+      dev-build/libtool \
+      dev-build/make \
+      dev-db/sqlite \
+      dev-lang/python \
+      dev-libs/boost \
+      dev-libs/libevent \
+      media-gfx/qrencode \
+      dev-qt/linguist-tools \
+      dev-qt/qtgui
+  fi
 }
 
 install_build_dependencies_pacman() {
