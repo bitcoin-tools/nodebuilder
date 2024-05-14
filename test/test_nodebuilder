@@ -89,8 +89,8 @@ tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
-NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
-NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
+readonly NODEBUILDER_REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
+readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
 case "$(uname -s)" in
 Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
@@ -108,9 +108,10 @@ nodebuilder_args=""
 [ "${compile_bitcoin}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
 
 if [ -n "${nodebuilder_args}" ]; then
+  # shellcheck disable=SC2155
   readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
   printf '%s/n' "Running nodebuilder with ${NODEBUILDER_ARGS_TRIMMED} args."
-  ./nodebuilder ${NODEBUILDER_ARGS_TRIMMED} \
+  ./nodebuilder "${NODEBUILDER_ARGS_TRIMMED}" \
     > test_output_stdout.txt \
     2> test_output_stderr.txt
 else
