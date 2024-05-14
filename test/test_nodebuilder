@@ -52,14 +52,15 @@ validate_git_ref_short_name() {
 
 compile_bitcoin="false"
 GIT_REF_SHORT_NAME=''
+target_bitcoin_version=''
 
 while [ $# -gt 0 ]; do
   case "$1" in
   -b | --bitcoin-version)
     [ -z "$2" ] &&
       throw_error "No argument supplied for -b|--bitcoin-version" "${LINENO}"
-    TARGET_BITCOIN_VERSION="$2"
-    validate_bitcoin_version "${TARGET_BITCOIN_VERSION}"
+    target_bitcoin_version="$2"
+    validate_bitcoin_version "${target_bitcoin_version}"
     shift
     ;;
   -c | --compile)
@@ -104,7 +105,7 @@ bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 [ -x nodebuilder ] || chmod u+x nodebuilder
 
 nodebuilder_args=""
-[ -n "${bitcoin_version}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin_version ${bitcoin_version}"
+[ -n "${target_bitcoin_version}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin_version ${target_bitcoin_version}"
 [ "${compile_bitcoin}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
 
 if [ -n "${nodebuilder_args}" ]; then
