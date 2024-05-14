@@ -294,6 +294,7 @@ install_build_dependencies_emerge() {
     if [ -n "$(ls -A /etc/dispatch-conf.conf.d/_merge)" ]; then
       throw_error "Please manually resolve configuration files with 'dispatch-conf' then re-run nodebuilder."
     fi
+    emerge --sync
     # Try the install command again
     if emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
       dev-build/automake \
@@ -312,6 +313,7 @@ install_build_dependencies_emerge() {
       if [ -n "$(ls -A /etc/dispatch-conf.conf.d/_merge)" ]; then
         throw_error "Please manually resolve configuration files with 'dispatch-conf' then re-run nodebuilder."
       fi
+      emerge --sync
       emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
         dev-build/automake \
         dev-build/libtool \
