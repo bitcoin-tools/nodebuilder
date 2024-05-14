@@ -15,5 +15,4 @@ dev-libs/boost
 dev-libs/libevent
 media-gfx/qrencode
 dev-qt/linguist-tools
-
 dev-qt/qtgui
