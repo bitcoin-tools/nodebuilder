@@ -477,7 +477,7 @@ while [ $# -gt 0 ]; do
     if is_valid_bitcoin_version "$2"; then
       target_bitcoin_version="$2"
     else
-      throw_error 'The Bitcoin version '$2' is not valid. Please use a value such as '27.0' from https://bitcoincore.org/bin/'
+      throw_error "The Bitcoin version '$2' is not valid. Please use a value such as '27.0' from https://bitcoincore.org/bin/."
     fi
     shift
     ;;
