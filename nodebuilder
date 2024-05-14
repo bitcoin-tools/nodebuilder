@@ -417,7 +417,7 @@ install_runtime_dependencies_emerge() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
   if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
+    printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
   else
     throw_error "The list of dependencies is empty."
   fi
