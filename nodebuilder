@@ -281,7 +281,7 @@ install_runtime_dependencies_darwin() {
     else
       printf '%s\n%s\n' 'failed.' 'Installing the Command Line Tools (expect a popup window).'
       /usr/bin/xcode-select --install
-      printf '%s\n' 'PRESS ENTER after you've completed the installation via the popup window.'
+      printf '%s\n' "PRESS ENTER after you've completed the installation via the popup window."
       read -r _
       if ! command -v git > /dev/null 2>&1; then
         throw_error 'Failed to install git via the Xcode Command Line Tools. Try manually installing git'
