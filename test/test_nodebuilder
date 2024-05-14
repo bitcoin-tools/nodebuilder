@@ -50,21 +50,16 @@ validate_git_ref_short_name() {
     throw_error "$1 is not a valid branch, tag, or commit" "${LINENO}"
 }
 
-compile_bitcoin="false"
-GIT_REF_SHORT_NAME=''
-target_bitcoin_version=''
-
 while [ $# -gt 0 ]; do
   case "$1" in
   -b | --bitcoin-version)
-    [ -z "$2" ] &&
-      throw_error "No argument supplied for -b|--bitcoin-version" "${LINENO}"
-    target_bitcoin_version="$2"
-    validate_bitcoin_version "${target_bitcoin_version}"
+    [ -z "$2" ] && throw_error "No argument supplied for -b|--bitcoin-version" "${LINENO}"
+    readonly TARGET_BITCOIN_VERSION="$2"
+    validate_bitcoin_version "${TARGET_BITCOIN_VERSION}"
     shift
     ;;
   -c | --compile)
-    compile_bitcoin="true"
+    readonly COMPILE_BITCOIN="true"
     ;;
   -h | --help)
     print_usage
@@ -73,7 +68,7 @@ while [ $# -gt 0 ]; do
   -r | --ref)
     [ -z "$2" ] &&
       throw_error "No argument supplied for -r|--ref" "${LINENO}"
-    GIT_REF_SHORT_NAME="$2"
+    readonly GIT_REF_SHORT_NAME="$2"
     validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
     shift
     ;;
@@ -83,6 +78,10 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+[ -n "${GIT_REF_SHORT_NAME}" ] || readonly GIT_REF_SHORT_NAME=''
+[ -n "${TARGET_BITCOIN_VERSION}" ] || readonly TARGET_BITCOIN_VERSION=''
+[ "${COMPILE_BITCOIN}" = "true" ] || readonly COMPILE_BITCOIN="false"
 
 [ -f test_output_stdout.txt ] || touch test_output_stdout.txt
 tail -f test_output_stdout.txt &
@@ -105,8 +104,8 @@ bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 [ -x nodebuilder ] || chmod u+x nodebuilder
 
 nodebuilder_args=""
-[ -n "${target_bitcoin_version}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin_version ${target_bitcoin_version}"
-[ "${compile_bitcoin}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
+[ -n "${TARGET_BITCOIN_VERSION}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin_version ${TARGET_BITCOIN_VERSION}"
+[ "${COMPILE_BITCOIN}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
 
 if [ -n "${nodebuilder_args}" ]; then
   # shellcheck disable=SC2155
@@ -192,7 +191,7 @@ for message in \
   fi
 done
 
-if [ "${compile_bitcoin}" = "true" ] ||
+if [ "${COMPILE_BITCOIN}" = "true" ] ||
   { [ -f /etc/os-release ] && [ "$(grep "^ID=" /etc/os-release | cut -d= -f2)" = "alpine" ]; }; then
   for message in \
     "Ensuring compile dependencies... ok.$" \
