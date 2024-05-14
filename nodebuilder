@@ -46,7 +46,7 @@ display_macos_warning() {
 
 ensure_curl_dependency() {
   if ! command -v curl > /dev/null 2>&1; then
-    printf '%s' "Installing curl depencency... '
+    printf '%s' 'Installing curl depencency... '
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       apk --quiet add curl
