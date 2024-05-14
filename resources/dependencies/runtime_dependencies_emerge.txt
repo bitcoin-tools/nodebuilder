@@ -6,3 +6,14 @@ app-misc/jq
 dev-vcs/git
 sys-process/procps
 x11-libs/libxcb
+dev-build/automake
+dev-build/libtool
+dev-build/make
+dev-db/sqlite
+dev-lang/python
+dev-libs/boost
+dev-libs/libevent
+media-gfx/qrencode
+dev-qt/linguist-tools
+
+dev-qt/qtgui
