@@ -153,7 +153,7 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint]
+    needs: [changes, dependencies-check, shell-lint]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
