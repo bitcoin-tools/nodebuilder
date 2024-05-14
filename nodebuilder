@@ -165,14 +165,14 @@ get_free_space_in_mib() {
   fi
 }
 
-get_memory_metric_in_mib() (
+get_memory_metric_in_mib() {
   metric_to_query="$1"
   awk -v metric="${metric_to_query}" \
     -v kib_mib_factor="${KIB_TO_MIB}" \
     '$0 ~ metric { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
-)
+}
 
-get_operating_system() (
+get_operating_system() {
   if [ "${TARGET_KERNEL}" = "Darwin" ]; then
     printf '%s\n' "Darwin"
   else
@@ -185,7 +185,7 @@ get_operating_system() (
       throw_error "Failed to determine OS release type"
     fi
   fi
-)
+}
 
 # shellcheck disable=SC2317
 handle_error() {
@@ -418,7 +418,7 @@ run_unit_tests() {
   return 0
 }
 
-set_bitcoin_core_option() (
+set_bitcoin_core_option() {
   option="$1"
   value="$2"
   if [ -f "${bitcoin_core_config_file:?}" ]; then
@@ -428,10 +428,10 @@ set_bitcoin_core_option() (
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
   fi
   printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-)
+}
 
 # This function sets a Bitcoin Core option in the configuration file if it's not already set.
-set_if_unset_bitcoin_core_option() (
+set_if_unset_bitcoin_core_option() {
   option="$1"
   value="$2"
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
@@ -440,7 +440,7 @@ set_if_unset_bitcoin_core_option() (
   if [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = "0" ]; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
-)
+}
 
 throw_error() {
   if [ $# -gt 1 ]; then
