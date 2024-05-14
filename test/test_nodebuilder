@@ -106,7 +106,6 @@ bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 nodebuilder_args=""
 [ -n "${bitcoin_version}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin_version ${bitcoin_version}"
 [ "${compile_bitcoin}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
- && 
 
 if [ -n "${nodebuilder_args}" ]; then
   readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
@@ -119,7 +118,6 @@ else
     > test_output_stdout.txt \
     2> test_output_stderr.txt
 fi
-
 [ -f nodebuilder ] && rm nodebuilder
 kill_tail_process
 
