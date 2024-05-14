@@ -20,6 +20,5 @@
   "requireConfig": "optional",
   "repositories": [
     "bitcoin-tools/nodebuilder"
-  ],
-  "username": "renovate[bot]"
+  ]
 }
