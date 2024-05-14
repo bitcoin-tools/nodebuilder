@@ -166,7 +166,7 @@ jobs:
       fail-fast: false
       matrix:
         job-purpose: [Test-package, Test-source]
-        os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
+        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14]
         include:
           - job-purpose: Test-package
             additional-args: ''
@@ -188,8 +188,8 @@ jobs:
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
-          - os: ubuntu-latest
-            os-friendly-name: Ubuntu LTS
+          - os: ubuntu-24.04
+            os-friendly-name: Ubuntu 24
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
             install-upgrades-command: >-
