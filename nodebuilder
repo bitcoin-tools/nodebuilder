@@ -84,7 +84,7 @@ ensure_curl_dependency() {
     esac
     printf '%s\n' 'ok.'
   fi
-  command -v curl > /dev/null 2>&1 || throw_error 'Unable to install 'curl'. Please report this error on github com bitcoin-tools nodebuilder'
+  command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error on github com bitcoin-tools nodebuilder"
 }
 
 ensure_sudo_dependency() {
@@ -127,7 +127,7 @@ ensure_sudo_dependency() {
     esac
     printf '%s\n' 'ok.'
   fi
-  command -v sudo > /dev/null 2>&1 || throw_error 'Unable to install 'sudo'. Please report this error on github com bitcoin-tools nodebuilder.'
+  command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error on github com bitcoin-tools nodebuilder."
 }
 
 get_cursor_column() {
