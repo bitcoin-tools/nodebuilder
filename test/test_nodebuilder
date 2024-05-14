@@ -61,6 +61,7 @@ while [ $# -gt 0 ]; do
     TARGET_BITCOIN_VERSION="$2"
     validate_bitcoin_version "${TARGET_BITCOIN_VERSION}"
     shift
+    ;;
   -c | --compile)
     compile_bitcoin="true"
     ;;
