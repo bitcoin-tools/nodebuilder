@@ -66,8 +66,7 @@ while [ $# -gt 0 ]; do
     exit 0
     ;;
   -r | --ref)
-    [ -z "$2" ] &&
-      throw_error "No argument supplied for -r|--ref" "${LINENO}"
+    [ -z "$2" ] && throw_error "No argument supplied for -r|--ref" "${LINENO}"
     readonly GIT_REF_SHORT_NAME="$2"
     validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
     shift
@@ -79,9 +78,9 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-[ -n "${GIT_REF_SHORT_NAME}" ] || readonly GIT_REF_SHORT_NAME=''
-[ -n "${TARGET_BITCOIN_VERSION}" ] || readonly TARGET_BITCOIN_VERSION=''
-[ "${COMPILE_BITCOIN}" = "true" ] || readonly COMPILE_BITCOIN="false"
+[ -z "${GIT_REF_SHORT_NAME}" ] && readonly GIT_REF_SHORT_NAME=''
+[ -z "${TARGET_BITCOIN_VERSION}" ] && readonly TARGET_BITCOIN_VERSION=''
+[ "${COMPILE_BITCOIN}" != "true" ] && readonly COMPILE_BITCOIN="false"
 
 [ -f test_output_stdout.txt ] || touch test_output_stdout.txt
 tail -f test_output_stdout.txt &
