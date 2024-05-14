@@ -1193,7 +1193,7 @@ while [ "${ibd_status}" = 'true' ]; do
   if [ "$(printf '%s\n' "${sync_progress}" | grep -c -i 'e')" -gt 0 ]; then
     sync_progress='0.000000001'
   fi
-  sync_progress_percent="$(awk -v prog="${sync_progress}" "BEGIN{printf '%f\n', prog * 100}")"
+  sync_progress_percent="$(awk -v prog="${sync_progress}" "BEGIN{printf "%f\n", prog * 100}")"
 
   free_space_in_mib="$(get_free_space_in_mib)"
 
