@@ -910,7 +910,7 @@ else
   [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
     mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
     sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
-    throw_error 'Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}.'
+    throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
   case "${TARGET_KERNEL}" in
   Linux)
     sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.so.0.0.0 "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.so.0.0.0
