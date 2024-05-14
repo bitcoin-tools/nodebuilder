@@ -12,7 +12,7 @@ handle_exit() {
 
 handle_error() {
   handle_exit
-  printf '%s\n' "Test failed."
+  printf '%s\n' 'Test failed.'
 }
 
 kill_tail_process() {
@@ -26,10 +26,10 @@ kill_tail_process() {
 
 print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
-  printf '%s\n' "Options:"
-  printf '%s\n' "-c, --compile      Build Bitcoin from source"
-  printf '%s\n' "-h, --help         Display this help message"
-  printf '%s\n' "-r, --ref          Choose a git tef to test"
+  printf '%s\n' 'Options:'
+  printf '%s\n' '-c, --compile      Build Bitcoin from source'
+  printf '%s\n' '-h, --help         Display this help message'
+  printf '%s\n' '-r, --ref          Choose a git tef to test'
 }
 
 throw_error() {
@@ -42,7 +42,7 @@ throw_error() {
 }
 
 validate_git_ref_short_name() {
-  [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ] ||
+  [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ] ||
     throw_error "Not inside a Git repository" "${LINENO}"
   [ "$(basename "$(git rev-parse --show-toplevel)")" = "nodebuilder" ] ||
     throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
