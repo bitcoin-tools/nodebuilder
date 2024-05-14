@@ -55,6 +55,12 @@ GIT_REF_SHORT_NAME=''
 
 while [ $# -gt 0 ]; do
   case "$1" in
+  -b | --bitcoin-version)
+    [ -z "$2" ] &&
+      throw_error "No argument supplied for -b|--bitcoin-version" "${LINENO}"
+    TARGET_BITCOIN_VERSION="$2"
+    validate_bitcoin_version "${TARGET_BITCOIN_VERSION}"
+    shift
   -c | --compile)
     compile_bitcoin="true"
     ;;
@@ -95,8 +101,16 @@ bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 
 [ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
 [ -x nodebuilder ] || chmod u+x nodebuilder
-if [ "${compile_bitcoin}" = 'true' ]; then
-  ./nodebuilder --compile \
+
+nodebuilder_args=""
+[ -n "${bitcoin_version}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin_version ${bitcoin_version}"
+[ "${compile_bitcoin}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
+ && 
+
+if [ -n "${nodebuilder_args}" ]; then
+  readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
+  printf '%s/n' "Running nodebuilder with ${NODEBUILDER_ARGS_TRIMMED} args."
+  ./nodebuilder ${NODEBUILDER_ARGS_TRIMMED} \
     > test_output_stdout.txt \
     2> test_output_stderr.txt
 else
@@ -104,6 +118,7 @@ else
     > test_output_stdout.txt \
     2> test_output_stderr.txt
 fi
+
 [ -f nodebuilder ] && rm nodebuilder
 kill_tail_process
 
