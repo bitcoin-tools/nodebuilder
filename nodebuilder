@@ -58,7 +58,7 @@ ensure_curl_dependency() {
       sudo dnf install --allowerasing --assumeyes curl > /dev/null
       ;;
     gentoo)
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
+      emerge --sync --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
       ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
@@ -104,7 +104,7 @@ ensure_sudo_dependency() {
       dnf install --allowerasing --assumeyes sudo > /dev/null
       ;;
     gentoo)
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
+      emerge --sync --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
       ;;
     arch | endeavouros | garuda | manjaro)
       pacman -Syu --needed --noconfirm sudo > /dev/null
