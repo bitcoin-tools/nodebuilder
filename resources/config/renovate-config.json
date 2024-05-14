@@ -6,7 +6,7 @@
   "automergeStrategy": "squash",
   "dependencyDashboard": true, 
   "internalChecksFilter":"strict",
-  "gitAuthor": "renovate <bot@renovateapp.com>",
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "minimumReleaseAge": "5 days",
   "onboarding": false,
   "packageRules": [
