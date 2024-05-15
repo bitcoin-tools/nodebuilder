@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1
-# Fedora is known for its proactive security and commitment to open-source software.
-# This Dockerfile is a good choice for modern and resource-rich environments.
-FROM fedora:latest@sha256:5ce8497aeea599bf6b54ab3979133923d82aaa4f6ca5ced1812611b197c79eb0
+# Clear Linux is known for its minimalistic approach and is optimized for performance and security.
+FROM clearlinux:latest@sha256:ebc7245ef48f35c66dd9c3b2976a8a325fdbfb2553afb58ae47588525c68f507
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
@@ -11,7 +10,7 @@ ARG NODEBUILDER_VERSION=v1.4.0
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 
 # Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_dnf.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_swupd.txt
 
 # Check the current environment
 RUN uname -a \
@@ -21,10 +20,9 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies
-RUN dnf makecache \
-  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs dnf --assumeyes install \
-  && dnf clean all
+RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
+  | xargs swupd bundle-add --quiet \
+  && swupd clean
 
 # Download and execute the script
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

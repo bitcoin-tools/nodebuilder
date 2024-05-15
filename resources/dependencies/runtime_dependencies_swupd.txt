@@ -1,0 +1,7 @@
+curl
+git
+gnupg
+gzip
+jq
+devpkg-libxcb
+sudo

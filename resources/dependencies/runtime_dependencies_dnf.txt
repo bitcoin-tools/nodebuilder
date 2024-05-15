@@ -4,5 +4,6 @@ gnupg
 gzip
 jq
 libxcb-devel
+procps
 sudo
 tar
