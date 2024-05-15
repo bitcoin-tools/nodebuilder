@@ -15,6 +15,16 @@ handle_error() {
   printf '%s\n' 'Test failed.'
 }
 
+is_valid_bitcoin_version() {
+  [ -z "$1" ] && throw_error 'No arguemnt passed into is_valid_bitcoin_version().'
+  readonly BITCOIN_VERSION_TO_CHECK="$1"
+  for version in ${VALID_BITCOIN_VERSION_LIST}; do
+    [ "${BITCOIN_VERSION_TO_CHECK}" = "${version}" ] &&
+      return 0
+  done
+  return 1
+}
+
 kill_tail_process() {
   if kill -0 "${tail_pid}" > /dev/null 2>&1; then
     kill -TERM "${tail_pid}" ||
@@ -27,13 +37,14 @@ kill_tail_process() {
 print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' 'Options:'
-  printf '%s\n' '-c, --compile      Build Bitcoin from source'
-  printf '%s\n' '-h, --help         Display this help message'
-  printf '%s\n' '-r, --ref          Choose a git tef to test'
+  printf '%s\n' '-b, --bitcoin-version   Specify the Bitcoin version'
+  printf '%s\n' '-c, --compile           Build Bitcoin from source'
+  printf '%s\n' '-h, --help              Display this help message'
+  printf '%s\n' '-r, --ref               Choose a git tef to test'
 }
 
 throw_error() {
-  if [ -z "$2" ]; then
+  if [ -z "${2:-}" ]; then
     echo "ERROR: $1" >&2
   else
     echo "ERROR at line $2: $1" >&2
@@ -41,31 +52,47 @@ throw_error() {
   exit 1
 }
 
+validate_bitcoin_version() {
+  [ -z "$1" ] && throw_error 'No arguemnt passed into validate_bitcoin_version().'
+  readonly BITCOIN_VERSION_TO_VALIDATE="$1"
+  if ! is_valid_bitcoin_version "${BITCOIN_VERSION_TO_VALIDATE}"; then
+    throw_error "The Bitcoin version '${BITCOIN_VERSION_TO_VALIDATE}' is invalid. Please use a value such as '27.0' from https-bitcoincore-dot-org/bin/"
+  fi
+}
+
 validate_git_ref_short_name() {
   [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ] ||
     throw_error 'Not inside a Git repository.' "${LINENO}"
-  [ "$(basename "$(git rev-parse --show-toplevel)")" = "nodebuilder" ] ||
+  [ "$(basename "$(git rev-parse --show-toplevel)")" = 'nodebuilder' ] ||
     throw_error 'Not in the nodebuilder repository.' "${LINENO}"
   git rev-parse --quiet --verify "$1" ||
-    throw_error "$1 is not a valid branch, tag, or commit" "${LINENO}"
+    throw_error "$1 is not a valid branch, tag, or commit." "${LINENO}"
 }
 
-compile_bitcoin='false'
-GIT_REF_SHORT_NAME=''
+readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
+    0.11.0 0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 \0.14.3 0.15.2 \
+    0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
+    0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
+    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 27.0'
 
 while [ $# -gt 0 ]; do
   case "$1" in
+  -b | --bitcoin-version)
+    [ -z "$2" ] && throw_error 'No argument supplied for -b|--bitcoin-version.' "${LINENO}"
+    readonly TARGET_BITCOIN_VERSION="$2"
+    validate_bitcoin_version "${TARGET_BITCOIN_VERSION}"
+    shift
+    ;;
   -c | --compile)
-    compile_bitcoin='true'
+    readonly COMPILE_BITCOIN='true'
     ;;
   -h | --help)
     print_usage
     exit 0
     ;;
   -r | --ref)
-    [ -z "$2" ] &&
-      throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
-    GIT_REF_SHORT_NAME="$2"
+    [ -z "$2" ] && throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
+    readonly GIT_REF_SHORT_NAME="$2"
     validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
     shift
     ;;
@@ -76,14 +103,18 @@ while [ $# -gt 0 ]; do
   shift
 done
 
+[ -z "${GIT_REF_SHORT_NAME:-}" ] && readonly GIT_REF_SHORT_NAME=''
+[ -z "${TARGET_BITCOIN_VERSION:-}" ] && readonly TARGET_BITCOIN_VERSION=''
+[ "${COMPILE_BITCOIN:-false}" != "true" ] && readonly COMPILE_BITCOIN="false"
+
 [ -f test_output_stdout.txt ] || touch test_output_stdout.txt
 tail -f test_output_stdout.txt &
 tail_pid=$!
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
-NODEBUILDER_REPO_URL='https://github.com/bitcoin-tools/nodebuilder'
-NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
+readonly NODEBUILDER_REPO_URL='https://github.com/bitcoin-tools/nodebuilder'
+readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
 case "$(uname -s)" in
 Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
@@ -95,8 +126,17 @@ bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 
 [ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
 [ -x nodebuilder ] || chmod u+x nodebuilder
-if [ "${compile_bitcoin}" = 'true' ]; then
-  ./nodebuilder --compile \
+
+nodebuilder_args=""
+[ -n "${TARGET_BITCOIN_VERSION}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin-version ${TARGET_BITCOIN_VERSION}"
+[ "${COMPILE_BITCOIN}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
+
+if [ -n "${nodebuilder_args}" ]; then
+  # shellcheck disable=SC2155
+  readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
+  printf '%s\n' "Running nodebuilder with '${NODEBUILDER_ARGS_TRIMMED}' args."
+  # shellcheck disable=SC2086
+  ./nodebuilder ${NODEBUILDER_ARGS_TRIMMED} \
     > test_output_stdout.txt \
     2> test_output_stderr.txt
 else
@@ -176,7 +216,7 @@ for message in \
   fi
 done
 
-if [ "${compile_bitcoin}" = 'true' ] ||
+if [ "${COMPILE_BITCOIN}" = 'true' ] ||
   { [ -f /etc/os-release ] && [ "$(grep '^ID=' /etc/os-release | cut -d= -f2)" = 'alpine' ]; }; then
   for message in \
     'Ensuring compile dependencies... ok.$' \
