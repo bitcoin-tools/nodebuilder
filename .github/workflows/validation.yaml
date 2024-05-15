@@ -152,7 +152,7 @@ jobs:
           use-verbose-mode: 'yes'
 
   run-nodebuilder-baremetal:
-    name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
+    name: Test ${{ matrix.os-friendly-name }} ${{ matrix.job-purpose }}
     needs: [changes, dependencies-check, shell-lint, yaml-lint]
     if: >-
       ${{
@@ -165,12 +165,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        job-purpose: [Test-package, Test-source]
+        job-purpose: [package, source]
         os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-latest]
         include:
-          - job-purpose: Test-package
+          - job-purpose: package
             additional-args: ''
-          - job-purpose: Test-source
+          - job-purpose: source
             additional-args: '--compile'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22
@@ -256,7 +256,7 @@ jobs:
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.job-purpose }}-${{ matrix.os }}-bitcoin-debug.log
+          name: ${{ matrix.os }}-${{ matrix.job-purpose }}-bitcoin-debug.log
           path: ${{ matrix.path-to-bitcoin-log }}
       - name: If test failed, fail the job
         if: steps.test-nodebuilder.outcome == 'failure'
