@@ -151,6 +151,7 @@ jobs:
           config-file: 'resources/config/markdown-link-check.json' 
           use-verbose-mode: 'yes'
 
+  run-nodebuilder-baremetal:
     name: Test ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
     needs: [changes, dependencies-check, shell-lint, yaml-lint]
     if: >-
