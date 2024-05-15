@@ -169,7 +169,7 @@ get_memory_metric_in_mib() {
   metric_to_query="$1"
   awk -v metric="${metric_to_query}" \
     -v kib_mib_factor="${KIB_TO_MIB}" \
-    "$0 ~ metric { printf '%d \n', $2 / kib_mib_factor }" /proc/meminfo
+    '$0 ~ metric { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
 }
 
 get_operating_system() {
