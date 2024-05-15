@@ -307,7 +307,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
-        run: grep "VERSION\|ID" /etc/os-release && uname -a
+        run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Run the docker image
         timeout-minutes: 120
         uses: docker/build-push-action@v5
