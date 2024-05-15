@@ -158,7 +158,7 @@ read -r _
 open_url "${REPO_URL}/releases/new?tag=${new_release_version}&title=Release%20${new_release_version}"
 printf '%s\n%s' \
   'Type out the release notes and save the draft release but DO NOT PUBLISH.' \
-  'Then PRESS ENTER to continue when you're ready to create the release tags pull request...'
+  'Then PRESS ENTER to continue when ready to create the release tags pull request...'
 read -r _
 
 # Prepare to push changes
@@ -171,7 +171,7 @@ open_url "${REPO_URL}/pull/new/${new_release_tag_branch}?title=feat(release): up
 printf '%s\n%s\n%s' \
   'We have now updated the beta tag and pushed the changes.' \
   'Create the draft pull request and test the beta tag though CI and manually.' \
-  'Then PRESS ENTER to continue when you're ready to remove the beta tag and publish the release...'
+  'Then PRESS ENTER to continue when ready to remove the beta tag and publish the release...'
 read -r _
 
 # Update version in files and commit changes
@@ -180,7 +180,7 @@ printf '%s\n%s\n%s\n%s' \
   'We have now set the release tag and pushed the changes.' \
   'Review the draft pull request, test, and merge when ready.' \
   'WARNING: Merging  will break production until the tag is created in the next step.' \
-  'Then PRESS ENTER to continue when you're ready to remove the beta tag and publish the release...'
+  'Then PRESS ENTER to continue when ready to remove the beta tag and publish the release...'
 read -r _
 
 # Final message
