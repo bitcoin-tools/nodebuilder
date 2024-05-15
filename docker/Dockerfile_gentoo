@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-# Gentoo is known for its flexibility and performance.
-# This Dockerfile offers a balance between stability, security, and modernity.
+# Gentoo is known for its customization and optimization at the expense of image build time.
+# This Dockerfile offers a stable base image but takes extra time to compile all dependencies.
 FROM gentoo/stage3:latest@sha256:11c63ffc7dd21d1092c6a1ccce4459da03e459298593eedc7e2b25dd0f48c746
 ENV TERM=xterm
 
@@ -24,4 +24,4 @@ RUN uname -a \
 RUN [ -d /var/db/repos/gentoo/ ] || mkdir -p /var/db/repos/gentoo/
 
 # Download and execute the script
-RUN /bin/sh -c -x "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
