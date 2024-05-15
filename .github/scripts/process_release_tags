@@ -157,7 +157,7 @@ read -r _
 # Open the final release page
 open_url "${REPO_URL}/releases/new?tag=${new_release_version}&title=Release%20${new_release_version}"
 printf '%s\n%s' \
-  'Type out the release notes and save the draft release but DON'T PUBLISH.' \
+  'Type out the release notes and save the draft release but DO NOT PUBLISH.' \
   'Then PRESS ENTER to continue when you're ready to create the release tags pull request...'
 read -r _
 
