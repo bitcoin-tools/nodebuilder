@@ -176,8 +176,8 @@ get_operating_system() {
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     printf '%s\n' 'Darwin'
   else
-    readonly OS_RELEASE_ID_LIKE="$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)"
-    readonly OS_RELEASE_ID="$(grep "^ID=" /etc/os-release | cut -d= -f2)"
+    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+    readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
 
     if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
       printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
@@ -375,9 +375,9 @@ is_running_in_ci() {
 }
 
 is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep -c "docker\|lxc\|actions_job" /proc/1/cgroup)" -gt 0 ]; then
+  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
     return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c "docker\|lxc\|actions_job" /proc/1/mountinfo)" -gt 0 ]; then
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
     return 0
   else
     return 1 #1=false
@@ -808,7 +808,7 @@ else
   readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
   readonly BITCOIN_INSTALL_INCLUDE_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/include"
   readonly BITCOIN_INSTALL_MAN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/share/man/man1"
-  readonly BITCOIN_INSTALL_DESTINATION="/usr/local"
+  readonly BITCOIN_INSTALL_DESTINATION='/usr/local'
   readonly BITCOIN_INSTALL_BIN_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/bin"
   readonly BITCOIN_INSTALL_LIB_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/lib"
   readonly BITCOIN_INSTALL_INCLUDE_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/include"
@@ -825,7 +825,7 @@ else
     readonly GPG_SIGNATURES_FILENAME='SHA256SUMS.asc'
     readonly GPG_SIGNATURES_FILE_SOURCE="${BITCOIN_SOURCE}/${GPG_SIGNATURES_FILENAME}"
     readonly GPG_GOOD_SIGNATURES_REQUIRED='7'
-    readonly GUIX_SIGS_REPO="https://github.com/bitcoin-core/guix.sigs.git"
+    readonly GUIX_SIGS_REPO='https://github.com/bitcoin-core/guix.sigs.git'
     readonly BITCOIN_TARBALL_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/${BITCOIN_TARBALL_FILENAME}"
     readonly BITCOIN_HASH_FILE="${TEMP_DIRECTORY}/${BITCOIN_HASH_FILENAME}"
     readonly GPG_SIGNATURES_FILE="${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILENAME}"
@@ -874,9 +874,9 @@ else
         git clone --depth 1 --quiet "${GUIX_SIGS_REPO}" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
       gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
     fi
-    readonly GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c "^gpg: Good signature from ")"
-    pgrep "^gpg-agent$" > /dev/null && gpgconf --kill gpg-agent
-    pgrep "^keyboxd$" > /dev/null && gpgconf --kill keyboxd
+    readonly GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')"
+    pgrep '^gpg-agent$' > /dev/null && gpgconf --kill gpg-agent
+    pgrep '^keyboxd$' > /dev/null && gpgconf --kill keyboxd
     if [ "${GPG_GOOD_SIGNATURE_COUNT}" -ge "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
       printf '%s\n' "${GPG_GOOD_SIGNATURE_COUNT} good."
       [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
@@ -916,7 +916,7 @@ else
     sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.so.0.0.0 "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.so.0.0.0
     (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
     (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
-    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin" ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
+    PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
     ;;
   Darwin)
     sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.0.dylib "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.0.dylib
@@ -970,8 +970,8 @@ if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
   if ! [ -f "${SHORTCUT_IMAGE_FILE}" ]; then
     # shellcheck disable=SC2015
     if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-      torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q "HTTP/[0-9.]* 200" ||
-      curl --fail --silent --show-error --location --retry 5 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q "HTTP/[0-9.]* 200"; then
+      torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200' ||
+      curl --fail --silent --show-error --location --retry 5 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200'; then
       command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
         torsocks curl --fail --silent --show-error --location --retry 2 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}" ||
         curl --fail --silent --show-error --location --retry 5 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}"
@@ -1108,7 +1108,7 @@ elif [ "${prune_value}" -gt 0 ]; then
   set_bitcoin_core_option 'prune' "${prune_value}"
   printf '%s\n' 'ok.'
 # check that a prune value doesn't already exist in the config file
-elif [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = 0 ]; then
+elif [ "$(grep -c -i '^prune=' "${bitcoin_core_config_file}")" = 0 ]; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     printf '  %s\n' 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
