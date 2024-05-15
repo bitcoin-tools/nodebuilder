@@ -263,7 +263,7 @@ jobs:
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-docker:
-    name: Build ${{ matrix.container }} image
+    name: Build image for ${{ matrix.container }}
     needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
       github.event.action != 'prerelease' &&
@@ -308,7 +308,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check the current OS version
         run: grep "VERSION\|ID" /etc/os-release && uname -a
-      - name: Run the docker image
+      - name: Build the ${{ matrix.container }} docker image
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
