@@ -128,7 +128,7 @@ bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 [ -x nodebuilder ] || chmod u+x nodebuilder
 
 nodebuilder_args=""
-[ -n "${TARGET_BITCOIN_VERSION}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin_version ${TARGET_BITCOIN_VERSION}"
+[ -n "${TARGET_BITCOIN_VERSION}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin-version ${TARGET_BITCOIN_VERSION}"
 [ "${COMPILE_BITCOIN}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
 
 if [ -n "${nodebuilder_args}" ]; then
