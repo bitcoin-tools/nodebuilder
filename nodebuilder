@@ -290,6 +290,9 @@ install_build_dependencies_emerge() {
   else
     # Automatically update any config files
     dispatch-conf --update
+    # or alternatively, etc-update --automode -5, which doesn't create a backup
+    emerge --update --newuse --deep @world
+
     # Check if there are any files that need manual resolution
     if [ -n "$(ls -A /etc/dispatch-conf.conf.d/_merge)" ]; then
       throw_error "Please manually resolve configuration files with 'dispatch-conf' then re-run nodebuilder."
