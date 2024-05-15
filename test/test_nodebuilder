@@ -78,9 +78,9 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-[ -z "${GIT_REF_SHORT_NAME}" ] && readonly GIT_REF_SHORT_NAME=''
-[ -z "${TARGET_BITCOIN_VERSION}" ] && readonly TARGET_BITCOIN_VERSION=''
-[ "${COMPILE_BITCOIN}" != "true" ] && readonly COMPILE_BITCOIN="false"
+[ -z "${GIT_REF_SHORT_NAME:-}" ] && readonly GIT_REF_SHORT_NAME=''
+[ -z "${TARGET_BITCOIN_VERSION:-}" ] && readonly TARGET_BITCOIN_VERSION=''
+[ "${COMPILE_BITCOIN:-false}" != "true" ] && readonly COMPILE_BITCOIN="false"
 
 [ -f test_output_stdout.txt ] || touch test_output_stdout.txt
 tail -f test_output_stdout.txt &
