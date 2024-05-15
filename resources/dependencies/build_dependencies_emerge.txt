@@ -1,0 +1,10 @@
+dev-build/automake
+dev-build/libtool
+dev-build/make
+dev-db/sqlite
+dev-lang/python
+dev-libs/boost
+dev-libs/libevent
+media-gfx/qrencode
+dev-qt/linguist-tools
+dev-qt/qtgui
