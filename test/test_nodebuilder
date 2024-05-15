@@ -125,7 +125,7 @@ if [ -f "${bitcoind_pid_path}" ]; then
       fi
     done
   else
-    throw_error 'Can't find bitcoin-cli in PATH.'
+    throw_error 'Unable to find bitcoin-cli in PATH.'
   fi
 fi
 
