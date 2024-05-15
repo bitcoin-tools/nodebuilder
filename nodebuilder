@@ -274,51 +274,19 @@ install_build_dependencies_dnf() {
 }
 
 install_build_dependencies_emerge() {
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/841-feat-add-support-and-dockerfile-for-gentoo-linux/resources/dependencies/build_dependencies_emerge.txt'
   printf '\n'
-  if emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
-    dev-build/automake \
-    dev-build/libtool \
-    dev-build/make \
-    dev-db/sqlite \
-    dev-lang/python \
-    dev-libs/boost \
-    dev-libs/libevent \
-    media-gfx/qrencode \
-    dev-qt/linguist-tools \
-    dev-qt/qtgui; then
-    :
-  else
-    # Automatically update any config files
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies}" ] && throw_error "The list of dependencies is empty."
+  if ! printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
+    --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail; then
     etc-update --automode -5
-    emerge --update --newuse --deep @world
-    # Try the install command again
-    if emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
-      dev-build/automake \
-      dev-build/libtool \
-      dev-build/make \
-      dev-db/sqlite \
-      dev-lang/python \
-      dev-libs/boost \
-      dev-libs/libevent \
-      media-gfx/qrencode \
-      dev-qt/linguist-tools \
-      dev-qt/qtgui; then
-      :
-    else
-      etc-update --automode -5
-      # Try the install command a third time
-      emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail \
-        dev-build/automake \
-        dev-build/libtool \
-        dev-build/make \
-        dev-db/sqlite \
-        dev-lang/python \
-        dev-libs/boost \
-        dev-libs/libevent \
-        media-gfx/qrencode \
-        dev-qt/linguist-tools \
-        dev-qt/qtgui
-    fi
+    emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
+    # Run the install command again
+    printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
+      --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
   fi
 }
 
@@ -404,16 +372,13 @@ install_runtime_dependencies_dnf() {
 }
 
 install_runtime_dependencies_emerge() {
-  readonly DEPENDENCIES_URL="https://github.com/bitcoin-tools/nodebuilder/raw/841-feat-add-support-and-dockerfile-for-gentoo-linux/resources/dependencies/runtime_dependencies_emerge.txt"
+  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/841-feat-add-support-and-dockerfile-for-gentoo-linux/resources/dependencies/runtime_dependencies_emerge.txt'
   printf '\n'
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
-  else
-    throw_error "The list of dependencies is empty."
-  fi
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
 }
 
 install_runtime_dependencies_pacman() {
@@ -473,7 +438,7 @@ install_system_updates_emerge() {
   readonly GENTOO_EBUILD_REPOSITORY="/var/db/repos/gentoo"
   [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
   emerge --sync --quiet
-  emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --update --deep --newuse @world
+  emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
   emerge --depclean --quiet
 }
 
