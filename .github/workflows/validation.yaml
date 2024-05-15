@@ -263,7 +263,7 @@ jobs:
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-docker:
-    name: Run container ${{ matrix.container }}
+    name: Build ${{ matrix.container }} image
     needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
       github.event.action != 'prerelease' &&
