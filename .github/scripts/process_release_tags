@@ -27,10 +27,10 @@ throw_error() {
 open_url() {
   url="$1"
   case "$(uname -s)" in
-  Darwin*) open "$url" ;;
-  Linux*) xdg-open "$url" ;;
-  CYGWIN* | MINGW32* | MSYS* | MINGW*) start "$url" ;;
-  *) echo "Unsupported OS, please open the URL manually: $url" ;;
+  Darwin*) open "${url}" ;;
+  Linux*) xdg-open "${url}" ;;
+  CYGWIN* | MINGW32* | MSYS* | MINGW*) start "${url}" ;;
+  *) echo "Unsupported OS, please open the URL manually: ${url}" ;;
   esac
 }
 
@@ -43,7 +43,7 @@ push_changes_to_branch() {
 
   # Rebase the current branch onto master
   if ! git rebase master; then
-    throw_error "Merge conflict occurred while rebasing. Please resolve the conflict and continue the rebase manually."
+    throw_error 'Merge conflict occurred while rebasing. Please resolve the conflict and continue the rebase manually.'
   fi
 
   # Replace the old version with the new version in all files
@@ -54,7 +54,7 @@ push_changes_to_branch() {
 
   # Push the changes to the remote repository
   if ! git push origin "${new_release_tag_branch}"; then
-    throw_error "Failed to push changes to origin. Please check your network connection and authentication."
+    throw_error 'Failed to push changes to origin. Please check your network connection and authentication.'
   fi
 }
 
@@ -76,7 +76,7 @@ prepare_to_push_changes() {
 # Replace function
 replace_in_files() {
   # Replace the old version with the new version in all files
-  if [ "$(uname -s)" = "Darwin" ]; then
+  if [ "$(uname -s)" = 'Darwin' ]; then
     find . -type f -exec env LANG=C sed -i '' "s/$1/$2/g" {} \;
   else
     find . -type f -exec env LANG=C sed -i "s/$1/$2/g" {} \;
@@ -107,7 +107,7 @@ validate_semver() {
 
 # Define the repository path and URL
 REPO_PATH="${HOME}/Documents/GitHub/nodebuilder"
-REPO_URL="https://github.com/bitcoin-tools/nodebuilder"
+REPO_URL='https://github.com/bitcoin-tools/nodebuilder'
 
 # Check if REPO_PATH is a valid Git repository
 if [ ! -d "${REPO_PATH}" ] || ! git -C "${REPO_PATH}" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
@@ -126,23 +126,23 @@ for cmd in git sed find; do
 done
 
 # Get the new release version
-new_release_version=""
+new_release_version=''
 if [ -n "${NEW_RELEASE_VERSION}" ]; then
   new_release_version="${NEW_RELEASE_VERSION}"
   validate_semver "{new_release_version}"
 else
-  printf '%s' "Enter the new release version: "
+  printf '%s' 'Enter the new release version: '
   read -r new_release_version
   validate_semver "${new_release_version}"
 fi
 
 # Get the new release branch
-new_release_tag_branch=""
+new_release_tag_branch=''
 if [ -n "${NEW_RELEASE_TAG_BRANCH}" ]; then
   new_release_tag_branch="${NEW_RELEASE_TAG_BRANCH}"
   validate_branch "${new_release_tag_branch}"
 else
-  printf '%s' "Enter the release tag branch: "
+  printf '%s' 'Enter the release tag branch: '
   read -r new_release_tag_branch
   validate_branch "${new_release_tag_branch}"
 fi
@@ -150,39 +150,39 @@ fi
 # Open the new beta pre-release page
 open_url "${REPO_URL}/releases/new?tag=${new_release_version}-beta&title=Release%20${new_release_version}%20(beta)&prerelease=1"
 printf '%s\n%s' \
-  "Publish the beta pre-release. Be sure to auto-generate the release notes." \
-  "Then PRESS ENTER to continue to create the draft release..."
+  'Publish the beta pre-release. Be sure to auto-generate the release notes.' \
+  'Then PRESS ENTER to continue to create the draft release...'
 read -r _
 
 # Open the final release page
 open_url "${REPO_URL}/releases/new?tag=${new_release_version}&title=Release%20${new_release_version}"
 printf '%s\n%s' \
-  "Type out the release notes and save the draft release but DON'T PUBLISH." \
-  "Then PRESS ENTER to continue when you're ready to create the release tags pull request..."
+  'Type out the release notes and save the draft release but DO NOT PUBLISH.' \
+  'Then PRESS ENTER to continue when ready to create the release tags pull request...'
 read -r _
 
 # Prepare to push changes
-last_release_version=""
+last_release_version=''
 prepare_to_push_changes
 
 # Update version in files, commit changes, and open the new pull request page
 push_changes_to_branch "${last_release_version}" "${new_release_version}-beta"
 open_url "${REPO_URL}/pull/new/${new_release_tag_branch}?title=feat(release): update Dockerfiles and README to ${new_release_version} tag"
 printf '%s\n%s\n%s' \
-  "We have now updated the beta tag and pushed the changes." \
-  "Create the draft pull request and test the beta tag though CI and manually." \
-  "Then PRESS ENTER to continue when you're ready to remove the beta tag and publish the release..."
+  'We have now updated the beta tag and pushed the changes.' \
+  'Create the draft pull request and test the beta tag though CI and manually.' \
+  'Then PRESS ENTER to continue when ready to remove the beta tag and publish the release...'
 read -r _
 
 # Update version in files and commit changes
 push_changes_to_branch "${new_release_version}-beta" "${new_release_version}"
 printf '%s\n%s\n%s\n%s' \
-  "We have now set the release tag and pushed the changes." \
-  "Review the draft pull request, test, and merge when ready." \
-  "WARNING: Merging  will break production until the tag is created in the next step." \
-  "Then PRESS ENTER to continue when you're ready to remove the beta tag and publish the release..."
+  'We have now set the release tag and pushed the changes.' \
+  'Review the draft pull request, test, and merge when ready.' \
+  'WARNING: Merging  will break production until the tag is created in the next step.' \
+  'Then PRESS ENTER to continue when ready to remove the beta tag and publish the release...'
 read -r _
 
 # Final message
 open_url "${REPO_URL}/releases/tag/${new_release_version}"
-printf '%s\n%s\n' "Publish the tag ASAP after merging the pull request." "Be sure to auto-generate the release notes below the curated notes."
+printf '%s\n%s\n' 'Publish the tag ASAP after merging the pull request.' 'Be sure to auto-generate the release notes below the curated notes.'
