@@ -176,8 +176,8 @@ get_operating_system() {
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     printf '%s\n' 'Darwin'
   else
-    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
-    readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
+    readonly OS_RELEASE_ID_LIKE="$(grep "^ID_LIKE=" /etc/os-release | cut -d= -f2)"
+    readonly OS_RELEASE_ID="$(grep "^ID=" /etc/os-release | cut -d= -f2)"
 
     if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
       printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
@@ -375,9 +375,9 @@ is_running_in_ci() {
 }
 
 is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+  if [ -f /proc/1/cgroup ] && [ "$(grep -c "docker\|lxc\|actions_job" /proc/1/cgroup)" -gt 0 ]; then
     return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c "docker\|lxc\|actions_job" /proc/1/mountinfo)" -gt 0 ]; then
     return 0
   else
     return 1 #1=false
@@ -874,9 +874,9 @@ else
         git clone --depth 1 --quiet "${GUIX_SIGS_REPO}" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
       gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
     fi
-    readonly GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')"
-    pgrep '^gpg-agent$' > /dev/null && gpgconf --kill gpg-agent
-    pgrep '^keyboxd$' > /dev/null && gpgconf --kill keyboxd
+    readonly GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c "^gpg: Good signature from ")"
+    pgrep "^gpg-agent$" > /dev/null && gpgconf --kill gpg-agent
+    pgrep "^keyboxd$" > /dev/null && gpgconf --kill keyboxd
     if [ "${GPG_GOOD_SIGNATURE_COUNT}" -ge "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
       printf '%s\n' "${GPG_GOOD_SIGNATURE_COUNT} good."
       [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
@@ -970,8 +970,8 @@ if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
   if ! [ -f "${SHORTCUT_IMAGE_FILE}" ]; then
     # shellcheck disable=SC2015
     if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-      torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200' ||
-      curl --fail --silent --show-error --location --retry 5 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200'; then
+      torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q "HTTP/[0-9.]* 200" ||
+      curl --fail --silent --show-error --location --retry 5 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q "HTTP/[0-9.]* 200"; then
       command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
         torsocks curl --fail --silent --show-error --location --retry 2 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}" ||
         curl --fail --silent --show-error --location --retry 5 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}"
@@ -1108,7 +1108,7 @@ elif [ "${prune_value}" -gt 0 ]; then
   set_bitcoin_core_option 'prune' "${prune_value}"
   printf '%s\n' 'ok.'
 # check that a prune value doesn't already exist in the config file
-elif [ "$(grep -c -i '^prune=' "${bitcoin_core_config_file}")" = 0 ]; then
+elif [ "$(grep -c -i "^prune=" "${bitcoin_core_config_file}")" = 0 ]; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     printf '  %s\n' 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
