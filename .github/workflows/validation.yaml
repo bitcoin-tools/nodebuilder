@@ -152,7 +152,7 @@ jobs:
           use-verbose-mode: 'yes'
 
   run-nodebuilder-baremetal:
-    name: Test ${{ matrix.os-friendly-name }} ${{ matrix.job-purpose }}
+    name: Test ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
     needs: [changes, dependencies-check, shell-lint, yaml-lint]
     if: >-
       ${{
