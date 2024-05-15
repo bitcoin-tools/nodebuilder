@@ -53,7 +53,7 @@ throw_error() {
 }
 
 validate_bitcoin_version() {
-  [ -z "$1" ] && throw_error "No arguemnt passed into validate_bitcoin_version()."
+  [ -z "$1" ] && throw_error 'No arguemnt passed into validate_bitcoin_version().'
   readonly BITCOIN_VERSION_TO_VALIDATE="$1"
   if ! is_valid_bitcoin_version "${BITCOIN_VERSION_TO_VALIDATE}"; then
     throw_error "The Bitcoin version '${BITCOIN_VERSION_TO_VALIDATE}' is invalid. Please use a value such as '27.0' from https-bitcoincore-dot-org/bin/"
@@ -62,11 +62,11 @@ validate_bitcoin_version() {
 
 validate_git_ref_short_name() {
   [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ] ||
-    throw_error "Not inside a Git repository" "${LINENO}"
+    throw_error "Not inside a Git repository." "${LINENO}"
   [ "$(basename "$(git rev-parse --show-toplevel)")" = "nodebuilder" ] ||
-    throw_error "Not in the 'nodebuilder' repository" "${LINENO}"
+    throw_error "Not in the 'nodebuilder' repository." "${LINENO}"
   git rev-parse --quiet --verify "$1" ||
-    throw_error "$1 is not a valid branch, tag, or commit" "${LINENO}"
+    throw_error "$1 is not a valid branch, tag, or commit." "${LINENO}"
 }
 
 readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
@@ -78,7 +78,7 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
 while [ $# -gt 0 ]; do
   case "$1" in
   -b | --bitcoin-version)
-    [ -z "$2" ] && throw_error 'No argument supplied for -b|--bitcoin-version' "${LINENO}"
+    [ -z "$2" ] && throw_error 'No argument supplied for -b|--bitcoin-version.' "${LINENO}"
     readonly TARGET_BITCOIN_VERSION="$2"
     validate_bitcoin_version "${TARGET_BITCOIN_VERSION}"
     shift
@@ -91,7 +91,7 @@ while [ $# -gt 0 ]; do
     exit 0
     ;;
   -r | --ref)
-    [ -z "$2" ] && throw_error "No argument supplied for -r|--ref" "${LINENO}"
+    [ -z "$2" ] && throw_error "No argument supplied for -r|--ref." "${LINENO}"
     readonly GIT_REF_SHORT_NAME="$2"
     validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
     shift
@@ -160,7 +160,7 @@ if [ -f "${bitcoind_pid_path}" ]; then
       ps aux | grep "${bitcoind_pid}"
       bitcoind_stop_sleep_counter=$((bitcoind_stop_sleep_counter + 1))
       if [ "$((bitcoind_stop_sleep_seconds * bitcoind_stop_sleep_counter))" -ge 3600 ]; then
-        throw_error "Stopping Bitcoin Core took over an hour"
+        throw_error "Stopping Bitcoin Core took over an hour."
       fi
     done
   else
