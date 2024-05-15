@@ -44,7 +44,7 @@ print_usage() {
 }
 
 throw_error() {
-  if [ -z "$2" ]; then
+  if [ -z "${2:-}" ]; then
     echo "ERROR: $1" >&2
   else
     echo "ERROR at line $2: $1" >&2
