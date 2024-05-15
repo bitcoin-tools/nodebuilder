@@ -472,7 +472,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
   -b | --bitcoin-version)
     if [ $# -eq 1 ]; then
-      throw_error "-B/--bitcoin-versoin requires an argument"
+      throw_error "-B/--bitcoin-version requires an argument"
     fi
     if is_valid_bitcoin_version "$2"; then
       target_bitcoin_version="$2"
