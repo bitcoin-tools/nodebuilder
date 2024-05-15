@@ -37,7 +37,7 @@ jobs:
       # If the event is a release, get the tag from GITHUB_REF
       # Otherwise, find the most recent release tag instead of using the commit SHA
       run: |
-        if [[ "${{ github.event_name }}" == "release" ]]; then
+        if [[ "${{ github.event_name }}" == 'release' ]]; then
           echo "NODEBUILDER_VERSION=${GITHUB_REF#refs/tags/}" >> "${GITHUB_ENV}"
         else
           echo "NODEBUILDER_VERSION=$(git describe --tags --abbrev=0)" >> "${GITHUB_ENV}"
