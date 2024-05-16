@@ -20,8 +20,7 @@ RUN uname -a \
   && date -u
 
 # Create the ebuild repository directory.
-RUN if [ ! -d /var/db/repos/gentoo/ ]; then mkdir -p /var/db/repos/gentoo/; fi \
-  && eselect news read new
+RUN [ -d /var/db/repos/gentoo/ ] || mkdir -p /var/db/repos/gentoo/
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
