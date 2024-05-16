@@ -222,7 +222,9 @@ install_build_dependencies_aptget() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo dnf install > /dev/null
+  printf '%s\n' "${dependencies}" | xargs DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends > /dev/null
+  # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
+  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12
 }
 
 install_build_dependencies_dnf() {
