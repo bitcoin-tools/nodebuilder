@@ -58,7 +58,6 @@ ensure_curl_dependency() {
       sudo dnf install --allowerasing --assumeyes curl > /dev/null
       ;;
     gentoo)
-      emerge --sync --quiet
       emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
       ;;
     arch | endeavouros | garuda | manjaro)
@@ -437,7 +436,6 @@ install_system_updates_emerge() {
   printf '\n'
   readonly GENTOO_EBUILD_REPOSITORY="/var/db/repos/gentoo"
   [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
-  emerge --sync --quiet
   emerge --depclean --quiet
   emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
   emerge --depclean --quiet
