@@ -6,27 +6,25 @@ FROM alpine:latest@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f277
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
-# Define the default version of nodebuilder or pass in a different version (eg master) as an argument
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
 ARG NODEBUILDER_VERSION=v1.4.0
 
-# Define the nodebuilder URL
+# Define the nodebuilder and dependencies URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-
-# Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_apk.txt
 
-# Check the current environment
+# Check the current environment.
 RUN uname -a \
   && cat /etc/os-release \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Install dependencies
+# Install dependencies.
 RUN apk --no-cache add coreutils curl \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' \
   | xargs apk --no-cache add
 
-# Download and execute the script
+# Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
