@@ -2,6 +2,8 @@
 # openSUSE is a robust Linux distribution that offers a great balance of stability and modernity.
 # This Dockerfile is ideal for users seeking a reliable, versatile operating system.
 FROM opensuse/leap:latest@sha256:da3a32575d87b0f01b8db23d481db00ede78bf7dcab57b1c653aa1d8255068c6
+
+# Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
