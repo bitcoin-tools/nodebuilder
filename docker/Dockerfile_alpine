@@ -2,6 +2,8 @@
 # Alpine is a lean, efficiency-focused Linux distribution.
 # This Dockerfile is ideal for creating lightweight, resource-efficient containers.
 FROM alpine:latest@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+
+# Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
