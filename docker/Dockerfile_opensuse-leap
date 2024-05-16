@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Ubuntu is known for its popularity and user-friendly design.
-# This Dockerfile offers a balance between stability, security, and modernity.
-FROM ubuntu:latest@sha256:3f85b7caad41a95462cf5b787d8a04604c8262cdcdf9a472b8c52ef83375fe15
+# openSUSE is a robust Linux distribution that offers a great balance of stability and modernity.
+# This Dockerfile is ideal for users seeking a reliable, versatile operating system.
+FROM opensuse/leap:latest@sha256:da3a32575d87b0f01b8db23d481db00ede78bf7dcab57b1c653aa1d8255068c6
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
@@ -11,7 +11,7 @@ ARG NODEBUILDER_VERSION=v1.4.0
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 
 # Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_aptget.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_zypper.txt
 
 # Check the current environment
 RUN uname -a \
@@ -21,13 +21,10 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies
-RUN apt-get -qq update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
-  ca-certificates curl 'sudo' \
+RUN zypper refresh \
+  && zypper --non-interactive install curl 'sudo' \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | DEBIAN_FRONTEND=noninteractive xargs apt-get -qq install --no-install-recommends \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  | xargs zypper --non-interactive install
 
 # Download and execute the script
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

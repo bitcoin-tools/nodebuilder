@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# RHEL UBI is an enterprise-grade Linux distribution with long-term support.
-# This Dockerfile is ideal for enterprise applications requiring strong support and stability.
-FROM registry.access.redhat.com/ubi8/ubi:8.9@sha256:edc34f89cf9c818c2fb28b8ea1780f384db563ce4293dc0ab8e73ec01791e5af
+# Arch Linux is a minimalist, rolling-release distribution.
+# This Dockerfile is ideal for users who prefer a hands-on approach and a clean, streamlined environment.
+FROM archlinux:latest@sha256:2dbd72d1e5510e047db7f441bf9069e9c53391b87e04e5bee3f379cd03cec060
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
@@ -11,7 +11,7 @@ ARG NODEBUILDER_VERSION=v1.4.0
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 
 # Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_pacman.txt
 
 # Check the current environment
 RUN uname -a \
@@ -21,10 +21,9 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies
-RUN dnf makecache \
+RUN pacman -Sy --noconfirm 'sudo' \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs dnf --assumeyes install \
-  && dnf clean all
+  | xargs pacman -Sy --noconfirm
 
 # Download and execute the script
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

@@ -1,0 +1,24 @@
+{
+  "assignees":[
+    "bitcoin-tools"
+  ],
+  "automerge": true,
+  "automergeStrategy": "squash",
+  "dependencyDashboard": true, 
+  "internalChecksFilter":"strict",
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "minimumReleaseAge": "5 days",
+  "onboarding": false,
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["docker"],
+      "groupName": "docker"
+    }
+  ],
+  "platform": "github",
+  "rebaseWhen": "behind-base",
+  "requireConfig": "optional",
+  "repositories": [
+    "bitcoin-tools/nodebuilder"
+  ]
+}

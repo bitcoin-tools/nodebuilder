@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Amazon Linux is a Linux server operating system from AWS, optimized for EC2.
-# This Dockerfile is ideal for applications that are deployed on AWS and require seamless integration.
-FROM amazonlinux:2023
+# RHEL UBI is an enterprise-grade Linux distribution with long-term support.
+# This Dockerfile is ideal for enterprise applications requiring strong support and stability.
+FROM redhat/ubi9:latest@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052951021caf429494
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument
@@ -11,7 +11,7 @@ ARG NODEBUILDER_VERSION=v1.4.0
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 
 # Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_dnf.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_dnf.txt
 
 # Check the current environment
 RUN uname -a \
@@ -22,10 +22,9 @@ RUN uname -a \
 
 # Install system updates and dependencies
 RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install findutils \
+  && dnf --allowerasing --assumeyes install curl \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | awk '{if ($0 == "gnupg") print "gnupg2"; else print $0;}' \
-  | xargs dnf --allowerasing --assumeyes install \
+  | xargs dnf --assumeyes install \
   && dnf clean all
 
 # Download and execute the script

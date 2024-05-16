@@ -3,8 +3,6 @@ on:
   pull_request:
   push:
     branches: [ master ]
-  issues:
-    types: [ opened ]
   release:
     types: [ created, published ]
   schedule:
@@ -33,25 +31,7 @@ jobs:
     - uses: dorny/paths-filter@v3
       id: filter
       with:
-        filters: |
-          ci:
-            - '.github/workflows/*.yaml'
-            - '.github/workflows/*.yml'
-            - 'resources/config/**'
-          dependencies:
-            - 'dependencies/**'
-          docker:
-            - 'docker/Dockerfile*'
-          helpers:
-            - '.github/scripts/**'
-          markdown:
-            - '**/*.md'
-          shell:
-            - 'nodebuilder'
-          spelling:
-            - 'resources/data/pyspelling.wordlist.txt'
-          test:
-            - 'test/test_nodebuilder'
+        filters: resources/config/paths-filter.yaml
 
   dependencies-check:
     name: Check depencencies
@@ -61,6 +41,11 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+      - name: Renovate
+        uses: renovatebot/github-action@v40.1.11
+        with:
+          configurationFile: 'resources/config/renovate-config.json'
+          token: ${{ secrets.RENOVATE_TOKEN }}
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
@@ -74,6 +59,7 @@ jobs:
     if: >-
       ${{ 
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.helpers == 'true' ||
         needs.changes.outputs.shell == 'true' ||
@@ -85,7 +71,14 @@ jobs:
       - name: Lint with shellcheck and shfmt
         uses: luizm/action-sh-checker@v0.8.0
         env:
-          SHFMT_OPTS: -i 2 -sr
+          SHELLCHECK_OPTS: >-
+            --enable add-default-case
+            --enable avoid-nullary-conditions
+            --enable check-unassigned-uppercase
+            --enable deprecate-which
+            --enable quote-safe-variables
+            --enable require-variable-braces
+          SHFMT_OPTS: --indent 2 --space-redirects
 
   yaml-lint:
     name: Lint the yaml code
@@ -93,6 +86,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true' ||
         needs.changes.outputs.test == 'true'
@@ -112,6 +106,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
@@ -119,14 +114,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Lint Dockerfiles
-        uses: luke142367/Docker-Lint-Action@v1.0.0
+        uses: luke142367/Docker-Lint-Action@v1.1.1
         with:
           target: docker/Dockerfile*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  markdown-lint:
-    name: Lint the markdown formatting
+  markdown-checks:
+    name: Check the documentation
     needs: changes
     if: >-
       ${{
@@ -136,43 +131,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Lint markdown
+      - name: Lint the markdown
         uses: avto-dev/markdown-lint@v1
         with:
           config: 'resources/config/markdownlint.yaml'
           args: '*/*.md'
-
-  markdown-links:
-    name: Check hyperlinks
-    needs: changes
-    if: >-
-      ${{
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.markdown == 'true' 
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run markdown-link-check on documentation
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
-        with:
-          config-file: 'resources/config/markdown-link-check.json' 
-          use-verbose-mode: 'yes'
-
-  markdown-spellcheck:
-    name: Check spelling
-    needs: changes
-    if: >-
-      ${{
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.markdown == 'true' ||
-        needs.changes.outputs.spelling == 'true'
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: rojopolis/spellcheck-github-actions@v0
-        name: Spell check markdown files with PySpelling
+      - name: Check spelling
+        uses: rojopolis/spellcheck-github-actions@v0
         with:
           config_path: 'resources/config/spellcheck.yaml'
           output_file: 'spellcheck-output.txt'
@@ -182,12 +147,24 @@ jobs:
           name: Spellcheck Output
           path: spellcheck-output.txt
 
+  markdown-links:
+    name: Check hyperlinks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run markdown-link-check on documentation
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          config-file: 'resources/config/markdown-link-check.json' 
+          use-verbose-mode: 'yes'
+
   run-nodebuilder-baremetal:
-    name: ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint]
+    name: Test ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
+    needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.shell == 'true' ||
         needs.changes.outputs.test == 'true'
       }}
@@ -195,12 +172,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        job-purpose: [Test-package, Test-source]
-        os: [ubuntu-22.04, ubuntu-latest, macos-13, macos-14]
+        job-purpose: [package, source]
+        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-latest]
         include:
-          - job-purpose: Test-package
+          - job-purpose: package
             additional-args: ''
-          - job-purpose: Test-source
+          - job-purpose: source
             additional-args: '--compile'
           - os: ubuntu-22.04
             os-friendly-name: Ubuntu 22
@@ -218,8 +195,8 @@ jobs:
               /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
               /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
-          - os: ubuntu-latest
-            os-friendly-name: Ubuntu LTS
+          - os: ubuntu-24.04
+            os-friendly-name: Ubuntu 24
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
             install-upgrades-command: >-
@@ -240,8 +217,8 @@ jobs:
             install-upgrades-command: softwareupdate --list && softwareupdate --install --recommended
             cache-path: /Library/Updates
             path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
-          - os: macos-14
-            os-friendly-name: macOS 14 [arm64]
+          - os: macos-latest
+            os-friendly-name: macOS 14
             check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
             install-upgrades-command: softwareupdate --list && softwareupdate --install --recommended
             cache-path: /Library/Updates
@@ -290,50 +267,59 @@ jobs:
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.job-purpose }}-${{ matrix.os }}-bitcoin-debug.log
+          name: ${{ matrix.os }}-${{ matrix.job-purpose }}-bitcoin-debug.log
           path: ${{ matrix.path-to-bitcoin-log }}
       - name: If test failed, fail the job
         if: steps.test-nodebuilder.outcome == 'failure'
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-docker:
-    name: Run container ${{ matrix.container }}
-    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
+    name: Build image for ${{ matrix.container }}
+    needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
-      ${{
+      github.event.action != 'prerelease' &&
+      github.event.action != 'published' &&
+      (
         needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true'
-      }}
+      )
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        container: [Alpine, Amazon, Arch, Debian, Fedora, Manjaro, Red Hat, Ubuntu, openSUSE]
+        container: [Alpine, Amazon Linux, Arch, Clear Linux, Debian, Fedora, Manjaro, Oracle Linux, Red Hat, Rocky Linux, Ubuntu, openSUSE]
         include:
           - container: Alpine
             dockerfile: Dockerfile_alpine
-          - container: Amazon
-            dockerfile: Dockerfile_amazon
+          - container: Amazon Linux
+            dockerfile: Dockerfile_amazonlinux
           - container: Arch
-            dockerfile: Dockerfile_arch
+            dockerfile: Dockerfile_archlinux
+          - container: Clear Linux
+            dockerfile: Dockerfile_clearlinux
           - container: Debian
             dockerfile: Dockerfile_debian
           - container: Fedora
             dockerfile: Dockerfile_fedora
           - container: Manjaro
-            dockerfile: Dockerfile_manjaro
+            dockerfile: Dockerfile_manjarolinux
+          - container: Oracle Linux
+            dockerfile: Dockerfile_oraclelinux
           - container: Red Hat
-            dockerfile: Dockerfile_redhat
+            dockerfile: Dockerfile_redhat-ubi9
+          - container: Rocky Linux
+            dockerfile: Dockerfile_rockylinux
           - container: Ubuntu
             dockerfile: Dockerfile
           - container: openSUSE
-            dockerfile: Dockerfile_opensuse
+            dockerfile: Dockerfile_opensuse-leap
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
-        run: grep "VERSION\|ID" /etc/os-release && uname -a
-      - name: Run the docker image
+        run: grep 'VERSION\|ID' /etc/os-release && uname -a
+      - name: Build the ${{ matrix.container }} docker image
         timeout-minutes: 120
         uses: docker/build-push-action@v5
         with:
