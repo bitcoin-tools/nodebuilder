@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # This script standardizes creating new GitHub releases and updating tags
+# shellcheck disable=SC2155
 
 set -o errexit
 set -o nounset
