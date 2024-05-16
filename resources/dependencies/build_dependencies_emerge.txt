@@ -8,4 +8,5 @@ dev-libs/libevent
 media-gfx/qrencode
 dev-qt/linguist-tools
 dev-qt/qtgui
+dev-qt/qtnetwork
 dev-qt/qtwidgets
