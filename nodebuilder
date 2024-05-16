@@ -146,20 +146,20 @@ get_cursor_column() {
   printf "\033[6n" > /dev/tty
   # System will print the cursor's row and column
   IFS=';' read -r _ stty_column
-  stty "$stored_stty_settings"
-  printf '%s' "$stty_column"
+  stty "${stored_stty_settings}"
+  printf '%s' "${stty_column}"
 }
 
 test_get_cursor_column() {
   # Test when cursor is at the start of a line
   printf '\n'
   col=$(get_cursor_column)
-  [ "$col" -ne 1 ] && throw_error "Failed: Expected 1, got $col"
+  [ "${col}" -ne 1 ] && throw_error "Failed: Expected 1, got ${col}"
 
   # Test when cursor is at the end of the string 'test'
   printf '\n%s' 'test'
   col=$(get_cursor_column)
-  [ "$col" -ne 5 ] && throw_error "Failed: Expected 5, got $col"
+  [ "${col}" -ne 5 ] && throw_error "Failed: Expected 5, got ${col}"
 
   printf '%s\n' 'All tests passed'
   return 0
@@ -1032,6 +1032,9 @@ else
       done
     fi
     ;;
+  *)
+    throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
+    ;;
   esac
 
   [ -d "${BITCOIN_INSTALL_BIN_DESTINATION}" ] ||
@@ -1292,11 +1295,11 @@ while [ "${ibd_status}" = 'true' ]; do
   size_on_disk_in_mib=$(($(echo "${blockchain_info}" | jq '.size_on_disk') / BYTES_TO_KIB / KIB_TO_MIB))
   sync_progress=$(echo "${blockchain_info}" | jq '.verificationprogress')
 
-  # Handle case of early sync by replacing scientific notation with decimal
-  if [ "$(printf '%s\n' "${sync_progress}" | grep -c -i 'e')" -gt 0 ]; then
-    sync_progress='0.000000001'
-  fi
-  sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')"
+  # Handle case of early sync (e^-8 or e^-9) by replacing scientific notation with decimal percent
+  case "${sync_progress}" in
+  *e*) sync_progress_percent='0.0000001' ;;
+  *) sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')" ;;
+  esac
 
   free_space_in_mib="$(get_free_space_in_mib)"
 

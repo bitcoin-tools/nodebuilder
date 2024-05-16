@@ -71,7 +71,14 @@ jobs:
       - name: Lint with shellcheck and shfmt
         uses: luizm/action-sh-checker@v0.8.0
         env:
-          SHFMT_OPTS: -i 2 -sr
+          SHELLCHECK_OPTS: >-
+            --enable add-default-case
+            --enable avoid-nullary-conditions
+            --enable check-unassigned-uppercase
+            --enable deprecate-which
+            --enable quote-safe-variables
+            --enable require-variable-braces
+          SHFMT_OPTS: --indent 2 --space-redirects
 
   yaml-lint:
     name: Lint the yaml code
@@ -153,7 +160,7 @@ jobs:
 
   run-nodebuilder-baremetal:
     name: Test ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
-    needs: [changes, dependencies-check, shell-lint, yaml-lint]
+    needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
@@ -264,7 +271,7 @@ jobs:
 
   run-nodebuilder-docker:
     name: Build image for ${{ matrix.container }}
-    needs: [changes, dependencies-check, dockerfile-lint, shell-lint, yaml-lint]
+    needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
       github.event.action != 'prerelease' &&
       github.event.action != 'published' &&
