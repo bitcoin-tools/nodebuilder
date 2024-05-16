@@ -26,7 +26,7 @@ throw_error() {
 # Open URL function
 open_url() {
   url="$1"
-  case "$(uname -s)" in
+  case "${TARGET_KERNEL}" in
   Darwin*) open "${url}" ;;
   Linux*) xdg-open "${url}" ;;
   CYGWIN* | MINGW32* | MSYS* | MINGW*) start "${url}" ;;
@@ -76,7 +76,7 @@ prepare_to_push_changes() {
 # Replace function
 replace_in_files() {
   # Replace the old version with the new version in all files
-  if [ "$(uname -s)" = 'Darwin' ]; then
+  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     find . -type f -exec env LANG=C sed -i '' "s/$1/$2/g" {} \;
   else
     find . -type f -exec env LANG=C sed -i "s/$1/$2/g" {} \;
@@ -105,9 +105,11 @@ validate_semver() {
   fi
 }
 
-# Define the repository path and URL
-REPO_PATH="${HOME}/Documents/GitHub/nodebuilder"
-REPO_URL='https://github.com/bitcoin-tools/nodebuilder'
+readonly TARGET_KERNEL="$(uname -s)"
+
+# TODO: handle this in a better way not hard-coding the path
+readonly REPO_PATH="${HOME}/Documents/GitHub/nodebuilder"
+readonly REPO_URL='https://github.com/bitcoin-tools/nodebuilder'
 
 # Check if REPO_PATH is a valid Git repository
 if [ ! -d "${REPO_PATH}" ] || ! git -C "${REPO_PATH}" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
