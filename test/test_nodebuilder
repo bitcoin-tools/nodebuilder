@@ -1,8 +1,25 @@
 #!/bin/sh
 #
 # A console output functional test script for nodebuilder
+# shellcheck disable=SC2155
+
 set -o errexit
 set -o nounset
+
+get_operating_system() {
+  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
+    printf '%s\n' 'Darwin'
+  else
+    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+    readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
+
+    if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
+      printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
+    else
+      throw_error 'Failed to determine OS release type'
+    fi
+  fi
+}
 
 handle_exit() {
   kill_tail_process
@@ -107,6 +124,9 @@ done
 [ -z "${TARGET_BITCOIN_VERSION:-}" ] && readonly TARGET_BITCOIN_VERSION=''
 [ "${COMPILE_BITCOIN:-false}" != "true" ] && readonly COMPILE_BITCOIN="false"
 
+readonly TARGET_KERNEL="$(uname -s)"
+readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
+
 [ -f test_output_stdout.txt ] || touch test_output_stdout.txt
 tail -f test_output_stdout.txt &
 tail_pid=$!
@@ -116,7 +136,7 @@ trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 readonly NODEBUILDER_REPO_URL='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
-case "$(uname -s)" in
+case "${TARGET_KERNEL}" in
 Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
 Linux) bitcoin_data_directory="${HOME}/.bitcoin" ;;
 MINGW*) throw_error 'Windows is not supported.' ;;
@@ -132,7 +152,6 @@ nodebuilder_args=""
 [ "${COMPILE_BITCOIN}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
 
 if [ -n "${nodebuilder_args}" ]; then
-  # shellcheck disable=SC2155
   readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
   printf '%s\n' "Running nodebuilder with '${NODEBUILDER_ARGS_TRIMMED}' args."
   # shellcheck disable=SC2086
@@ -217,7 +236,7 @@ for message in \
 done
 
 if [ "${COMPILE_BITCOIN}" = 'true' ] ||
-  { [ -f /etc/os-release ] && [ "$(grep '^ID=' /etc/os-release | cut -d= -f2)" = 'alpine' ]; }; then
+  { [ -f /etc/os-release ] && [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]; }; then
   for message in \
     'Ensuring compile dependencies... ok.$' \
     'Downloading Bitcoin source code... ok.$' \
@@ -251,7 +270,7 @@ else
   fi
 fi
 
-if [ "$(uname -s)" != 'Darwin' ]; then
+if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
   for message in \
     'Performing a system upgrade... ok.$' \
     'Ensuring runtime dependencies... ok.$' \

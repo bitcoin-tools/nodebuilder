@@ -138,20 +138,20 @@ get_cursor_column() {
   printf "\033[6n" > /dev/tty
   # System will print the cursor's row and column
   IFS=';' read -r _ stty_column
-  stty "$stored_stty_settings"
-  printf '%s' "$stty_column"
+  stty "${stored_stty_settings}"
+  printf '%s' "${stty_column}"
 }
 
 test_get_cursor_column() {
   # Test when cursor is at the start of a line
   printf '\n'
   col=$(get_cursor_column)
-  [ "$col" -ne 1 ] && throw_error "Failed: Expected 1, got $col"
+  [ "${col}" -ne 1 ] && throw_error "Failed: Expected 1, got ${col}"
 
   # Test when cursor is at the end of the string 'test'
   printf '\n%s' 'test'
   col=$(get_cursor_column)
-  [ "$col" -ne 5 ] && throw_error "Failed: Expected 5, got $col"
+  [ "${col}" -ne 5 ] && throw_error "Failed: Expected 5, got ${col}"
 
   printf '%s\n' 'All tests passed'
   return 0
@@ -928,6 +928,9 @@ else
         codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}"
       done
     fi
+    ;;
+  *)
+    throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
     ;;
   esac
 
