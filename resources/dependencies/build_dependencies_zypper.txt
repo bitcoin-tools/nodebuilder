@@ -1,7 +1,7 @@
 autoconf
 automake
 boost-devel
-gcc12
+gcc10-c++
 libevent
 libqt5-qtbase-devel
 libtool
