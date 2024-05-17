@@ -787,12 +787,14 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "$
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Configuring the build environment... '
-  gcc --version
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   else
-    ./configure --without-bdb --enable-suppress-external-warnings
+    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   fi
+  grep -v \
+    'libzmq' \
+    "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
   if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
