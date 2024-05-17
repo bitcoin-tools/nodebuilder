@@ -1,0 +1,7 @@
+base-devel
+boost
+boost-libs
+db
+openssl
+qrencode
+qt4
