@@ -799,7 +799,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "$
   else
     compile_jobs_count="$(($(nproc) + 1))"
   fi
-  make --jobs "${compile_jobs_count}"
+  make --jobs "${compile_jobs_count}" > /dev/null 2>&1
   printf '%s\n  %s' 'ok.' 'Running compile checks, please wait... '
   make --jobs "${compile_jobs_count}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
