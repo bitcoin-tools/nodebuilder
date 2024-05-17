@@ -261,6 +261,7 @@ install_build_dependencies_zypper() {
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+  export CXX=g++-13
 }
 
 install_runtime_dependencies_apk() {
