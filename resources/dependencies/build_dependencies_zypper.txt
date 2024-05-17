@@ -1,7 +1,6 @@
 autoconf
 automake
 gcc-c++
-git
 libboost-all-dev
 libdb-4_8-devel
 libevent
