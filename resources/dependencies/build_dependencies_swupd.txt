@@ -2,3 +2,4 @@ boost-base
 devpkg-libevent
 devpkg-qttools
 make
+python3-basic
