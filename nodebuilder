@@ -793,7 +793,8 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "$
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   fi
   grep -v \
-    'libzmq' \
+    -e 'libzmq' \
+    -e 'xgettext' \
     "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
   if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
