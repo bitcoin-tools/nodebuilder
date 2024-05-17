@@ -1,4 +1,4 @@
-devpkg-boost
+boost-base
 devpkg-libevent
 devpkg-qttools
 make
