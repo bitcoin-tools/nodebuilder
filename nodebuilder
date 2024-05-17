@@ -711,7 +711,7 @@ esac
 
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' 'ok.'
-elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]; then
+elif [ "${compile_bitcoin:-false}" = 'true' ] || [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]; then
   printf '%s\n  %s' 'no.' 'Ensuring compile dependencies... '
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
