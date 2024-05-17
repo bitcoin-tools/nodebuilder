@@ -786,6 +786,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "$
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Configuring the build environment... '
+  gcc --version
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings
   else
