@@ -4,4 +4,4 @@ boost-libs
 db
 openssl
 qrencode
-qt4
+qt5
