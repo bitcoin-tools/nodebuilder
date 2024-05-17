@@ -237,15 +237,30 @@ install_build_dependencies_dnf() {
 }
 
 install_build_dependencies_pacman() {
-  echo 'TODO: install_build_dependencies_pacman()'
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_pacman.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null
 }
 
 install_build_dependencies_swupd() {
-  echo 'TODO: install_build_dependencies_swupd()'
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_swupd.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
 }
 
 install_build_dependencies_zypper() {
-  echo 'TODO: install_build_dependencies_zypper()'
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_zypper.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
 }
 
 install_runtime_dependencies_apk() {
@@ -711,7 +726,7 @@ esac
 
 if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
   printf '%s\n' 'ok.'
-elif [ "${compile_bitcoin:-false}" = 'true' ] || [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]; then
+elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]; then
   printf '%s\n  %s' 'no.' 'Ensuring compile dependencies... '
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
