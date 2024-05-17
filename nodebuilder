@@ -787,21 +787,17 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "$
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Configuring the build environment... '
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings
   else
-    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+    ./configure --without-bdb --enable-suppress-external-warnings
   fi
-  grep -v \
-    -e 'libzmq' \
-    -e 'xgettext' \
-    "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
   if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
   else
     compile_jobs_count="$(($(nproc) + 1))"
   fi
-  make --jobs "${compile_jobs_count}" > /dev/null 2>&1
+  make --jobs "${compile_jobs_count}"
   printf '%s\n  %s' 'ok.' 'Running compile checks, please wait... '
   make --jobs "${compile_jobs_count}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
