@@ -1,0 +1,3 @@
+devpkg-libevent
+devpkg-qttools
+make
