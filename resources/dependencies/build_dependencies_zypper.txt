@@ -1,6 +1,6 @@
 autoconf
 automake
-boost-base
+boost
 gcc-c++
 libdb-4_8-devel
 libevent
