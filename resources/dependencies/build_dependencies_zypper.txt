@@ -1,13 +1,13 @@
 autoconf
 automake
 gcc-c++
-libboost
+libboost-all-dev
 libdb-4_8-devel
 libevent
-libqrencode
 libqt5-qtbase-devel
 libtool
 make
 openssl
 python3
+qrencode
 sqlite3
