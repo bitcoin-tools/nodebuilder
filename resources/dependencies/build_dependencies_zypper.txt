@@ -1,0 +1,10 @@
+autoconf
+automake
+make
+gcc-c++
+libqt5-qtbase-devel
+libtool
+libboost
+python3
+openssl
+sqlite3
