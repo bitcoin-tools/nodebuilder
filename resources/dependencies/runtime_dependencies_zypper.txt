@@ -1,5 +1,4 @@
 curl
-gcc
 git
 gnupg
 gzip
