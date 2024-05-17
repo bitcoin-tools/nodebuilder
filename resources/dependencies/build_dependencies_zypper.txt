@@ -1,6 +1,6 @@
 autoconf
 automake
-boost-base
+boost-devel
 gcc-c++
 libevent
 libqt5-qtbase-devel
