@@ -788,7 +788,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "$
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Configuring the build environment... '
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
   else
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
   fi
