@@ -9,3 +9,4 @@ make
 python3
 qrencode
 sqlite3
+zeromq
