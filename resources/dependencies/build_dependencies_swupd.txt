@@ -1,5 +1,6 @@
 devpkg-boost
 devpkg-libevent
 devpkg-qttools
+libzmq
 make
 python3-basic
