@@ -1,0 +1,13 @@
+autoconf
+automake
+boost-devel
+gcc-c++
+libevent-devel
+libtool
+make
+python3
+qrencode-devel
+qt5-qttools-devel
+qt5-qtbase-devel
+qt5-qtwayland
+sqlite-devel

@@ -1,0 +1,14 @@
+alpine-sdk
+autoconf
+automake
+boost
+boost-dev
+libffi-dev
+db-dev
+libevent-dev
+libtool
+libqrencode-dev
+libzmq
+qt5-qtbase
+qt5-qtbase-x11
+qt5-qttools-dev
