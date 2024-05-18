@@ -1,0 +1,8 @@
+automake
+boost
+libevent
+libtool
+pkg-config
+python
+qrencode
+qt@5
