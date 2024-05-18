@@ -245,6 +245,7 @@ install_build_dependencies_dnf() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  [ "${TARGET_OPERATING_SYSTEM}" = "rockylinux" ] && sudo dnf config-manager --set-enabled devel
   printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
 }
 
