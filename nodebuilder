@@ -206,7 +206,7 @@ handle_sigint() {
 }
 
 install_build_dependencies_apk() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/build_dependencies_apk.txt'
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/924-bug-compile-warning-on-alpine-due-to-libzmq/resources/dependencies/build_dependencies_apk.txt'
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
