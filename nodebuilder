@@ -245,6 +245,9 @@ install_build_dependencies_dnf() {
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   case "${TARGET_OPERATING_SYSTEM}" in
+  amzn)
+    sudo dnf config-manager --set-enabled amzn2-core
+    ;;
   ol)
     sudo dnf config-manager --enable ol9_optional_latest
     ;;
