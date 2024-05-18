@@ -176,11 +176,10 @@ get_operating_system() {
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     printf '%s\n' 'Darwin'
   else
-    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
     readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
-
-    if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
-      printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
+    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+    if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
+      printf '%s\n' "${OS_RELEASE_ID:-${OS_RELEASE_ID_LIKE}}"
     else
       throw_error 'Failed to determine OS release type'
     fi
@@ -248,6 +247,9 @@ install_build_dependencies_dnf() {
   case "${TARGET_OPERATING_SYSTEM}" in
   ol)
     sudo dnf config-manager --enable ol9_optional_latest
+    ;;
+  rhel)
+    sudo dnf config-manager --enable rhel-9-for-x86_64-appstream-rpms
     ;;
   rockylinux)
     sudo dnf config-manager --set-enabled devel
