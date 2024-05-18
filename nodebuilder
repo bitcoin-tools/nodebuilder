@@ -255,7 +255,7 @@ install_build_dependencies_dnf() {
   \"rhel\")
     sudo dnf config-manager --enable rhel-9-for-x86_64-appstream-rpms
     ;;
-  \"rockylinux\")
+  \"rocky\")
     sudo dnf config-manager --set-enabled devel
     ;;
   *) ;;
