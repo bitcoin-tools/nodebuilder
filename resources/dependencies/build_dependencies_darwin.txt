@@ -3,6 +3,7 @@ boost
 gettext
 libevent
 libtool
+libzmq
 pkg-config
 python
 qrencode
