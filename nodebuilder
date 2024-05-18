@@ -227,6 +227,18 @@ install_build_dependencies_aptget() {
   DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12
 }
 
+install_build_dependencies_darwin() {
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_darwin.txt'
+  #TODO: wrap this command with torsocks-curl with curl fallback 
+  sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
+    https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | brew install --quiet > /dev/null
+}
+
 install_build_dependencies_dnf() {
   readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_dnf.txt'
   command -v torsocks > /dev/null 2>&1 &&
@@ -751,9 +763,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || is_running_in_container || [ "$
     install_build_dependencies_swupd
     ;;
   Darwin)
-    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
-      https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
-    brew install --quiet automake boost libevent libtool pkg-config python qrencode qt@5 > /dev/null
+    install_build_dependencies_darwin
     ;;
   *)
     install_build_command_function=''
