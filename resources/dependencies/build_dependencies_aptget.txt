@@ -7,7 +7,7 @@ libevent-dev
 libqrencode-dev
 libsqlite3-dev
 libtool
-libzmq3
+libzmq5
 pkg-config
 python3
 qtbase5-dev
