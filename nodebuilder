@@ -222,7 +222,7 @@ install_build_dependencies_apk() {
     grep -v 'ICU with non-English locales' -A2 -B1 || true
 }
 
-install_build_dependencies_aptget() { 
+install_build_dependencies_aptget() {
   readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_aptget.txt'
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
