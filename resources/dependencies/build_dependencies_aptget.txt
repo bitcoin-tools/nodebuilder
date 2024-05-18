@@ -2,12 +2,13 @@ automake
 autotools-dev
 bsdmainutils
 build-essential
+gettext
 libboost-dev
 libevent-dev
 libqrencode-dev
 libsqlite3-dev
 libtool
-libzmq5
+libzmq-dev
 pkg-config
 python3
 qtbase5-dev
