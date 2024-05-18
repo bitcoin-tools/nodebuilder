@@ -176,10 +176,9 @@ get_operating_system() {
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     printf '%s\n' 'Darwin'
   else
-    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
     readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
-
-    if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
+    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+    if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
       printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
     else
       throw_error 'Failed to determine OS release type'
@@ -207,55 +206,92 @@ handle_sigint() {
 }
 
 install_build_dependencies_apk() {
-  apk --quiet add alpine-sdk libffi-dev autoconf automake db-dev boost boost-dev libtool libevent-dev libqrencode-dev qt5-qtbase qt5-qtbase-x11 qt5-qttools-dev |
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_apk.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs apk --quiet add |
     grep -v 'ICU with non-English locales' -A2 -B1 || true
 }
 
 install_build_dependencies_aptget() {
-  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev qtbase5-dev qttools5-dev qttools5-dev-tools qtwayland5 libqrencode-dev > /dev/null
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_aptget.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
   # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
   DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12
 }
 
+install_build_dependencies_darwin() {
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_darwin.txt'
+  #TODO: wrap this command with torsocks-curl with curl fallback
+  sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
+    https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs brew install --quiet > /dev/null
+}
+
 install_build_dependencies_dnf() {
-  sudo dnf install gcc-c++ libtool make autoconf automake python3 libevent-devel boost-devel sqlite-devel qt5-qttools-devel qt5-qtbase-devel qt5-qtwayland qrencode-devel > /dev/null
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_dnf.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
 }
 
 install_build_dependencies_pacman() {
-  echo 'TODO: install_build_dependencies_pacman()'
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_pacman.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null
 }
 
 install_build_dependencies_swupd() {
-  echo 'TODO: install_build_dependencies_swupd()'
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_swupd.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
 }
 
 install_build_dependencies_zypper() {
-  echo 'TODO: install_build_dependencies_zypper()'
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/915-feat-create-build-dependency-files/resources/dependencies/build_dependencies_zypper.txt'
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install
+  export CXX=g++-13
 }
 
 install_runtime_dependencies_apk() {
-  readonly DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_apk.txt'
+  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_apk.txt'
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add
-  else
-    throw_error 'The list of dependencies is empty.'
-  fi
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add
 }
 
 install_runtime_dependencies_aptget() {
   check_dpkg_lock
-  readonly DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_aptget.txt'
+  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_aptget.txt'
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
-  else
-    throw_error 'The list of dependencies is empty.'
-  fi
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null
 }
 
 install_runtime_dependencies_darwin() {
@@ -291,51 +327,39 @@ install_runtime_dependencies_darwin() {
 }
 
 install_runtime_dependencies_dnf() {
-  readonly DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_dnf.txt'
+  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_dnf.txt'
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
-  else
-    throw_error 'The list of dependencies is empty.'
-  fi
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
 }
 
 install_runtime_dependencies_pacman() {
-  readonly DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_pacman.txt'
+  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_pacman.txt'
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null
-  else
-    throw_error 'The list of dependencies is empty.'
-  fi
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > dev/null
 }
 
 install_runtime_dependencies_swupd() {
-  readonly DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_swupd.txt'
+  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_swupd.txt'
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
-  else
-    throw_error 'The list of dependencies is empty.'
-  fi
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
 }
 
 install_runtime_dependencies_zypper() {
-  readonly DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_zypper.txt'
+  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_zypper.txt'
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${DEPENDENCIES_URL}")
-  if [ -n "${dependencies}" ]; then
-    printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
-  else
-    throw_error 'The list of dependencies is empty.'
-  fi
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
 }
 
 install_system_updates_apk() {
@@ -738,9 +762,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || [ "${TARGET_OPERATING_SYSTEM}" 
     install_build_dependencies_swupd
     ;;
   Darwin)
-    sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
-      https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
-    brew install --quiet automake boost libevent libtool pkg-config python qrencode qt@5 > /dev/null
+    install_build_dependencies_darwin
     ;;
   *)
     install_build_command_function=''
@@ -775,14 +797,10 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] || [ "${TARGET_OPERATING_SYSTEM}" 
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Configuring the build environment... '
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
   else
-    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
   fi
-  grep -v \
-    -e 'libzmq' \
-    -e 'xgettext' \
-    "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
   if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
