@@ -1,5 +1,6 @@
 automake
 boost
+gettext
 libevent
 libtool
 pkg-config
