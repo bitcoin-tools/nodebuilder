@@ -258,7 +258,7 @@ install_build_dependencies_dnf() {
 install_build_dependencies_emerge() {
   readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/841-feat-add-support-and-dockerfile-for-gentoo-linux/resources/dependencies/build_dependencies_emerge.txt'
   printf '\n'
-    command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
