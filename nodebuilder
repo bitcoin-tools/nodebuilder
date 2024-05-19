@@ -343,9 +343,7 @@ install_runtime_dependencies_pacman() {
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_DEPENDENCIES_LOG_FILE}"
-  echo 'DEBUG PRINTING THE CONTENTS OF STDERR LOG FILE'
-  cat "${STDERR_DEPENDENCIES_LOG_FILE}"
-  grep -v 'skipping' "${STDERR_DEPENDENCIES_LOG_FILE}" >&2
+  grep -v 'skipping' "${STDERR_DEPENDENCIES_LOG_FILE}" >&2 || true
   rm "${STDERR_DEPENDENCIES_LOG_FILE}"
 }
 
