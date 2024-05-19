@@ -384,6 +384,8 @@ install_system_updates_dnf() {
 }
 
 install_system_updates_pacman() {
+  echo 'DEVUG PRINTING LINE 20 OF /etc/pacman.conf'
+  head -n 20 /etc/pacman.conf | tail -n 1
   sudo pacman -Syu --noconfirm --quiet > /dev/null
 }
 
