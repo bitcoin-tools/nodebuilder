@@ -16,13 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         container:
+          - gentoo
           - alpine
           - amazonlinux
           - archlinux
           - clearlinux
           - debian
           - fedora
-          - gentoo
           - manjarolinux
           - opensuse-leap
           - oraclelinux
