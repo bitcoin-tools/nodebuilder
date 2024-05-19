@@ -8,8 +8,7 @@ db-dev
 libevent-dev
 libtool
 libqrencode-dev
-libzmq-dev
 qt5-qtbase
 qt5-qtbase-x11
 qt5-qttools-dev
-zeromq
+zeromq-dev
