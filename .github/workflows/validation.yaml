@@ -246,7 +246,7 @@ jobs:
       - name: Test the console output ${{ matrix.additional-args }}
         id: test-nodebuilder
         run: /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" ${{ matrix.additional-args }}
-        timeout-minutes: 300
+        timeout-minutes: 120
         continue-on-error: true
       - name: If test failed, debug nodebuilder ${{ matrix.additional-args }}
         if: steps.test-nodebuilder.outcome == 'failure'
@@ -259,7 +259,7 @@ jobs:
           wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
           chmod u+x nodebuilder
           /bin/sh -x ./nodebuilder ${{ matrix.additional-args }}
-        timeout-minutes: 300
+        timeout-minutes: 120
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
