@@ -6,8 +6,8 @@ on:
   release:
     types: [ created, published ]
   schedule:
-    # run every 6 hours at 0352, 0952, 1552, and 2152 UTC
-    - cron: '52 3,9,15,21 * * *'
+    # run every day at 0252, 0852, 1452, and 2052 UTC
+    - cron: '52 2,8,14,20 * * *'
   workflow_dispatch:
 env:
   TERM: xterm
@@ -318,7 +318,7 @@ jobs:
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
-        timeout-minutes: 120
+        timeout-minutes: 300
         uses: docker/build-push-action@v5
         with:
           build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
