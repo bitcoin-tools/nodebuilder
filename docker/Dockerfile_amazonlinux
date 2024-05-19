@@ -2,25 +2,25 @@
 # Amazon Linux is a Linux server operating system from AWS, optimized for EC2.
 # This Dockerfile is ideal for applications that are deployed on AWS and require seamless integration.
 FROM amazonlinux:latest@sha256:5478f82c47e435ed988fa12a00b623ef3c920fadd669d40c596249cf81960c4c
+
+# Set the terminal type to Xterm.
 ENV TERM=xterm
 
-# Define the default version of nodebuilder or pass in a different version (eg master) as an argument
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
 ARG NODEBUILDER_VERSION=v1.4.0
 
-# Define the nodebuilder URL
+# Define the nodebuilder and dependencies URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-
-# Define the dependencies URL
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_dnf.txt
 
-# Check the current environment
+# Check the current environment.
 RUN uname -a \
   && cat /etc/os-release \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Install system updates and dependencies
+# Install system updates and dependencies.
 RUN dnf makecache \
   && dnf --allowerasing --assumeyes install findutils \
   && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
@@ -28,5 +28,5 @@ RUN dnf makecache \
   | xargs dnf --allowerasing --assumeyes install \
   && dnf clean all
 
-# Download and execute the script
+# Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

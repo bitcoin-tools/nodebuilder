@@ -1,0 +1,8 @@
+app-admin/sudo
+app-arch/gzip
+app-arch/tar
+app-crypt/gnupg
+app-misc/jq
+dev-vcs/git
+sys-process/procps
+x11-libs/libxcb

@@ -22,6 +22,7 @@ jobs:
           - clearlinux
           - debian
           - fedora
+          - gentoo
           - manjarolinux
           - opensuse-leap
           - oraclelinux
