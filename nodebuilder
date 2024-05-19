@@ -260,7 +260,7 @@ install_build_dependencies_emerge() {
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
-  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   if ! printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
     --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail; then
     etc-update --automode -5
@@ -365,7 +365,7 @@ install_runtime_dependencies_emerge() {
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
-  [ -z "${dependencies}" ] && throw_error "The list of dependencies is empty."
+  [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
   printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
 }
 
@@ -413,8 +413,8 @@ install_system_updates_dnf() {
 }
 
 install_system_updates_emerge() {
+  readonly GENTOO_EBUILD_REPOSITORY='/var/db/repos/gentoo'
   printf '\n'
-  readonly GENTOO_EBUILD_REPOSITORY="/var/db/repos/gentoo"
   [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
   emerge --depclean --quiet
   emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
