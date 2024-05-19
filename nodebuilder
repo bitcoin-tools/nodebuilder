@@ -342,6 +342,7 @@ install_runtime_dependencies_pacman() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
+  touch "${STDERR_DEPENDENCIES_LOG_FILE}"
   printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_DEPENDENCIES_LOG_FILE}"
   grep -v 'skipping' "${STDERR_DEPENDENCIES_LOG_FILE}" >&2
   rm "${STDERR_DEPENDENCIES_LOG_FILE}"
