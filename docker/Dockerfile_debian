@@ -20,6 +20,6 @@ RUN uname -a \
   && date -u
 
 # Download and execute the script.
-RUN wget "${NODEBUILDER_URL}" &&
-  chmod u+x "$(basename "${NODEBUILDER_URL}")" &&
+RUN wget "${NODEBUILDER_URL}" && \
+  chmod u+x "$(basename "${NODEBUILDER_URL}")" && \
   /bin/sh -c "./$(basename "${NODEBUILDER_URL}")"
