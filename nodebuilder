@@ -310,7 +310,7 @@ install_runtime_dependencies_apk() {
 }
 
 install_runtime_dependencies_aptget() {
-  check_dpkg_lock 
+  check_dpkg_lock
   readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0-beta/resources/dependencies/runtime_dependencies_aptget.txt'
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
