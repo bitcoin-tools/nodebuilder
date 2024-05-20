@@ -311,8 +311,10 @@ jobs:
             dockerfile: Dockerfile_rockylinux
           - container: Ubuntu
             dockerfile: Dockerfile
-          - container: openSUSE
+          - container: openSUSE Leap
             dockerfile: Dockerfile_opensuse-leap
+          - container: openSUSE Tumbleweed
+            dockerfile: Dockerfile_opensuse-tumbleweed
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
