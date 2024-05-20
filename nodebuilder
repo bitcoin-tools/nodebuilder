@@ -137,6 +137,10 @@ ensure_sudo_dependency() {
   command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error on github com bitcoin-tools nodebuilder."
 }
 
+ensure_xargs_dependenc() {
+  echo 'TODO'
+}
+
 get_cursor_column() {
   stored_stty_settings=$(stty -g)
   # Set raw mode, no echo, immediate read
