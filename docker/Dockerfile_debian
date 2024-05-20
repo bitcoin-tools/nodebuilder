@@ -21,7 +21,8 @@ RUN uname -a \
 
 # Install system updates and dependencies.
 RUN apt-get -qq update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends curl 'sudo' \
+  && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
+  ca-certificates curl 'sudo' \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
