@@ -17,7 +17,7 @@ RUN uname -a \
   && cat /etc/os-release \
   && df -h \
   && grep Mem /proc/meminfo \
-  && date -
+  && date -u
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
