@@ -1,4 +1,5 @@
 curl
+gawk
 git
 gnupg
 gzip
