@@ -45,7 +45,7 @@ display_macos_warning() {
 }
 
 ensure_curl_dependency() {
-  if "$(command -v dnf > /dev/null 2>&1)"; then
+  if command -v dnf > /dev/null 2>&1; then
     sudo dnf install --allowerasing --assumeyes curl > /dev/null
   elif ! command -v curl > /dev/null 2>&1; then
     printf '%s' 'Installing curl depencency... '
