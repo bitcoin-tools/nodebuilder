@@ -7,9 +7,9 @@ FROM redhat/ubi9:latest@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.4.0
+ARG NODEBUILDER_VERSION=v1.5.0-beta
 
-# Define the nodebuilder and dependencies URL.
+# Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/resources/dependencies/runtime_dependencies_dnf.txt
 
@@ -19,13 +19,6 @@ RUN uname -a \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
-
-# Install system updates and dependencies.
-RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install curl \
-  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs dnf --assumeyes install \
-  && dnf clean all
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
