@@ -45,7 +45,9 @@ display_macos_warning() {
 }
 
 ensure_curl_dependency() {
-  if ! command -v curl > /dev/null 2>&1; then
+  if "$(command -v dnf > /dev/null 2>&1)"; then
+    sudo dnf install --allowerasing --assumeyes curl > /dev/null
+  elif ! command -v curl > /dev/null 2>&1; then
     printf '%s' 'Installing curl depencency... '
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
@@ -75,7 +77,7 @@ ensure_curl_dependency() {
       elif command -v apt-get > /dev/null; then
         sudo apt-get -qq install -y curl > /dev/null
       elif command -v dnf > /dev/null; then
-        sudo dnf install curl > /dev/null
+        sudo dnf install --allowerasing --assumeyes curl > /dev/null
       elif command -v pacman > /dev/null; then
         sudo pacman -Syu --needed --noconfirm curl > /dev/null
       elif command -v zypper > /dev/null; then
