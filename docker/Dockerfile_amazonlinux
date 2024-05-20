@@ -19,7 +19,7 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Install sudo dependency.
+# Install dependencies.
 RUN dnf makecache \
   && dnf --allowerasing --assumeyes install findutils 'sudo' \
   && dnf clean all
