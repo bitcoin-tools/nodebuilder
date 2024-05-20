@@ -20,4 +20,4 @@ RUN uname -a \
   && date -u
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN /bin/sh -c -x "$(curl -fsSL ${NODEBUILDER_URL} )"
