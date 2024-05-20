@@ -19,7 +19,7 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Install dependency.
+# Install dependencies.
  RUN apk --no-cache add coreutils curl
 
 # Download and execute the script.
