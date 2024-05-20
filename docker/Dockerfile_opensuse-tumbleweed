@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+# openSUSE is a robust Linux distribution that offers a great balance of stability and modernity.
+# This Dockerfile is ideal for users seeking a reliable, versatile operating system.
+FROM opensuse/tumbleweed:latest@sha256:129406cbf6664f80c1b92410b2e582379a24864e982f2dad3888a9ac9153d91d
+
+# Set the terminal type to Xterm.
+ENV TERM=xterm
+
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
+ARG NODEBUILDER_VERSION=v1.4.0
+
+# Define the nodebuilder and dependencies URL.
+ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_zypper.txt
+
+# Check the current environment.
+RUN uname -a \
+  && cat /etc/os-release \
+  && df -h \
+  && grep Mem /proc/meminfo \
+  && date -u
+
+# Install system updates and dependencies.
+RUN zypper refresh && zypper --non-interactive install findutils
+
+# Download and execute the script.
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
