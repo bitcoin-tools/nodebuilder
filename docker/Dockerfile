@@ -26,6 +26,4 @@ RUN apt-get -qq update \
   && rm -rf /var/lib/apt/lists/*
 
 # Download and execute the script.
-RUN wget "${NODEBUILDER_URL}" && \
-  chmod u+x "$(basename "${NODEBUILDER_URL}")" && \
-  /bin/sh -c "./$(basename "${NODEBUILDER_URL}")"
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
