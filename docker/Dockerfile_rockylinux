@@ -19,5 +19,10 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
+# Install sudo dependency.
+RUN dnf makecache \
+  && dnf --allowerasing --assumeyes install 'sudo' \
+  && dnf clean all
+
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
