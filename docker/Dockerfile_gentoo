@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+# Gentoo is known for its customization, optimization at the expense of image build time.
+# This Dockerfile offers a stable base image but takes extra time to compile all dependencies.
+FROM gentoo/stage3:latest@sha256:245d770e7015969bed6295ace87efc8091e70f70f0c8e5b8b29f13f3db8f29cd
+
+# Set the terminal type to Xterm.
+ENV TERM=xterm
+
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
+ARG NODEBUILDER_VERSION=v1.4.0
+
+# Define the nodebuilder URL.
+ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
+# Check the current environment.
+RUN uname -a \
+  && cat /etc/os-release \
+  && df -h \
+  && grep Mem /proc/meminfo \
+  && date -u
+
+# Create the ebuild repository directory.
+RUN [ -d /var/db/repos/gentoo/ ] || mkdir -p /var/db/repos/gentoo/
+
+# Download and execute the script.
+RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

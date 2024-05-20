@@ -1,28 +1,28 @@
 # syntax=docker/dockerfile:1
 # Manjaro focuses on user-friendliness and accessibility.
 # This Dockerfile is ideal for users who want a balance of control and convenience.
-FROM manjarolinux/base:latest@sha256:57a9589c80d79bfd76926e5f22efb8cfd9d5ac8c255739a7cb4ce1bad79f9dbc
+FROM manjarolinux/base:latest@sha256:359a130819186d101857bf36f1b44b62f9430050d34a9868a64c4d9ccfa8f715
+
+# Set the terminal type to Xterm.
 ENV TERM=xterm
 
-# Define the default version of nodebuilder or pass in a different version (eg master) as an argument
+# Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
 ARG NODEBUILDER_VERSION=v1.4.0
 
-# Define the nodebuilder URL
+# Define the nodebuilder and dependencies URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_pacman.txt
 
-# Define the dependencies URL
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/dependencies/runtime_dependencies_pacman.txt
-
-# Check the current environment
+# Check the current environment.
 RUN uname -a \
   && cat /etc/os-release \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Install system updates and dependencies
+# Install system updates and dependencies.
 RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
   | xargs pacman -Sy --noconfirm
 
-# Download and execute the script
+# Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

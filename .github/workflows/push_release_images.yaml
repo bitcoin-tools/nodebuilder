@@ -1,0 +1,107 @@
+name: Build and Push Docker Images
+on:
+  release:
+    types: [ prereleased, published ]
+  workflow_dispatch:
+  pull_request:
+    branches: [ push_docker_images_test ]
+env:
+  DEFAULT_IMAGE: ubuntu
+  DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodebuilder
+jobs:
+  build-and-push:
+    name : Push ${{ matrix.container }} image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        container:
+          - gentoo
+          - alpine
+          - amazonlinux
+          - archlinux
+          - clearlinux
+          - debian
+          - fedora
+          - manjarolinux
+          - opensuse-leap
+          - oraclelinux
+          - redhat-ubi9
+          - rockylinux
+    steps:
+    - name: Checkout with history to get latest tag
+      if: ${{ github.event_name != 'release' }}
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Find nodebuilder version tag
+      # If the event is a release, get the tag from GITHUB_REF
+      # Otherwise, find the most recent release tag instead of using the commit SHA
+      run: |
+        if [[ "${{ github.event_name }}" == 'release' ]]; then
+          echo "NODEBUILDER_VERSION=${GITHUB_REF#refs/tags/}" >> "${GITHUB_ENV}"
+        else
+          echo "NODEBUILDER_VERSION=$(git describe --tags --abbrev=0)" >> "${GITHUB_ENV}"
+        fi
+    - name: Checkout the latest release tag
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ env.NODEBUILDER_VERSION }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Set container image tags
+      # Set the tags for the {container}-{version} and {container}
+      # For example: ':alpine-v1.4.0' and ':alpine'
+      run: |
+        TAGS="${{ env.DOCKERHUB_REPO }}:${{ matrix.container }}-${{ env.NODEBUILDER_VERSION }}"
+        TAGS="${TAGS},${{ env.DOCKERHUB_REPO }}:${{ matrix.container }}"
+        echo "IMAGE_TAGS=${TAGS}" >> "${GITHUB_ENV}"
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      timeout-minutes: 360
+      with:
+        context: .
+        file: docker/Dockerfile_${{ matrix.container }}
+        build-args: NODEBUILDER_VERSION=${{ env.NODEBUILDER_VERSION }}
+        # Push if the CI run isn't from a beta prerelease
+        push: ${{ !github.event.release.prerelease }}
+        tags: ${{ env.IMAGE_TAGS }}
+    outputs:
+      nodebuilder-version: ${{ env.NODEBUILDER_VERSION }}
+  build-and-push-ubuntu:
+    name: Push ubuntu default image
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the latest release tag
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ needs.build-and-push.outputs.nodebuilder-version }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      timeout-minutes: 360
+      with:
+        context: .
+        file: docker/Dockerfile
+        build-args: NODEBUILDER_VERSION=${{ needs.build-and-push.outputs.nodebuilder-version }}
+        # Push if the CI run isn't from a beta prerelease
+        push: ${{ !github.event.release.prerelease }}
+        # Set the tags for the ubuntu-{version}, ubuntu, {version}, and latest
+        # For example, ':ubuntu-v1.4.0', ':ubuntu', ':v1.4.0', and ':latest'
+        tags: |
+          ${{ env.DOCKERHUB_REPO }}:${{ env.DEFAULT_IMAGE }}-${{ needs.build-and-push.outputs.nodebuilder-version }}
+          ${{ env.DOCKERHUB_REPO }}:${{ env.DEFAULT_IMAGE }}
+          ${{ env.DOCKERHUB_REPO }}:${{ needs.build-and-push.outputs.nodebuilder-version }}
+          ${{ env.DOCKERHUB_REPO }}:latest
