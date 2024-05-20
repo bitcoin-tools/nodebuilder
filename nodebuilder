@@ -358,15 +358,7 @@ install_runtime_dependencies_dnf() {
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
-  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  if [ "${TARGET_OPERATING_SYSTEM}" = 'amzn' ]; then
-    printf '%s\n' "${dependencies}" |
-      awk '{if ($0 == "gnupg") print "gnupg2"; else print $0;}' |
-      xargs sudo dnf --assumeyes --quiet install > /dev/null
-  else
-    printf '%s\n' "${dependencies}" |
-      xargs sudo dnf --assumeyes --quiet install > /dev/null
-  fi
+  [ -z "${dependencies:-}" ] && throw_error 'printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
 }
 
 install_runtime_dependencies_emerge() {
