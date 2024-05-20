@@ -21,7 +21,7 @@ RUN uname -a \
 
 # Install dependencies.
 RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install gnupg2 findutils 'sudo' \
+  && dnf --allowerasing --assumeyes install findutils gnupg2 'sudo' \
   && dnf clean all
 
 # Download and execute the script.
