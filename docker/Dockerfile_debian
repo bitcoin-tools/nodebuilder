@@ -19,6 +19,12 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
+# Install system updates and dependencies.
+RUN apt-get -qq update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends curl 'sudo' \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
 # Download and execute the script.
 RUN wget "${NODEBUILDER_URL}" && \
   chmod u+x "$(basename "${NODEBUILDER_URL}")" && \
