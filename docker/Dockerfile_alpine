@@ -20,7 +20,7 @@ RUN uname -a \
   && date -u
 
 # Install dependency.
-#RUN apk --no-cache add curl
+ RUN apk --no-cache add coreutils curl
 
 # Download and execute the script.
 RUN wget "${NODEBUILDER_URL}" && \
