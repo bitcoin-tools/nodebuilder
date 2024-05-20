@@ -8,9 +8,8 @@ ENV TERM=xterm
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
 ARG NODEBUILDER_VERSION=v1.4.0
 
-# Define the nodebuilder and dependencies URL.
+# Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/resources/dependencies/runtime_dependencies_swupd.txt
 
 # Check the current environment.
 RUN uname -a \
@@ -18,11 +17,6 @@ RUN uname -a \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
-
-# Install system updates and dependencies.
-RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs swupd bundle-add --quiet \
-  && swupd clean
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
