@@ -10,7 +10,7 @@ ARG NODEBUILDER_VERSION=v1.4.0
 
 # Define the nodebuilder and dependencies URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_swupd.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/resources/dependencies/runtime_dependencies_swupd.txt
 
 # Check the current environment.
 RUN uname -a \
