@@ -21,10 +21,7 @@ RUN uname -a \
   && date -u
 
 # Install system updates and dependencies.
-RUN zypper refresh \
-  && zypper --non-interactive install curl 'sudo' \
-  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs zypper --non-interactive install
+RUN zypper refresh && zypper --non-interactive install findutils
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
