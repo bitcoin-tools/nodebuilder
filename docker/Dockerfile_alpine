@@ -19,6 +19,9 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
+# Install dependency.
+RUN apk --no-cache add curl
+
 # Download and execute the script.
 RUN wget "${NODEBUILDER_URL}" && \
   chmod u+x "$(basename "${NODEBUILDER_URL}")" && \
