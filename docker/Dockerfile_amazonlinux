@@ -21,7 +21,7 @@ RUN uname -a \
 
 # Install sudo dependency.
 RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install 'sudo'
+  && dnf --allowerasing --assumeyes install sudo
   && dnf clean all
 
 # Download and execute the script.
