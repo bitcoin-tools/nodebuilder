@@ -1,7 +1,7 @@
 name: Build and Push Docker Images
 on:
   release:
-    types: [ prereleased, published ]
+    types: [ published ]
   workflow_dispatch:
   pull_request:
     branches: [ push_docker_images_test ]
