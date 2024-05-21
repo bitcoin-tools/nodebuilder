@@ -7,11 +7,10 @@ FROM ubuntu:latest@sha256:3f85b7caad41a95462cf5b787d8a04604c8262cdcdf9a472b8c52e
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.4.0
+ARG NODEBUILDER_VERSION=v1.5.0-beta.2
 
-# Define the nodebuilder and dependencies URL.
+# Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_aptget.txt
 
 # Check the current environment.
 RUN uname -a \
@@ -24,8 +23,6 @@ RUN uname -a \
 RUN apt-get -qq update \
   && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
   ca-certificates curl 'sudo' \
-  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | DEBIAN_FRONTEND=noninteractive xargs apt-get -qq install --no-install-recommends \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
