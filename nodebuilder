@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
+# shellcheck disable=SC2009
 # shellcheck disable=SC2155
 
 set -o errexit
@@ -412,6 +413,33 @@ install_system_updates_aptget() {
   rm "${STDERR_INSTALL_LOG_FILE}"
 }
 
+install_system_updates_darwin() {
+  softwareupdate --install --os-only --recommended &
+  softwareupdate_pid="$!"
+
+  # Continuously check for the presence of the restart dialog while softwareupdate is running
+  while ps -p "${softwareupdate_pid}" > /dev/null; do
+    ps aux #debug
+    # If the restart dialog is present, handle it
+    if ps aux | grep --quiet "[i]nstallassistant_springboard"; then
+      if is_running_in_ci || is_running_in_container; then
+        installassistant_pid=$(ps aux | grep "[i]nstallassistant_springboard" | awk '{print $2}')
+
+        # DEBUG TESTING HERE DELETE BEFORE MERGING
+        # MIGHT ALSO NEED TO SEND A kill -TERM "${installassistant_pid}"
+        # MIGHT ALSO NEED TO TRY kill "${softwareupdate_pid}"
+        kill -INT "${installassistant_pid}"
+      else
+        echo "The system needs to restart to finish installing updates. Please click the restart button."
+        exit 0
+      fi
+    fi
+
+    # Wait a bit before checking again
+    sleep 1
+  done
+}
+
 install_system_updates_dnf() {
   sudo dnf clean all && sudo dnf --assumeyes --quiet upgrade > /dev/null
 }
@@ -693,9 +721,7 @@ Linux)
     sudo reboot
     exit 0
   fi
-  printf '%s\n' 'ok.'
-
-  printf '%s' 'Ensuring runtime dependencies... '
+  printf '%s\n%s' 'ok.' 'Ensuring runtime dependencies... '
   case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
     install_runtime_dependencies_apk
@@ -755,6 +781,21 @@ Darwin)
     throw_error 'Check for active internet failed.'
   printf '%s\n' 'ok.'
   display_macos_warning
+  printf '%s' "Performing a system upgrade... "
+  softwareupdate --list #DEBUG PURPOSES DELETE THIS LINE BEFORE MERGING
+  reboot_required_list_macos="$(softwareupdate --list 2> /dev/null | grep "restart" || true)"
+  install_system_updates_darwin
+  if [ -n "${reboot_required_list_macos}" ] && ! is_running_in_ci; then
+    printf '\n%s\n%s\n' "REBOOT REQUIRED to upgrade the following:" "${reboot_required_list_macos}"
+    if [ "${unattended}" = false ]; then
+      printf '\n%s' "PRESS ENTER to reboot or press Ctrl+C to exit... "
+      read -r _
+      printf '\n'
+    fi
+    printf '%s\n' "Rebooting."
+    sudo reboot
+    exit 0
+  fi
   printf '%s' 'Checking for git... '
   install_runtime_dependencies_darwin
   printf '%s\n' 'ok.'
