@@ -7,11 +7,10 @@ FROM rockylinux:9@sha256:c944604c0c759f5d164ffbdf0bbab2fac582b739938937403c067ab
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.4.0
+ARG NODEBUILDER_VERSION=v1.5.0-beta.2
 
-# Define the nodebuilder and dependencies URL.
+# Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_dnf.txt
 
 # Check the current environment.
 RUN uname -a \
@@ -20,11 +19,9 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Install system updates and dependencies.
+# Install sudo dependency.
 RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install curl \
-  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs dnf --assumeyes install \
+  && dnf --allowerasing --assumeyes install 'sudo' \
   && dnf clean all
 
 # Download and execute the script.
