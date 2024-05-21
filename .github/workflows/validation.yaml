@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   release:
-    types: [ created, published ]
+    types: [ published ]
   schedule:
     # run every day at 0252, 0852, 1452, and 2052 UTC
     - cron: '52 2,8,14,20 * * *'
