@@ -7,7 +7,7 @@ FROM rockylinux:9@sha256:c944604c0c759f5d164ffbdf0bbab2fac582b739938937403c067ab
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.5.0-beta.2
+ARG NODEBUILDER_VERSION=v1.5.0-beta.3
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
