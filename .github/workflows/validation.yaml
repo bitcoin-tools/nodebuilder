@@ -202,7 +202,7 @@ jobs:
             install-upgrades-command: >-
               sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
               && sudo apt-get update --option 'Acquire::Retries=5'
-              && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
+              && sudo DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
             cache-path: |
               /var/cache/apt/archives/*.deb
               /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
