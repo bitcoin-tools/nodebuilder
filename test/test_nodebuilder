@@ -272,7 +272,6 @@ fi
 
 if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
   for message in \
-    'Performing a system upgrade... ok.$' \
     'Ensuring runtime dependencies... ok.$' \
     'Creating application shortcuts... ok.$' \
     'Checking the memory on your system... [0-9]+\.[0-9] of [0-9]+\.[0-9] GiB free.$'; do

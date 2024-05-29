@@ -183,10 +183,6 @@ jobs:
             os-friendly-name: Ubuntu 22
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            install-upgrades-command: >-
-              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
-              && sudo apt-get update --option 'Acquire::Retries=5'
-              && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
             cache-path: |
               /var/cache/apt/archives/*.deb
               /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
@@ -199,10 +195,6 @@ jobs:
             os-friendly-name: Ubuntu 24
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            install-upgrades-command: >-
-              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
-              && sudo apt-get update --option 'Acquire::Retries=5'
-              && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
             cache-path: |
               /var/cache/apt/archives/*.deb
               /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
@@ -240,9 +232,6 @@ jobs:
       - name: Remove the snap package
         if: matrix.remove-firefox-command != null
         run: ${{ matrix.remove-firefox-command }}
-      - name: Install system upgrades
-        if: matrix.install-upgrades-command != null
-        run: ${{ matrix.install-upgrades-command }}
       - name: Test the console output ${{ matrix.additional-args }}
         id: test-nodebuilder
         run: /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" ${{ matrix.additional-args }}
