@@ -12,7 +12,7 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/node
 
 ## Table of Contents
 
--[Health Checks](#health-checks)
+- [Health Checks](#health-checks)
 - [Usage](#usage)
   - [(Optional) Docker Container](#optional-docker-container)
   - [(Optional) Command-Line Arguments](#optional-command-line-arguments)
