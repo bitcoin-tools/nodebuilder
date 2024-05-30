@@ -8,7 +8,7 @@ Copy-paste the following command into Terminal:
 sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/nodebuilder)"
 ```
 
-### Health Checks
+#### Health Checks
 
 [![Validation CI](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
 
@@ -16,7 +16,6 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/node
 
 ## Table of Contents
 
-- [Health Checks](#health-checks)
 - [Usage](#usage)
   - [(Optional) Docker Container](#optional-docker-container)
   - [(Optional) Command-Line Arguments](#optional-command-line-arguments)
