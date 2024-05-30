@@ -1,4 +1,4 @@
-# Bitcoin Core Node Builder [![Validation Checks](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
+# Bitcoin Core Node Builder
 
 Run a secure Bitcoin Core node with ease.
 
@@ -7,6 +7,8 @@ Copy-paste the following command into Terminal:
 ```sh
 sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/nodebuilder)"
 ```
+
+[![Validation Checks](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
 
 ## Table of Contents
 
