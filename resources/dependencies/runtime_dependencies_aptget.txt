@@ -4,5 +4,6 @@ gnupg
 gzip
 jq
 libxcb-xinerama0
+procps
 sudo
 tar
