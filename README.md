@@ -8,14 +8,11 @@ Copy-paste the following command into Terminal:
 sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/nodebuilder)"
 ```
 
-## Health Checks
 
-[![Validation CI](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
-
-[![Build and Push Docker Images](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml/badge.svg)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml)
 
 ## Table of Contents
 
+-[Health Checks](#health-checks)
 - [Usage](#usage)
   - [(Optional) Docker Container](#optional-docker-container)
   - [(Optional) Command-Line Arguments](#optional-command-line-arguments)
@@ -26,6 +23,12 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/node
 - [Acknowledgements](#acknowledgements)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Health Checks
+
+[![Validation CI](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
+
+[![Build and Push Docker Images](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml/badge.svg)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml)
 
 ## Usage
 
