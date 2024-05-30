@@ -9,6 +9,7 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/node
 ```
 
 [![Validation Checks](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
+
 [![Build and Push Docker Images](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml/badge.svg)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml)
 
 ## Table of Contents
