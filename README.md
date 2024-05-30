@@ -1,4 +1,4 @@
-# Bitcoin Core Node Builder
+# Bitcoin Core Node Builder [![Validation CI](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
 
 Run a secure Bitcoin Core node with ease.
 
