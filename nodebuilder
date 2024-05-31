@@ -254,14 +254,18 @@ install_build_dependencies_dnf() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  dnf list installed epel-release > /dev/null 2>&1 ||
-    sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RHEL_MAJOR_VERSION_ID}.noarch.rpm"
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
+  amzn) echo "DEBUG DETECTED AMZN OS ID" ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
+    dnf list installed epel-release > /dev/null 2>&1 ||
+      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RHEL_MAJOR_VERSION_ID}.noarch.rpm"
     sudo dnf config-manager --enable "rhel-${RHEL_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms"
     ;;
-  *) ;;
+  *)
+    dnf list installed epel-release > /dev/null 2>&1 ||
+      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RHEL_MAJOR_VERSION_ID}.noarch.rpm"
+    ;;
   esac
   printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
 }
