@@ -249,18 +249,17 @@ install_build_dependencies_darwin() {
 
 install_build_dependencies_dnf() {
   readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/resources/dependencies/build_dependencies_dnf.txt'
+  readonly RHEL_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  if ! dnf list installed epel-release > /dev/null 2>&1; then
-    readonly RHEL_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
-    sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RHEL_VERSION_ID}.noarch.rpm"
-  fi
-  echo "${TARGET_OPERATING_SYSTEM}"
-  case "${TARGET_OPERATING_SYSTEM}" in
+  dnf list installed epel-release > /dev/null 2>&1 ||
+    sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RHEL_MAJOR_VERSION_ID}.noarch.rpm"
+  case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
   rhel)
-    sudo dnf config-manager --enable rhel-9-for-x86_64-appstream-rpms
+    echo "DEBUG DETECTED RHEL OS ID"
+    #sudo dnf config-manager --enable rhel-9-for-x86_64-appstream-rpms
     ;;
   *) ;;
   esac
