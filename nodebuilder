@@ -258,7 +258,7 @@ install_build_dependencies_dnf() {
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
     dnf list installed epel-release > /dev/null 2>&1 ||
-      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"    
+      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
