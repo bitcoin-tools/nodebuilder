@@ -255,7 +255,7 @@ install_build_dependencies_dnf() {
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   if ! dnf list installed epel-release > /dev/null; then
     # shellcheck disable=SC2046
-    sudo dnf --assumeyes install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E '%{rhel}').noarch.rpm
+    sudo dnf --assumeyes install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %{rhel}).noarch.rpm
   fi
   printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
 }
