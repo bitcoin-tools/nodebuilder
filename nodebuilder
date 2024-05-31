@@ -60,7 +60,7 @@ ensure_curl_dependency() {
       sudo dnf install --allowerasing --assumeyes curl > /dev/null
       ;;
     gentoo)
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
+      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --retry 5 --quiet --quiet-build --quiet-fail net-misc/curl
       ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
@@ -107,7 +107,7 @@ ensure_sudo_dependency() {
       ;;
     gentoo)
       emerge --sync --quiet
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
+      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --retry 5 --quiet --quiet-build --quiet-fail app-admin/sudo
       ;;
     arch | endeavouros | garuda | manjaro)
       pacman -Syu --needed --noconfirm sudo > /dev/null
@@ -264,12 +264,12 @@ install_build_dependencies_emerge() {
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   if ! printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-    --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail; then
+    --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --retry 5 --quiet --quiet-build --quiet-fail; then
     etc-update --automode -5
-    emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
+    emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --retry 5 --quiet --quiet-build --quiet-fail --deep --newuse @world
     # Run the install command again
-    printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-      --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
+    printf '%s\n' "${dependencies}" | xargs emerge --retry 5 --autounmask-write \
+      --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --retry 5 --quiet --quiet-build --quiet-fail
   fi
 }
 
@@ -369,7 +369,7 @@ install_runtime_dependencies_emerge() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
+  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --retry 5 --quiet --quiet-build --quiet-fail
 }
 
 install_runtime_dependencies_pacman() {
@@ -423,7 +423,7 @@ install_system_updates_emerge() {
   printf '\n'
   [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
   emerge --depclean --quiet
-  emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
+  emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --retry 5 --quiet --quiet-build --quiet-fail --deep --newuse @world
   emerge --depclean --quiet
 }
 
