@@ -255,7 +255,11 @@ install_build_dependencies_dnf() {
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
-  amzn) echo "DEBUG DETECTED AMZN OS ID" ;;
+  amzn)
+    echo "DEBUG DETECTED AMZN OS ID"
+    dnf list installed epel-release > /dev/null 2>&1 ||
+      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"    
+    ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
     dnf list installed epel-release > /dev/null 2>&1 ||
