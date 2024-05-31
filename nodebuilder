@@ -256,6 +256,13 @@ install_build_dependencies_dnf() {
   if ! dnf list installed epel-release > /dev/null; then
     sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %\{rhel\}).noarch.rpm"
   fi
+  echo "${TARGET_OPERATING_SYSTEM}"
+  case "${TARGET_OPERATING_SYSTEM}" in
+  rhel)
+    sudo dnf config-manager --enable rhel-9-for-x86_64-appstream-rpms
+    ;;
+  *) ;;
+  esac
   printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
 }
 
