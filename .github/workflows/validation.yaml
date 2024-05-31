@@ -195,13 +195,6 @@ jobs:
             os-friendly-name: Ubuntu 24
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            cache-path: |
-              /var/cache/apt/archives/*.deb
-              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
-              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
-              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
-              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
-              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: macos-13
             os-friendly-name: macOS 13

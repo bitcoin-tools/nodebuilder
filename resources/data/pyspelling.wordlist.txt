@@ -87,6 +87,7 @@ stopanddecrypt
 sudo
 sles
 suse
+svg
 tcort
 tmp
 tx
