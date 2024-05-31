@@ -11,3 +11,4 @@ qt5-qttools-devel
 qt5-qtbase-devel
 qt5-qtwayland
 sqlite-devel
+zeromq-devel

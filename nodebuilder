@@ -88,8 +88,8 @@ EOF
 display_macos_warning() {
   if [ "${TARGET_KERNEL}" = 'Darwin' ] && [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
     printf '%s\n%s\n' \
-      'WARNING: Your operating system has an unpatched security vulnerability called GoFetch.' \
-      'Avoid performing any security-critical actions and consider switching to Ubuntu Linux.'
+      'WARNING: macOS has an unpatched security vulnerability called GoFetch.' \
+      '         Avoid security-critical actions, such as securing significant funds.'
     if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
       printf '%s' 'PRESS ENTER to continue or press Ctrl+C to exit... '
       read -r _
