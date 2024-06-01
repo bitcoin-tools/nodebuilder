@@ -257,7 +257,7 @@ install_build_dependencies_dnf() {
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
-    sudo dnf config-manager --set-enabled amzn2023-core
+    #sudo dnf config-manager --set-enabled amzn2023-core
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
