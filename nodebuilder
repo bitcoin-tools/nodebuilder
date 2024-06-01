@@ -261,9 +261,10 @@ install_build_dependencies_dnf() {
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
-    dnf list installed epel-release > /dev/null 2>&1 ||
-      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RHEL_MAJOR_VERSION_ID}.noarch.rpm"
+    #sudo dnf config-manager --enable rhel-9-for-x86_64-appstream-rpms
     sudo dnf config-manager --enable "rhel-${RHEL_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms"
+    #dnf list installed epel-release > /dev/null 2>&1 ||
+    #  sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RHEL_MAJOR_VERSION_ID}.noarch.rpm"
     ;;
   *)
     dnf list installed epel-release > /dev/null 2>&1 ||
