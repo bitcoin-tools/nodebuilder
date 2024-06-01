@@ -257,9 +257,10 @@ install_build_dependencies_dnf() {
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
+    rpm -qa | grep -qi amazon-linux-extras ||
+        sudo yum install --assumeyes amazon-linux-extras
     amazon-linux-extras list
-    dnf list installed epel-release > /dev/null 2>&1 ||
-      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+    sudo amazon-linux-extras enable epel
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
