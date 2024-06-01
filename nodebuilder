@@ -258,7 +258,7 @@ install_build_dependencies_dnf() {
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
     dnf repolist all --verbose
-    #sudo dnf config-manager --set-enabled amzn2023-core
+    sudo dnf config-manager --set-enabled amazonlinux-core
     #dnf provides "*/qt5-tools-devel"
     ;;
   rhel)
