@@ -257,8 +257,9 @@ install_build_dependencies_dnf() {
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
+    dnf repolist all --verbose
     #sudo dnf config-manager --set-enabled amzn2023-core
-    dnf provides "*/qt5-tools-devel"
+    #dnf provides "*/qt5-tools-devel"
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
