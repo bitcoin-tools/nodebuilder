@@ -258,7 +258,7 @@ install_build_dependencies_dnf() {
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
     #sudo dnf config-manager --set-enabled amzn2023-core
-    dnf provides qt5-tools-devel
+    dnf provides */qt5-tools-devel
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
