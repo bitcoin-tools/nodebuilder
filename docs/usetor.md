@@ -31,11 +31,11 @@ This procedure has been tested on Ubuntu 24.
            CPU: 1ms
    ```
 
-4. Configure Tor, Bitcoin Core, and your user permissions.
+4. Configure Tor, Bitcoin Core, and your user permissions. Run the following command in Terminal:
    ```sh
    printf 'ControlPort 9051\nCookieAuthentication 1\nCookieAuthFileGroupReadable 1\nDataDirectoryGroupReadable 1' |
      sudo tee -a /etc/tor/torrc
-   usermod -a -G "$(stat -c '%G' /run/tor/control.authcookie)" "${USER}"
+   sudo usermod -a -G "$(stat -c '%G' /run/tor/control.authcookie)" "${USER}"
    printf 'listen=1\n' >> ~/.bitcoin/bitcoin.conf
    printf 'proxy=127.0.0.1:9050\n' >> ~/.bitcoin/bitcoin.conf
    ```
