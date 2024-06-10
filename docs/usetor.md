@@ -2,7 +2,7 @@
 
 These docs are a beginner-friendly version of the [Tor documentation from Bitcoin Core](https://github.com/bitcoin/bitcoin/blob/master/doc/tor.md). If you are technical, please read and follow those docs instead.
 
-At this time, your distro must use the `apt` Package manager.
+At this time, your Linux distribution must use the `apt` Package manager.
 
 ## apt Package Manager (Ubuntu, Debian, etc.)
 
@@ -48,7 +48,7 @@ This procedure has been tested on Ubuntu 24.
 
 6. Reboot your system and re-run Bitcoin Core.
 
-7. Check again that the Tor service is up. Run the following commmand in Terminal:
+7. Check again that the Tor service is up. Run the following command in Terminal:
 
    ```sh
    systemctl status Tor
@@ -60,7 +60,7 @@ This procedure has been tested on Ubuntu 24.
    getnetworkinfo
    ```
 
-9. In the response, look for a long code ending in `.onion` in the `localaddress` at the end. You should see a . For example:
+9. In the response, look for a long code ending in `.onion` in the `localaddresses` at the end. You should see a . For example:
 
    ```text
        }
