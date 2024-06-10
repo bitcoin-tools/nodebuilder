@@ -69,6 +69,7 @@ incrementalfee
 installmanual
 installquick
 io
+localaddresses
 libbitcoinconsensus
 linux
 macOS
@@ -78,6 +79,7 @@ manpages
 md
 mktemp
 mvdan
+nCookieAuthFileGroupReadable
 nCookieAuthentication
 nDataDirectoryGroupReadable
 nodebuilder
@@ -104,6 +106,7 @@ sles
 suse
 svg
 systemctl
+systemd
 tcort
 tmp
 torrc
