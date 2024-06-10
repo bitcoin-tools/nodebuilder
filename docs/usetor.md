@@ -17,6 +17,7 @@ This procedure has been tested on Ubuntu 24.
    ```
 
 2. Check that Tor service properly installed. Run the following command in Terminal:
+
    ```sh
    systemctl status tor
    ```
