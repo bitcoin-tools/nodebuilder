@@ -20,7 +20,7 @@ This procedure has been tested on Ubuntu 24.
    systemctl status tor
    ```
 
-4. The response should show that the Tor service is enabled and active. For example:
+3. The response should show that the Tor service is enabled and active. For example:
    ```text
    user1@comp1:~$ systemctl status tor
    ● tor.service - Anonymizing overlay network for TCP (multi-instance-master)
@@ -31,7 +31,7 @@ This procedure has been tested on Ubuntu 24.
            CPU: 1ms
    ```
 
-5. Configure Tor, Bitcoin Core, and your user permissions.
+4. Configure Tor, Bitcoin Core, and your user permissions.
    ```sh
    printf 'ControlPort 9051\nCookieAuthentication 1\nCookieAuthFileGroupReadable 1\nDataDirectoryGroupReadable 1' |
      sudo tee -a /etc/tor/torrc
@@ -40,21 +40,21 @@ This procedure has been tested on Ubuntu 24.
    printf 'proxy=127.0.0.1:9050\n' >> ~/.bitcoin/bitcoin.conf
    ```
 
-6. Shut down Bitcoin Core if it's running and wait for the "Bitcoin Core is shutting down" dialog to disappear.
+5. Shut down Bitcoin Core if it's running and wait for the "Bitcoin Core is shutting down" dialog to disappear.
 
-7. Reboot your system and re-run Bitcoin Core.
+6. Reboot your system and re-run Bitcoin Core.
 
-8. Check again that the Tor service is up. Run the following commmand in Terminal:
+7. Check again that the Tor service is up. Run the following commmand in Terminal:
    ```sh
    systemctl status Tor
    ```
 
-10. Open the `Window -> Console` option and run the following command:
+8. Open the `Window -> Console` option and run the following command:
    ```text
    getnetworkinfo
    ```
 
-11. In the response, look for a long code ending in `.onion` in the `localaddress` at the end. You should see a . For example:
+9. In the response, look for a long code ending in `.onion` in the `localaddress` at the end. You should see a . For example:
    ```text
        }
      ],
