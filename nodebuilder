@@ -5,6 +5,7 @@
 
 set -o errexit
 set -o nounset
+set -x
 
 check_dpkg_lock() {
   if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; then
