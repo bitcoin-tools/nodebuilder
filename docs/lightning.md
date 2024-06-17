@@ -8,17 +8,33 @@ At this time, your Linux distribution must use the `apt` Package manager.
 
 Data integrity is critical for lightning nodes. If your channel states become corrupted, your money may become unrecoverable.
 
-To avoid losing money, your lightning hardware setup should include:
+To avoid losing money, your lightning hardware setup should be resillient to power loss, hardware dailure, and spontaneous bit flips.
+
+### Power Loss
+
+To protect against power loss, you should consider:
 - a battery backup on your internet modem, router, cable signal amplifiers, etc. to ensure your Wi-Fi stays on if your power drops
-- a primary laptop (with a working battery) plugged into a UPS (uninterruptable power supply)
-- ECC RAM (error correcting code memory), ideally 32 GB or more
-- RAID-1 mirroring set up between an internal NVMe drive and an internal SATA drive, but ideally 2TB or more
-  - See the [recommended laptop models](#recommended-laptop-models).
+- a laptop (with a working battery) instead of a desktop computer or micro-computer like a Raspberry P
+- a UPS (uninterruptable power supply) backup battery powering the laptop
+
+### Hardware Failures
+
+To protect against hardware failure, you should consider:
+- RAID-1 mirroring set up between two internal drives
+  - Ideally, the laptop would have both an internal NVMe drive and an internal SATA drive. See the [recommended laptop models](#recommended-laptop-models).
   - Each drive needs at least 1 TB of capacity to sync the chain unpruned, but ideally 2 TB or more.
-- channel backups to local network storage every 5 minutes
-- encrypted channel backups to the cloud every hour
-- a backup laptop to recover your lightning node if (when) your primary laptop dies.
-  - You can swap one or both of the primary laptop's drives in case of a failure.
+- scheduled channel backups to local network storage every 5 minutes
+- scheduled encrypted channel backups to the cloud every hour
+- a spare laptop to recover your lightning node when your primary laptop dies.
+  - You can use one or both of the primary laptop's storage drives in case of a failure.
+
+### Bit Flips
+
+Data faults are inevitable with computers. Spontaneous bit flips can come from hardware glitches or high-energy cosmic particles.
+
+To protect against spontaneous bit flips, you should consider:
+- a file system type that uses data checksums, such as Btrfs or ZFS 
+- using ECC RAM (error correcting code memory), ideally 32 GB or more
 
 ### Recommended Laptop Models
 
