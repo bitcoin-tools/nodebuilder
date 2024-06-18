@@ -63,3 +63,42 @@ To configure RAID at the software level:
 
 
 The Ubuntu Desktop installer doesn't
+
+### Use Tor on Lightning
+
+- Install Tor and verify the service is "active" and "enabled" with `systemctl status tor`.
+
+- Make sure the following lines are in `/etc/tor/torrc`, without a `#` at the beginning of the line:
+
+  ```
+  ExitPolicy reject *:* # no exits allowed
+  ControlPort 9051
+  CookieAuthentication 1
+  CookieAuthFileGroupReadable 1
+  ```
+
+- Add the following lines to `~/.lightning/config`.
+
+  ```
+  proxy=127.0.0.1:9050
+  bind-addr=127.0.0.1:9735
+  addr=statictor:127.0.0.1:9051
+  always-use-proxy=true
+  ```
+
+- Make sure the user running Lightning is a memeber of the Tor group.
+  - Check if the user is already a member of the tor group.
+
+    ```
+    groups "${LIGHTNINGUSER:-$USER}"
+    ```
+
+  - Add the user to the tor group, shut down Lightning and Bitcoin, and restart the computer.
+
+    ```
+    [ -f "${HOME}/.lightning/lightningd-bitcoin.pid ] && lightning-cli stop
+    while [ -f "${HOME}/.lightning/lightningd-bitcoin.pid ]; do sleep 1; done
+    [ -f "${HOME}/.bitcoin/bitcoind.pid ] && bitcoin-cli --rpcwait stop
+    while [ -f "${HOME}/.lightning/lightningd-bitcoin.pid ]; do sleep 1; done
+    reboot || sudo reboot
+    ```
