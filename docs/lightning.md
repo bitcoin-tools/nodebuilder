@@ -8,7 +8,7 @@ At this time, your Linux distribution must use the `apt` Package manager.
 
 Data integrity is critical for lightning nodes. If your channel states become corrupted, your money may become unrecoverable.
 
-To avoid losing money, your lightning hardware setup should be resillient to power loss, hardware failure, and spontaneous bit flips.
+To avoid losing money, your lightning hardware setup should be resilient to power loss, hardware failure, and spontaneous bit flips.
 
 ### Power Loss
 
@@ -16,7 +16,7 @@ To protect against power loss, you should consider:
 
 - a battery backup on your internet modem, router, cable signal amplifiers, etc. to ensure your WiFi stays on if your power drops
 - a laptop (with a working battery) instead of a desktop computer or micro-computer like a Raspberry P
-- a UPS (uninterruptable power supply) backup battery powering the laptop
+- a UPS (uninterruptible power supply) backup battery powering the laptop
 
 ### Hardware Failures
 
