@@ -60,14 +60,18 @@ This procedure has been tested on Ubuntu 24.
    getnetworkinfo
    ```
 
-9. In the response, look for a long code ending in `.onion` in the `localaddresses` at the end. You should see a . For example:
+9. Look for the `localaddresses` field at the end of the response. You should see a long address ending in `.onion`. For example:
 
    ```text
-       }
-     ],
+     ...
      "relayfee": 0.00001000,
      "incrementalfee": 0.00001000,
      "localaddresses": [
+       {
+         "address": "lku5sksm4cxiny3dhpp5jobudfm57p3wl3w5w6dm4n4ehev4xpyc3cid.onion",
+         "port": 8333,
+         "score": 4
+       }
      ],
      "warnings": ""
    }
