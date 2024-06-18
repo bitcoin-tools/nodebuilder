@@ -72,6 +72,34 @@ To configure RAID at the software level:
 2. Shutdown the computer, boot from the USB drive, and proceed with the Ubuntu Server installation.
 3. At the asdf step.
 
+### Install Lightning
+
+Compile and install Core Lightning.
+
+```sh
+sudo apt-get update
+sudo NEEDRESTART_MODE=a apt-get install --assume-yes python3-pip python3-json5 python3-flask python3-gunicorn python3-venv libsecp256k1-dev jq autoconf automake build-essential git libtool libsqlite3-dev libffi-dev net-tools zlib1g-dev libsodium-dev gettext valgrind libpq-dev shellcheck cppcheck libsecp256k1-dev lowdown cargo rustfmt protobuf-compiler
+pip3 install --upgrade pip
+python3 -m venv myvenv
+source myvenv/bin/activate
+pip3 install flask-cors flask_restx pyln-client flask-socketio gevent gevent-websocket pyln-client websockets mako grpcio-tools
+#pip3 install poetry
+git clone -b v24.05 --depth 1 https://github.com/ElementsProject/lightning.git
+cd lightning/
+pip3 install -r plugins/clnrest/requirements.txt
+./configure
+make -j "$(nproc)"
+sudo make install
+deactivate
+```
+
+Check the installation using these commands and looking for the expected version:
+
+```sh
+lightningd --version
+lightning-cli --version
+```
+
 ### Use Tor on Lightning
 
 - Install Tor and verify the service is "active" and "enabled" with `systemctl status tor`.
