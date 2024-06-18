@@ -111,6 +111,7 @@ replicatedhq
 relayfee
 rf
 rhysd
+rpcwait
 runtime
 shellcheck
 shfmt
