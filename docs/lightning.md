@@ -96,6 +96,7 @@ The Ubuntu Desktop installer doesn't
   - Add the user to the tor group, shut down Lightning and Bitcoin, and restart the computer.
 
     ```
+    usermod -a -G "$(stat -c '%G' /run/tor/control.authcookie)" "${LIGHTNINGUSER:-$USER}"
     [ -f "${HOME}/.lightning/lightningd-bitcoin.pid" ] && lightning-cli stop
     while [ -f "${HOME}/.lightning/lightningd-bitcoin.pid" ]; do sleep 1; done
     [ -f "${HOME}/.bitcoin/bitcoind.pid" ] && bitcoin-cli --rpcwait stop
