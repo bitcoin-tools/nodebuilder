@@ -36,7 +36,7 @@ Data faults are inevitable with computers. Spontaneous bit flips can come from h
 
 To protect against spontaneous bit flips, you should consider:
 
-- a file system type that uses data checksums, such as BTRFS or ZFS
+- a file system type that includes data integrity checks, such as ZFS or BTRFS
 - ECC RAM (error correcting code memory), ideally 32 GB or more
 
 ### Recommended Laptop Models
@@ -68,7 +68,7 @@ If you don't see a RAID option in the UEFI setup options, your system might not 
 
 To configure RAID at the software level:
 
-1. Create a bootable USB drive with the latest LTS version of Ubuntu Server. The Ubuntu Desktop installer doesn't support RAID configuration through the installer.
+1. Create a USB boot drive with the latest LTS version of Ubuntu Server. The Ubuntu Desktop installer doesn't support RAID configuration through the installer.
 2. asdf
 
 ### Use Tor on Lightning
@@ -93,7 +93,7 @@ To configure RAID at the software level:
   always-use-proxy=true
   ```
 
-- Make sure the user running Lightning is a memeber of the Tor group.
+- Make sure the user running Lightning is a member of the Tor group.
   - Check if the user is already a member of the tor group.
 
     ```sh
