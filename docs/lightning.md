@@ -68,8 +68,9 @@ If you don't see a RAID option in the UEFI setup options, your system might not 
 
 To configure RAID at the software level:
 
-1. Create a USB boot drive with the latest LTS version of Ubuntu Server. The Ubuntu Desktop installer doesn't support RAID configuration through the installer.
-2. asdf
+1. Create a USB boot drive with the latest LTS version of Ubuntu Server installer. (Unfortunately the Ubuntu Desktop 24.04 LTS installer doesn't support RAID configuration through the installer, but the Ubuntu Server 24.04 LTS installer does.)
+2. Shutdown the computer, boot from the USB drive, and proceed with the Ubuntu Server installation.
+3. At the asdf step.
 
 ### Use Tor on Lightning
 
