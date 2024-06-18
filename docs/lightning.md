@@ -99,6 +99,6 @@ The Ubuntu Desktop installer doesn't
     [ -f "${HOME}/.lightning/lightningd-bitcoin.pid" ] && lightning-cli stop
     while [ -f "${HOME}/.lightning/lightningd-bitcoin.pid" ]; do sleep 1; done
     [ -f "${HOME}/.bitcoin/bitcoind.pid" ] && bitcoin-cli --rpcwait stop
-    while [ -f "${HOME}/.bitcoin/bitcoind.pid ]; do sleep 1; done
+    while [ -f "${HOME}/.bitcoin/bitcoind.pid" ]; do sleep 1; done
     reboot || sudo reboot
     ```
