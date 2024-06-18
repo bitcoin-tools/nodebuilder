@@ -68,7 +68,7 @@ This procedure has been tested on Ubuntu 24.
      "incrementalfee": 0.00001000,
      "localaddresses": [
        {
-         "address": "lku5sksm4cxiny3dhpp5jobudfm57p3wl3w5w6dm4n4ehev4xpyc3cid.onion",
+         "address": "********************************************************.onion",
          "port": 8333,
          "score": 4
        }
