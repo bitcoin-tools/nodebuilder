@@ -1,8 +1,7 @@
-Acknowlegements
+Acknowledgements
 Addy
 ArmanTheParman
 BTRFS
-Chainstate
 DNF
 ECC
 LTS
@@ -26,6 +25,7 @@ Yeow
 ZFS
 actionlint
 blockchain
+chainstate
 dockerfilelint
 gzip
 macOS
