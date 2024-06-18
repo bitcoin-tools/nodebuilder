@@ -24,7 +24,7 @@ To protect against hardware failure, you should consider:
 
 - RAID-1 mirroring set up between two internal drives
   - Ideally, the laptop would have both an internal NVMe drive and an internal SATA drive. See the [recommended laptop models](#recommended-laptop-models).
-  - Each drive needs at least 1 TB of capacity to sync the chain unpruned, but ideally 2 TB or more.
+  - Each drive needs at least 1 TB of capacity to sync the chain without pruning, but ideally 2 TB or more.
 - scheduled channel backups to local network storage every 5 minutes
 - scheduled encrypted channel backups to the cloud every hour
 - a spare laptop to recover your lightning node when your primary laptop dies.
