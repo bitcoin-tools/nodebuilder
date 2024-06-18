@@ -37,7 +37,7 @@ Data faults are inevitable with computers. Spontaneous bit flips can come from h
 To protect against spontaneous bit flips, you should consider:
 
 - a file system type that uses data checksums, such as Btrfs or ZFS
-   ECC RAM (error correcting code memory), ideally 32 GB or more
+- ECC RAM (error correcting code memory), ideally 32 GB or more
 
 ### Recommended Laptop Models
 
