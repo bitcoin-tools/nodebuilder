@@ -80,7 +80,7 @@ To configure RAID on Ubuntu Server:
   7. Make sure you see `partition 1  new, backup ESP, to be formatted as fat32` under USED DEVICES at the bottom.
   8. Under the free space for both drives, choose Add GPT Partition, leave the size blank, choose "Leave unformatted" for the format, and choose Create.
   9. Make sure you see `partition 2  new, unused` for both drives under AVAILABLE DEVICES in the middle.
-  10. Create the md0 drive
+  10. Create the `md0` RAID drive.
     1. Choose `Create software raid (md)`.
     2. Leave the name as md0 by default.
     3. Leave the RAID Level as `1 (mirrored)` by default.
