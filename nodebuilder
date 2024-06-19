@@ -870,6 +870,8 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   else
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
   fi
+  printf '%s\n  %s' 'ok.' 'DEBUG checking for python3... '
+  command -v python3
   printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
   if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
