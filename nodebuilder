@@ -244,7 +244,6 @@ install_build_dependencies_darwin() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n%s\n' 'DEBUG got dependencies' "${dependencies}"
   printf '%s\n' "${dependencies}" | xargs brew install --quiet > /dev/null ||
     brew link --overwrite --quiet python
 }
@@ -869,8 +868,6 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   else
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
   fi
-  printf '%s\n  %s' 'ok.' 'DEBUG checking for python3... '
-  command -v python3
   printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
   if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
