@@ -157,7 +157,9 @@ if [ -n "${nodebuilder_args}" ]; then
   printf '%s\n' "Running nodebuilder with '${NODEBUILDER_ARGS_TRIMMED}' args."
 fi
 
-./nodebuilder "${NODEBUILDER_ARGS_TRIMMED:-}" \
+# Execute the script with optional command line arguments
+readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
+"${RUN_NODEBUILDER_COMMAND}" \
   > test_output_stdout.txt \
   2> test_output_stderr.txt
 
