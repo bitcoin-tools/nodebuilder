@@ -244,8 +244,7 @@ install_build_dependencies_darwin() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs brew install --quiet > /dev/null ||
-    brew link --overwrite --quiet python
+  printf '%s\n' "${dependencies}" | xargs brew install --quiet > /dev/null
 }
 
 install_build_dependencies_dnf() {
