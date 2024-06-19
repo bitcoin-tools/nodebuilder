@@ -69,7 +69,7 @@ To configure RAID on Ubuntu Server:
 1. Create a USB boot drive with the latest LTS version of the Ubuntu Server installer.
 2. Boot into the Ubuntu Server setup and proceed normally, such as choosing your language.
 3. At the "Guided storage option" step, choose the "Custom storage layout" option to configure RAID.
-4. Set up a software RAID-1 (md) congiguration.
+4. Set up a software RAID-1 (`md`) congiguration.
     1. Determine which two drives you will reformat and use for RAID-1. The best way is to check the Capacity.
     2. Ensure both drives show only free space. If either drive shows anything other than free space, reformat it.
     3. Select one of the two drives and choose "Use As Boot Device".
@@ -84,7 +84,7 @@ To configure RAID on Ubuntu Server:
         - Leave the name as `md0` by default.
         - Leave the RAID Level as `1 (mirrored)` by default.
         - Select partition 2 from both drives.
-        - Verify that the greyed-out size at the bottom matches expectations, for example, "1.1818T" if using 2-terabyte drives.
+        - Verify that the size at the bottom matches expectations, for example, "1.1818T" if using 2-terabyte drives.
         - Select Create.
     11. Verify that a new `md0 (new, unused)` device with only free space appears under AVAILABLE DEVICES in the middle.
     12. For the free space in the `md0` device, choose Add GPT Partition, leave the size blank, select "btrfs" for the format, leave the mount as `/` by default, and choose Create.
@@ -92,7 +92,7 @@ To configure RAID on Ubuntu Server:
     14. Select Done.
 5. Continue with the Ubuntu Server setup process by setting your name, hostname, username, and password, and finish the installer.
 6. When the installation is complete, reboot into Ubuntu Server, log in, and run `sudo apt install ubuntu-desktop`.
-7. Ensure that the RAID-1 resync finishes. If you see a resyn percentage when running `cat /proc/mdstat`, wait for the amount of time specified.
+7. Ensure that the RAID-1 resync finishes. If you see a resync percentage when running `cat /proc/mdstat`, wait for the amount of time specified.
 8. When the RAID-1 resync is complete, run `reboot` and wait for the Ubuntu Desktop screen to load.
 9. Log into Ubuntu Desktop and install run System Updater to install security updates.
 
