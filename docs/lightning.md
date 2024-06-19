@@ -69,7 +69,7 @@ To configure RAID on Ubuntu Server:
 1. Create a USB boot drive with the latest LTS version of the Ubuntu Server installer.
 2. Boot into the Ubuntu Server setup and proceed normally, such as choosing your language.
 3. At the "Guided storage option" step, choose the "Custom storage layout" option to configure RAID.
-4. Set up a software RAID-1 (`md`) congiguration.
+4. Set up a software RAID-1 (`md`) configuration.
     1. Determine which two drives you will reformat and use for RAID-1. The best way is to check the Capacity.
     2. Ensure both drives show only free space. If either drive shows anything other than free space, reformat it.
     3. Select one of the two drives and choose "Use As Boot Device".
