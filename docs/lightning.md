@@ -58,8 +58,6 @@ You can either configure RAID in the UEFI (a.k.a. modern BIOS) or at the softwar
 
 To configure RAID at the hardware level:
 
-
-
 If you don't see a RAID option in the UEFI setup options, your system might not support RAID at the hardware level. Set it up at the software level instead.
 
 #### Alternatively, Configure Software-Level RAID
@@ -67,35 +65,35 @@ If you don't see a RAID option in the UEFI setup options, your system might not 
 The Ubuntu Desktop 24.04 LTS installer doesn't support RAID configuration through the installer, so use the Ubuntu Server installer.
 
 To configure RAID on Ubuntu Server:
-1. Create a USB boot drive with the latest LTS version of Ubuntu Server installer.
+1. Create a USB boot drive with the latest LTS version of the Ubuntu Server installer.
 1. Boot into the Ubuntu Server setup and proceed normally, such as choosing your language.
 2. At the "Guided storage option" step, choose the "Custom storage layout" option to configure RAID.
 3. Set up a software RAID-1 (md) congiguration.
-  1. Determine which two drives you will reformat and use for RAID-1. The best way is to look at the Capacity.
-  2. Make sure both drives show only free space. If either drive has shows anything other than free space, reformat it.
+  1. Determine which two drives you will reformat and use for RAID-1. The best way is to check the Capacity.
+  2. Ensure both drives show only free space. If either drive shows anything other than free space, reformat it.
   3. Select one of the two drives and choose "Use As Boot Device".
-  4. Make sure you see a new mount point `/boot/efi/` appear under FILE SYSTEM SUMMARY at the top.
-  5. Make sure you see `partition 1  new, primary ESP, to be formatted as fat32, mounted at /boot/efi` under USED DEVICES at the bottom.
+  4. Verify that a new mount point `/boot/efi` appears under FILE SYSTEM SUMMARY at the top.
+  5. Verify that `partition 1 new, primary ESP, to be formatted as fat32, mounted at /boot/efi` appears under USED DEVICES at the bottom.
   6. Select the other of the two drives and choose "Add As Another Boot Device".
-  7. Make sure you see `partition 1  new, backup ESP, to be formatted as fat32` under USED DEVICES at the bottom.
-  8. Under the free space for both drives, choose Add GPT Partition, leave the size blank, choose "Leave unformatted" for the format, and choose Create.
-  9. Make sure you see `partition 2  new, unused` for both drives under AVAILABLE DEVICES in the middle.
+  7. Verify that `partition 1 new, backup ESP, to be formatted as fat32` appears under USED DEVICES at the bottom.
+  8. For both drives, under the free space, choose Add GPT Partition, leave the size blank, select "Leave unformatted" for the format, and choose Create.
+  9. Verify that `partition 2 new, unused` appears for both drives under AVAILABLE DEVICES in the middle.
   10. Create the `md0` RAID drive.
-    1. Choose `Create software raid (md)`.
-    2. Leave the name as md0 by default.
+    1. Select `Create software raid (md)`.
+    2. Leave the name as `md0` by default.
     3. Leave the RAID Level as `1 (mirrored)` by default.
-    4. Select the partition 2's from both drives.
-    5. Make sure the greyed-out size at the bottom is as expected, for example "1.1818T" if using 2 terabyte drives.
-    6. Choose Create.
-  11. Make sure you see a new `md0 (new, unused)` device with only free space under AVAILABLE DEVICES in the middle.
-  12. Under the free space for the `md0` device, choose Add GPT Partition, leave the size blank, choose "btrfs" for the format, leave the mount as `/` by default, and choose Create.
-  13. Make sure you see a new mount point `/` mentioning "btrfs" and software RAID 1" appear under FILE SYSTEM SUMMARY at the top.
-  14. Choose Done.
-14. Continue with the Ubuntu Server setup process by setting your name, host name, username, and password and finishing the installer.
+    4. Select partition 2 from both drives.
+    5. Verify that the greyed-out size at the bottom matches expectations, for example, "1.1818T" if using 2-terabyte drives.
+    6. Select Create.
+  11. Verify that a new `md0 (new, unused)` device with only free space appears under AVAILABLE DEVICES in the middle.
+  12. For the free space in the `md0` device, choose Add GPT Partition, leave the size blank, select "btrfs" for the format, leave the mount as `/` by default, and choose Create.
+  13. Verify that a new mount point `/` mentioning "btrfs" and "software RAID 1" appears under FILE SYSTEM SUMMARY at the top.
+  14. Select Done.
+14. Continue with the Ubuntu Server setup process by setting your name, hostname, username, and password, and finish the installer.
 15. When the installation is complete, reboot into Ubuntu Server, log in, and run `sudo apt install ubuntu-desktop`.
-16. If you see a resyn percentage when running `cat /proc/mdstat`, wait until the RAID-1 resync process completes.
+16. Ensure that the RAID-1 resync finishes. If you see a resyn percentage when running `cat /proc/mdstat`, wait for the amount of time specified.
 17. When the RAID-1 resync is complete, run `reboot` and wait for the Ubuntu Desktop screen to load.
-18. Log into Ubuntu Desktop and install all system updates.
+18. Log into Ubuntu Desktop and install run System Updater to install security updates.
 
 ### Install Lightning
 
