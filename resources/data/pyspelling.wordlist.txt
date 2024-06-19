@@ -4,6 +4,7 @@ ArmanTheParman
 BTRFS
 DNF
 ECC
+GPT
 LTS
 MacOS
 Manjaro
@@ -25,12 +26,15 @@ Yeow
 ZFS
 actionlint
 blockchain
+btrfs
 chainstate
 dockerfilelint
 gzip
+hostname
 macOS
 nodebuilder
 openSUSE
 runtime
 shfmt
 sudo
+unformatted
