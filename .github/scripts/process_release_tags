@@ -141,7 +141,7 @@ fi
 
 # Get the new release branch
 new_release_tag_branch=''
-if [ -n "${NEW_RELEASE_TAG_BRANCH-:}" ]; then
+if [ -n "${NEW_RELEASE_TAG_BRANCH:-}" ]; then
   new_release_tag_branch="${NEW_RELEASE_TAG_BRANCH}"
   validate_branch "${new_release_tag_branch}"
 else
