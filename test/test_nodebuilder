@@ -23,6 +23,7 @@ get_operating_system() {
 
 handle_exit() {
   kill_tail_process
+  [ -f nodebuilder ] && rm nodebuilder
   [ -f test_output_stdout.txt ] && rm test_output_stdout.txt
   [ -f test_output_stderr.txt ] && rm test_output_stderr.txt
 }
@@ -154,16 +155,14 @@ nodebuilder_args=""
 if [ -n "${nodebuilder_args}" ]; then
   readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
   printf '%s\n' "Running nodebuilder with '${NODEBUILDER_ARGS_TRIMMED}' args."
-  # shellcheck disable=SC2086
-  ./nodebuilder ${NODEBUILDER_ARGS_TRIMMED} \
-    > test_output_stdout.txt \
-    2> test_output_stderr.txt
-else
-  ./nodebuilder \
-    > test_output_stdout.txt \
-    2> test_output_stderr.txt
 fi
-[ -f nodebuilder ] && rm nodebuilder
+
+./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-} \
+  > test_output_stdout.txt \
+  2> test_output_stderr.txt
+
+# After the script runs successfully
+rm nodebuilder
 kill_tail_process
 
 # Stop Bitcoin Core
