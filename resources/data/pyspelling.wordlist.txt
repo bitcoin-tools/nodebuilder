@@ -34,6 +34,7 @@ hostname
 macOS
 nodebuilder
 openSUSE
+resync
 runtime
 shfmt
 sudo
