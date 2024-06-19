@@ -63,7 +63,8 @@ push_changes_to_branch() {
 prepare_to_push_changes() {
   # Change to the repository directory
   cd "${REPO_PATH}"
-  git checkout master
+  git fetch origin master
+  git checkout -b master origin/master
   git pull origin
 
   # Get the last release version
