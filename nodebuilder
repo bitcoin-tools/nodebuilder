@@ -239,11 +239,13 @@ install_build_dependencies_darwin() {
   readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/resources/dependencies/build_dependencies_darwin.txt'
   #TODO: wrap this command with torsocks-curl with curl fallback
   sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
-    https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
+    https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  printf '%s\n' 'DEBUG installed Brew'
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n%s\n' 'DEBUG got dependencies' "${dependencies}"
   printf '%s\n' "${dependencies}" | xargs brew install --quiet > /dev/null
 }
 
