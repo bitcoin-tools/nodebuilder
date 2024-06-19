@@ -4,7 +4,6 @@ gettext
 libevent
 libtool
 pkg-config
-python
 qrencode
 qt@5
 zeromq
