@@ -246,7 +246,8 @@ install_build_dependencies_darwin() {
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n%s\n' 'DEBUG got dependencies' "${dependencies}"
-  printf '%s\n' "${dependencies}" | xargs brew install --quiet
+  printf '%s\n' "${dependencies}" | xargs brew install --quiet ||
+     { printf '%s\n' 'DEBUG linking Python' && brew link --overwrite python && printf '%s\n' 'DEBUG Brew doctoring' && brew doctor; }
 }
 
 install_build_dependencies_dnf() {
