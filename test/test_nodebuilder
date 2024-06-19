@@ -155,7 +155,7 @@ if [ -n "${nodebuilder_args}" ]; then
   readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
   printf '%s\n' "Running nodebuilder with '${NODEBUILDER_ARGS_TRIMMED}' args."
   # shellcheck disable=SC2086
-  ./nodebuilder ${NODEBUILDER_ARGS_TRIMMED} \
+  ./nodebuilder ${NODEBUILDER_ARGS_TRIMMED}
 else
   ./nodebuilder \
     > test_output_stdout.txt \
