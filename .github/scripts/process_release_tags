@@ -130,7 +130,7 @@ done
 
 # Get the new release version
 new_release_version=''
-if [ -n "${NEW_RELEASE_VERSION}" ]; then
+if [ -n "${NEW_RELEASE_VERSION:-}" ]; then
   new_release_version="${NEW_RELEASE_VERSION}"
   validate_semver "{new_release_version}"
 else
