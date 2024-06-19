@@ -236,7 +236,7 @@ install_build_dependencies_aptget() {
 }
 
 install_build_dependencies_darwin() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/1043-bug-ci-is-failing-on-macos-13-compile-job-on-brew-install/resources/dependencies/build_dependencies_darwin.txt'
+  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/resources/dependencies/build_dependencies_darwin.txt'
   #TODO: wrap this command with torsocks-curl with curl fallback
   sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
     https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
