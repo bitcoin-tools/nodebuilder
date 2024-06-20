@@ -258,7 +258,7 @@ install_build_dependencies_dnf() {
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
     dnf repolist all --verbose
-    sudo dnf config-manager --set-enabled amazonlinux-core
+    sudo yum-config-manager --enable amazonlinux-core
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
