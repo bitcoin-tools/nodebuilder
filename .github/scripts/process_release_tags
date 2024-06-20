@@ -67,10 +67,6 @@ prepare_to_push_changes() {
   git checkout -b master origin/master
   git pull origin
 
-  # Get the last release version
-  last_release_version="$(git describe --tags --abbrev=0)"
-  validate_semver "${last_release_version}"
-
   # Checkout the new release branch
   git checkout "${new_release_tag_branch}"
 }
