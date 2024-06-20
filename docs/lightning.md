@@ -4,6 +4,20 @@ These docs are a beginner-friendly version of the [installation documentation fr
 
 This guide is for Linux distributions that use the `apt` Package manager, such as Ubuntu and Debian.
 
+## Table of Contents
+
+- [Hardware and Data Considerations](#hardware-and-data-considerations)
+  - [Power Loss](#power-loss)
+  - [Hardware Failures](#hardware-failures)
+  - [Bit Flips and Data Integrity](#bit-flips-and-data-integrity)
+  - [Recommended Laptop Models](#recommended-laptop-models)
+- [Ubuntu Instructions](#ubuntu-instructions)
+  - [Configure RAID-1](#configure-raid-1)
+    - [Configure Hardware-Level RAID](#configure-hardware-level-raid)
+    - [Alternatively, Configure Software-Level RAID](#alternatively-configure-software-level-raid)
+  - [Install Lightning](#install-lightning)
+  - [Use Tor on Lightning](#use-tor-on-lightning)
+
 ## Hardware and Data Considerations
 
 Data integrity is critical for lightning nodes.
@@ -32,7 +46,7 @@ To protect against hardware failure, you should consider:
 - a spare laptop to recover your lightning node when your primary laptop dies.
   - You can use one or both of the primary laptop's storage drives in case of a failure.
 
-### Bit Flips
+### Bit Flips and Data Integrity
 
 Data faults are inevitable with computers. Spontaneous bit flips can come from hardware glitches or high-energy cosmic particles.
 
@@ -41,7 +55,7 @@ To protect against spontaneous bit flips, you should consider:
 - a file system type that includes data integrity checks, such as ZFS or BTRFS
 - ECC RAM (error correcting code memory), ideally 32 GB or more
 
-### Recommended Laptop Models
+## Recommended Laptop Models
 
 Here are laptops that support using two internal NVMe drive and internal SATA drive:
 
