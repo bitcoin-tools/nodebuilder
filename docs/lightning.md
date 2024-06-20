@@ -61,27 +61,27 @@ Here are laptops that support using two internal NVMe drive and internal SATA dr
 
 - Thinkpad E490
   - Does not support ECC RAM.
-  - Supports one NVMe and one 2.5" SATA SSD.
+  - Supports one NVMe and one 2.5" SATA.
 - Thinkpad P-Series
   - Look for models P1, P15, P53, and P73.
   - Supports ECC RAM with the Xeon E-2276M or E-2286M processors.
-  - Supports one NVMe and one 2.5" SATA SSD.
+  - Supports one NVMe and one 2.5" SATA.
 - Dell Precision Series
   - Look for models 7540 and 7740.
   - Supports ECC RAM with the Xeon E-2276M or E-2286M processors.
-  - Supports one NVMe and one 2.5" SATA SSD.
+  - Supports one NVMe and one 2.5" SATA.
 - HP ZBook Series
   - Look for models 7540 and 7740.
   - Supports ECC RAM with the Xeon E-2276M or E-2286M processors.
-  - Supports one NVMe and one 2.5" SATA SSD.
+  - Supports one NVMe and one 2.5" SATA.
 - MSI Workstation Series
   - Look for models WS65 and WS75
   - Supports ECC RAM with the Xeon E-2276M or E-2286M processors.
-  - Supports one NVMe and one 2.5" SATA SSD.
+  - Supports one NVMe and one 2.5" SATA.
 - ASUS ProArt StudioBook Series
   - Look for models Pro 17 and Pro X
   - Supports ECC RAM with the Xeon E-2276M or E-2286M processors.
-  - Supports one NVMe and one 2.5" SATA SSD.
+  - Supports one NVMe and one 2.5" SATA.
 
 ## Ubuntu Instructions
 
