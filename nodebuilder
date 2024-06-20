@@ -527,6 +527,7 @@ throw_error() {
   exit 1
 }
 
+# shellcheck disable=SC2317
 trap_exit_handler() {
   if [ $? -eq 0 ]; then
     handle_exit
