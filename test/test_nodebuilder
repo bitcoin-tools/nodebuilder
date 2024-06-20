@@ -159,8 +159,11 @@ fi
 
 # Execute the script with optional command line arguments
 ls -l ./nodebuilder
-readonly RUN_NODEBUILDER_COMMAND="nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
-./"${RUN_NODEBUILDER_COMMAND}"
+readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
+echo "Executing command: ${RUN_NODEBUILDER_COMMAND}"
+if ! ${RUN_NODEBUILDER_COMMAND}; then
+    throw_error "Failed to execute nodebuilder command."
+fi
 
 # After the script runs successfully
 rm nodebuilder
