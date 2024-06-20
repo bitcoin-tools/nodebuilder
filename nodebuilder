@@ -1118,21 +1118,21 @@ Darwin) ;; #TODO: Add macOS memory check
     "$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_free_mib / mib_gib_factor}')" \
     "$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_total_mib / mib_gib_factor}')"
 
-  if [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
+  if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
     printf '%s' 'Configuring for minimal memory usage... '
     set_if_unset_bitcoin_core_option 'dbcache' '4'
     set_if_unset_bitcoin_core_option 'maxmempool' '5'
     set_if_unset_bitcoin_core_option 'maxconnections' '4'
     [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' 'ok.'
-  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
+  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
     printf '%s' 'Configuring for reduced memory usage... '
     set_if_unset_bitcoin_core_option 'dbcache' '100'
     set_if_unset_bitcoin_core_option 'maxmempool' '50'
     set_if_unset_bitcoin_core_option 'maxconnections' '10'
     [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
     printf '%s\n' 'ok.'
-  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((8 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '256' ]; then
+  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
     printf '%s' 'Configuring for conservative memory usage... '
     set_if_unset_bitcoin_core_option 'dbcache' '225'
     set_if_unset_bitcoin_core_option 'maxmempool' '150'
