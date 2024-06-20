@@ -6,7 +6,9 @@ This guide is for Linux distributions that use the `apt` Package manager, such a
 
 ## Hardware and Data Considerations
 
-Data integrity is critical for lightning nodes. If your channel states become corrupted, your money may become unrecoverable.
+Data integrity is critical for lightning nodes.
+
+If your channel states become corrupted, your money may become unrecoverable.
 
 To avoid losing money, your lightning hardware setup should be resilient to power loss, hardware failure, and spontaneous bit flips.
 
@@ -41,10 +43,12 @@ To protect against spontaneous bit flips, you should consider:
 
 ### Recommended Laptop Models
 
-Here's a laptops that support using both an internal NVMe drive and internal SATA drive:
+Here are laptops that support using two internal NVMe drive and internal SATA drive:
 
-- Thinkpad E490 (released late 2019 / early 2020)
-  - 32 GB max ram, optional i7 upgraded processor
+- Thinkpad E490
+- Thinkpad P1
+- Thinkpad P53
+- Thinkpad P73
 
 ## Ubuntu Instructions
 
