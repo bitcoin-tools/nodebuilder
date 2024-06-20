@@ -528,11 +528,11 @@ throw_error() {
 }
 
 trap_exit_handler() {
-    if [ $? -eq 0 ]; then
-        handle_exit
-    else
-        handle_error "$LINENO"
-    fi
+  if [ $? -eq 0 ]; then
+    handle_exit
+  else
+    handle_error "${LINENO}"
+  fi
 }
 
 # This list excludes vulnerable versions, e.g. CVE-2015-6031 and CVE-2018-17144
