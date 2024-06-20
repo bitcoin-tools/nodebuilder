@@ -2,7 +2,7 @@
 
 These docs are a beginner-friendly version of the [installation documentation from Core Lightning](https://github.com/ElementsProject/lightning/blob/master/doc/getting-started/getting-started/installation.md). If you are technical, please read and follow those docs instead.
 
-At this time, these docs are for Linux distributions that use the `apt` Package manager, such as Ubuntu and Debian.
+This guide is for Linux distributions that use the `apt` Package manager, such as Ubuntu and Debian.
 
 ## Hardware and Data Considerations
 
