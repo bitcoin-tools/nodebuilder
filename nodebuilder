@@ -532,7 +532,7 @@ trap_exit_handler() {
   if [ $? -eq 0 ]; then
     handle_exit
   else
-    handle_error "${LINENO}"
+    handle_error "${LINENO:-}"
   fi
 }
 
