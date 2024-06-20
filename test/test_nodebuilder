@@ -160,7 +160,7 @@ fi
 # Execute the script with optional command line arguments
 ls -l ./nodebuilder
 readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
-"${RUN_NODEBUILDER_COMMAND}"
+sh -c "'${RUN_NODEBUILDER_COMMAND}'"
 
 # After the script runs successfully
 rm nodebuilder
