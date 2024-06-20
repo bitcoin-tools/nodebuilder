@@ -1,3 +1,4 @@
+ASUS
 Acknowledgements
 Addy
 ArmanTheParman
@@ -6,11 +7,13 @@ DNF
 ECC
 GPT
 LTS
+MSI
 MacOS
 Manjaro
 MiB
 NVMe
 Parmanode
+ProArt
 POSIX
 Proxmox
 PySpelling
@@ -18,11 +21,15 @@ RHEL
 SATA
 ShellCheck
 Shfmt
+StudioBook
 Thinkpad
 UEFI
+WS
 WSL
 Westgate
+Xeon
 Yeow
+ZBook
 ZFS
 actionlint
 blockchain
