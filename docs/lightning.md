@@ -10,7 +10,7 @@ This guide is for Linux distributions that use the `apt` Package manager, such a
   - [Power Loss](#power-loss)
   - [Hardware Failures](#hardware-failures)
   - [Bit Flips and Data Integrity](#bit-flips-and-data-integrity)
-  - [Recommended Laptop Models](#recommended-laptop-models)
+- [Recommended Laptop Models](#recommended-laptop-models)
 - [Ubuntu Instructions](#ubuntu-instructions)
   - [Configure RAID-1](#configure-raid-1)
     - [Configure Hardware-Level RAID](#configure-hardware-level-raid)
