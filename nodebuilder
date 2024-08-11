@@ -38,7 +38,7 @@ create_application_shortcuts() {
   readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
   readonly APPLICATIONS_DIRECTORY="${USER_DATA_DIRECTORY}/applications"
   readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
-  readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin/bitcoin/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
+  readonly SHORTCUT_IMAGE_SOURCE="${BITCOIN_CORE_REPO}/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
   readonly SHORTCUT_FILENAME='bitcoin-qt.desktop'
 
   [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
@@ -148,13 +148,13 @@ ensure_curl_dependency() {
       elif command -v zypper > /dev/null; then
         sudo zypper --non-interactive --quiet install curl > /dev/null
       else
-        throw_error 'PACKAGE MANAGER NOT FOUND. Please open an issue at github com bitcoin-tools nodebuilder.'
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
       fi
       ;;
     esac
     printf '%s\n' 'ok.'
   fi
-  command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error on github com bitcoin-tools nodebuilder"
+  command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
 ensure_sudo_dependency() {
@@ -195,13 +195,63 @@ ensure_sudo_dependency() {
       elif command -v zypper > /dev/null; then
         zypper --non-interactive --quiet install sudo > /dev/null
       else
-        throw_error 'PACKAGE MANAGER NOT FOUND. Please open an issue at github com bitcoin-tools nodebuilder.'
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
       fi
       ;;
     esac
     printf '%s\n' 'ok.'
   fi
-  command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error on github com bitcoin-tools nodebuilder."
+  command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
+}
+
+ensure_xargs_dependency() {
+  if ! command -v xargs > /dev/null 2>&1; then
+    printf '%s' 'Installing xargs depencency... '
+    case "${TARGET_OPERATING_SYSTEM}" in
+    alpine)
+      apk --quiet add findutils
+      ;;
+    debian | ubuntu)
+      apt-get install -y findutils > /dev/null
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
+      dnf install --allowerasing --assumeyes findutils > /dev/null
+      ;;
+    gentoo)
+      emerge --sync --quiet
+      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail sys-apps/findutils
+      ;;
+    arch | endeavouros | garuda | manjaro)
+      pacman -Syu --needed --noconfirm findutils > /dev/null
+      ;;
+    suse | *opensuse*)
+      zypper --non-interactive --quiet install findutils > /dev/null
+      ;;
+    clear-linux-os)
+      swupd bundle-add findutils > /dev/null
+      ;;
+    *)
+      if command -v apk > /dev/null; then
+        apk --quiet add findutils
+      elif command -v apt-get > /dev/null; then
+        apt-get -qq install -y findutils > /dev/null
+      elif command -v dnf > /dev/null; then
+        dnf install findutils > /dev/null
+      elif command -v pacman > /dev/null; then
+        pacman -Syu --needed --noconfirm findutils > /dev/null
+      elif command -v zypper > /dev/null; then
+        zypper --non-interactive --quiet install findutils > /dev/null
+      else
+        [ -f /etc/os-release ] && cat /etc/os-release
+        [ -f /etc/lsb-release ] && cat /etc/lsb-release
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
+      fi
+      ;;
+    esac
+    command -v xargs > /dev/null 2>&1 ||
+      throw_error "Unable to install 'xargs'. Report this error at ${NODEBUILDER_REPO}."
+    printf '%s\n' 'ok.'
+  fi
 }
 
 get_cursor_column() {
@@ -698,9 +748,13 @@ readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 
-readonly DEPENDENCIES_BASE_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies'
+readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
+readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
+readonly NODEBUILDER_DEPENDENCIES_TAG='942-bug-check-for-xargs-before-using'
+readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 ensure_sudo_dependency
+ensure_xargs_dependency
 
 if is_running_in_container; then
   printf '%s\n' 'Detected: running in a container.'
@@ -777,7 +831,7 @@ Linux)
 
   # Stop running if the Docker container base image is outdated
   if [ -f /var/run/reboot-required ] && is_running_in_container; then
-    throw_error 'The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder.'
+    throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
   # Reboot the system unless it's running in CI/CD
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n' 'REBOOT REQUIRED to upgrade the following:' "$(cat /var/run/reboot-required.pkgs)"
@@ -833,7 +887,7 @@ Linux)
     if [ -n "${install_runtime_command_function}" ]; then
       "${install_runtime_command_function}"
     else
-      throw_error 'Unknown package manager. This version of Linux is not supported.'
+      throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
     fi
     ;;
   esac
@@ -944,11 +998,10 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
     ;;
   esac
   printf '%s\n  %s' 'ok.' 'Downloading Bitcoin source code... '
-  readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin.git'
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${COMPILE_DIRECTORY}" ||
-    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${COMPILE_DIRECTORY}"
+    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" ||
+    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}"
   cd "${COMPILE_DIRECTORY}"/
   printf '%s\n  %s' 'ok.' 'Analyzing hardware configuration... '
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
@@ -1001,7 +1054,7 @@ else
     readonly GPG_SIGNATURES_FILENAME='SHA256SUMS.asc'
     readonly GPG_SIGNATURES_FILE_SOURCE="${BITCOIN_SOURCE}/${GPG_SIGNATURES_FILENAME}"
     readonly GPG_GOOD_SIGNATURES_REQUIRED='7'
-    readonly GUIX_SIGS_REPO='https://github.com/bitcoin-core/guix.sigs.git'
+    readonly GUIX_SIGS_REPO='https://github.com/bitcoin-core/guix.sigs'
     readonly BITCOIN_TARBALL_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/${BITCOIN_TARBALL_FILENAME}"
     readonly BITCOIN_HASH_FILE="${TEMP_DIRECTORY}/${BITCOIN_HASH_FILENAME}"
     readonly GPG_SIGNATURES_FILE="${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILENAME}"
@@ -1029,7 +1082,7 @@ else
     elif command -v shasum > /dev/null; then
       readonly SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
     else
-      throw_error 'Either sha256sum or shasum must on PATH. Please open an issue at github com bitcoin-tools nodebuilder.'
+      throw_error "Either sha256sum or shasum must on PATH. Please open an issue at ${NODEBUILDER_REPO}."
     fi
     cd "${HOME}"/
     case "${SHA256_CHECK}" in
@@ -1046,8 +1099,8 @@ else
     else
       # shellcheck disable=SC2015
       command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-        torsocks git clone --depth 1 --quiet "${GUIX_SIGS_REPO}" "${GUIX_SIGS_TEMPORARY_DIRECTORY}" ||
-        git clone --depth 1 --quiet "${GUIX_SIGS_REPO}" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
+        torsocks git clone --depth 1 --quiet "${GUIX_SIGS_REPO}.git" "${GUIX_SIGS_TEMPORARY_DIRECTORY}" ||
+        git clone --depth 1 --quiet "${GUIX_SIGS_REPO}.git" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
       gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
     fi
     readonly GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')"
