@@ -268,7 +268,7 @@ handle_sigint() {
 }
 
 install_build_dependencies_apk() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_apk.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_apk.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
@@ -278,7 +278,7 @@ install_build_dependencies_apk() {
 }
 
 install_build_dependencies_aptget() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_aptget.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_aptget.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
@@ -289,7 +289,7 @@ install_build_dependencies_aptget() {
 }
 
 install_build_dependencies_darwin() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_darwin.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_darwin.txt"
   #TODO: wrap this command with torsocks-curl with curl fallback
   sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
     https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
@@ -301,7 +301,7 @@ install_build_dependencies_darwin() {
 }
 
 install_build_dependencies_dnf() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_dnf.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_dnf.txt"
   readonly OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
 
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
@@ -329,7 +329,7 @@ install_build_dependencies_dnf() {
 }
 
 install_build_dependencies_emerge() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_emerge.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_emerge.txt"
   printf '\n'
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
@@ -346,7 +346,7 @@ install_build_dependencies_emerge() {
 }
 
 install_build_dependencies_pacman() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_pacman.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_pacman.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
@@ -356,7 +356,7 @@ install_build_dependencies_pacman() {
 }
 
 install_build_dependencies_swupd() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_swupd.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_swupd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
@@ -365,7 +365,7 @@ install_build_dependencies_swupd() {
 }
 
 install_build_dependencies_zypper() {
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_zypper.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_zypper.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
@@ -375,7 +375,7 @@ install_build_dependencies_zypper() {
 }
 
 install_runtime_dependencies_apk() {
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/runtime_dependencies_apk.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_apk.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -385,7 +385,7 @@ install_runtime_dependencies_apk() {
 
 install_runtime_dependencies_aptget() {
   check_dpkg_lock
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/runtime_dependencies_aptget.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_aptget.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -426,7 +426,7 @@ install_runtime_dependencies_darwin() {
 }
 
 install_runtime_dependencies_dnf() {
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/runtime_dependencies_dnf.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_dnf.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -435,7 +435,7 @@ install_runtime_dependencies_dnf() {
 }
 
 install_runtime_dependencies_emerge() {
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/runtime_dependencies_emerge.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_emerge.txt"
   printf '\n'
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
@@ -445,7 +445,7 @@ install_runtime_dependencies_emerge() {
 }
 
 install_runtime_dependencies_pacman() {
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/runtime_dependencies_pacman.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_pacman.txt"
   readonly STDERR_DEPENDENCIES_LOG_FILE="${TEMP_DIRECTORY}/stderr_runtime_dependencies_log"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
@@ -457,7 +457,7 @@ install_runtime_dependencies_pacman() {
 }
 
 install_runtime_dependencies_swupd() {
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/runtime_dependencies_swupd.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_swupd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -466,7 +466,7 @@ install_runtime_dependencies_swupd() {
 }
 
 install_runtime_dependencies_zypper() {
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/runtime_dependencies_zypper.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_zypper.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -685,6 +685,8 @@ readonly TEMP_DIRECTORY="$(mktemp -d)"
 readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
+
+readonly DEPENDENCIES_BASE_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies'
 
 ensure_sudo_dependency
 
