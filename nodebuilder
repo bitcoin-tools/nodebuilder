@@ -32,6 +32,59 @@ clear_the_terminal() {
   fi
 }
 
+create_application_shortcuts() {
+  printf '%s' 'Creating application shortcuts... '
+  readonly DESKTOP_DIRECTORY="${HOME}/Desktop"
+  readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
+  readonly APPLICATIONS_DIRECTORY="${USER_DATA_DIRECTORY}/applications"
+  readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
+  readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin/bitcoin/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
+  readonly SHORTCUT_FILENAME='bitcoin-qt.desktop'
+
+  [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
+  if ! [ -f "${SHORTCUT_IMAGE_FILE}" ]; then
+    # shellcheck disable=SC2015
+    if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
+      torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200' ||
+      curl --fail --silent --show-error --location --retry 5 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200'; then
+      command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
+        torsocks curl --fail --silent --show-error --location --retry 2 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}" ||
+        curl --fail --silent --show-error --location --retry 5 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}"
+    else
+      throw_error "Bitcoin image file doesn't exist at ${SHORTCUT_IMAGE_SOURCE}"
+    fi
+  fi
+
+  [ -d "${DESKTOP_DIRECTORY}" ] || mkdir -p "${DESKTOP_DIRECTORY}"
+  [ -d "${APPLICATIONS_DIRECTORY}" ] || mkdir -p "${APPLICATIONS_DIRECTORY}"
+  ## Create desktop entries on the user's Desktop and 'Show Applications' directories
+  cat << EOF | tee "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}" > "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
+[Desktop Entry]
+Version=1.0
+Name=Bitcoin Core
+Comment=Connect to the Bitcoin P2P Network
+Comment[de]=Verbinde mit dem Bitcoin peer-to-peer Netzwerk
+Comment[fr]=Bitcoin, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Bitcoin, eşten eşe kriptografik sanal para birimi
+Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt; else bitcoind --daemonwait; fi'
+Terminal=false
+Type=Application
+Icon=${SHORTCUT_IMAGE_FILE}
+MimeType=x-scheme-handler/bitcoin;
+Categories=Office;Finance;P2P;Network;Qt;
+StartupWMClass=Bitcoin-qt
+EOF
+  chmod u+x "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}"
+  chmod u+x "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
+  ## Make the desktop shortcut trusted
+  if is_running_in_ci || is_running_in_container; then
+    :
+  else
+    gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true
+  fi
+  printf '%s\n' 'ok.'
+}
+
 display_macos_warning() {
   if [ "${TARGET_KERNEL}" = 'Darwin' ] && [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
     printf '%s\n%s\n' \
@@ -613,9 +666,6 @@ readonly TEMP_DIRECTORY="$(mktemp -d)"
 readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
-readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
-readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
-readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin/bitcoin/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
 
 ensure_sudo_dependency
 
@@ -1056,51 +1106,7 @@ else
   printf '%s\n' 'ok.'
 fi
 
-if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
-  printf '%s' 'Creating application shortcuts... '
-  readonly DESKTOP_PATH="${HOME}/Desktop"
-  readonly APPLICATIONS_PATH="${USER_DATA_DIRECTORY}/applications"
-  readonly SHORTCUT_FILENAME='bitcoin_core.desktop'
-
-  [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
-  if ! [ -f "${SHORTCUT_IMAGE_FILE}" ]; then
-    # shellcheck disable=SC2015
-    if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-      torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200' ||
-      curl --fail --silent --show-error --location --retry 5 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200'; then
-      command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-        torsocks curl --fail --silent --show-error --location --retry 2 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}" ||
-        curl --fail --silent --show-error --location --retry 5 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}"
-    else
-      throw_error "Bitcoin image file doesn't exist at ${SHORTCUT_IMAGE_SOURCE}"
-    fi
-  fi
-
-  ## Create .desktop on the user's Desktop and 'Show Applications' directories
-  [ -d "${DESKTOP_PATH}" ] || mkdir -p "${DESKTOP_PATH}"
-  [ -d "${APPLICATIONS_PATH}" ] || mkdir -p "${APPLICATIONS_PATH}"
-  cat << EOF | tee "${APPLICATIONS_PATH}/${SHORTCUT_FILENAME}" > "${DESKTOP_PATH}/${SHORTCUT_FILENAME}"
-[Desktop Entry]
-Name=Bitcoin Core
-Comment=Launch Bitcoin Core
-Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt; else bitcoind --daemonwait; fi'
-Icon=${SHORTCUT_IMAGE_FILE}
-Terminal=false
-StartupWMClass=Bitcoin Core
-Type=Application
-Categories=Application;
-MimeType=application/bitcoin-paymentrequest;application/bitcoin-payment;application/bitcoin-paymentack;x-scheme-handler/bitcoin;
-EOF
-  chmod u+x "${APPLICATIONS_PATH}/${SHORTCUT_FILENAME}"
-  chmod u+x "${DESKTOP_PATH}/${SHORTCUT_FILENAME}"
-  ## Make the desktop shortcut trusted
-  if is_running_in_ci || is_running_in_container; then
-    :
-  else
-    gio set "${DESKTOP_PATH}/${SHORTCUT_FILENAME}" 'metadata::trusted' true
-  fi
-  printf '%s\n' 'ok.'
-fi
+[ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
 # If bitcoin.conf doesn't already exist, use default settings
 [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
