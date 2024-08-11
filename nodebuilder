@@ -138,7 +138,53 @@ ensure_sudo_dependency() {
 }
 
 ensure_xargs_dependenc() {
-  echo 'TODO'
+  if ! command -v xargs > /dev/null 2>&1; then
+    printf '%s' 'Installing xargs depencency... '
+    case "${TARGET_OPERATING_SYSTEM}" in
+    alpine)
+      apk --quiet add findutils
+      ;;
+    debian | ubuntu)
+      apt-get install -y findutils > /dev/null
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
+      dnf install --allowerasing --assumeyes findutils > /dev/null
+      ;;
+    gentoo)
+      emerge --sync --quiet
+      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail sys-apps/findutils
+      ;;
+    arch | endeavouros | garuda | manjaro)
+      pacman -Syu --needed --noconfirm findutils > /dev/null
+      ;;
+    suse | *opensuse*)
+      zypper --non-interactive --quiet install findutils > /dev/null
+      ;;
+    clear-linux-os)
+      swupd bundle-add findutils > /dev/null
+      ;;
+    *)
+      if command -v apk > /dev/null; then
+        apk --quiet add findutils
+      elif command -v apt-get > /dev/null; then
+        apt-get -qq install -y findutils > /dev/null
+      elif command -v dnf > /dev/null; then
+        dnf install findutils > /dev/null
+      elif command -v pacman > /dev/null; then
+        pacman -Syu --needed --noconfirm findutils > /dev/null
+      elif command -v zypper > /dev/null; then
+        zypper --non-interactive --quiet install findutils > /dev/null
+      else
+        [ -f /etc/os-release ] && cat /etc/os-release
+        [ -f /etc/lsb-release ] && cat /etc/lsb-release
+        throw_error 'PACKAGE MANAGER NOT FOUND. Report this error at github com bitcoin-tools nodebuilder.'
+      fi
+      ;;
+    esac
+    command -v xargs > /dev/null 2>&1 ||
+      throw_error "Unable to install 'xargs'. Report this error on github dot com slash bitcoin-tools slash nodebuilder."
+    printf '%s\n' 'ok.'
+  fi
 }
 
 get_cursor_column() {
