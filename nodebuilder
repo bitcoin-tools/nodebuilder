@@ -136,13 +136,13 @@ ensure_curl_dependency() {
       elif command -v zypper > /dev/null; then
         sudo zypper --non-interactive --quiet install curl > /dev/null
       else
-        throw_error 'PACKAGE MANAGER NOT FOUND. Please open an issue at github com bitcoin-tools nodebuilder.'
+        throw_error "PACKAGE MANAGER NOT FOUND. Please open an issue at ${NODEBUILDER_REPO}."
       fi
       ;;
     esac
     printf '%s\n' 'ok.'
   fi
-  command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error on github com bitcoin-tools nodebuilder"
+  command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
 ensure_sudo_dependency() {
@@ -183,13 +183,13 @@ ensure_sudo_dependency() {
       elif command -v zypper > /dev/null; then
         zypper --non-interactive --quiet install sudo > /dev/null
       else
-        throw_error 'PACKAGE MANAGER NOT FOUND. Please open an issue at github com bitcoin-tools nodebuilder.'
+        throw_error "Package manager was not found. Please open an issue at ${NODEBUILDER_REPO}."
       fi
       ;;
     esac
     printf '%s\n' 'ok.'
   fi
-  command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error on github com bitcoin-tools nodebuilder."
+  command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
 ensure_xargs_dependency() {
@@ -232,12 +232,12 @@ ensure_xargs_dependency() {
       else
         [ -f /etc/os-release ] && cat /etc/os-release
         [ -f /etc/lsb-release ] && cat /etc/lsb-release
-        throw_error 'PACKAGE MANAGER NOT FOUND. Report this error at github com bitcoin-tools nodebuilder.'
+        throw_error 'Package manager was not found. Report this error at ${NODEBUILDER_REPO}.'
       fi
       ;;
     esac
     command -v xargs > /dev/null 2>&1 ||
-      throw_error "Unable to install 'xargs'. Report this error on github dot com slash bitcoin-tools slash nodebuilder."
+      throw_error "Unable to install 'xargs'. Report this error at ${NODEBUILDER_REPO}."
     printf '%s\n' 'ok.'
   fi
 }
@@ -819,7 +819,7 @@ Linux)
 
   # Stop running if the Docker container base image is outdated
   if [ -f /var/run/reboot-required ] && is_running_in_container; then
-    throw_error 'The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}.'
+    throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
   # Reboot the system unless it's running in CI/CD
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n' 'REBOOT REQUIRED to upgrade the following:' "$(cat /var/run/reboot-required.pkgs)"
@@ -1070,7 +1070,7 @@ else
     elif command -v shasum > /dev/null; then
       readonly SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
     else
-      throw_error 'Either sha256sum or shasum must on PATH. Please open an issue at github com bitcoin-tools nodebuilder.'
+      throw_error "Either sha256sum or shasum must on PATH. Please open an issue at ${NODEBUILDER_REPO}."
     fi
     cd "${HOME}"/
     case "${SHA256_CHECK}" in
