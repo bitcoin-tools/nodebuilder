@@ -58,7 +58,7 @@ create_application_shortcuts() {
   [ -d "${DESKTOP_DIRECTORY}" ] || mkdir -p "${DESKTOP_DIRECTORY}"
   [ -d "${APPLICATIONS_DIRECTORY}" ] || mkdir -p "${APPLICATIONS_DIRECTORY}"
   ## Create desktop entries on the user's Desktop and 'Show Applications' directories
-  cat << EOF > "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}"
+  cat << EOF | tee "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}" > "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
 [Desktop Entry]
 Version=1.0
 Name=Bitcoin Core
