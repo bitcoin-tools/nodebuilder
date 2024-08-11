@@ -60,6 +60,7 @@ create_application_shortcuts() {
   ## Create desktop entries on the user's Desktop and 'Show Applications' directories
   cat << EOF | tee "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}" > "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
 [Desktop Entry]
+Encoding=UTF-8
 Version=1.0
 Name=Bitcoin Core
 Comment=Connect to the Bitcoin P2P Network
