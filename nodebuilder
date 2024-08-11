@@ -136,7 +136,7 @@ ensure_curl_dependency() {
       elif command -v zypper > /dev/null; then
         sudo zypper --non-interactive --quiet install curl > /dev/null
       else
-        throw_error "PACKAGE MANAGER NOT FOUND. Please open an issue at ${NODEBUILDER_REPO}."
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
       fi
       ;;
     esac
@@ -183,7 +183,7 @@ ensure_sudo_dependency() {
       elif command -v zypper > /dev/null; then
         zypper --non-interactive --quiet install sudo > /dev/null
       else
-        throw_error "Package manager was not found. Please open an issue at ${NODEBUILDER_REPO}."
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
       fi
       ;;
     esac
@@ -232,7 +232,7 @@ ensure_xargs_dependency() {
       else
         [ -f /etc/os-release ] && cat /etc/os-release
         [ -f /etc/lsb-release ] && cat /etc/lsb-release
-        throw_error 'Package manager was not found. Report this error at ${NODEBUILDER_REPO}.'
+        throw_error 'Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}.'
       fi
       ;;
     esac
@@ -875,7 +875,7 @@ Linux)
     if [ -n "${install_runtime_command_function}" ]; then
       "${install_runtime_command_function}"
     else
-      throw_error 'Unknown package manager. This version of Linux is not supported.'
+      throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
     fi
     ;;
   esac
