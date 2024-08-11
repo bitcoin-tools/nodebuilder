@@ -386,6 +386,56 @@ install_build_dependencies_zypper() {
   export CXX=g++-13
 }
 
+install_runtime_dependencies() {
+  printf '%s' 'Ensuring runtime dependencies... '
+  case "${TARGET_OPERATING_SYSTEM}" in
+  alpine)
+    install_runtime_dependencies_apk
+    ;;
+  debian | ubuntu)
+    install_runtime_dependencies_aptget
+    ;;
+  fedora* | rhel | centos* | rocky | ol)
+    install_runtime_dependencies_dnf
+    ;;
+  gentoo)
+    install_runtime_dependencies_emerge
+    ;;
+  arch | endeavouros | garuda | manjaro)
+    install_runtime_dependencies_pacman
+    ;;
+  suse | *opensuse*)
+    install_runtime_dependencies_zypper
+    ;;
+  clear-linux-os)
+    install_runtime_dependencies_swupd
+    ;;
+  *)
+    install_runtime_command_function=''
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      emerge \
+      pacman \
+      swupd \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+
+    if [ -n "${install_runtime_command_function}" ]; then
+      "${install_runtime_command_function}"
+    else
+      throw_error 'Unknown package manager. This version of Linux is not supported.'
+    fi
+    ;;
+  esac
+  printf '%s\n' 'ok.'
+}
+
 install_runtime_dependencies_apk() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_apk.txt"
   command -v torsocks > /dev/null 2>&1 &&
@@ -790,54 +840,6 @@ Linux)
     exit 0
   fi
   printf '%s\n' 'ok.'
-
-  printf '%s' 'Ensuring runtime dependencies... '
-  case "${TARGET_OPERATING_SYSTEM}" in
-  alpine)
-    install_runtime_dependencies_apk
-    ;;
-  debian | ubuntu)
-    install_runtime_dependencies_aptget
-    ;;
-  fedora* | rhel | centos* | rocky | ol)
-    install_runtime_dependencies_dnf
-    ;;
-  gentoo)
-    install_runtime_dependencies_emerge
-    ;;
-  arch | endeavouros | garuda | manjaro)
-    install_runtime_dependencies_pacman
-    ;;
-  suse | *opensuse*)
-    install_runtime_dependencies_zypper
-    ;;
-  clear-linux-os)
-    install_runtime_dependencies_swupd
-    ;;
-  *)
-    install_runtime_command_function=''
-    for package_manager in \
-      apk \
-      apt-get \
-      dnf \
-      emerge \
-      pacman \
-      swupd \
-      zypper; do
-      if command -v "${package_manager}" > /dev/null; then
-        install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
-        break
-      fi
-    done
-
-    if [ -n "${install_runtime_command_function}" ]; then
-      "${install_runtime_command_function}"
-    else
-      throw_error 'Unknown package manager. This version of Linux is not supported.'
-    fi
-    ;;
-  esac
-  printf '%s\n' 'ok.'
   ;;
 Darwin)
   readonly TARGET_BITCOIN_OPERATING_SYSTEM='apple-darwin'
@@ -852,7 +854,6 @@ Darwin)
   printf '%s\n' 'ok.'
   display_macos_warning
   printf '%s' 'Checking for git... '
-  install_runtime_dependencies_darwin
   printf '%s\n' 'ok.'
   ;;
 MINGW*)
@@ -862,6 +863,8 @@ MINGW*)
   throw_error 'Your operating system is not supported.'
   ;;
 esac
+
+install_runtime_dependencies
 
 printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
 if command -v bitcoind > /dev/null 2>&1; then
