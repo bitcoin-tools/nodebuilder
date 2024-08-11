@@ -63,7 +63,7 @@ create_application_shortcuts() {
 Version=1.0
 Name=Bitcoin Core
 Comment=Connect to the Bitcoin P2P Network
-Comment[de]=Verbinde mit dem Bitcoin Peer-to-Peer Netzwerk
+Comment[de]=Verbinde mit dem Bitcoin peer-to-peer Netzwerk
 Comment[fr]=Connectez-vous au réseau P2P de Bitcoin
 Comment[tr]=Bitcoin P2P Ağına Bağlan
 Comment[es]=Conéctate a la red P2P de Bitcoin
