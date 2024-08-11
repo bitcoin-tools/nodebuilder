@@ -38,7 +38,7 @@ create_application_shortcuts() {
   readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
   readonly APPLICATIONS_DIRECTORY="${USER_DATA_DIRECTORY}/applications"
   readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
-  readonly SHORTCUT_IMAGE_SOURCE="https://github.com/bitcoin/bitcoin/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
+  readonly SHORTCUT_IMAGE_SOURCE="${BITCOIN_CORE_REPO}/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
   readonly SHORTCUT_FILENAME='bitcoin-qt.desktop'
 
   [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
@@ -736,7 +736,10 @@ readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 
-readonly DEPENDENCIES_BASE_URL='https://github.com/bitcoin-tools/nodebuilder/raw/942-bug-check-for-xargs-before-using/resources/dependencies'
+readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
+readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
+readonly NODEBUILDER_DEPENDENCIES_TAG='942-bug-check-for-xargs-before-using'
+readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 ensure_sudo_dependency
 
@@ -815,7 +818,7 @@ Linux)
 
   # Stop running if the Docker container base image is outdated
   if [ -f /var/run/reboot-required ] && is_running_in_container; then
-    throw_error 'The Docker base image is outdated. Please open an issue at github.com/bitcoin-tools/nodebuilder.'
+    throw_error 'The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}.'
   # Reboot the system unless it's running in CI/CD
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n' 'REBOOT REQUIRED to upgrade the following:' "$(cat /var/run/reboot-required.pkgs)"
@@ -982,11 +985,10 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
     ;;
   esac
   printf '%s\n  %s' 'ok.' 'Downloading Bitcoin source code... '
-  readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin.git'
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${COMPILE_DIRECTORY}" ||
-    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}" "${COMPILE_DIRECTORY}"
+    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" ||
+    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}"
   cd "${COMPILE_DIRECTORY}"/
   printf '%s\n  %s' 'ok.' 'Analyzing hardware configuration... '
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
@@ -1039,7 +1041,7 @@ else
     readonly GPG_SIGNATURES_FILENAME='SHA256SUMS.asc'
     readonly GPG_SIGNATURES_FILE_SOURCE="${BITCOIN_SOURCE}/${GPG_SIGNATURES_FILENAME}"
     readonly GPG_GOOD_SIGNATURES_REQUIRED='7'
-    readonly GUIX_SIGS_REPO='https://github.com/bitcoin-core/guix.sigs.git'
+    readonly GUIX_SIGS_REPO='https://github.com/bitcoin-core/guix.sigs'
     readonly BITCOIN_TARBALL_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/${BITCOIN_TARBALL_FILENAME}"
     readonly BITCOIN_HASH_FILE="${TEMP_DIRECTORY}/${BITCOIN_HASH_FILENAME}"
     readonly GPG_SIGNATURES_FILE="${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILENAME}"
@@ -1084,8 +1086,8 @@ else
     else
       # shellcheck disable=SC2015
       command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-        torsocks git clone --depth 1 --quiet "${GUIX_SIGS_REPO}" "${GUIX_SIGS_TEMPORARY_DIRECTORY}" ||
-        git clone --depth 1 --quiet "${GUIX_SIGS_REPO}" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
+        torsocks git clone --depth 1 --quiet "${GUIX_SIGS_REPO}.git" "${GUIX_SIGS_TEMPORARY_DIRECTORY}" ||
+        git clone --depth 1 --quiet "${GUIX_SIGS_REPO}.git" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
       gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
     fi
     readonly GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')"
