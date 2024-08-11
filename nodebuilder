@@ -84,6 +84,7 @@ Type=Application
 Icon=${SHORTCUT_IMAGE_FILE}
 MimeType=x-scheme-handler/bitcoin;
 Categories=Office;Finance;P2P;Network;Qt;
+StartupNotify=true
 StartupWMClass=Bitcoin-qt
 EOF
   chmod u+x "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}"
