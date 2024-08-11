@@ -27,4 +27,4 @@ RUN dnf makecache \
 # Download and execute the script.
 RUN wget ${NODEBUILDER_URL} \
   && chmod u+x nodebuilder \
-  && ./nodebuilder --compile
+  && ./nodebuilder
