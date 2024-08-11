@@ -232,7 +232,7 @@ ensure_xargs_dependency() {
       else
         [ -f /etc/os-release ] && cat /etc/os-release
         [ -f /etc/lsb-release ] && cat /etc/lsb-release
-        throw_error 'Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}.'
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
       fi
       ;;
     esac
