@@ -1,16 +1,15 @@
 # syntax=docker/dockerfile:1
 # Clear Linux is known for its minimalistic approach and is optimized for performance and security.
-FROM clearlinux:latest@sha256:683443060f924791f107b52c5a1701bf154b0b59c746fdc1e9e24d36339b7589
+FROM clearlinux:latest@sha256:06458b40c0e4f642690e7f2af6c97748cbe18cfd3337d2aefa040782e78731e8
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.4.0
+ARG NODEBUILDER_VERSION=v1.6.0
 
-# Define the nodebuilder and dependencies URL.
+# Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_swupd.txt
 
 # Check the current environment.
 RUN uname -a \
@@ -18,11 +17,6 @@ RUN uname -a \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
-
-# Install system updates and dependencies.
-RUN curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs swupd bundle-add --quiet \
-  && swupd clean
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

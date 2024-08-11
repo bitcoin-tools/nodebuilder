@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Gentoo is known for its customization, optimization at the expense of image build time.
-# This Dockerfile offers a stable base image but takes extra time to compile all dependencies.
-FROM gentoo/stage3:latest@sha256:90b2978e575e59b00dae153ef57c4f425dba1baf8ddb4b9ac7219a95e310ee54
+# openSUSE is a robust Linux distribution that offers a great balance of stability and modernity.
+# This Dockerfile is ideal for users seeking a reliable, versatile operating system.
+FROM opensuse/tumbleweed:latest@sha256:63e2ff98ed784a237e5ff38b7e2c095ac43419eee42764e67e940af7d25a878b
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
@@ -19,8 +19,8 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Create the ebuild repository directory.
-RUN [ -d /var/db/repos/gentoo/ ] || mkdir -p /var/db/repos/gentoo/
+# Install system updates and dependencies.
+RUN zypper refresh && zypper --non-interactive install findutils
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

@@ -1,17 +1,16 @@
 # syntax=docker/dockerfile:1
 # Alpine is a lean, efficiency-focused Linux distribution.
 # This Dockerfile is ideal for creating lightweight, resource-efficient containers.
-FROM alpine:latest@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+FROM alpine:latest@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.4.0
+ARG NODEBUILDER_VERSION=v1.6.0
 
-# Define the nodebuilder and dependencies URL.
+# Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_apk.txt
 
 # Check the current environment.
 RUN uname -a \
@@ -21,10 +20,7 @@ RUN uname -a \
   && date -u
 
 # Install dependencies.
-RUN apk --no-cache add coreutils curl \
-  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | awk '{if ($0 == "netcat") print "netcat-openbsd"; else print $0;}' \
-  | xargs apk --no-cache add
+ RUN apk --no-cache add coreutils curl
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

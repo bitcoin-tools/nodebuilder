@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   release:
-    types: [ created, published ]
+    types: [ published ]
   schedule:
     # run every day at 0252, 0852, 1452, and 2052 UTC
     - cron: '52 2,8,14,20 * * *'
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Renovate
-        uses: renovatebot/github-action@v40.1.11
+        uses: renovatebot/github-action@v40.2.5
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -183,10 +183,6 @@ jobs:
             os-friendly-name: Ubuntu 22
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            install-upgrades-command: >-
-              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
-              && sudo apt-get update --option 'Acquire::Retries=5'
-              && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
             cache-path: |
               /var/cache/apt/archives/*.deb
               /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
@@ -199,17 +195,6 @@ jobs:
             os-friendly-name: Ubuntu 24
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            install-upgrades-command: >-
-              sleep $(echo "scale=3; $RANDOM / 32768 * 10" | bc)
-              && sudo apt-get update --option 'Acquire::Retries=5'
-              && sudo NEEDRESTART_MODE=a apt-get dist-upgrade --assume-yes --option 'Acquire::Retries=5'
-            cache-path: |
-              /var/cache/apt/archives/*.deb
-              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
-              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
-              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
-              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
-              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: macos-13
             os-friendly-name: macOS 13
@@ -240,9 +225,6 @@ jobs:
       - name: Remove the snap package
         if: matrix.remove-firefox-command != null
         run: ${{ matrix.remove-firefox-command }}
-      - name: Install system upgrades
-        if: matrix.install-upgrades-command != null
-        run: ${{ matrix.install-upgrades-command }}
       - name: Test the console output ${{ matrix.additional-args }}
         id: test-nodebuilder
         run: /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" ${{ matrix.additional-args }}
@@ -285,7 +267,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [Gentoo, Alpine, Amazon Linux, Arch, Clear Linux, Debian, Fedora, Manjaro, Oracle Linux, Red Hat, Rocky Linux, Ubuntu, openSUSE]
+        container: [Gentoo, Alpine, Amazon Linux, Arch, Clear Linux, Debian, Fedora, Manjaro, Oracle Linux, Red Hat, Rocky Linux, Ubuntu, openSUSE Leap, openSUSE Tumbleweed]
         include:
           - container: Gentoo
             dockerfile: Dockerfile_gentoo
@@ -311,15 +293,17 @@ jobs:
             dockerfile: Dockerfile_rockylinux
           - container: Ubuntu
             dockerfile: Dockerfile
-          - container: openSUSE
+          - container: openSUSE Leap
             dockerfile: Dockerfile_opensuse-leap
+          - container: openSUSE Tumbleweed
+            dockerfile: Dockerfile_opensuse-tumbleweed
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
         timeout-minutes: 300
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .

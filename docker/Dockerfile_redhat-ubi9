@@ -1,17 +1,17 @@
 # syntax=docker/dockerfile:1
 # RHEL UBI is an enterprise-grade Linux distribution with long-term support.
 # This Dockerfile is ideal for enterprise applications requiring strong support and stability.
-FROM redhat/ubi9:latest@sha256:ed84f34cd929ea6b0c247b6daef54dd79602804a32480a052951021caf429494
+FROM redhat/ubi9:latest@sha256:1ee4d8c50d14d9c9e9229d9a039d793fcbc9aa803806d194c957a397cf1d2b17
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.4.0
+ARG NODEBUILDER_VERSION=v1.6.0
 
-# Define the nodebuilder and dependencies URL.
+# Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
-ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_dnf.txt
+ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/resources/dependencies/runtime_dependencies_dnf.txt
 
 # Check the current environment.
 RUN uname -a \
@@ -20,12 +20,12 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
-# Install system updates and dependencies.
+# Install sudo dependency.
 RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install curl \
-  && curl --fail --silent --show-error --location "${DEPENDENCIES_URL}" \
-  | xargs dnf --assumeyes install \
+  && dnf --allowerasing --assumeyes install 'sudo' wget \
   && dnf clean all
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN wget ${NODEBUILDER_URL} \
+  && chmod u+x nodebuilder \
+  && ./nodebuilder
