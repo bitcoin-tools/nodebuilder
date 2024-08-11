@@ -313,7 +313,7 @@ install_build_dependencies_dnf() {
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
     dnf repolist all --verbose
-    throw_error "Unable to compile on Amazon Linux. Please run without '--compile' option."
+    throw_error "Building from source is unsupported on Amazon Linux. Re-run without the '-c/--compile' option."
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
