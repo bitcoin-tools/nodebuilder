@@ -311,11 +311,10 @@ install_build_dependencies_dnf() {
 
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
   amzn)
-    echo "DEBUG DETECTED AMZN OS ID"
-    dnf repolist all --verbose
     throw_error "Building from source is unsupported on Amazon Linux. Re-run without the '-c/--compile' option."
     ;;
   rhel)
+    set -x
     echo "DEBUG DETECTED RHEL OS ID"
     sudo subscription-manager identity > /dev/null 2>&1 ||
       throw_error "You need to register the RHEL subscription with 'sudo subscription-manager subscribe' first."
