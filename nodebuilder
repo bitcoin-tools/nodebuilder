@@ -302,10 +302,13 @@ install_build_dependencies_darwin() {
 
 install_build_dependencies_dnf() {
   readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_dnf.txt'
+  readonly OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
+
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
@@ -314,16 +317,15 @@ install_build_dependencies_dnf() {
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
-    readonly RHEL_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
     sudo subscription-manager identity > /dev/null 2>&1 ||
       throw_error "You need to register the RHEL subscription with 'sudo subscription-manager subscribe' first."
-    sudo dnf config-manager --enable "rhel-${RHEL_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms"
+    sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms"
     dnf list installed epel-release > /dev/null 2>&1 ||
-      throw_error "Failed to install EPEL release rhel-${RHEL_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
+      throw_error "Failed to install EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
     ;;
   *)
     dnf list installed epel-release > /dev/null 2>&1 ||
-      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RHEL_MAJOR_VERSION_ID}.noarch.rpm"
+      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
     ;;
   esac
   printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
