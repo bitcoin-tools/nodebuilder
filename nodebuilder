@@ -58,14 +58,26 @@ create_application_shortcuts() {
   [ -d "${DESKTOP_DIRECTORY}" ] || mkdir -p "${DESKTOP_DIRECTORY}"
   [ -d "${APPLICATIONS_DIRECTORY}" ] || mkdir -p "${APPLICATIONS_DIRECTORY}"
   ## Create desktop entries on the user's Desktop and 'Show Applications' directories
-  cat << EOF | tee "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}" > "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
+  cat << EOF > "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}"
 [Desktop Entry]
 Version=1.0
 Name=Bitcoin Core
 Comment=Connect to the Bitcoin P2P Network
-Comment[de]=Verbinde mit dem Bitcoin peer-to-peer Netzwerk
-Comment[fr]=Bitcoin, monnaie virtuelle cryptographique pair à pair
-Comment[tr]=Bitcoin, eşten eşe kriptografik sanal para birimi
+Comment[de]=Verbinde mit dem Bitcoin Peer-to-Peer Netzwerk
+Comment[fr]=Connectez-vous au réseau P2P de Bitcoin
+Comment[tr]=Bitcoin P2P Ağına Bağlan
+Comment[es]=Conéctate a la red P2P de Bitcoin
+Comment[zh]=连接到比特币P2P网络
+Comment[ja]=ビットコインP2Pネットワークに接続
+Comment[ko]=비트코인 P2P 네트워크에 연결
+Comment[ru]=Подключитесь к сети P2P Bitcoin
+Comment[pt]=Conecte-se à rede P2P do Bitcoin
+Comment[it]=Collegati alla rete P2P di Bitcoin
+Comment[nl]=Verbind met het Bitcoin P2P-netwerk
+Comment[ar]=اتصل بشبكة بيتكوين نظير إلى نظير
+Comment[pl]=Połącz z siecią P2P Bitcoin
+Comment[sv]=Anslut till Bitcoin P2P-nätverket
+Comment[hi]=बिटकॉइन पी2पी नेटवर्क से कनेक्ट करें
 Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt; else bitcoind --daemonwait; fi'
 Terminal=false
 Type=Application
