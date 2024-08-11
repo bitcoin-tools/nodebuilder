@@ -302,10 +302,29 @@ install_build_dependencies_darwin() {
 
 install_build_dependencies_dnf() {
   readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/resources/dependencies/build_dependencies_dnf.txt'
+  readonly OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
+
+  case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
+  amzn)
+    throw_error "Building from source on Amazon Linux is unsupported."
+    ;;
+  rhel)
+    sudo subscription-manager identity > /dev/null 2>&1 ||
+      throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
+    sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms" ||
+      throw_error "Failed to enable EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
+    ;;
+  *) ;;
+  esac
+
+  dnf list installed epel-release > /dev/null 2>&1 ||
+    sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+
   printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
 }
 

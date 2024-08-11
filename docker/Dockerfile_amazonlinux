@@ -21,8 +21,10 @@ RUN uname -a \
 
 # Install dependencies.
 RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install findutils gnupg2 'sudo' \
+  && dnf --allowerasing --assumeyes install findutils gnupg2 'sudo' wget \
   && dnf clean all
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN wget ${NODEBUILDER_URL} \
+  && chmod u+x nodebuilder \
+  && ./nodebuilder --compile
