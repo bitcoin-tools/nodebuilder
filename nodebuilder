@@ -314,8 +314,6 @@ install_build_dependencies_dnf() {
     throw_error "Building from source is unsupported on Amazon Linux. Re-run without the '-c/--compile' option."
     ;;
   rhel)
-    set -x
-    echo "DEBUG DETECTED RHEL OS ID"
     sudo subscription-manager identity > /dev/null 2>&1 ||
       throw_error "You need to register the RHEL subscription with 'sudo subscription-manager subscribe' first."
     sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms"
