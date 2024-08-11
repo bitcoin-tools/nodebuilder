@@ -436,7 +436,7 @@ install_build_dependencies_zypper() {
   export CXX=g++-13
 }
 
-install_runtime_dependencies() {
+install_runtime_dependencies_linux() {
   printf '%s' 'Ensuring runtime dependencies... '
   case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
@@ -890,6 +890,7 @@ Linux)
     exit 0
   fi
   printf '%s\n' 'ok.'
+  install_runtime_dependencies_linux
   ;;
 Darwin)
   readonly TARGET_BITCOIN_OPERATING_SYSTEM='apple-darwin'
@@ -914,8 +915,6 @@ MINGW*)
   throw_error 'Your operating system is not supported.'
   ;;
 esac
-
-install_runtime_dependencies
 
 printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
 if command -v bitcoind > /dev/null 2>&1; then
