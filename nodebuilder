@@ -192,7 +192,7 @@ ensure_sudo_dependency() {
   command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error on github com bitcoin-tools nodebuilder."
 }
 
-ensure_xargs_dependenc() {
+ensure_xargs_dependency() {
   if ! command -v xargs > /dev/null 2>&1; then
     printf '%s' 'Installing xargs depencency... '
     case "${TARGET_OPERATING_SYSTEM}" in
@@ -742,6 +742,7 @@ readonly NODEBUILDER_DEPENDENCIES_TAG='942-bug-check-for-xargs-before-using'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 ensure_sudo_dependency
+ensure_xargs_dependency
 
 if is_running_in_container; then
   printf '%s\n' 'Detected: running in a container.'
