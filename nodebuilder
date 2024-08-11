@@ -313,7 +313,7 @@ install_build_dependencies_dnf() {
   amzn)
     echo "DEBUG DETECTED AMZN OS ID"
     dnf repolist all --verbose
-    sudo yum-config-manager --enable amazonlinux-core
+    throw_error "Unable to compile on Amazon Linux. Please run without '--compile' option."
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
