@@ -262,7 +262,11 @@ install_build_dependencies_dnf() {
     ;;
   rhel)
     echo "DEBUG DETECTED RHEL OS ID"
+    sudo subscription-manager identity >/dev/null 2>&1 ||
+      throw_error "You need to register the RHEL subscription with 'sudo subscription-manager subscribe` first."
     sudo dnf config-manager --enable "rhel-${RHEL_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms"
+    dnf list installed epel-release > /dev/null 2>&1 ||
+      throw_error 'Failed to install EPEL release rhel-%s-for-%s-appstream-rpms.' "${RHEL_MAJOR_VERSION_ID}" "${TARGET_ARCHITECTURE}"
     ;;
   *)
     dnf list installed epel-release > /dev/null 2>&1 ||
