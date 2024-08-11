@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Renovate
-        uses: renovatebot/github-action@v40.1.11
+        uses: renovatebot/github-action@v40.2.5
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -195,13 +195,6 @@ jobs:
             os-friendly-name: Ubuntu 24
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            cache-path: |
-              /var/cache/apt/archives/*.deb
-              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
-              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
-              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
-              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
-              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: macos-13
             os-friendly-name: macOS 13
@@ -310,7 +303,7 @@ jobs:
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
         timeout-minutes: 300
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .
