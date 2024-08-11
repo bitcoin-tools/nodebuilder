@@ -5,12 +5,14 @@ Run a secure Bitcoin Core node with ease.
 Copy-paste the following command into Terminal:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/nodebuilder)"
 ```
 
-##### Health Checks
+##### License and Health Checks
 
-[![Validation CI](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml) [![Build and Push Docker Images](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml/badge.svg?event=release)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml)
+[![License: MIT-0](https://img.shields.io/badge/License-MIT--0-yellow.svg)](https://opensource.org/licenses/MIT-0)
+[![Validation CI](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
+[![Build and Push Docker Images](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml/badge.svg?event=release)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml)
 
 ## Table of Contents
 
@@ -30,13 +32,13 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/node
 As mentioned above, start the script from the command line. Open Terminal and run:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/nodebuilder)"
 ```
 
 Or download the script to your local system, set permissions, and run it:
 
 ```sh
-wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.4.0/nodebuilder
+wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/nodebuilder
 chmod u+x nodebuilder
 ./nodebuilder
 ```
@@ -65,18 +67,18 @@ docker build -f Dockerfile_alpine .
 
 | Short | Long Version | Description |
 |:-----:|:-------------|:------------|
-| `-b` | `--bitcoin-version` | Specify the Bitcoin version. Requires one argument, for example: `-b 26.0` |
+| `-b` | `--bitcoin-version` | Specify the Bitcoin version. Requires one argument, for example: `-b 27.1` |
 | `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
 | `-h` | `--help` | Display the help message. _Overrides all other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
 | `-t` | `--test` | Run unit tests on functions. |
 | `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
 
-You can set multiple options. Here are two ways to compile Bitcoin 26.0 unattended with a 50000 MiB prune:
+You can set multiple options. Here are two ways to compile Bitcoin 27.1 unattended with a 50000 MiB prune:
 
 ```sh
-./nodebuilder -b 26.0 -c -p 50000 -u
-./nodebuilder --bitcoin-version 26.0 --compile --prune 50000 --unattended
+./nodebuilder -b 27.1 -c -p 50000 -u
+./nodebuilder --bitcoin-version 27.1 --compile --prune 50000 --unattended
 ```
 
 ## Prerequisites
