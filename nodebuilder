@@ -904,6 +904,7 @@ Darwin)
   printf '%s\n' 'ok.'
   display_macos_warning
   printf '%s' 'Checking for git... '
+  install_runtime_dependencies_darwin
   printf '%s\n' 'ok.'
   ;;
 MINGW*)
