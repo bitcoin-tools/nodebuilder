@@ -924,9 +924,9 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
-  printf '%s\n' 'Detected: running on Linux.'
+  printf '%s\n' 'Detected: running in Linux.'
   is_running_in_container &&
-    printf '%s\n' 'Detected: running in a container.'
+    printf '%s\n' 'Detected: running in Docker.'
   TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   ensure_curl_dependency
@@ -942,7 +942,7 @@ Linux)
     install_system_updates
   ;;
 Darwin)
-  printf '%s\n' 'Detected: running on macOS.'
+  printf '%s\n' 'Detected: running in macOS.'
   TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
   printf '%s' 'Checking internet status... '
