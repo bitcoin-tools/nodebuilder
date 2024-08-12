@@ -979,25 +979,40 @@ else
   current_bitcoin_version=''
 fi
 
-# If version is like 'xx.yy', pad it as 'xx.yy.0'
+# If version is like 'xx.yy.zz' or 'xx.yy', pad it as 'xx.yy.zz.0'
 case "${current_bitcoin_version}" in
-'' | *[.]*[.]*)
-  current_bitcoin_version_padded="${current_bitcoin_version}"
+'' | *[.]*[.]*[.]*)
+  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}"
+  ;;
+*[.]*[.]*)
+  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0"
+  ;;
+*[.]*)
+  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0"
   ;;
 *)
-  current_bitcoin_version_padded="${current_bitcoin_version}.0"
+  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0.0"
   ;;
 esac
-case "${target_bitcoin_version}" in
-'' | *[.]*[.]*)
-  target_bitcoin_version_padded="${target_bitcoin_version}"
-  ;;
-*)
-  target_bitcoin_version_padded="${target_bitcoin_version}.0"
-  ;;
-esac
+readonly CURRENT_BITCOIN_VERSION_PADDED
 
-if [ "${current_bitcoin_version_padded}" = "${target_bitcoin_version_padded}" ]; then
+case "${target_bitcoin_version}" in
+'' | *[.]*[.]*[.]*)
+  TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
+  ;;
+*[.]*[.]*)
+  TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
+  ;;
+*[.]*)
+  TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
+  ;;
+*)
+  TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
+  ;;
+esac
+readonly TARGET_BITCOIN_VERSION_PADDED
+
+if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   printf '%s\n' 'ok.'
 elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
