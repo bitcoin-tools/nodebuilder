@@ -912,7 +912,6 @@ readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCI
 ensure_sudo_dependency
 ensure_xargs_dependency
 
-
 if is_running_in_ci ||
   is_running_in_container ||
   sudo --validate --noninteractive > /dev/null 2>&1; then
