@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 # Amazon Linux is a Linux server operating system from AWS, optimized for EC2.
 # This Dockerfile is ideal for applications that are deployed on AWS and require seamless integration.
-FROM amazonlinux:latest@sha256:0d172f83b07323d8a8a08ea2242b7d64eb676f013eba269a158f229ce062a24f
+FROM amazonlinux:latest@sha256:07900cb42ce7c5620507a79d02274d4257bc754a8359d1c7b4b52e61ffd14987
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.5.0
+ARG NODEBUILDER_VERSION=v1.6.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
@@ -21,8 +21,10 @@ RUN uname -a \
 
 # Install dependencies.
 RUN dnf makecache \
-  && dnf --allowerasing --assumeyes install findutils gnupg2 'sudo' \
+  && dnf --allowerasing --assumeyes install findutils gnupg2 'sudo' wget \
   && dnf clean all
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN wget ${NODEBUILDER_URL} \
+  && chmod u+x nodebuilder \
+  && ./nodebuilder

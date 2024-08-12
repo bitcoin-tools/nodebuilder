@@ -4,7 +4,7 @@ These docs are a beginner-friendly version of the [Tor documentation from Bitcoi
 
 At this time, your Linux distribution must use the `apt` Package manager.
 
-## apt Package Manager (Ubuntu, Debian, etc.)
+## `apt` Package Manager (Ubuntu, Debian, etc.)
 
 This procedure has been tested on Ubuntu 24.
 
@@ -60,14 +60,18 @@ This procedure has been tested on Ubuntu 24.
    getnetworkinfo
    ```
 
-9. In the response, look for a long code ending in `.onion` in the `localaddresses` at the end. You should see a . For example:
+9. Look for the `localaddresses` field at the end of the response. You should see a long address ending in `.onion`. For example:
 
    ```text
-       }
-     ],
+     ...
      "relayfee": 0.00001000,
      "incrementalfee": 0.00001000,
      "localaddresses": [
+       {
+         "address": "lku5sksm4cxiny3dhpp5jobudfm57p3wl3w5w6dm4n4ehev4xpyc3cid.onion",
+         "port": 8333,
+         "score": 4
+       }
      ],
      "warnings": ""
    }
@@ -75,6 +79,6 @@ This procedure has been tested on Ubuntu 24.
 
 10. Click on the Peers tab and wait for a peer to connect where the Network is Onion.
 
-## dnf Package Manager (Fedora, RHEL, Amazon Linux, Oracle Linux, etc.)
+## `dnf` Package Manager (Fedora, RHEL, Amazon Linux, Oracle Linux, etc.)
 
 To be determined.

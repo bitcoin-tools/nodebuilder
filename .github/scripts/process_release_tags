@@ -63,12 +63,9 @@ push_changes_to_branch() {
 prepare_to_push_changes() {
   # Change to the repository directory
   cd "${REPO_PATH}"
-  git checkout master
+  git fetch origin master
+  git checkout -b master origin/master
   git pull origin
-
-  # Get the last release version
-  last_release_version="$(git describe --tags --abbrev=0)"
-  validate_semver "${last_release_version}"
 
   # Checkout the new release branch
   git checkout "${new_release_tag_branch}"
@@ -84,23 +81,15 @@ replace_in_files() {
   fi
 }
 
-# Validate branch
 validate_branch() {
-  # Fetch the latest branches from the remote repository
+  cd "${REPO_PATH}"
   git fetch origin
-
-  # Check if the branch exists on the remote repository
   if ! git show-ref --verify --quiet refs/remotes/origin/"$1"; then
     throw_error "Branch $1 does not exist on origin. Please enter a valid branch."
   fi
-
-  # Change to the repository directory
-  cd "${REPO_PATH}"
 }
 
-# Validate SemVer format
 validate_semver() {
-  # Check if the version is in SemVer format
   if ! echo "$1" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
     throw_error "Invalid version: $1. Version must be in SemVer format without any suffix like '-beta'."
   fi
@@ -130,7 +119,7 @@ done
 
 # Get the new release version
 new_release_version=''
-if [ -n "${NEW_RELEASE_VERSION}" ]; then
+if [ -n "${NEW_RELEASE_VERSION:-}" ]; then
   new_release_version="${NEW_RELEASE_VERSION}"
   validate_semver "{new_release_version}"
 else
@@ -141,14 +130,13 @@ fi
 
 # Get the new release branch
 new_release_tag_branch=''
-if [ -n "${NEW_RELEASE_TAG_BRANCH}" ]; then
+if [ -n "${NEW_RELEASE_TAG_BRANCH:-}" ]; then
   new_release_tag_branch="${NEW_RELEASE_TAG_BRANCH}"
-  validate_branch "${new_release_tag_branch}"
 else
   printf '%s' 'Enter the release tag branch: '
   read -r new_release_tag_branch
-  validate_branch "${new_release_tag_branch}"
 fi
+validate_branch "${new_release_tag_branch}"
 
 # Open the new beta pre-release page
 open_url "${REPO_URL}/releases/new?tag=${new_release_version}-beta&title=Release%20${new_release_version}%20(beta)&prerelease=1"

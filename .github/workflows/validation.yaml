@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Renovate
-        uses: renovatebot/github-action@v40.1.12
+        uses: renovatebot/github-action@v40.2.5
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -157,6 +157,25 @@ jobs:
         with:
           config-file: 'resources/config/markdown-link-check.json' 
           use-verbose-mode: 'yes'
+
+  conventional-commits:
+    name: Check pull request title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate pull request title as a conventional commit
+        run: |
+          PR_TITLE="$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")"
+          PR_REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9\-]+\))?: .{1,}$"
+          if [[ ${PR_TITLE} =~ ${PR_REGEX} ]]; then
+            echo "Pull request title '${PR_TITLE}' is valid."
+          else
+            echo "Error: Pull request title does not follow Conventional Commits format."
+            echo "Expected format: <type>(<scope>): <description>"
+            echo "Actual title: ${PR_TITLE}"
+            exit 1
+          fi
 
   run-nodebuilder-baremetal:
     name: Test ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
@@ -303,7 +322,7 @@ jobs:
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
         timeout-minutes: 300
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .

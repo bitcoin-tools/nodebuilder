@@ -5,12 +5,21 @@ Run a secure Bitcoin Core node with ease.
 Copy-paste the following command into Terminal:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/nodebuilder)"
 ```
+
+[![Run Bitcoin Core](https://img.shields.io/badge/run-Bitcoin%20Core-orange.svg?logo=data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIzLjYzNiAxNC45MDJjLTEuNjAyIDYuNDMtOC4xMTQgMTAuMzQyLTE0LjU0MyA4Ljc0QzIuNjY2IDIyLjAzNy0xLjI0NiAxNS41MjUuMzU3IDkuMDk4IDEuOTYgMi42NjkgOC40Ny0xLjI0NCAxNC44OTcuMzU5YzYuNDMgMS42MDIgMTAuMzQxIDguMTE1IDguNzM5IDE0LjU0NCIgZmlsbD0iI2Y3OTMxYSIvPjxwYXRoIGQ9Ik0xNC42ODYgMTAuMjY3Yy0uMzcxIDEuNDg3LTIuNjYzLjczMS0zLjQwNi41NDZsLjY1NS0yLjYyOWMuNzQzLjE4NiAzLjEzOC41MzEgMi43NSAyLjA4M20tLjQwNiA0LjI0MmMtLjQwNyAxLjYzNS0zLjE2Ljc1LTQuMDUzLjUzbC43MjQtMi45Yy44OTMuMjI0IDMuNzU0LjY2NCAzLjMzIDIuMzdtMy4wMDgtNC4yMTljLjIzOC0xLjU5Ni0uOTc3LTIuNDU1LTIuNjQtMy4wMjdsLjU0LTIuMTYzLTEuMzE4LS4zMy0uNTI1IDIuMTA3YTU0LjI5MiA1NC4yOTIgMCAwIDAtMS4wNTQtLjI0OWwuNTMtMi4xMi0xLjMxNy0uMzI4LS41NCAyLjE2MmMtLjI4Ni0uMDY1LS41NjctLjEzLS44NC0uMTk4bC4wMDEtLjAwNy0xLjgxNi0uNDUzLS4zNSAxLjQwNnMuOTc3LjIyNC45NTYuMjM4Yy41MzMuMTMzLjYzLjQ4Ni42MTMuNzY2bC0uNjE1IDIuNDYzYy4wMzguMDEuMDg1LjAyNC4xMzcuMDQ1bC0uMTM4LS4wMzUtLjg2MiAzLjQ1MmMtLjA2NS4xNjEtLjIzLjQwNS0uNjA0LjMxMi4wMTQuMDItLjk1Ny0uMjM5LS45NTctLjIzOUw1LjgzNiAxNS42bDEuNzE0LjQyN2MuMzE4LjA4LjYzLjE2NC45MzguMjQybC0uNTQ1IDIuMTkgMS4zMTUuMzI4LjU0LTIuMTY0Yy4zNi4wOTcuNzA4LjE4NyAxLjA1LjI3MWwtLjUzOCAyLjE1NiAxLjMxNi4zMjguNTQ2LTIuMTgzYzIuMjQ1LjQyNCAzLjkzMy4yNTMgNC42NDMtMS43NzcuNTc0LTEuNjM1LS4wMjctMi41NzgtMS4yMDgtMy4xOTQuODYtLjE5OCAxLjUwOC0uNzY1IDEuNjgxLTEuOTM0IiBmaWxsPSIjZmZmIi8+PC9zdmc+)](https://bitcoincore.org)
+[![Language: POSIX shell](https://img.shields.io/badge/language-POSIX%20shell-green.svg?logo=gnubash)](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html)
+[![License: MIT-0](https://img.shields.io/badge/license-MIT--0-yellow.svg?logo=data:image/svg+xml;base64,PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KPCEtLSBVcGxvYWRlZCB0bzogU1ZHIFJlcG8sIHd3dy5zdmdyZXBvLmNvbSwgVHJhbnNmb3JtZWQgYnk6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIGZpbGw9IiNmZmZmZmYiIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDMyIDMyIiB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+Cg08ZyBpZD0iU1ZHUmVwb19iZ0NhcnJpZXIiIHN0cm9rZS13aWR0aD0iMCIvPgoNPGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cg08ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+IDx0aXRsZT5qdXN0aWNlPC90aXRsZT4gPHBhdGggZD0iTTI0LjA2NCA2LjU4M2wtMy43NzMgOC4zNzVoLTEuMDk4bDQuMDI0LTguOTE2aC02LjIxM3YyMC43NzFjMS4yOCAwLjA0NyA3LjgxMyAyLjE2NyA3LjgxMyAyLjE2N3YxLjAyMGgtMTcuNTZ2LTEuMDg5YzAgMCA2LjY3OC0yLjA5OSA3LjY4NC0yLjA5OXYtMjAuNzdoLTYuMDE1bDQuMDI1IDguOTE2aC0xLjA5OGwtMy43NzMtOC4zNzUtMy43NzMgOC4zNzVoLTEuMDk4bDQuMDQ4LTguOTY2di0xLjAzNGg2Ljc1NGMwLTEuMzUzIDAuOTA3LTIuNDU4IDEuOTY1LTIuNDU4IDEuMTE5IDAgMS45NjUgMS4xNjggMS45NjUgMi40NThoNi44Nzh2MC44ODdsNC4xMTYgOS4xMTNoLTEuMDk4bC0zLjc3My04LjM3NXpNMTMuMDIwIDE1Ljk3OWMwIDIuNjkzLTEuODY4IDUuMjgyLTQuOTM5IDUuMjgyLTMuMDAyIDAtNC45MzktMi41ODktNC45MzktNS4yODItMC4wMDEgMC4wMDQgOS44NzggMC4wMDQgOS44NzggMHpNMTkuMjYyIDE1Ljk3OWMwIDAuMDA1IDkuODc5IDAuMDA1IDkuODc5IDAgMCAyLjY5My0xLjg2OCA1LjI4Mi00LjkzOSA1LjI4Mi0zLjAwMyAwLTQuOTQtMi41ODktNC45NC01LjI4MnoiLz4gPC9nPgoNPC9zdmc+)](https://opensource.org/licenses/MIT-0)
+
+[![Supports: Docker](https://img.shields.io/badge/supports-Docker-blue.svg?logo=docker)](https://docs.docker.com/)
+[![Supports: Linux distros](https://img.shields.io/badge/supports-Linux%20distros-blue.svg?logo=linux)](https://en.wikipedia.org/wiki/List_of_Linux_distributions)
+[![Supports: macOS](https://img.shields.io/badge/supports-macOS-blue.svg?logo=apple)](https://support.apple.com/guide/mac-help/welcome/mac)
 
 ##### Health Checks
 
-[![Validation CI](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml) [![Build and Push Docker Images](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml/badge.svg?event=release)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml)
+[![Validation CI](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml/badge.svg?branch=master&event=push)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/validation.yaml)
+[![Build and Push Docker Images](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml/badge.svg?event=release)](https://github.com/bitcoin-tools/nodebuilder/actions/workflows/push_release_images.yaml)
 
 ## Table of Contents
 
@@ -30,13 +39,13 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/node
 As mentioned above, start the script from the command line. Open Terminal and run:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/nodebuilder)"
 ```
 
 Or download the script to your local system, set permissions, and run it:
 
 ```sh
-wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.5.0/nodebuilder
+wget https://github.com/bitcoin-tools/nodebuilder/raw/v1.6.0/nodebuilder
 chmod u+x nodebuilder
 ./nodebuilder
 ```
@@ -82,12 +91,12 @@ You can set multiple options. Here are two ways to compile Bitcoin 27.1 unattend
 ## Prerequisites
 
 1. An active internet connection (of course)
-3. A POSIX-compatible operating system
+2. A POSIX-compatible operating system
    - Linux - [Alpine](https://wiki.alpinelinux.org/wiki/Installation), [Arch](https://wiki.archlinux.org/title/installation_guide) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), [Debian](https://debian.org/releases/stable/installmanual) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview), [Fedora](https://fedoraproject.org/workstation/download), [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
    - [macOS](https://apple.com/macos)
    - Or, any system that can run [Docker](./docker/)
    - On Windows, either run nodebuilder in WSL (Windows Subsystem for Linux) or in a [Docker container](#optional-docker-container)
-6. `curl`, which the script will attempt to automatically install or you can install with a package manager
+3. `curl`, which the script will attempt to automatically install or you can install with a package manager
 
 This POSIX-compliant script installs a minimal number of [runtime dependencies](./resources/dependencies/) that aren't defined in POSIX.
 

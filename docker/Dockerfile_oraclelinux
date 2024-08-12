@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 # Oracle Linux is known for its robustness and performance.
 # This Dockerfile is a good choice for modern and resource-rich environments.
-FROM oraclelinux:9@sha256:1bc1fc7f5e0fec6fd1e47db5f63b9b35c3f734a5344ea3db81b4a43f116dd443
+FROM oraclelinux:9@sha256:75e5222c149ecb04df9b14543a112009db148f43bf8d3053be392cf1cf908b7b
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.5.0
+ARG NODEBUILDER_VERSION=v1.6.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
@@ -19,5 +19,12 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
+# Install sudo dependency.
+RUN dnf makecache \
+  && dnf --allowerasing --assumeyes install wget \
+  && dnf clean all
+
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN wget ${NODEBUILDER_URL} \
+  && chmod u+x nodebuilder \
+  && ./nodebuilder
