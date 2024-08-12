@@ -743,12 +743,10 @@ set_bitcoin_core_option() {
 set_if_unset_bitcoin_core_option() {
   option="$1"
   value="$2"
-  if [ ! -f "${bitcoin_core_config_file:?}" ]; then
+  [ ! -f "${bitcoin_core_config_file:?}" ] &&
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
-  fi
-if ! grep -q -i "^${option}=" "${bitcoin_core_config_file:?}"; then
+  grep -q -i "^${option}=" "${bitcoin_core_config_file:?}" ||
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
-  fi
 }
 
 throw_error() {
