@@ -1393,9 +1393,6 @@ else
   printf '  %s\n' 'Your node has already synced the blockchain.'
 fi
 
-# DEBUG ONLY
-set -x
-
 while [ "${ibd_status}" = 'true' ]; do
   blocks=$(echo "${blockchain_info}" | jq '.blocks')
   headers=$(echo "${blockchain_info}" | jq '.headers')
