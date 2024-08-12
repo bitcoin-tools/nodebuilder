@@ -730,24 +730,24 @@ run_unit_tests() {
 set_bitcoin_core_option() {
   option="$1"
   value="$2"
-  if [ -f "${bitcoin_core_config_file:?}" ]; then
-    sed -i.bak "/^${option}=/d" "${bitcoin_core_config_file:?}"
-    rm "${bitcoin_core_config_file:?}.bak"
+  if [ -f "${BITCOIN_CORE_CONFIG_FILE:?}" ]; then
+    sed -i.bak "/^${option}=/d" "${BITCOIN_CORE_CONFIG_FILE:?}"
+    rm "${BITCOIN_CORE_CONFIG_FILE:?}.bak"
   else
-    install -m 600 /dev/null "${bitcoin_core_config_file:?}"
+    install -m 600 /dev/null "${BITCOIN_CORE_CONFIG_FILE:?}"
   fi
-  printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
+  printf '%s\n' "${option}=${value}" >> "${BITCOIN_CORE_CONFIG_FILE:?}"
 }
 
 # This function sets a Bitcoin Core option in the configuration file if it's not already set.
 set_if_unset_bitcoin_core_option() {
   option="$1"
   value="$2"
-  if [ ! -f "${bitcoin_core_config_file:?}" ]; then
-    install -m 600 /dev/null "${bitcoin_core_config_file:?}"
+  if [ ! -f "${BITCOIN_CORE_CONFIG_FILE:?}" ]; then
+    install -m 600 /dev/null "${BITCOIN_CORE_CONFIG_FILE:?}"
   fi
-  if [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = 0 ]; then
-    printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
+  if [ "$(grep -c -i "^${option}=" "${BITCOIN_CORE_CONFIG_FILE:?}")" = 0 ]; then
+    printf '%s\n' "${option}=${value}" >> "${BITCOIN_CORE_CONFIG_FILE:?}"
   fi
 }
 
@@ -875,8 +875,8 @@ clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
   printf '%s\n' 'Detected: running on Linux.'
-  readonly TARGET_BITCOIN_OPERATING_SYSTEM='linux-gnu'
-  readonly BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
+  TARGET_BITCOIN_OPERATING_SYSTEM='linux-gnu'
+  BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   ensure_curl_dependency
   printf '%s' 'Checking internet status... '
   ( (check_internet 1.1.1.1 ||
@@ -949,8 +949,8 @@ Linux)
   install_runtime_dependencies_linux
   ;;
 Darwin)
-  readonly TARGET_BITCOIN_OPERATING_SYSTEM='apple-darwin'
-  readonly BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
+  TARGET_BITCOIN_OPERATING_SYSTEM='apple-darwin'
+  BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
   printf '%s\n%s' 'Detected: running on macOS.' 'Checking internet status... '
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
@@ -971,6 +971,11 @@ MINGW*)
   throw_error 'Your operating system is not supported.'
   ;;
 esac
+
+readonly TARGET_BITCOIN_OPERATING_SYSTEM
+readonly BITCOIN_DATA_DIRECTORY
+readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
+readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
 
 printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
 if command -v bitcoind > /dev/null 2>&1; then
@@ -1220,8 +1225,7 @@ fi
 
 # If bitcoin.conf doesn't already exist, use default settings
 [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
-bitcoin_core_config_file="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
-if [ ! -f "${bitcoin_core_config_file}" ]; then
+if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
   printf '%s' 'Setting the default node behavior... '
   is_running_in_ci && set_bitcoin_core_option 'debug' 'net'
   set_bitcoin_core_option 'mempoolfullrbf' '1'
@@ -1320,7 +1324,7 @@ elif [ "${prune_value}" -gt 0 ]; then
   set_bitcoin_core_option 'prune' "${prune_value}"
   printf '%s\n' 'ok.'
 # check that a prune value doesn't already exist in the config file
-elif [ "$(grep -c -i '^prune=' "${bitcoin_core_config_file}")" = 0 ]; then
+elif [ "$(grep -c -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}")" = 0 ]; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     printf '  %s\n' 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
@@ -1411,10 +1415,16 @@ while [ "${ibd_status}" = 'true' ]; do
 
   clear_the_terminal
   if [ "${headers}" -eq 0 ]; then
+    headers_presync_height="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d, -f2 | cut -d: -f2 | cut -d'(' -f1 | cut -d' ' -f2)"
+    headers_presync_progress_percent="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
     printf '%s\n' 'Syncing the block headers (first pass).'
+    printf 'Headers presynced:          %d\n' "${headers_presync_height}"
+    printf 'Headers presync progress:   %f %%\n' "${headers_presync_progress_percent}"
   elif [ "${blocks}" -eq 0 ]; then
+    headers_sync_progress_percent="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
     printf '%s\n' 'Syncing the block headers (second pass).'
-    printf 'Headers synced:     %d\n' "${headers}"
+    printf 'Headers synced:          %d\n' "${headers}"
+    printf 'Headers sync progress:   %f %%\n' "${headers_sync_progress_percent}"
   else
     printf 'Sync progress:      %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
