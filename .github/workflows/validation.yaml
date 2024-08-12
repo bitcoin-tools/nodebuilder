@@ -169,7 +169,7 @@ jobs:
           readonly PR_TITLE="$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")"
           readonly PR_REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9\-]+\))?: .{1,}$"
           if [[ ${PR_TITLE} =~ ${PR_REGEX} ]]; then
-            echo "Pull request title is valid."
+            echo "Pull request title '${PR_TITLE}' is valid."
           else
             echo "Error: Pull request title does not follow Conventional Commits format."
             echo "Expected format: <type>(<scope>): <description>"
