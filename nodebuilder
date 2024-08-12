@@ -486,7 +486,7 @@ install_build_dependencies_zypper() {
   export CXX=g++-13
 }
 
-install_runtime_dependencies_linux() {
+install_runtime_dependencies() {
   printf '%s' 'Ensuring runtime dependencies... '
   case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
@@ -509,6 +509,9 @@ install_runtime_dependencies_linux() {
     ;;
   clear-linux-os)
     install_runtime_dependencies_swupd
+    ;;
+  Darwin)
+    install_runtime_dependencies_darwin
     ;;
   *)
     install_runtime_command_function=''
@@ -637,7 +640,7 @@ install_runtime_dependencies_zypper() {
 }
 
 install_system_updates() {
-  printf '%s\n%s' 'ok.' 'Performing a system upgrade... '
+  printf '%s' 'Performing a system upgrade... '
   case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
     install_system_updates_apk
@@ -680,6 +683,22 @@ install_system_updates() {
     fi
     ;;
   esac
+
+  # Stop running if the Docker container base image is outdated
+  if [ -f /var/run/reboot-required ] && is_running_in_container; then
+    throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
+  # Reboot the system unless it's running in CI/CD
+  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
+    printf '\n%s\n%s\n' 'REBOOT IS REQUIRED to upgrade the following packages:' "$(cat /var/run/reboot-required.pkgs)"
+    if [ "${unattended}" = 'false' ]; then
+      printf '\n%s' 'PRESS ENTER to reboot or press Ctrl+C to exit... '
+      read -r _
+    fi
+    printf '%s\n' 'Rebooting.'
+    sudo reboot
+    exit 0
+  fi
+  printf '%s\n' 'ok.'
 }
 
 install_system_updates_apk() {
@@ -893,9 +912,6 @@ readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCI
 ensure_sudo_dependency
 ensure_xargs_dependency
 
-if is_running_in_container; then
-  printf '%s\n' 'Detected: running in a container.'
-fi
 
 if is_running_in_ci ||
   is_running_in_container ||
@@ -910,7 +926,9 @@ clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
   printf '%s\n' 'Detected: running on Linux.'
-  TARGET_BITCOIN_OPERATING_SYSTEM='linux-gnu'
+  is_running_in_container &&
+    printf '%s\n' 'Detected: running in a container.'
+  TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   ensure_curl_dependency
   printf '%s' 'Checking internet status... '
@@ -920,31 +938,15 @@ Linux)
     check_internet 9.9.9.11) &&
     check_internet bitcoincore.org) ||
     throw_error 'Check for active internet failed.'
-  if ! is_running_in_ci; then
-    install_system_updates
-  fi
-
-  # Stop running if the Docker container base image is outdated
-  if [ -f /var/run/reboot-required ] && is_running_in_container; then
-    throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
-  # Reboot the system unless it's running in CI/CD
-  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
-    printf '\n%s\n%s\n' 'REBOOT REQUIRED to upgrade the following:' "$(cat /var/run/reboot-required.pkgs)"
-    if [ "${unattended}" = 'false' ]; then
-      printf '\n%s' 'PRESS ENTER to reboot or press Ctrl+C to exit... '
-      read -r _
-    fi
-    printf '%s\n' 'Rebooting.'
-    sudo reboot
-    exit 0
-  fi
   printf '%s\n' 'ok.'
-  install_runtime_dependencies_linux
+  is_running_in_ci ||
+    install_system_updates
   ;;
 Darwin)
-  TARGET_BITCOIN_OPERATING_SYSTEM='apple-darwin'
+  printf '%s\n' 'Detected: running on macOS.'
+  TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s\n%s' 'Detected: running on macOS.' 'Checking internet status... '
+  printf '%s' 'Checking internet status... '
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
     check_internet 9.9.9.9 ||
@@ -954,7 +956,6 @@ Darwin)
   printf '%s\n' 'ok.'
   display_macos_warning
   printf '%s' 'Checking for git... '
-  install_runtime_dependencies_darwin
   printf '%s\n' 'ok.'
   ;;
 MINGW*)
@@ -965,7 +966,9 @@ MINGW*)
   ;;
 esac
 
-readonly TARGET_BITCOIN_OPERATING_SYSTEM
+install_runtime_dependencies
+
+readonly TARGET_BITCOIN_TARBALL_OS
 readonly BITCOIN_DATA_DIRECTORY
 readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
@@ -1065,7 +1068,7 @@ else
   readonly BITCOIN_INSTALL_INCLUDE_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/include"
   readonly BITCOIN_INSTALL_MAN_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/share/man/man1"
 
-  readonly BITCOIN_TARBALL_FILENAME="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${TARGET_BITCOIN_OPERATING_SYSTEM}.tar.gz"
+  readonly BITCOIN_TARBALL_FILENAME="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${TARGET_BITCOIN_TARBALL_OS}.tar.gz"
   readonly BITCOIN_TARBALL_DESTINATION_PATH="${HOME}/Downloads/${BITCOIN_TARBALL_FILENAME}"
 
   if ! [ -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ]; then
