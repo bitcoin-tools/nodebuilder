@@ -318,13 +318,6 @@ get_operating_system() {
 }
 
 # shellcheck disable=SC2317
-handle_error() {
-  log_error "Failed to run line $1."
-  handle_exit
-  exit 1
-}
-
-# shellcheck disable=SC2317
 handle_exit() {
   [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
 }
@@ -757,24 +750,15 @@ set_if_unset_bitcoin_core_option() {
 }
 
 throw_error() {
-  if [ $# -gt 1 ]; then
-    log_error "$@"
-  elif [ $# -eq 1 ]; then
+  if [ $# -eq 1 ]; then
     log_error "$1"
+  elif [ $# -gt 1 ]; then
+    log_error "$@"
   else
-    log_error "Unknown error thrown at line ${LINENO:-}"
+    log_error "Unknown error thrown."
   fi
   handle_exit
   exit 1
-}
-
-# shellcheck disable=SC2317
-trap_exit_handler() {
-  if [ $? -eq 0 ]; then
-    handle_exit
-  else
-    handle_error "${LINENO:-}"
-  fi
 }
 
 # This list excludes vulnerable versions, e.g. CVE-2015-6031 and CVE-2018-17144
@@ -843,7 +827,7 @@ done
 
 [ "${unit_tests}" = 'true' ] && run_unit_tests
 
-trap trap_exit_handler EXIT
+trap 'if [ $? -eq 0 ]; then handle_exit; else throw_error "Unhandled error at line ${LINENO:-}."; fi' EXIT
 trap handle_sigint INT
 
 readonly BYTES_TO_KIB=1024
