@@ -23,7 +23,12 @@ check_internet() {
 }
 
 clear_the_terminal() {
-  if command -v clear > /dev/null 2>&1; then
+  if is_running_in_ci || is_running_in_container; then
+    return
+  elif ! [ -t 1 ]; then
+    # stdout is not a terminal perhaps redirected or piped
+    return
+  elif command -v clear > /dev/null 2>&1; then
     clear
   elif command -v tput > /dev/null 2>&1; then
     tput clear
