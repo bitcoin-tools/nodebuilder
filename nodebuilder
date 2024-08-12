@@ -746,7 +746,7 @@ set_if_unset_bitcoin_core_option() {
   if [ ! -f "${bitcoin_core_config_file:?}" ]; then
     install -m 600 /dev/null "${bitcoin_core_config_file:?}"
   fi
-  if [ "$(grep -c -i "^${option}=" "${bitcoin_core_config_file:?}")" = 0 ]; then
+if ! grep -q -i "^${option}=" "${bitcoin_core_config_file:?}"; then
     printf '%s\n' "${option}=${value}" >> "${bitcoin_core_config_file:?}"
   fi
 }
@@ -1320,7 +1320,7 @@ elif [ "${prune_value}" -gt 0 ]; then
   set_bitcoin_core_option 'prune' "${prune_value}"
   printf '%s\n' 'ok.'
 # check that a prune value doesn't already exist in the config file
-elif [ "$(grep -c -i '^prune=' "${bitcoin_core_config_file}")" = 0 ]; then
+elif ! grep -q -i '^prune=' "${bitcoin_core_config_file}"; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     printf '  %s\n' 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
