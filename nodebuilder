@@ -24,7 +24,7 @@ check_internet_status() {
   printf '%s\n' 'ok.'
 }
 
-check_internet_status() {
+check_internet_to_address() {
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
   readonly CHECK_INTERNET_TIMEOUT='10'
