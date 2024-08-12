@@ -154,13 +154,14 @@ nodebuilder_args=""
 
 if [ -n "${nodebuilder_args}" ]; then
   readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
-  printf '%s\n' "Running nodebuilder with '${NODEBUILDER_ARGS_TRIMMED}' args."
+  printf "Running nodebuilder with '%s' args\n" "${NODEBUILDER_ARGS_TRIMMED}"
+  readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
+else
+  readonly RUN_NODEBUILDER_COMMAND="./nodebuilder"
 fi
 
 # Execute the script with optional command line arguments
-ls -l ./nodebuilder
-readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
-echo "Executing command: ${RUN_NODEBUILDER_COMMAND}"
+printf 'Executing command: %s\n' "${RUN_NODEBUILDER_COMMAND}"
 if ! ${RUN_NODEBUILDER_COMMAND} \
   > test_output_stdout.txt \
   2> test_output_stderr.txt; then
