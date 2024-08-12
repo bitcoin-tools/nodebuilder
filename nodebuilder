@@ -682,12 +682,12 @@ is_running_in_ci() {
 }
 
 is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+  if [ -f /proc/1/cgroup ] && grep -q 'docker\|lxc\|actions_job' /proc/1/cgroup; then
     return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+  elif [ -f /proc/1/mountinfo ] && grep -q 'docker\|lxc\|actions_job' /proc/1/mountinfo; then
     return 0
   else
-    return 1 #1=false
+    return 1
   fi
 }
 
@@ -741,12 +741,13 @@ set_bitcoin_core_option() {
 set_if_unset_bitcoin_core_option() {
   option="$1"
   value="$2"
+  # create a blank config file if it doesn't exist
   if [ ! -f "${BITCOIN_CORE_CONFIG_FILE:?}" ]; then
     install -m 600 /dev/null "${BITCOIN_CORE_CONFIG_FILE:?}"
   fi
-  if [ "$(grep -c -i "^${option}=" "${BITCOIN_CORE_CONFIG_FILE:?}")" = 0 ]; then
+  # add the new option if not already set
+  grep -q -i "^${option}=" "${BITCOIN_CORE_CONFIG_FILE:?}" ||
     printf '%s\n' "${option}=${value}" >> "${BITCOIN_CORE_CONFIG_FILE:?}"
-  fi
 }
 
 throw_error() {
@@ -1313,7 +1314,7 @@ elif [ "${prune_value}" -gt 0 ]; then
   set_bitcoin_core_option 'prune' "${prune_value}"
   printf '%s\n' 'ok.'
 # check that a prune value doesn't already exist in the config file
-elif [ "$(grep -c -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}")" = 0 ]; then
+elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     printf '  %s\n' 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
