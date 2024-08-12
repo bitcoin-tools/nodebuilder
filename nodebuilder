@@ -12,6 +12,17 @@ check_dpkg_lock() {
   fi
 }
 
+check_internet_status() {
+  printf '%s' 'Checking internet status... '
+  ( (check_internet_to_address 1.1.1.1 ||
+    check_internet_to_address 1.1.0.0 ||
+    check_internet_to_address 9.9.9.9 ||
+    check_internet_to_address 9.9.9.11) &&
+    check_internet_to_address bitcoincore.org) ||
+    throw_error 'Check for active internet failed.'
+  printf '%s\n' 'ok.'
+}
+
 check_internet() {
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
