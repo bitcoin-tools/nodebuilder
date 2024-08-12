@@ -684,12 +684,12 @@ is_running_in_ci() {
 }
 
 is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+  if [ -f /proc/1/cgroup ] && grep -q 'docker\|lxc\|actions_job' /proc/1/cgroup; then
     return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+  elif [ -f /proc/1/mountinfo ] && grep -q 'docker\|lxc\|actions_job' /proc/1/mountinfo; then
     return 0
   else
-    return 1 #1=false
+    return 1
   fi
 }
 
