@@ -157,6 +157,7 @@ ensure_curl_dependency() {
       ;;
     Darwin)
       throw_error "Please install the 'curl' dependency."
+      ;;
     *)
       if command -v apk > /dev/null; then
         apk --quiet add curl
