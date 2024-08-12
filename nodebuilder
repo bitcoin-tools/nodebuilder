@@ -497,7 +497,7 @@ install_build_dependencies_zypper() {
   export CXX=g++-13
 }
 
-install_runtime_dependencies_linux() {
+install_runtime_dependencies() {
   printf '%s' 'Ensuring runtime dependencies... '
   case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
@@ -520,6 +520,9 @@ install_runtime_dependencies_linux() {
     ;;
   clear-linux-os)
     install_runtime_dependencies_swupd
+    ;;
+  Darwin)
+    install_runtime_dependencies_darwin
     ;;
   *)
     install_runtime_command_function=''
@@ -647,6 +650,68 @@ install_runtime_dependencies_zypper() {
   printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
 }
 
+install_system_updates() {
+  printf '%s' 'Performing a system upgrade... '
+  case "${TARGET_OPERATING_SYSTEM}" in
+  alpine)
+    install_system_updates_apk
+    ;;
+  debian | ubuntu)
+    install_system_updates_aptget
+    ;;
+  fedora* | rhel | centos* | rocky | ol)
+    install_system_updates_dnf
+    ;;
+  gentoo)
+    install_system_updates_emerge
+    ;;
+  arch | endeavouros | garuda | manjaro)
+    install_system_updates_pacman
+    ;;
+  suse | *opensuse*)
+    install_system_updates_zypper
+    ;;
+  clear-linux-os)
+    install_system_updates_swupd
+    ;;
+  *)
+    if command -v apk > /dev/null; then
+      install_system_updates_apk
+    elif command -v apt-get > /dev/null; then
+      install_system_updates_aptget
+    elif command -v dnf > /dev/null; then
+      install_system_updates_dnf
+    elif command -v emerge > /dev/null; then
+      install_system_updates_emerge
+    elif command -v pacman > /dev/null; then
+      install_system_updates_pacman
+    elif command -v swupd > /dve/null; then
+      install_system_updates_swupd
+    elif command -v zypper > /dev/null; then
+      install_system_updates_zypper
+    else
+      throw_error 'This version of Linux is not supported.'
+    fi
+    ;;
+  esac
+
+  # Stop running if the Docker container base image is outdated
+  if [ -f /var/run/reboot-required ] && is_running_in_container; then
+    throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
+  # Reboot the system unless it's running in CI/CD
+  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
+    printf '\n%s\n%s\n' 'REBOOT IS REQUIRED to upgrade the following packages:' "$(cat /var/run/reboot-required.pkgs)"
+    if [ "${unattended}" = 'false' ]; then
+      printf '\n%s' 'PRESS ENTER to reboot or press Ctrl+C to exit... '
+      read -r _
+    fi
+    printf '%s\n' 'Rebooting.'
+    sudo reboot
+    exit 0
+  fi
+  printf '%s\n' 'ok.'
+}
+
 install_system_updates_apk() {
   apk update --quiet && apk upgrade --quiet
 }
@@ -693,12 +758,12 @@ is_running_in_ci() {
 }
 
 is_running_in_container() {
-  if [ -f /proc/1/cgroup ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/cgroup)" -gt 0 ]; then
+  if [ -f /proc/1/cgroup ] && grep -q 'docker\|lxc\|actions_job' /proc/1/cgroup; then
     return 0
-  elif [ -f /proc/1/mountinfo ] && [ "$(grep -c 'docker\|lxc\|actions_job' /proc/1/mountinfo)" -gt 0 ]; then
+  elif [ -f /proc/1/mountinfo ] && grep -q 'docker\|lxc\|actions_job' /proc/1/mountinfo; then
     return 0
   else
-    return 1 #1=false
+    return 1
   fi
 }
 
@@ -752,12 +817,13 @@ set_bitcoin_core_option() {
 set_if_unset_bitcoin_core_option() {
   option="$1"
   value="$2"
+  # create a blank config file if it doesn't exist
   if [ ! -f "${BITCOIN_CORE_CONFIG_FILE:?}" ]; then
     install -m 600 /dev/null "${BITCOIN_CORE_CONFIG_FILE:?}"
   fi
-  if [ "$(grep -c -i "^${option}=" "${BITCOIN_CORE_CONFIG_FILE:?}")" = 0 ]; then
+  # add the new option if not already set
+  grep -q -i "^${option}=" "${BITCOIN_CORE_CONFIG_FILE:?}" ||
     printf '%s\n' "${option}=${value}" >> "${BITCOIN_CORE_CONFIG_FILE:?}"
-  fi
 }
 
 throw_error() {
@@ -858,10 +924,6 @@ readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCI
 ensure_sudo_dependency
 ensure_xargs_dependency
 
-if is_running_in_container; then
-  printf '%s\n' 'Detected: running in a container.'
-fi
-
 if is_running_in_ci ||
   is_running_in_container ||
   sudo --validate --noninteractive > /dev/null 2>&1; then
@@ -874,8 +936,10 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
-  printf '%s\n' 'Detected: running on Linux.'
-  TARGET_BITCOIN_OPERATING_SYSTEM='linux-gnu'
+  printf '%s\n' 'Detected: running in Linux.'
+  is_running_in_container &&
+    printf '%s\n' 'Detected: running in Docker.'
+  TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   ensure_curl_dependency
   printf '%s' 'Checking internet status... '
@@ -885,73 +949,15 @@ Linux)
     check_internet 9.9.9.11) &&
     check_internet bitcoincore.org) ||
     throw_error 'Check for active internet failed.'
-  if ! is_running_in_ci; then
-    printf '%s\n%s' 'ok.' 'Performing a system upgrade... '
-    case "${TARGET_OPERATING_SYSTEM}" in
-    alpine)
-      install_system_updates_apk
-      ;;
-    debian | ubuntu)
-      install_system_updates_aptget
-      ;;
-    fedora* | rhel | centos* | rocky | ol)
-      install_system_updates_dnf
-      ;;
-    gentoo)
-      install_system_updates_emerge
-      ;;
-    arch | endeavouros | garuda | manjaro)
-      install_system_updates_pacman
-      ;;
-    suse | *opensuse*)
-      install_system_updates_zypper
-      ;;
-    clear-linux-os)
-      install_system_updates_swupd
-      ;;
-    *)
-      if command -v apk > /dev/null; then
-        install_system_updates_apk
-      elif command -v apt-get > /dev/null; then
-        install_system_updates_aptget
-      elif command -v dnf > /dev/null; then
-        install_system_updates_dnf
-      elif command -v emerge > /dev/null; then
-        install_system_updates_emerge
-      elif command -v pacman > /dev/null; then
-        install_system_updates_pacman
-      elif command -v swupd > /dve/null; then
-        install_system_updates_swupd
-      elif command -v zypper > /dev/null; then
-        install_system_updates_zypper
-      else
-        throw_error 'This version of Linux is not supported.'
-      fi
-      ;;
-    esac
-  fi
-
-  # Stop running if the Docker container base image is outdated
-  if [ -f /var/run/reboot-required ] && is_running_in_container; then
-    throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
-  # Reboot the system unless it's running in CI/CD
-  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
-    printf '\n%s\n%s\n' 'REBOOT REQUIRED to upgrade the following:' "$(cat /var/run/reboot-required.pkgs)"
-    if [ "${unattended}" = 'false' ]; then
-      printf '\n%s' 'PRESS ENTER to reboot or press Ctrl+C to exit... '
-      read -r _
-    fi
-    printf '%s\n' 'Rebooting.'
-    sudo reboot
-    exit 0
-  fi
   printf '%s\n' 'ok.'
-  install_runtime_dependencies_linux
+  is_running_in_ci ||
+    install_system_updates
   ;;
 Darwin)
-  TARGET_BITCOIN_OPERATING_SYSTEM='apple-darwin'
+  printf '%s\n' 'Detected: running in macOS.'
+  TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s\n%s' 'Detected: running on macOS.' 'Checking internet status... '
+  printf '%s' 'Checking internet status... '
   ( (check_internet 1.1.1.1 ||
     check_internet 1.1.0.0 ||
     check_internet 9.9.9.9 ||
@@ -961,7 +967,6 @@ Darwin)
   printf '%s\n' 'ok.'
   display_macos_warning
   printf '%s' 'Checking for git... '
-  install_runtime_dependencies_darwin
   printf '%s\n' 'ok.'
   ;;
 MINGW*)
@@ -972,7 +977,9 @@ MINGW*)
   ;;
 esac
 
-readonly TARGET_BITCOIN_OPERATING_SYSTEM
+install_runtime_dependencies
+
+readonly TARGET_BITCOIN_TARBALL_OS
 readonly BITCOIN_DATA_DIRECTORY
 readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
@@ -1072,7 +1079,7 @@ else
   readonly BITCOIN_INSTALL_INCLUDE_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/include"
   readonly BITCOIN_INSTALL_MAN_DESTINATION="${BITCOIN_INSTALL_DESTINATION}/share/man/man1"
 
-  readonly BITCOIN_TARBALL_FILENAME="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${TARGET_BITCOIN_OPERATING_SYSTEM}.tar.gz"
+  readonly BITCOIN_TARBALL_FILENAME="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${TARGET_BITCOIN_TARBALL_OS}.tar.gz"
   readonly BITCOIN_TARBALL_DESTINATION_PATH="${HOME}/Downloads/${BITCOIN_TARBALL_FILENAME}"
 
   if ! [ -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ]; then
@@ -1324,7 +1331,7 @@ elif [ "${prune_value}" -gt 0 ]; then
   set_bitcoin_core_option 'prune' "${prune_value}"
   printf '%s\n' 'ok.'
 # check that a prune value doesn't already exist in the config file
-elif [ "$(grep -c -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}")" = 0 ]; then
+elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     printf '  %s\n' 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
@@ -1418,7 +1425,7 @@ while [ "${ibd_status}" = 'true' ]; do
     headers_presync_height="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d, -f2 | cut -d: -f2 | cut -d'(' -f1 | cut -d' ' -f2)"
     headers_presync_progress_percent="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
     printf '%s\n' 'Syncing the block headers (first pass).'
-    printf 'Headers presynced:          %d\n' "${headers_presync_height}"
+    printf 'Headers presynced:          %s\n' "${headers_presync_height}"
     printf 'Headers presync progress:   %.2f %%\n' "${headers_presync_progress_percent}"
   elif [ "${blocks}" -eq 0 ]; then
     headers_sync_progress_percent="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
