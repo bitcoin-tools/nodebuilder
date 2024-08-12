@@ -1419,23 +1419,24 @@ while [ "${ibd_status}" = 'true' ]; do
     headers_presync_progress_percent="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
     printf '%s\n' 'Syncing the block headers (first pass).'
     printf 'Headers presynced:          %d\n' "${headers_presync_height}"
-    printf 'Headers presync progress:   %f %%\n' "${headers_presync_progress_percent}"
+    printf 'Headers presync progress:   %.2f %%\n' "${headers_presync_progress_percent}"
   elif [ "${blocks}" -eq 0 ]; then
     headers_sync_progress_percent="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
     printf '%s\n' 'Syncing the block headers (second pass).'
-    printf 'Headers synced:          %d\n' "${headers}"
-    printf 'Headers sync progress:   %f %%\n' "${headers_sync_progress_percent}"
+    printf 'Headers synced:             %d\n' "${headers}"
+    printf 'Headers sync progress:      %.2f %%\n' "${headers_sync_progress_percent}"
   else
-    printf 'Sync progress:      %.3f %%\n' "${sync_progress_percent}"
-    printf 'Blocks remaining:   %d\n' "$((headers - blocks))"
+    printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
+    printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
 
     if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-      printf 'Current chain tip:  %s\n' "$(/bin/date -r "${last_block_time}" | cut -c 5-)"
+      current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
     else
-      printf 'Current chain tip:  %s\n' "$(date -d @"${last_block_time}" | cut -c 5-)"
+      current_chain_tip_timestamp="$(date -d @"${last_block_time}" | cut -c 5-)"
     fi
+    printf 'Current chain tip:        %s\n' "${current_chain_tip_timestamp}"
 
-    printf '%s' 'Chain sync size:    '
+    printf '%s' 'Chain sync size:          '
     if [ "${size_on_disk_in_mib}" -gt "${MIB_TO_GIB}" ]; then
       printf '%d GiB\n' "$((size_on_disk_in_mib / MIB_TO_GIB))"
     else
@@ -1443,7 +1444,7 @@ while [ "${ibd_status}" = 'true' ]; do
     fi
   fi
 
-  printf '%s' 'Disk free space:    '
+  printf '%s' 'Disk free space:              '
   if [ "${free_space_in_mib}" -gt "${MIB_TO_GIB}" ]; then
     printf '%d GiB\n' "$((free_space_in_mib / MIB_TO_GIB))"
   else
