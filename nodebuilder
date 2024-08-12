@@ -331,6 +331,56 @@ handle_sigint() {
   exit 0
 }
 
+install_build_dependencies() {
+  case "${TARGET_OPERATING_SYSTEM}" in
+  alpine)
+    install_build_dependencies_apk
+    ;;
+  debian | ubuntu)
+    install_build_dependencies_aptget
+    ;;
+  fedora* | rhel | centos* | rocky | ol)
+    install_build_dependencies_dnf
+    ;;
+  gentoo)
+    install_build_dependencies_emerge
+    ;;
+  arch | endeavouros | garuda | manjaro)
+    install_build_dependencies_pacman
+    ;;
+  suse | *opensuse*)
+    install_build_dependencies_zypper
+    ;;
+  clear-linux-os)
+    install_build_dependencies_swupd
+    ;;
+  Darwin)
+    install_build_dependencies_darwin
+    ;;
+  *)
+    install_build_command_function=''
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      emerge \
+      pacman \
+      swupd \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+    if [ -n "${install_build_command_function}" ]; then
+      "${install_build_command_function}"
+    else
+      printf '%s\n  %s\n' 'failed.' 'Unable to determine build dependencies. Attempting to compile without verifying dependencies.'
+    fi
+    ;;
+  esac
+}
+
 install_build_dependencies_apk() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_apk.txt"
   command -v torsocks > /dev/null 2>&1 &&
@@ -436,6 +486,56 @@ install_build_dependencies_zypper() {
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install
   export CXX=g++-13
+}
+
+install_runtime_dependencies_linux() {
+  printf '%s' 'Ensuring runtime dependencies... '
+  case "${TARGET_OPERATING_SYSTEM}" in
+  alpine)
+    install_runtime_dependencies_apk
+    ;;
+  debian | ubuntu)
+    install_runtime_dependencies_aptget
+    ;;
+  fedora* | rhel | centos* | rocky | ol)
+    install_runtime_dependencies_dnf
+    ;;
+  gentoo)
+    install_runtime_dependencies_emerge
+    ;;
+  arch | endeavouros | garuda | manjaro)
+    install_runtime_dependencies_pacman
+    ;;
+  suse | *opensuse*)
+    install_runtime_dependencies_zypper
+    ;;
+  clear-linux-os)
+    install_runtime_dependencies_swupd
+    ;;
+  *)
+    install_runtime_command_function=''
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      emerge \
+      pacman \
+      swupd \
+      zypper; do
+      if command -v "${package_manager}" > /dev/null; then
+        install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
+      fi
+    done
+
+    if [ -n "${install_runtime_command_function}" ]; then
+      "${install_runtime_command_function}"
+    else
+      throw_error 'Unknown package manager. This version of Linux is not supported.'
+    fi
+    ;;
+  esac
+  printf '%s\n' 'ok.'
 }
 
 install_runtime_dependencies_apk() {
@@ -752,7 +852,7 @@ readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='942-bug-check-for-xargs-before-using'
+readonly NODEBUILDER_DEPENDENCIES_TAG='1170-feat-refactor-the-dependencies-installation'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 ensure_sudo_dependency
@@ -846,54 +946,7 @@ Linux)
     exit 0
   fi
   printf '%s\n' 'ok.'
-
-  printf '%s' 'Ensuring runtime dependencies... '
-  case "${TARGET_OPERATING_SYSTEM}" in
-  alpine)
-    install_runtime_dependencies_apk
-    ;;
-  debian | ubuntu)
-    install_runtime_dependencies_aptget
-    ;;
-  fedora* | rhel | centos* | rocky | ol)
-    install_runtime_dependencies_dnf
-    ;;
-  gentoo)
-    install_runtime_dependencies_emerge
-    ;;
-  arch | endeavouros | garuda | manjaro)
-    install_runtime_dependencies_pacman
-    ;;
-  suse | *opensuse*)
-    install_runtime_dependencies_zypper
-    ;;
-  clear-linux-os)
-    install_runtime_dependencies_swupd
-    ;;
-  *)
-    install_runtime_command_function=''
-    for package_manager in \
-      apk \
-      apt-get \
-      dnf \
-      emerge \
-      pacman \
-      swupd \
-      zypper; do
-      if command -v "${package_manager}" > /dev/null; then
-        install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
-        break
-      fi
-    done
-
-    if [ -n "${install_runtime_command_function}" ]; then
-      "${install_runtime_command_function}"
-    else
-      throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
-    fi
-    ;;
-  esac
-  printf '%s\n' 'ok.'
+  install_runtime_dependencies_linux
   ;;
 Darwin)
   readonly TARGET_BITCOIN_OPERATING_SYSTEM='apple-darwin'
@@ -952,53 +1005,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   printf '%s\n  %s' 'no.' 'Ensuring compile dependencies... '
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
-  case "${TARGET_OPERATING_SYSTEM}" in
-  alpine)
-    install_build_dependencies_apk
-    ;;
-  debian | ubuntu)
-    install_build_dependencies_aptget
-    ;;
-  fedora* | rhel | centos* | rocky | ol)
-    install_build_dependencies_dnf
-    ;;
-  gentoo)
-    install_build_dependencies_emerge
-    ;;
-  arch | endeavouros | garuda | manjaro)
-    install_build_dependencies_pacman
-    ;;
-  suse | *opensuse*)
-    install_build_dependencies_zypper
-    ;;
-  clear-linux-os)
-    install_build_dependencies_swupd
-    ;;
-  Darwin)
-    install_build_dependencies_darwin
-    ;;
-  *)
-    install_build_command_function=''
-    for package_manager in \
-      apk \
-      apt-get \
-      dnf \
-      emerge \
-      pacman \
-      swupd \
-      zypper; do
-      if command -v "${package_manager}" > /dev/null; then
-        install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
-        break
-      fi
-    done
-    if [ -n "${install_build_command_function}" ]; then
-      "${install_build_command_function}"
-    else
-      printf '%s\n  %s\n' 'failed.' 'Unable to determine build dependencies. Attempting to compile without verifying dependencies.'
-    fi
-    ;;
-  esac
+  install_build_dependencies
   printf '%s\n  %s' 'ok.' 'Downloading Bitcoin source code... '
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
