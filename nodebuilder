@@ -852,7 +852,7 @@ readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='1170-feat-refactor-the-dependencies-installation'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.6.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 ensure_sudo_dependency
