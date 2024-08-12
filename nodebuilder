@@ -24,7 +24,7 @@ check_internet_status() {
   printf '%s\n' 'ok.'
 }
 
-check_internet() {
+check_internet_status() {
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
   readonly CHECK_INTERNET_TIMEOUT='10'
@@ -956,7 +956,7 @@ MINGW*)
   ;;
 esac
 
-printf '%s\n' 'Detected: running ${TARGET_BITCOIN_TARBALL_OS}.'
+printf '%s\n' "Detected: running ${TARGET_BITCOIN_TARBALL_OS}."
 is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
 check_internet_status
 # don't install system updates on CI or Darwin (macOS)
