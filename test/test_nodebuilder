@@ -23,6 +23,7 @@ get_operating_system() {
 
 handle_exit() {
   kill_tail_process
+  [ -f nodebuilder ] && rm nodebuilder
   [ -f test_output_stdout.txt ] && rm test_output_stdout.txt
   [ -f test_output_stderr.txt ] && rm test_output_stderr.txt
 }
@@ -153,17 +154,22 @@ nodebuilder_args=""
 
 if [ -n "${nodebuilder_args}" ]; then
   readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
-  printf '%s\n' "Running nodebuilder with '${NODEBUILDER_ARGS_TRIMMED}' args."
-  # shellcheck disable=SC2086
-  ./nodebuilder ${NODEBUILDER_ARGS_TRIMMED} \
-    > test_output_stdout.txt \
-    2> test_output_stderr.txt
+  printf "Running nodebuilder with '%s' args\n" "${NODEBUILDER_ARGS_TRIMMED}"
+  readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
 else
-  ./nodebuilder \
-    > test_output_stdout.txt \
-    2> test_output_stderr.txt
+  readonly RUN_NODEBUILDER_COMMAND="./nodebuilder"
 fi
-[ -f nodebuilder ] && rm nodebuilder
+
+# Execute the script with optional command line arguments
+printf 'Executing command: %s\n' "${RUN_NODEBUILDER_COMMAND}"
+if ! ${RUN_NODEBUILDER_COMMAND} \
+  > test_output_stdout.txt \
+  2> test_output_stderr.txt; then
+  throw_error "Failed to execute nodebuilder command."
+fi
+
+# After the script runs successfully
+rm nodebuilder
 kill_tail_process
 
 # Stop Bitcoin Core
