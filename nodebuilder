@@ -13,6 +13,7 @@ check_dpkg_lock() {
 }
 
 check_internet_status() {
+  ensure_curl_dependency
   printf '%s' 'Checking internet status... '
   ( (check_internet_to_address 1.1.1.1 ||
     check_internet_to_address 1.1.0.0 ||
@@ -154,6 +155,8 @@ ensure_curl_dependency() {
     clear-linux-os)
       sudo swupd bundle-add curl > /dev/null
       ;;
+    Darwin)
+      throw_error "Please install the 'curl' dependency."
     *)
       if command -v apk > /dev/null; then
         apk --quiet add curl
@@ -936,47 +939,27 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
-  printf '%s\n' 'Detected: running in Linux.'
-  is_running_in_container &&
-    printf '%s\n' 'Detected: running in Docker.'
   TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
-  ensure_curl_dependency
-  printf '%s' 'Checking internet status... '
-  ( (check_internet 1.1.1.1 ||
-    check_internet 1.1.0.0 ||
-    check_internet 9.9.9.9 ||
-    check_internet 9.9.9.11) &&
-    check_internet bitcoincore.org) ||
-    throw_error 'Check for active internet failed.'
-  printf '%s\n' 'ok.'
-  is_running_in_ci ||
-    install_system_updates
   ;;
 Darwin)
-  printf '%s\n' 'Detected: running in macOS.'
   TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s' 'Checking internet status... '
-  ( (check_internet 1.1.1.1 ||
-    check_internet 1.1.0.0 ||
-    check_internet 9.9.9.9 ||
-    check_internet 9.9.9.11) &&
-    check_internet bitcoincore.org) ||
-    throw_error 'Check for active internet failed.'
-  printf '%s\n' 'ok.'
   display_macos_warning
-  printf '%s' 'Checking for git... '
-  printf '%s\n' 'ok.'
   ;;
 MINGW*)
   throw_error 'Windows is not supported. Instead, use WSL (Windows Subsystem for Linux).'
   ;;
 *)
-  throw_error 'Your operating system is not supported.'
+  throw_error "Your operating system is not supported. Please open an issue at ${NODEBUILDER_REPO}."
   ;;
 esac
 
+printf '%s\n' 'Detected: running ${TARGET_BITCOIN_TARBALL_OS}.'
+is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
+check_internet_status
+# don't install system updates on CI or Darwin (macOS)
+is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
 install_runtime_dependencies
 
 readonly TARGET_BITCOIN_TARBALL_OS
