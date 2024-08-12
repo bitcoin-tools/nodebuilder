@@ -981,7 +981,7 @@ fi
 
 # If version is like 'xx.yy', pad it as 'xx.yy.0'
 case "${current_bitcoin_version}" in
-''|*[.]*[.]*)
+'' | *[.]*[.]*)
   current_bitcoin_version_padded="${current_bitcoin_version}"
   ;;
 *)
@@ -989,7 +989,7 @@ case "${current_bitcoin_version}" in
   ;;
 esac
 case "${target_bitcoin_version}" in
-''|*[.]*[.]*)
+'' | *[.]*[.]*)
   target_bitcoin_version_padded="${target_bitcoin_version}"
   ;;
 *)
