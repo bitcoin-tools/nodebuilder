@@ -161,7 +161,9 @@ fi
 ls -l ./nodebuilder
 readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
 echo "Executing command: ${RUN_NODEBUILDER_COMMAND}"
-if ! ${RUN_NODEBUILDER_COMMAND}; then
+if ! ${RUN_NODEBUILDER_COMMAND} \
+  > test_output_stdout.txt \
+  2> test_output_stderr.txt; then
   throw_error "Failed to execute nodebuilder command."
 fi
 
