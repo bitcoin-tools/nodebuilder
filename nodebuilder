@@ -979,7 +979,7 @@ else
   current_bitcoin_version=''
 fi
 
-# If version is like 'xx.yy.zz' or 'xx.yy', pad it as 'xx.yy.zz.0'
+# If version is like 'xx.yy.zz' or 'xx.yy' or 'xx', pad it as 'xx.yy.zz.0'
 case "${current_bitcoin_version}" in
 '' | *[.]*[.]*[.]*)
   CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}"
