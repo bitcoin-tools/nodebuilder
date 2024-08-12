@@ -1444,7 +1444,7 @@ while [ "${ibd_status}" = 'true' ]; do
     fi
   fi
 
-  printf '%s' 'Disk free space:              '
+  printf '%s' 'Disk free space:            '
   if [ "${free_space_in_mib}" -gt "${MIB_TO_GIB}" ]; then
     printf '%d GiB\n' "$((free_space_in_mib / MIB_TO_GIB))"
   else
