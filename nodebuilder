@@ -12,7 +12,19 @@ check_dpkg_lock() {
   fi
 }
 
-check_internet() {
+check_internet_status() {
+  ensure_curl_dependency
+  printf '%s' 'Checking internet status... '
+  ( (check_internet_to_address 1.1.1.1 ||
+    check_internet_to_address 1.1.0.0 ||
+    check_internet_to_address 9.9.9.9 ||
+    check_internet_to_address 9.9.9.11) &&
+    check_internet_to_address bitcoincore.org) ||
+    throw_error 'Check for active internet failed.'
+  printf '%s\n' 'ok.'
+}
+
+check_internet_to_address() {
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
   readonly CHECK_INTERNET_TIMEOUT='10'
@@ -142,6 +154,9 @@ ensure_curl_dependency() {
       ;;
     clear-linux-os)
       sudo swupd bundle-add curl > /dev/null
+      ;;
+    Darwin)
+      throw_error "Please install the 'curl' dependency."
       ;;
     *)
       if command -v apk > /dev/null; then
@@ -925,47 +940,27 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
-  printf '%s\n' 'Detected: running in Linux.'
-  is_running_in_container &&
-    printf '%s\n' 'Detected: running in Docker.'
   TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
-  ensure_curl_dependency
-  printf '%s' 'Checking internet status... '
-  ( (check_internet 1.1.1.1 ||
-    check_internet 1.1.0.0 ||
-    check_internet 9.9.9.9 ||
-    check_internet 9.9.9.11) &&
-    check_internet bitcoincore.org) ||
-    throw_error 'Check for active internet failed.'
-  printf '%s\n' 'ok.'
-  is_running_in_ci ||
-    install_system_updates
+  printf '%s\n' "Detected: running Linux."
+  is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
   ;;
 Darwin)
-  printf '%s\n' 'Detected: running in macOS.'
   TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s' 'Checking internet status... '
-  ( (check_internet 1.1.1.1 ||
-    check_internet 1.1.0.0 ||
-    check_internet 9.9.9.9 ||
-    check_internet 9.9.9.11) &&
-    check_internet bitcoincore.org) ||
-    throw_error 'Check for active internet failed.'
-  printf '%s\n' 'ok.'
+  printf '%s\n' "Detected: running macOS."
   display_macos_warning
-  printf '%s' 'Checking for git... '
-  printf '%s\n' 'ok.'
   ;;
 MINGW*)
   throw_error 'Windows is not supported. Instead, use WSL (Windows Subsystem for Linux).'
   ;;
 *)
-  throw_error 'Your operating system is not supported.'
+  throw_error "Your operating system is not supported. Please open an issue at ${NODEBUILDER_REPO}."
   ;;
 esac
 
+check_internet_status
+is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
 install_runtime_dependencies
 
 readonly TARGET_BITCOIN_TARBALL_OS
@@ -1415,6 +1410,7 @@ while [ "${ibd_status}" = 'true' ]; do
     headers_presync_progress_percent="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
     printf '%s\n' 'Syncing the block headers (first pass).'
     printf 'Headers presynced:          %s\n' "${headers_presync_height}"
+    printf 'Headers presync prog str:   %s %% DEBUG ONLY\n' "${headers_presync_progress_percent}"
     printf 'Headers presync progress:   %.2f %%\n' "${headers_presync_progress_percent}"
   elif [ "${blocks}" -eq 0 ]; then
     headers_sync_progress_percent="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
