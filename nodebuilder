@@ -138,7 +138,7 @@ ensure_curl_dependency() {
       apk --quiet add curl
       ;;
     debian | ubuntu)
-      sudo apt-get install -y curl > /dev/null
+      sudo apt-get install -y curl > /dev/null 2>/dev/null
       ;;
     fedora* | rhel | centos* | rocky | ol)
       sudo dnf install --allowerasing --assumeyes curl > /dev/null
