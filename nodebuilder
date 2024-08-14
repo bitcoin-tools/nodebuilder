@@ -138,7 +138,7 @@ ensure_curl_dependency() {
       apk --quiet add curl
       ;;
     debian | ubuntu)
-      sudo apt-get install -y curl > /dev/null 2>/dev/null
+      sudo apt-get install -y curl > /dev/null 2> /dev/null
       ;;
     fedora* | rhel | centos* | rocky | ol)
       sudo dnf install --allowerasing --assumeyes curl > /dev/null
@@ -162,7 +162,7 @@ ensure_curl_dependency() {
       if command -v apk > /dev/null; then
         apk --quiet add curl
       elif command -v apt-get > /dev/null; then
-        sudo apt-get -qq install -y curl > /dev/null 2>/dev/null
+        sudo apt-get -qq install -y curl > /dev/null 2> /dev/null
       elif command -v dnf > /dev/null; then
         sudo dnf install --allowerasing --assumeyes curl > /dev/null
       elif command -v pacman > /dev/null; then
@@ -187,7 +187,7 @@ ensure_sudo_dependency() {
       apk --quiet add sudo
       ;;
     debian | ubuntu)
-      apt-get install -y sudo > /dev/null 2>/dev/null
+      apt-get install -y sudo > /dev/null 2> /dev/null
       ;;
     fedora* | rhel | centos* | rocky | ol)
       dnf install --allowerasing --assumeyes sudo > /dev/null
@@ -209,7 +209,7 @@ ensure_sudo_dependency() {
       if command -v apk > /dev/null; then
         apk --quiet add sudo
       elif command -v apt-get > /dev/null; then
-        apt-get -qq install -y sudo > /dev/null 2>/dev/null
+        apt-get -qq install -y sudo > /dev/null 2> /dev/null
       elif command -v dnf > /dev/null; then
         dnf install sudo > /dev/null
       elif command -v pacman > /dev/null; then
@@ -234,7 +234,7 @@ ensure_xargs_dependency() {
       apk --quiet add findutils
       ;;
     debian | ubuntu)
-      apt-get install -y findutils > /dev/null 2>/dev/null
+      apt-get install -y findutils > /dev/null 2> /dev/null
       ;;
     fedora* | rhel | centos* | rocky | ol)
       dnf install --allowerasing --assumeyes findutils > /dev/null
@@ -256,7 +256,7 @@ ensure_xargs_dependency() {
       if command -v apk > /dev/null; then
         apk --quiet add findutils
       elif command -v apt-get > /dev/null; then
-        apt-get -qq install -y findutils > /dev/null 2>/dev/null
+        apt-get -qq install -y findutils > /dev/null 2> /dev/null
       elif command -v dnf > /dev/null; then
         dnf install findutils > /dev/null
       elif command -v pacman > /dev/null; then
@@ -410,9 +410,9 @@ install_build_dependencies_aptget() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>/dev/null
+  printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2> /dev/null
   # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
-  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12 2>/dev/null
+  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12 2> /dev/null
 }
 
 install_build_dependencies_darwin() {
@@ -570,7 +570,7 @@ install_runtime_dependencies_aptget() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>/dev/null
+  printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2> /dev/null
 }
 
 install_runtime_dependencies_darwin() {
