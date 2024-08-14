@@ -722,7 +722,6 @@ install_system_updates_apk() {
 
 install_system_updates_aptget() {
   check_dpkg_lock
-  readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2>&1
 }
 
