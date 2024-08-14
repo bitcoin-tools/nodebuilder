@@ -1416,8 +1416,8 @@ while [ "${ibd_status}" = 'true' ]; do
       printf 'Headers presync prog str:   %s %% DEBUG ONLY\n' "${headers_presync_progress_percent}"
       printf 'Headers presync progress:   %.2f %%\n' "${headers_presync_progress_percent}"
     else
-      printf 'Headers presynced:          0\n' "${headers_presync_height}"
-      printf 'Headers presync progress:   0.00 %%\n' "${headers_presync_progress_percent}"
+      printf 'Headers presynced:          %d\n' '0'
+      printf 'Headers presync progress:   %.2f %%\n' '0.00'
     fi
   elif [ "${blocks}" -eq 0 ]; then
     printf '%s\n' 'Syncing the block headers (second pass).'
