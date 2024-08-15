@@ -734,13 +734,34 @@ install_system_updates_dnf() {
 
 install_system_updates_emerge() {
   readonly GENTOO_EBUILD_REPOSITORY='/var/db/repos/gentoo'
+  readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs $(nproc) --load-average $(($(nproc) + 1)) --quiet --quiet-build --quiet-fail --deep --newuse @world"
+  readonly EMERGE_MAX_RETRIES='3'
   printf '\n'
-  [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
-  emerge --depclean --quiet
-  emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
-  emerge --depclean --quiet
-}
+  
+  # Create the ebuild repository directory if it does not exist
+  if [ ! -d "${GENTOO_EBUILD_REPOSITORY}" ]; then
+    mkdir -p "${GENTOO_EBUILD_REPOSITORY}" || throw_error "Failed to create directory ${GENTOO_EBUILD_REPOSITORY}"
+  fi
+  
+  emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
 
+  # Retry the gentoo command if it fails
+  index='0'
+  while [ "${index}" -lt "${EMERGE_MAX_RETRIES}" ]; do
+    if eval "${EMERGE_UPDATE_COMMAND}"; then
+      break
+    else
+      index=$((index + 1))
+      sleep 5
+    fi
+  done
+
+  # Check if all retries were exhausted
+  [ "${index}" -ge "${EMERGE_MAX_RETRIES}" ] &&
+    throw_error "Emerge system update failed after ${EMERGE_MAX_RETRIES} attempts"
+
+  emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
+}
 install_system_updates_pacman() {
   sudo pacman -Syu --noconfirm --quiet > /dev/null
 }
