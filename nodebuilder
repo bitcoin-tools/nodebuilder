@@ -1019,11 +1019,14 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   install_build_dependencies
   printf '%s\n  %s' 'ok.' 'Downloading Bitcoin source code... '
   # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
+  command -v torsocks > /dev/null 2>&1 &&
+    [ "${TARGET_KERNEL}" != 'Darwin' ] &&
     torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" ||
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}"
   cd "${COMPILE_DIRECTORY}"/
   printf '%s\n  %s' 'ok.' 'Analyzing hardware configuration... '
+  command -v autoreconf > /dev/null 2>&1 ||
+    throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Configuring the build environment... '
