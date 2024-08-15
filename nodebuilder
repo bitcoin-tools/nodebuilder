@@ -1024,6 +1024,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}"
   cd "${COMPILE_DIRECTORY}"/
   printf '%s\n  %s' 'ok.' 'Analyzing hardware configuration... '
+  command -v autoreconf || throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   printf '%s\n  %s' 'ok.' 'Configuring the build environment... '
