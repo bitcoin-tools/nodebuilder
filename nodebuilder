@@ -1210,7 +1210,7 @@ else
 
   printf '  %s' 'Removing installation files... '
   rm -r "${BITCOIN_CORE_EXTRACT_DIR:?}/"
-  rm -r "${:?}/"
+  rm -r "${TEMP_DIRECTORY:?}/"
   printf '%s\n' 'ok.'
 fi
 
