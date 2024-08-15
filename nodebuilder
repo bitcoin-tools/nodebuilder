@@ -737,12 +737,12 @@ install_system_updates_emerge() {
   readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs $(nproc) --load-average $(($(nproc) + 1)) --quiet --quiet-build --quiet-fail --deep --newuse @world"
   readonly EMERGE_MAX_RETRIES='3'
   printf '\n'
-  
+
   # Create the ebuild repository directory if it does not exist
   if [ ! -d "${GENTOO_EBUILD_REPOSITORY}" ]; then
     mkdir -p "${GENTOO_EBUILD_REPOSITORY}" || throw_error "Failed to create directory ${GENTOO_EBUILD_REPOSITORY}"
   fi
-  
+
   emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
 
   # Retry the gentoo command if it fails
