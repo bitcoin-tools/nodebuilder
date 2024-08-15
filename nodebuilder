@@ -924,10 +924,13 @@ readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 case "${TARGET_KERNEL}" in
 'Darwin')
   SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
+  ;;
 'Linux')
   SYS_CORES_COUNT="$(nproc)"
+  ;;
 *)
   throw_error 'Unknown kernel.'
+  ;;
 esac
 readonly SYS_CORES_COUNT
 readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
