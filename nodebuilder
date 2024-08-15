@@ -334,7 +334,7 @@ get_operating_system() {
 
 # shellcheck disable=SC2317
 handle_exit() {
-  [ -n "${:-}" ] && rm -rf -- "${:?}"/
+  [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
 }
 
 # shellcheck disable=SC2317
