@@ -1403,17 +1403,27 @@ while [ "${ibd_status}" = 'true' ]; do
 
   clear_the_terminal
   if [ "${headers}" -eq 0 ]; then
-    headers_presync_height="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d, -f2 | cut -d: -f2 | cut -d'(' -f1 | cut -d' ' -f2)"
-    headers_presync_progress_percent="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
     printf '%s\n' 'Syncing the block headers (first pass).'
-    printf 'Headers presynced:          %s\n' "${headers_presync_height}"
-    printf 'Headers presync prog str:   %s %% DEBUG ONLY\n' "${headers_presync_progress_percent}"
-    printf 'Headers presync progress:   %.2f %%\n' "${headers_presync_progress_percent}"
+    headers_presync_last_log_line="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
+    if [ -n "${headers_presync_last_log_line}" ]; then
+      headers_presync_height=$(echo "${headers_presync_last_log_line}" | cut -d, -f2 | cut -d: -f2 | cut -d'(' -f1 | cut -d' ' -f2)
+      headers_presync_progress_percent=$(echo "${headers_presync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)
+      printf 'Headers presynced:          %d\n' "${headers_presync_height}"
+      printf 'Headers presync progress:   %.2f %%\n' "${headers_presync_progress_percent}"
+    else
+      printf 'Headers presynced:          %d\n' '0'
+      printf 'Headers presync progress:   %.2f %%\n' '0.00'
+    fi
   elif [ "${blocks}" -eq 0 ]; then
-    headers_sync_progress_percent="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 | cut -d~ -f2 | cut -d% -f1)"
     printf '%s\n' 'Syncing the block headers (second pass).'
     printf 'Headers synced:             %d\n' "${headers}"
-    printf 'Headers sync progress:      %.2f %%\n' "${headers_sync_progress_percent}"
+    headers_sync_last_log_line="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
+    if [ -n "${headers_sync_last_log_line}" ]; then
+      headers_sync_progress_percent="$(echo "${headers_sync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)"
+      printf 'Headers sync progress:      %.2f %%\n' "${headers_sync_progress_percent}"
+    else
+      printf 'Headers sync progress:      %.2f %%\n' '0.00'
+    fi
   else
     printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
