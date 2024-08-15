@@ -144,7 +144,7 @@ ensure_curl_dependency() {
       sudo dnf install --allowerasing --assumeyes curl > /dev/null
       ;;
     gentoo)
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
+      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail net-misc/curl
       ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
@@ -194,7 +194,7 @@ ensure_sudo_dependency() {
       ;;
     gentoo)
       emerge --sync --quiet
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
+      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail app-admin/sudo
       ;;
     arch | endeavouros | garuda | manjaro)
       pacman -Syu --needed --noconfirm sudo > /dev/null
@@ -241,7 +241,7 @@ ensure_xargs_dependency() {
       ;;
     gentoo)
       emerge --sync --quiet
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail sys-apps/findutils
+      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail sys-apps/findutils
       ;;
     arch | endeavouros | garuda | manjaro)
       pacman -Syu --needed --noconfirm findutils > /dev/null
@@ -334,7 +334,7 @@ get_operating_system() {
 
 # shellcheck disable=SC2317
 handle_exit() {
-  [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
+  [ -n "${:-}" ] && rm -rf -- "${:?}"/
 }
 
 # shellcheck disable=SC2317
@@ -463,12 +463,12 @@ install_build_dependencies_emerge() {
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   if ! printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-    --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail; then
+    --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail; then
     etc-update --automode -5
-    emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
+    emerge --update --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail --deep --newuse @world
     # Run the install command again
     printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-      --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
+      --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
   fi
 }
 
@@ -621,12 +621,12 @@ install_runtime_dependencies_emerge() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
+  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
 }
 
 install_runtime_dependencies_pacman() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_pacman.txt"
-  readonly STDERR_DEPENDENCIES_LOG_FILE="${TEMP_DIRECTORY}/stderr_runtime_dependencies_log"
+  readonly STDERR_DEPENDENCIES_LOG_FILE="${}/stderr_runtime_dependencies_log"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -722,7 +722,7 @@ install_system_updates_apk() {
 
 install_system_updates_aptget() {
   check_dpkg_lock
-  readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
+  readonly STDERR_INSTALL_LOG_FILE="${}/stderr_install.log"
   sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
   grep -v 'apt-utils' "${STDERR_INSTALL_LOG_FILE}" >&2 || true
   rm "${STDERR_INSTALL_LOG_FILE}"
@@ -737,7 +737,7 @@ install_system_updates_emerge() {
   printf '\n'
   [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
   emerge --depclean --quiet
-  emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
+  emerge --update --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail --deep --newuse @world
   emerge --depclean --quiet
 }
 
@@ -915,10 +915,12 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-readonly TEMP_DIRECTORY="$(mktemp -d)"
+readonly ="$(mktemp -d)"
 readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
+readonly SYS_CORES_COUNT="$(nproc)"
+readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
@@ -1014,8 +1016,8 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ]; then
   printf '%s\n  %s' 'no.' 'Ensuring compile dependencies... '
-  readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
-  readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
+  readonly COMPILE_DIRECTORY="${}/compile_bitcoin"
+  readonly STDERR_COMPILE_LOG_FILE="${}/stderr_install.log"
   install_build_dependencies
   printf '%s\n  %s' 'ok.' 'Downloading Bitcoin source code... '
   # shellcheck disable=SC2015
@@ -1036,7 +1038,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
     compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
   else
-    compile_jobs_count="$(($(nproc) + 1))"
+    compile_jobs_count="${SYS_CORES_PLUS_ONE}"
   fi
   make --jobs "${compile_jobs_count}" > /dev/null 2>&1
   printf '%s\n  %s' 'ok.' 'Running compile checks, please wait... '
@@ -1052,7 +1054,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   current_bitcoin_version="${target_bitcoin_version}"
 else
   printf '%s\n' 'no.'
-  readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
+  readonly BITCOIN_CORE_EXTRACT_DIR="${}/bitcoin-core"
   readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
   readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
   readonly BITCOIN_INSTALL_INCLUDE_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/include"
@@ -1075,10 +1077,10 @@ else
     readonly GPG_SIGNATURES_FILE_SOURCE="${BITCOIN_SOURCE}/${GPG_SIGNATURES_FILENAME}"
     readonly GPG_GOOD_SIGNATURES_REQUIRED='7'
     readonly GUIX_SIGS_REPO='https://github.com/bitcoin-core/guix.sigs'
-    readonly BITCOIN_TARBALL_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/${BITCOIN_TARBALL_FILENAME}"
-    readonly BITCOIN_HASH_FILE="${TEMP_DIRECTORY}/${BITCOIN_HASH_FILENAME}"
-    readonly GPG_SIGNATURES_FILE="${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILENAME}"
-    readonly GUIX_SIGS_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/guix.sigs"
+    readonly BITCOIN_TARBALL_TEMPORARY_DIRECTORY="${}/${BITCOIN_TARBALL_FILENAME}"
+    readonly BITCOIN_HASH_FILE="${}/${BITCOIN_HASH_FILENAME}"
+    readonly GPG_SIGNATURES_FILE="${}/${GPG_SIGNATURES_FILENAME}"
+    readonly GUIX_SIGS_TEMPORARY_DIRECTORY="${}/guix.sigs"
     readonly GUIX_SIGS_DESTINATION_DIRECTORY="${HOME}/Downloads/guix.sigs"
     printf '  %s' 'Downloading Bitcoin Core... '
     if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
@@ -1096,7 +1098,7 @@ else
     printf '%s\n' 'ok.'
 
     printf '  %s' 'Validating the checksum... '
-    cd "${TEMP_DIRECTORY}"/
+    cd "${}"/
     if command -v sha256sum > /dev/null; then
       readonly SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
     elif command -v shasum > /dev/null; then
@@ -1108,7 +1110,7 @@ else
     case "${SHA256_CHECK}" in
     *'OK'*) ;;
     *)
-      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${BITCOIN_HASH_FILE}."
+      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${}/${BITCOIN_HASH_FILE}."
       ;;
     esac
     printf '%s\n' 'ok.'
@@ -1134,7 +1136,7 @@ else
       rm "${BITCOIN_HASH_FILE}"
       rm "${GPG_SIGNATURES_FILE}"
     else
-      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILE}."
+      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${}/${GPG_SIGNATURES_FILE}."
     fi
   fi
 
@@ -1208,7 +1210,7 @@ else
 
   printf '  %s' 'Removing installation files... '
   rm -r "${BITCOIN_CORE_EXTRACT_DIR:?}/"
-  rm -r "${TEMP_DIRECTORY:?}/"
+  rm -r "${:?}/"
   printf '%s\n' 'ok.'
 fi
 
