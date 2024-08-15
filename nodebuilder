@@ -919,7 +919,17 @@ readonly TEMP_DIRECTORY="$(mktemp -d)"
 readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
-readonly SYS_CORES_COUNT="$(nproc)"
+
+# SYS_CORES_COUNT is CPU cores in the environment
+case "${TARGET_KERNEL}" in
+'Darwin')
+  SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
+'Linux')
+  SYS_CORES_COUNT="$(nproc)"
+*)
+  throw_error 'Unknown kernel.'
+esac
+readonly SYS_CORES_COUNT
 readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
@@ -1035,14 +1045,9 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
   fi
   printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
-  if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
-    compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
-  else
-    compile_jobs_count="${SYS_CORES_PLUS_ONE}"
-  fi
-  make --jobs "${compile_jobs_count}" > /dev/null 2>&1
+  make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
   printf '%s\n  %s' 'ok.' 'Running compile checks, please wait... '
-  make --jobs "${compile_jobs_count}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+  make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
   printf '%s\n  %s' 'ok.' 'Installing Bitcoin Core... '
