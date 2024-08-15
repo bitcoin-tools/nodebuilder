@@ -1098,7 +1098,7 @@ else
     printf '%s\n' 'ok.'
 
     printf '  %s' 'Validating the checksum... '
-    cd "${}"/
+    cd "${TEMP_DIRECTORY}"/
     if command -v sha256sum > /dev/null; then
       readonly SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
     elif command -v shasum > /dev/null; then
