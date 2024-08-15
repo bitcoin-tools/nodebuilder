@@ -626,7 +626,7 @@ install_runtime_dependencies_emerge() {
 
 install_runtime_dependencies_pacman() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_pacman.txt"
-  readonly STDERR_DEPENDENCIES_LOG_FILE="${}/stderr_runtime_dependencies_log"
+  readonly STDERR_DEPENDENCIES_LOG_FILE="${TEMP_DIRECTORY}/stderr_runtime_dependencies_log"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -722,7 +722,7 @@ install_system_updates_apk() {
 
 install_system_updates_aptget() {
   check_dpkg_lock
-  readonly STDERR_INSTALL_LOG_FILE="${}/stderr_install.log"
+  readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
   grep -v 'apt-utils' "${STDERR_INSTALL_LOG_FILE}" >&2 || true
   rm "${STDERR_INSTALL_LOG_FILE}"
@@ -1016,8 +1016,8 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ]; then
   printf '%s\n  %s' 'no.' 'Ensuring compile dependencies... '
-  readonly COMPILE_DIRECTORY="${}/compile_bitcoin"
-  readonly STDERR_COMPILE_LOG_FILE="${}/stderr_install.log"
+  readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
+  readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   install_build_dependencies
   printf '%s\n  %s' 'ok.' 'Downloading Bitcoin source code... '
   # shellcheck disable=SC2015
@@ -1054,7 +1054,7 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   current_bitcoin_version="${target_bitcoin_version}"
 else
   printf '%s\n' 'no.'
-  readonly BITCOIN_CORE_EXTRACT_DIR="${}/bitcoin-core"
+  readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
   readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
   readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
   readonly BITCOIN_INSTALL_INCLUDE_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/include"
@@ -1077,10 +1077,10 @@ else
     readonly GPG_SIGNATURES_FILE_SOURCE="${BITCOIN_SOURCE}/${GPG_SIGNATURES_FILENAME}"
     readonly GPG_GOOD_SIGNATURES_REQUIRED='7'
     readonly GUIX_SIGS_REPO='https://github.com/bitcoin-core/guix.sigs'
-    readonly BITCOIN_TARBALL_TEMPORARY_DIRECTORY="${}/${BITCOIN_TARBALL_FILENAME}"
-    readonly BITCOIN_HASH_FILE="${}/${BITCOIN_HASH_FILENAME}"
-    readonly GPG_SIGNATURES_FILE="${}/${GPG_SIGNATURES_FILENAME}"
-    readonly GUIX_SIGS_TEMPORARY_DIRECTORY="${}/guix.sigs"
+    readonly BITCOIN_TARBALL_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/${BITCOIN_TARBALL_FILENAME}"
+    readonly BITCOIN_HASH_FILE="${TEMP_DIRECTORY}/${BITCOIN_HASH_FILENAME}"
+    readonly GPG_SIGNATURES_FILE="${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILENAME}"
+    readonly GUIX_SIGS_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/guix.sigs"
     readonly GUIX_SIGS_DESTINATION_DIRECTORY="${HOME}/Downloads/guix.sigs"
     printf '  %s' 'Downloading Bitcoin Core... '
     if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
@@ -1110,7 +1110,7 @@ else
     case "${SHA256_CHECK}" in
     *'OK'*) ;;
     *)
-      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${}/${BITCOIN_HASH_FILE}."
+      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${BITCOIN_HASH_FILE}."
       ;;
     esac
     printf '%s\n' 'ok.'
@@ -1136,7 +1136,7 @@ else
       rm "${BITCOIN_HASH_FILE}"
       rm "${GPG_SIGNATURES_FILE}"
     else
-      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${}/${GPG_SIGNATURES_FILE}."
+      throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILE}."
     fi
   fi
 
