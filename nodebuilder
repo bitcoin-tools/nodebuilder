@@ -936,7 +936,7 @@ MINGW* | Cygwin)
   throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
   ;;
 FreeBSD)
-  throw_error 'FreeBSD is not supported. Please open an issue at ${NODEBUILDER_REPO}.'
+  throw_error "FreeBSD is not supported. Please open an issue at ${NODEBUILDER_REPO}."
   ;;
 *)
   throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
