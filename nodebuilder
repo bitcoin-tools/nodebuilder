@@ -993,7 +993,10 @@ esac
 readonly CURRENT_BITCOIN_VERSION_PADDED
 
 case "${target_bitcoin_version}" in
-'' | *[.]*[.]*[.]*)
+'')
+  throw_error 'Bitcoin Core target version is not set.'
+  ;;
+*[.]*[.]*[.]*)
   TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
   ;;
 *[.]*[.]*)
