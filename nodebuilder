@@ -747,12 +747,12 @@ install_system_updates_emerge() {
     if eval "${EMERGE_UPDATE_COMMAND}"; then
       break
     else
-      index=$((emerge_retry_index + 1))
+      emerge_retry_index=$((emerge_retry_index + 1))
       sleep 5
     fi
   done
 
-  [ "${index}" -ge "${EMERGE_MAX_RETRIES}" ] &&
+  [ "${emerge_retry_index}" -ge "${EMERGE_MAX_RETRIES}" ] &&
     throw_error "Emerge system update failed after ${EMERGE_MAX_RETRIES} attempts"
 
   emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
