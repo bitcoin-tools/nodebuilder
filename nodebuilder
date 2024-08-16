@@ -332,6 +332,10 @@ get_operating_system() {
   fi
 }
 
+get_timestamp() {
+  date +'%Y-%m-%dT%H:%M:%S'
+}
+
 # shellcheck disable=SC2317
 handle_exit() {
   [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
@@ -784,7 +788,7 @@ is_valid_bitcoin_version() {
 
 log_error() {
   printf '\n'
-  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
+  printf '[%s] ERROR: %s\n' "$(get_timestamp)" "$*" >&2
 }
 
 print_usage() {
