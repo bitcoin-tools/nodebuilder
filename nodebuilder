@@ -788,8 +788,9 @@ is_valid_bitcoin_version() {
 
 log_error() {
   printf '\n'
-  printf '[%s] ERROR: %s\n' "$(get_log_timestamp)" "${CONSOLE_COLOR_RED}$*" >&2
+  printf '[%s] ERROR: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_RED}$*" >&2
   reset_console_color
+  printf '\n' >&2
 }
 
 print_usage() {
