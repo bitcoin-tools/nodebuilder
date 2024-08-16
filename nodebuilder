@@ -788,7 +788,8 @@ is_valid_bitcoin_version() {
 
 log_error() {
   printf '\n'
-  printf '[%s] ERROR: %s\n' "$(get_log_timestamp)" "$*" >&2
+  printf '[%s] ERROR: %s\n' "$(get_log_timestamp)" "${CONSOLE_COLOR_RED}$*" >&2
+  reset_console_color
 }
 
 print_usage() {
@@ -800,6 +801,10 @@ print_usage() {
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
   printf '%s\n' '-t, --test              Run unit tests on functions'
   printf '%s\n' '-u, --unattended        Run in non-interactive mode'
+}
+
+reset_console_color() {
+  printf '%s' "$CONSOLE_COLOR_NORMAL"
 }
 
 run_unit_tests() {
@@ -914,6 +919,9 @@ done
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else throw_error "Unhandled error at line ${LINENO:-}."; fi' EXIT
 trap handle_sigint INT
+
+readonly CONSOLE_COLOR_RED="$(tput setaf 1)"
+readonly CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
