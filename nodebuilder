@@ -938,6 +938,7 @@ else
 fi
 
 clear_the_terminal
+echo "DEBUG: TARGET_KERNEL is set to ${TARGET_KERNEL}"
 case "${TARGET_KERNEL}" in
 Linux)
   SYS_CORES_COUNT="$(nproc)"
