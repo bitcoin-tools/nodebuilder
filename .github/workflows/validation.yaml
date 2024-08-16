@@ -12,6 +12,12 @@ on:
 env:
   TERM: xterm
 jobs:
+  actions-trigger-type:
+    name: Check which type of trigger ran the action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug Values
+        run: echo "event.action is ${{ github.event.action }}"
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
