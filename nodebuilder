@@ -925,28 +925,21 @@ readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.6.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
-clear_the_terminal
-echo "DEBUG: TARGET_KERNEL is set to ${TARGET_KERNEL}"
 case "${TARGET_KERNEL}" in
 Linux)
   SYS_CORES_COUNT="$(nproc)"
-  TARGET_BITCOIN_TARBALL_OS='linux-gnu'
-  BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
-  printf '%s\n' "Detected: running Linux."
-  is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
   ;;
 Darwin)
   SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
-  TARGET_BITCOIN_TARBALL_OS='apple-darwin'
-  BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s\n' "Detected: running macOS."
-  display_macos_warning
   ;;
-MINGW*)
-  throw_error 'Windows is not supported. Instead, use WSL (Windows Subsystem for Linux).'
+MINGW*|Cygwin)
+  throw_error 'Windows is not supported. Instead, use WSL (Windows Subsystem for Linux), Linux, or macOS.'
+  ;;
+FreeBSD)
+  throw_error 'FreeBSD is not supported. Please use Linux or macOS, or a compatible environment.'
   ;;
 *)
-  throw_error "Your operating system is not supported. Please open an issue at ${NODEBUILDER_REPO}."
+  throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
   ;;
 esac
 
@@ -962,8 +955,25 @@ else
   sudo --validate
 fi
 
-readonly SYS_CORES_COUNT
-readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
+clear_the_terminal
+echo "DEBUG: TARGET_KERNEL is set to ${TARGET_KERNEL}"
+case "${TARGET_KERNEL}" in
+Linux)
+  TARGET_BITCOIN_TARBALL_OS='linux-gnu'
+  BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
+  printf '%s\n' "Detected: running Linux."
+  is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
+  ;;
+Darwin)
+  TARGET_BITCOIN_TARBALL_OS='apple-darwin'
+  BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
+  printf '%s\n' "Detected: running macOS."
+  display_macos_warning
+  ;;
+*)
+  ;;
+esac
+
 readonly TARGET_BITCOIN_TARBALL_OS
 readonly BITCOIN_DATA_DIRECTORY
 readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
