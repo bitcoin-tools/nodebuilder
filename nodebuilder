@@ -144,7 +144,7 @@ ensure_curl_dependency() {
       sudo dnf install --allowerasing --assumeyes curl > /dev/null
       ;;
     gentoo)
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail net-misc/curl
+      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail net-misc/curl
       ;;
     arch | endeavouros | garuda | manjaro)
       sudo pacman -Syu --needed --noconfirm curl > /dev/null
@@ -194,7 +194,7 @@ ensure_sudo_dependency() {
       ;;
     gentoo)
       emerge --sync --quiet
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail app-admin/sudo
+      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail app-admin/sudo
       ;;
     arch | endeavouros | garuda | manjaro)
       pacman -Syu --needed --noconfirm sudo > /dev/null
@@ -241,7 +241,7 @@ ensure_xargs_dependency() {
       ;;
     gentoo)
       emerge --sync --quiet
-      emerge --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail sys-apps/findutils
+      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail sys-apps/findutils
       ;;
     arch | endeavouros | garuda | manjaro)
       pacman -Syu --needed --noconfirm findutils > /dev/null
@@ -463,12 +463,12 @@ install_build_dependencies_emerge() {
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   if ! printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-    --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail; then
+    --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail; then
     etc-update --automode -5
-    emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
+    emerge --update --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail --deep --newuse @world
     # Run the install command again
     printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-      --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
+      --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
   fi
 }
 
@@ -621,7 +621,7 @@ install_runtime_dependencies_emerge() {
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail
+  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
 }
 
 install_runtime_dependencies_pacman() {
@@ -737,7 +737,7 @@ install_system_updates_emerge() {
   printf '\n'
   [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
   emerge --depclean --quiet
-  emerge --update --jobs "$(nproc)" --load-average "$(($(nproc) + 1))" --quiet --quiet-build --quiet-fail --deep --newuse @world
+  emerge --update --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail --deep --newuse @world
   emerge --depclean --quiet
 }
 
@@ -940,12 +940,14 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
+  SYS_CORES_COUNT="$(nproc)"
   TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   printf '%s\n' "Detected: running Linux."
   is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
   ;;
 Darwin)
+  SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
   TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
   printf '%s\n' "Detected: running macOS."
@@ -959,14 +961,16 @@ MINGW*)
   ;;
 esac
 
-check_internet_status
-is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
-install_runtime_dependencies
-
+readonly SYS_CORES_COUNT
+readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 readonly TARGET_BITCOIN_TARBALL_OS
 readonly BITCOIN_DATA_DIRECTORY
 readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
+
+check_internet_status
+is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
+install_runtime_dependencies
 
 printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
 if command -v bitcoind > /dev/null 2>&1; then
@@ -1036,14 +1040,9 @@ elif [ "${compile_bitcoin:-false}" = 'true' ] ||
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
   fi
   printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
-  if [ "${TARGET_OPERATING_SYSTEM}" = 'Darwin' ]; then
-    compile_jobs_count="$(($(sysctl -n hw.physicalcpu) + 1))"
-  else
-    compile_jobs_count="$(($(nproc) + 1))"
-  fi
-  make --jobs "${compile_jobs_count}" > /dev/null 2>&1
+  make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
   printf '%s\n  %s' 'ok.' 'Running compile checks, please wait... '
-  make --jobs "${compile_jobs_count}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+  make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
   printf '%s\n  %s' 'ok.' 'Installing Bitcoin Core... '
