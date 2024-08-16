@@ -343,7 +343,7 @@ jobs:
     needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
       needs.changes.outputs.docker-gentoo == 'true' ||
-      github.event.action == 'workflow_dispatch'
+      ( github.event.action == '' && github.event.inputs == null )
     runs-on: ubuntu-latest
     strategy:
       matrix:
