@@ -311,6 +311,10 @@ get_free_space_in_mib() {
   fi
 }
 
+get_log_timestamp() {
+  date +'%Y-%m-%dT%H:%M:%S'
+}
+
 get_memory_metric_in_mib() {
   metric_to_query="$1"
   awk -v metric="${metric_to_query}" \
@@ -784,7 +788,9 @@ is_valid_bitcoin_version() {
 
 log_error() {
   printf '\n'
-  printf '%s\n' "[$(date +'%Y-%m-%dT%H:%M:%S')] ERROR: $*" >&2
+  printf '[%s] ERROR: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_RED}$*" >&2
+  reset_console_color
+  printf '\n' >&2
 }
 
 print_usage() {
@@ -796,6 +802,10 @@ print_usage() {
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
   printf '%s\n' '-t, --test              Run unit tests on functions'
   printf '%s\n' '-u, --unattended        Run in non-interactive mode'
+}
+
+reset_console_color() {
+  printf '%s' "${CONSOLE_COLOR_NORMAL}"
 }
 
 run_unit_tests() {
@@ -841,6 +851,9 @@ throw_error() {
   handle_exit
   exit 1
 }
+
+readonly CONSOLE_COLOR_RED="$(tput setaf 1)"
+readonly CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 
 # This list excludes vulnerable versions, e.g. CVE-2015-6031 and CVE-2018-17144
 readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
