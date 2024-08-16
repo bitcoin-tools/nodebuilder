@@ -16,9 +16,11 @@ jobs:
     name: Check which type of trigger ran the action
     runs-on: ubuntu-latest
     steps:
-      - name: Check github.event.input
-        run: printf 'github.event.input is %s\n' "${{ github.event.input }}"
-      - name: Debug github.event
+      - name: Check event action and inputs
+        run: |
+          printf 'github.event.action is %s\n' "${{ github.event.action }}"
+          printf 'github.event.inputs is %s\n' "${{ github.event.inputs }}"
+      - name: Check the JSON for event object
         run: |
           echo '${{ toJson(github.event) }}' > event_context.json
           cat event_context.json
