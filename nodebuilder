@@ -117,7 +117,7 @@ EOF
 }
 
 display_macos_warning() {
-  log_warning 'macOS has an unpatched security vulnerability called GoFetch.' \
+  log_warning 'macOS has an unpatched security vulnerability called GoFetch.'
   log_warning 'Avoid security-critical actions, such as securing significant funds.'
   if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
     printf '%s' 'PRESS ENTER to continue or press Ctrl+C to exit... '
