@@ -1417,10 +1417,10 @@ while [ "${ibd_status}" = 'true' ]; do
       headers_presync_height=$(echo "${headers_presync_last_log_line}" | cut -d, -f2 | cut -d: -f2 | cut -d'(' -f1 | cut -d' ' -f2)
       headers_presync_progress_percent=$(echo "${headers_presync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)
       printf 'Headers presynced:          %d\n' "${headers_presync_height}"
-      printf 'Headers presync progress:   %.2f %%\n' "${headers_presync_progress_percent}"
+      printf 'Headers presync progress:   %.1f %%\n' "${headers_presync_progress_percent}"
     else
       printf 'Headers presynced:          %d\n' '0'
-      printf 'Headers presync progress:   %.2f %%\n' '0.00'
+      printf 'Headers presync progress:   %.1f %%\n' '0.0'
     fi
   elif [ "${blocks}" -eq 0 ]; then
     printf '%s\n' 'Syncing the block headers (second pass).'
