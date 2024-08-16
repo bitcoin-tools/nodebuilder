@@ -93,7 +93,7 @@ You can set multiple options. Here are two ways to compile Bitcoin 27.1 unattend
 1. An active internet connection (of course)
 2. A POSIX-compatible operating system
    - Linux - [Alpine](https://wiki.alpinelinux.org/wiki/Installation), [Arch](https://github.com/archlinux/archinstall) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), [Debian](https://en.wikipedia.org/wiki/Debian) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview), [Fedora](https://fedoraproject.org/workstation/download), [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
-   - [macOS](https://apple.com/macos)
+   - [macOS](https://en.wikipedia.org/wiki/MacOS)
    - Or, any system that can run [Docker](./docker/)
    - On Windows, either run nodebuilder in WSL (Windows Subsystem for Linux) or in a [Docker container](#optional-docker-container)
 3. `curl`, which the script will attempt to automatically install or you can install with a package manager
