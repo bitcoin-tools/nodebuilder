@@ -932,7 +932,7 @@ Linux)
 Darwin)
   SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
   ;;
-MINGW*|Cygwin)
+MINGW* | Cygwin)
   throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
   ;;
 FreeBSD)
