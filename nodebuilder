@@ -925,18 +925,6 @@ readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.6.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
-ensure_sudo_dependency
-ensure_xargs_dependency
-
-if is_running_in_ci ||
-  is_running_in_container ||
-  sudo --validate --noninteractive > /dev/null 2>&1; then
-  :
-else
-  printf '%s\n' 'Please enter your sudo password if requested.'
-  sudo --validate
-fi
-
 clear_the_terminal
 echo "DEBUG: TARGET_KERNEL is set to ${TARGET_KERNEL}"
 case "${TARGET_KERNEL}" in
@@ -961,6 +949,18 @@ MINGW*)
   throw_error "Your operating system is not supported. Please open an issue at ${NODEBUILDER_REPO}."
   ;;
 esac
+
+ensure_sudo_dependency
+ensure_xargs_dependency
+
+if is_running_in_ci ||
+  is_running_in_container ||
+  sudo --validate --noninteractive > /dev/null 2>&1; then
+  :
+else
+  printf '%s\n' 'Please enter your sudo password if requested.'
+  sudo --validate
+fi
 
 readonly SYS_CORES_COUNT
 readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
