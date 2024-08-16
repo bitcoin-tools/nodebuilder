@@ -327,7 +327,7 @@ jobs:
           context: .
           file: docker/${{ matrix.dockerfile }}
 
-  run-nodebuilder-docker-gentoo:
+  run-nodebuilder-gentoo:
     name: Docker image for ${{ matrix.container }}
     needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
