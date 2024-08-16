@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug Values
-        run: echo "github.event is ${{ github.event }}"
+        run: echo "github.event is ${{ toJson(github.event) }}"
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
