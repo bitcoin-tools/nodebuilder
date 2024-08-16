@@ -349,8 +349,8 @@ jobs:
     steps:
       - name: Debug Values
         run: |
-          echo "docker-gentoo: ${{ needs.changes.outputs.docker-gentoo }}"
-          echo "event.action: ${{ github.event.action }}"
+          echo "docker-gentoo is ${{ needs.changes.outputs.docker-gentoo }}"
+          echo "event.action is ${{ github.event.action }}"
       - uses: actions/checkout@v4
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
