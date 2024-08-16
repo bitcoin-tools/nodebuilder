@@ -342,6 +342,7 @@ jobs:
     if: >-
       needs.changes.outputs.docker-gentoo == 'true' ||
       ( github.event.action == '' &&
+        github.event.before == '' &&
         github.event.inputs == null )
     runs-on: ubuntu-latest
     strategy:
