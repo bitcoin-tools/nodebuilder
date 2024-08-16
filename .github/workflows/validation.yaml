@@ -341,6 +341,10 @@ jobs:
           - container: Gentoo
             dockerfile: Dockerfile_gentoo
     steps:
+      - name: Debug Values
+        run: |
+          echo "docker-gentoo: ${{ needs.changes.outputs.docker-gentoo }}"
+          echo "event.action: ${{ github.event.action }}"
       - uses: actions/checkout@v4
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
