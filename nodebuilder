@@ -804,7 +804,7 @@ print_usage() {
 }
 
 reset_console_color() {
-  printf '%s' "$CONSOLE_COLOR_NORMAL"
+  printf '%s' "${CONSOLE_COLOR_NORMAL}"
 }
 
 run_unit_tests() {
