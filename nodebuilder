@@ -990,9 +990,6 @@ case "${current_bitcoin_version}" in
 *[.]*)
   CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0"
   ;;
-'')
-  CURRENT_BITCOIN_VERSION_PADDED=''
-  ;;
 *)
   CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0.0"
   ;;
@@ -1008,9 +1005,6 @@ case "${target_bitcoin_version}" in
   ;;
 *[.]*)
   TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
-  ;;
-'')
-  throw_error 'Bitcoin Core target version is not set.'
   ;;
 *)
   TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
