@@ -920,21 +920,6 @@ readonly TARGET_ARCHITECTURE="$(uname -m)"
 readonly TARGET_KERNEL="$(uname -s)"
 readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 
-# SYS_CORES_COUNT is CPU cores in the environment
-case "${TARGET_KERNEL}" in
-'Darwin')
-  SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
-  ;;
-'Linux')
-  SYS_CORES_COUNT="$(nproc)"
-  ;;
-*)
-  throw_error 'Unknown kernel.'
-  ;;
-esac
-readonly SYS_CORES_COUNT
-readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
-
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.6.0'
@@ -955,12 +940,14 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
 Linux)
+  SYS_CORES_COUNT="$(nproc)"
   TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   printf '%s\n' "Detected: running Linux."
   is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
   ;;
 Darwin)
+  SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
   TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
   printf '%s\n' "Detected: running macOS."
@@ -974,14 +961,16 @@ MINGW*)
   ;;
 esac
 
-check_internet_status
-is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
-install_runtime_dependencies
-
+readonly SYS_CORES_COUNT
+readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 readonly TARGET_BITCOIN_TARBALL_OS
 readonly BITCOIN_DATA_DIRECTORY
 readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
+
+check_internet_status
+is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
+install_runtime_dependencies
 
 printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
 if command -v bitcoind > /dev/null 2>&1; then
@@ -1001,6 +990,9 @@ case "${current_bitcoin_version}" in
 *[.]*)
   CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0"
   ;;
+'')
+  CURRENT_BITCOIN_VERSION_PADDED=''
+  ;;
 *)
   CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0.0"
   ;;
@@ -1016,6 +1008,9 @@ case "${target_bitcoin_version}" in
   ;;
 *[.]*)
   TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
+  ;;
+'')
+  throw_error 'Bitcoin Core target version is not set.'
   ;;
 *)
   TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
