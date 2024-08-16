@@ -791,17 +791,15 @@ log_error() {
 }
 
 log_info() {
-  printf '\n'
-  printf '[%s] INFO: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_YELLOW}$*" >&2
+  printf '[%s] INFO: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_YELLOW}$*"
   reset_console_color
-  printf '\n' >&2
+  printf '\n'
 }
 
 log_warning() {
-  printf '\n'
-  printf '[%s] WARN: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_GREEN}$*" >&2
+  printf '[%s] WARN: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_GREEN}$*"
   reset_console_color
-  printf '\n' >&2
+  printf '\n'
 }
 
 print_usage() {
