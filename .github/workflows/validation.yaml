@@ -288,8 +288,6 @@ jobs:
       matrix:
         container: [Gentoo, Alpine, Amazon Linux, Arch, Clear Linux, Debian, Fedora, Manjaro, Oracle Linux, Red Hat, Rocky Linux, Ubuntu, openSUSE Leap, openSUSE Tumbleweed]
         include:
-          - container: Gentoo
-            dockerfile: Dockerfile_gentoo
           - container: Alpine
             dockerfile: Dockerfile_alpine
           - container: Amazon Linux
@@ -321,9 +319,28 @@ jobs:
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
-        timeout-minutes: 300
+        timeout-minutes: 100
         uses: docker/build-push-action@v6
         with:
           build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .
           file: docker/${{ matrix.dockerfile }}
+
+  run-nodebuilder-docker-gentoo:
+    name: Docker image for Gentoo
+    needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
+    if: >-
+      needs.changes.outputs.docker-gentoo == 'true' ||
+      github.event.action == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the current OS version
+        run: grep 'VERSION\|ID' /etc/os-release && uname -a
+      - name: Build the Gentoo docker image
+        timeout-minutes: 200
+        uses: docker/build-push-action@v6
+        with:
+          build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
+          context: .
+          file: docker/Dockerfile_gentoo
