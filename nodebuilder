@@ -925,6 +925,26 @@ readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.6.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
+case "${TARGET_KERNEL}" in
+Linux)
+  SYS_CORES_COUNT="$(nproc)"
+  ;;
+Darwin)
+  SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
+  ;;
+MINGW* | Cygwin)
+  throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
+  ;;
+FreeBSD)
+  throw_error "FreeBSD is not supported. Please open an issue at ${NODEBUILDER_REPO}."
+  ;;
+*)
+  throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
+  ;;
+esac
+readonly SYS_CORES_COUNT
+readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
+
 ensure_sudo_dependency
 ensure_xargs_dependency
 
@@ -938,31 +958,25 @@ else
 fi
 
 clear_the_terminal
+echo "DEBUG: TARGET_KERNEL is set to ${TARGET_KERNEL}"
 case "${TARGET_KERNEL}" in
 Linux)
-  SYS_CORES_COUNT="$(nproc)"
   TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   printf '%s\n' "Detected: running Linux."
   is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
   ;;
 Darwin)
-  SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
   TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
   printf '%s\n' "Detected: running macOS."
   display_macos_warning
   ;;
-MINGW*)
-  throw_error 'Windows is not supported. Instead, use WSL (Windows Subsystem for Linux).'
-  ;;
 *)
-  throw_error "Your operating system is not supported. Please open an issue at ${NODEBUILDER_REPO}."
+  throw_error 'Unknown target kernel type.'
   ;;
 esac
 
-readonly SYS_CORES_COUNT
-readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 readonly TARGET_BITCOIN_TARBALL_OS
 readonly BITCOIN_DATA_DIRECTORY
 readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
