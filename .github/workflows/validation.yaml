@@ -12,12 +12,6 @@ on:
 env:
   TERM: xterm
 jobs:
-  actions-trigger-type:
-    name: Check which type of trigger ran the action
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug Values
-        run: echo "event.action is ${{ github.event.action }}"
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
@@ -347,8 +341,6 @@ jobs:
           - container: Gentoo
             dockerfile: Dockerfile_gentoo
     steps:
-      - name: Debug Values
-        run: echo "event.action is ${{ github.event.action }}"
       - uses: actions/checkout@v4
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
