@@ -852,6 +852,9 @@ throw_error() {
   exit 1
 }
 
+readonly CONSOLE_COLOR_RED="$(tput setaf 1)"
+readonly CONSOLE_COLOR_NORMAL="$(tput sgr0)"
+
 # This list excludes vulnerable versions, e.g. CVE-2015-6031 and CVE-2018-17144
 readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.11.0 0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 \0.14.3 0.15.2 \
@@ -920,9 +923,6 @@ done
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else throw_error "Unhandled error at line ${LINENO:-}."; fi' EXIT
 trap handle_sigint INT
-
-readonly CONSOLE_COLOR_RED="$(tput setaf 1)"
-readonly CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 
 readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
