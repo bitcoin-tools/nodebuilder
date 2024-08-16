@@ -971,6 +971,7 @@ Darwin)
   display_macos_warning
   ;;
 *)
+  throw_error 'Unknown target kernel type.'
   ;;
 esac
 
