@@ -942,6 +942,8 @@ FreeBSD)
   throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
   ;;
 esac
+readonly SYS_CORES_COUNT
+readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 
 ensure_sudo_dependency
 ensure_xargs_dependency
