@@ -117,14 +117,11 @@ EOF
 }
 
 display_macos_warning() {
-  if [ "${TARGET_KERNEL}" = 'Darwin' ] && [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
-    printf '%s\n%s\n' \
-      'WARNING: macOS has an unpatched security vulnerability called GoFetch.' \
-      '         Avoid security-critical actions, such as securing significant funds.'
-    if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
-      printf '%s' 'PRESS ENTER to continue or press Ctrl+C to exit... '
-      read -r _
-    fi
+  log_warning 'macOS has an unpatched security vulnerability called GoFetch.' \
+  log_warning 'Avoid security-critical actions, such as securing significant funds.'
+  if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
+    printf '%s' 'PRESS ENTER to continue or press Ctrl+C to exit... '
+    read -r _
   fi
 }
 
@@ -334,10 +331,6 @@ get_operating_system() {
       throw_error 'Failed to determine OS release type'
     fi
   fi
-}
-
-get_log_timestamp() {
-  date +'%Y-%m-%dT%H:%M:%S'
 }
 
 # shellcheck disable=SC2317
@@ -797,6 +790,20 @@ log_error() {
   printf '\n' >&2
 }
 
+log_info() {
+  printf '\n'
+  printf '[%s] INFO: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_YELLOW}$*" >&2
+  reset_console_color
+  printf '\n' >&2
+}
+
+log_warning() {
+  printf '\n'
+  printf '[%s] WARN: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_GREEN}$*" >&2
+  reset_console_color
+  printf '\n' >&2
+}
+
 print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' 'Options:'
@@ -857,6 +864,8 @@ throw_error() {
 }
 
 readonly CONSOLE_COLOR_RED="$(tput setaf 1)"
+readonly CONSOLE_COLOR_GREEN="$(tput setaf 2)"
+readonly CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
 readonly CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 
 # This list excludes vulnerable versions, e.g. CVE-2015-6031 and CVE-2018-17144
@@ -980,14 +989,14 @@ case "${TARGET_KERNEL}" in
 Linux)
   TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
-  printf '%s\n' "Detected: running Linux."
-  is_running_in_container && printf '%s\n' 'Detected: running in Docker.'
+  log_info 'Detected: running Linux.'
+  is_running_in_container && log_info 'Detected: running in Docker.'
   ;;
 Darwin)
   TARGET_BITCOIN_TARBALL_OS='apple-darwin'
   BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-  printf '%s\n' "Detected: running macOS."
-  display_macos_warning
+  log_info "Detected: running macOS."
+  [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
   ;;
 *)
   throw_error 'Unknown target kernel type.'
