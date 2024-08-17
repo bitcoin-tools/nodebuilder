@@ -829,6 +829,14 @@ print_usage() {
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
   printf '%s\n' '-t, --test              Run unit tests on functions'
   printf '%s\n' '-u, --unattended        Run in non-interactive mode'
+  printf '%s\n' '-V, --version           Print the nodebuilder version'
+}
+
+print_version() {
+  printf '%s\n' 'nodebuilder 1.7.0'
+  printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
+  printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
+  printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
 }
 
 reset_console_color() {
@@ -938,6 +946,9 @@ while [ $# -gt 0 ]; do
     ;;
   -u | --unattended)
     unattended='true'
+    ;;
+  -V | --version)
+    print_version
     ;;
   *)
     printf '%s\n%s\n' "Error: '$1' is invalid." 'Use -h or --help for available options.'
