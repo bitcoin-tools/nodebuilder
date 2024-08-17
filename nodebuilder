@@ -948,7 +948,7 @@ while [ $# -gt 0 ]; do
     unattended='true'
     ;;
   -V | --version)
-    print_versoin
+    print_version
     ;;
   *)
     printf '%s\n%s\n' "Error: '$1' is invalid." 'Use -h or --help for available options.'
