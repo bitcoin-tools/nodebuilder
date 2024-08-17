@@ -951,7 +951,7 @@ readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.7.0-beta2'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.7.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
