@@ -58,7 +58,9 @@ jobs:
     name: Lint the shell code
     needs: changes
     if: >-
-      ${{ 
+      ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
@@ -86,6 +88,8 @@ jobs:
     needs: changes
     if: >-
       ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
@@ -106,6 +110,8 @@ jobs:
     needs: changes
     if: >-
       ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
@@ -126,6 +132,8 @@ jobs:
     needs: changes
     if: >-
       ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.markdown == 'true'
       }}
@@ -183,6 +191,8 @@ jobs:
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.shell == 'true' ||
