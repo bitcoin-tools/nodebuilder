@@ -12,15 +12,6 @@ on:
 env:
   TERM: xterm
 jobs:
-  event-json:
-    name: Capture the workflow event object
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check the JSON for event object
-        run: |
-          echo '${{ toJson(github.event) }}' > event_context.json
-          cat event_context.json
-          rm event_context.json
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
