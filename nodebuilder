@@ -791,7 +791,7 @@ log_error() {
 }
 
 log_info() {
-  printf '[%s] INFO: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_GREEN}$*"
+  printf '[%s] INFO: %s' "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
 }
@@ -862,7 +862,6 @@ throw_error() {
 }
 
 readonly CONSOLE_COLOR_RED="$(tput setaf 1)"
-readonly CONSOLE_COLOR_GREEN="$(tput setaf 2)"
 readonly CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
 readonly CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 
