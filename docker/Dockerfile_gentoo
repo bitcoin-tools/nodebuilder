@@ -7,7 +7,7 @@ FROM gentoo/stage3:latest@sha256:c6a9bb1f82cf91fe47a36299f6cbbcedfc74b5d4016387e
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.6.0
+ARG NODEBUILDER_VERSION=v1.7.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
