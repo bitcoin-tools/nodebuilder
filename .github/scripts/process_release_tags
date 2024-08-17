@@ -139,14 +139,14 @@ fi
 validate_branch "${new_release_tag_branch}"
 
 # Open the new beta pre-release page
-open_url "${REPO_URL}/releases/new?tag=${new_release_version}-beta&title=Release%20${new_release_version}%20(beta)&prerelease=1"
+open_url "${REPO_URL}/releases/new?tag=v${new_release_version}-beta&title=Release%20${new_release_version}%20(beta)&prerelease=1"
 printf '%s\n%s' \
   'Publish the beta pre-release. Be sure to auto-generate the release notes.' \
   'Then PRESS ENTER to continue to create the draft release...'
 read -r _
 
 # Open the final release page
-open_url "${REPO_URL}/releases/new?tag=${new_release_version}&title=Release%20${new_release_version}"
+open_url "${REPO_URL}/releases/new?tag=v${new_release_version}&title=Release%20${new_release_version}"
 printf '%s\n%s' \
   'Type out the release notes and save the draft release but DO NOT PUBLISH.' \
   'Then PRESS ENTER to continue when ready to create the release tags pull request...'

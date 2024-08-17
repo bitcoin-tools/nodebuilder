@@ -735,13 +735,29 @@ install_system_updates_dnf() {
 
 install_system_updates_emerge() {
   readonly GENTOO_EBUILD_REPOSITORY='/var/db/repos/gentoo'
+  readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs ${SYS_CORES_COUNT} --load-average ${SYS_CORES_PLUS_ONE} --quiet --quiet-build --quiet-fail --deep --newuse @world"
+  readonly EMERGE_MAX_RETRIES='3'
   printf '\n'
-  [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
-  emerge --depclean --quiet
-  emerge --update --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail --deep --newuse @world
-  emerge --depclean --quiet
-}
 
+  [ -d "${GENTOO_EBUILD_REPOSITORY}" ] || mkdir -p "${GENTOO_EBUILD_REPOSITORY}"
+
+  emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
+
+  emerge_retry_index='0'
+  while [ "${emerge_retry_index}" -lt "${EMERGE_MAX_RETRIES}" ]; do
+    if eval "${EMERGE_UPDATE_COMMAND}"; then
+      break
+    else
+      emerge_retry_index=$((emerge_retry_index + 1))
+      sleep 5
+    fi
+  done
+
+  [ "${emerge_retry_index}" -ge "${EMERGE_MAX_RETRIES}" ] &&
+    throw_error "Emerge system update failed after ${EMERGE_MAX_RETRIES} attempts"
+
+  emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
+}
 install_system_updates_pacman() {
   sudo pacman -Syu --noconfirm --quiet > /dev/null
 }
@@ -785,19 +801,25 @@ is_valid_bitcoin_version() {
 
 log_error() {
   printf '\n'
-  printf '[%s] ERROR: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_RED}$*" >&2
+  printf '[%s] ERROR: %s' \
+    "$(get_log_timestamp)" \
+    "${CONSOLE_COLOR_RED}$*" \
+    >&2
   reset_console_color
   printf '\n' >&2
 }
 
 log_info() {
-  printf '[%s] INFO: %s' "$(get_log_timestamp)" "$*"
-  reset_console_color
-  printf '\n'
+  printf '[%s] INFO: %s\n' \
+    "$(get_log_timestamp)" \
+    "$*"
 }
 
 log_warning() {
-  printf '[%s] WARN: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_YELLOW}$*"
+  printf '\n'
+  printf '[%s]  WARN: %s' \
+    "$(get_log_timestamp)" \
+    "${CONSOLE_COLOR_YELLOW}$*"
   reset_console_color
   printf '\n'
 }
@@ -981,7 +1003,6 @@ else
 fi
 
 clear_the_terminal
-echo "DEBUG: TARGET_KERNEL is set to ${TARGET_KERNEL}"
 case "${TARGET_KERNEL}" in
 Linux)
   TARGET_BITCOIN_TARBALL_OS='linux-gnu'

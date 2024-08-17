@@ -7,20 +7,11 @@ on:
     types: [ published ]
   schedule:
     # run every day at 0252, 0852, 1452, and 2052 UTC
-    - cron: '52 2,8,14,20 * * *'
+    - cron: '52 1,7,13,19 * * *'
   workflow_dispatch:
 env:
   TERM: xterm
 jobs:
-  event-json:
-    name: Capture the workflow event object
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check the JSON for event object
-        run: |
-          echo '${{ toJson(github.event) }}' > event_context.json
-          cat event_context.json
-          rm event_context.json
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
@@ -52,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Renovate
-        uses: renovatebot/github-action@v40.2.5
+        uses: renovatebot/github-action@v40.2.6
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -67,7 +58,9 @@ jobs:
     name: Lint the shell code
     needs: changes
     if: >-
-      ${{ 
+      ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
@@ -95,6 +88,8 @@ jobs:
     needs: changes
     if: >-
       ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
@@ -115,6 +110,8 @@ jobs:
     needs: changes
     if: >-
       ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
@@ -135,6 +132,8 @@ jobs:
     needs: changes
     if: >-
       ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.markdown == 'true'
       }}
@@ -192,6 +191,8 @@ jobs:
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.shell == 'true' ||
