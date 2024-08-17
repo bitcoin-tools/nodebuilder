@@ -118,9 +118,8 @@ EOF
 
 display_macos_warning() {
   if [ "${TARGET_KERNEL}" = 'Darwin' ] && [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
-    printf '%s\n%s\n' \
-      'WARNING: macOS has an unpatched security vulnerability called GoFetch.' \
-      '         Avoid security-critical actions, such as securing significant funds.'
+    log_warning 'macOS has an unpatched security vulnerability called GoFetch.'
+    log_warning 'Avoid security-critical actions, such as securing significant funds.'
     if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
       printf '%s' 'PRESS ENTER to continue or press Ctrl+C to exit... '
       read -r _
@@ -809,6 +808,13 @@ log_error() {
   printf '\n' >&2
 }
 
+log_warning() {
+  printf '\n'
+  printf '[%s]  WARN: %s' "$(get_log_timestamp)" "${CONSOLE_COLOR_YELLOW}$*"
+  reset_console_color
+  printf '\n'
+}
+
 print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' 'Options:'
@@ -869,6 +875,7 @@ throw_error() {
 }
 
 readonly CONSOLE_COLOR_RED="$(tput setaf 1)"
+readonly CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
 readonly CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 
 # This list excludes vulnerable versions, e.g. CVE-2015-6031 and CVE-2018-17144
