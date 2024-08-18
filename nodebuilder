@@ -1267,7 +1267,6 @@ if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
   set_bitcoin_core_option 'server' '1'
 fi
 
-
 # MEMORY
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
