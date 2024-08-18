@@ -837,6 +837,14 @@ print_usage() {
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
   printf '%s\n' '-t, --test              Run unit tests on functions'
   printf '%s\n' '-u, --unattended        Run in non-interactive mode'
+  printf '%s\n' '-V, --version           Print the nodebuilder version'
+}
+
+print_version() {
+  printf '%s\n' 'nodebuilder 1.7.0'
+  printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
+  printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
+  printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
 }
 
 reset_console_color() {
@@ -948,6 +956,9 @@ while [ $# -gt 0 ]; do
   -u | --unattended)
     unattended='true'
     ;;
+  -V | --version)
+    print_version
+    ;;
   *)
     printf '%s\n%s\n' "Error: '$1' is invalid." 'Use -h or --help for available options.'
     exit 1
@@ -972,7 +983,7 @@ readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.6.0'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.7.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
@@ -1411,7 +1422,7 @@ else
 fi
 
 log_info 'Checking the RPC status.'
-readonly BITCOIN_RPC_TIMEOUT=60
+readonly BITCOIN_RPC_TIMEOUT=300
 if ! bitcoin-cli --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
   throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds."
 fi
@@ -1501,7 +1512,7 @@ while [ "${ibd_status}" = 'true' ]; do
   fi
 
   if [ "${size_on_disk_in_mib}" -ge 1 ] && (is_running_in_ci || is_running_in_container); then
-    printf '%s\n' 'The blockchain download is progressing. Exiting the script.'
+    log_success 'The blockchain download is progressing. Exiting the script.'
     exit 0
   fi
 
