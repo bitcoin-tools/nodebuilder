@@ -206,7 +206,7 @@ for message in \
   'INFO: Checking for internet.$' \
   'INFO: Internet checks passed.$' \
   'INFO: Checking for Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?...$' \
-  'INFO: (Failed to find|Found) Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)? installed.$' \
+  'INFO: (Failed to find|Found) Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?.$' \
   'INFO: Installing Bitcoin Core... ok.$' \
   'INFO: Setting the default node behavior... ok.$' \
   'INFO: Found data already synced... [0-9]+ GiB.$' \

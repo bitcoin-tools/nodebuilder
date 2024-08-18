@@ -14,14 +14,14 @@ check_dpkg_lock() {
 
 check_internet_status() {
   ensure_curl_dependency
-  printf '%s' 'Checking internet status... '
+  log_info 'Checking for internet.'
   ( (check_internet_to_address 1.1.1.1 ||
     check_internet_to_address 1.1.0.0 ||
     check_internet_to_address 9.9.9.9 ||
     check_internet_to_address 9.9.9.11) &&
     check_internet_to_address bitcoincore.org) ||
-    throw_error 'Check for active internet failed.'
-  printf '%s\n' 'ok.'
+    throw_error 'Internet checks failed.'
+  log_info 'Internet checks passed.'
 }
 
 check_internet_to_address() {
@@ -50,7 +50,7 @@ clear_the_terminal() {
 }
 
 create_application_shortcuts() {
-  printf '%s' 'Creating application shortcuts... '
+  log_info 'Creating application shortcuts.'
   readonly DESKTOP_DIRECTORY="${HOME}/Desktop"
   readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
   readonly APPLICATIONS_DIRECTORY="${USER_DATA_DIRECTORY}/applications"
@@ -113,7 +113,7 @@ EOF
   else
     gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true
   fi
-  printf '%s\n' 'ok.'
+
 }
 
 display_macos_warning() {
@@ -129,7 +129,7 @@ ensure_curl_dependency() {
   if command -v dnf > /dev/null 2>&1; then
     sudo dnf install --allowerasing --assumeyes curl > /dev/null
   elif ! command -v curl > /dev/null 2>&1; then
-    printf '%s' 'Installing curl depencency... '
+    log_info 'Installing curl depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       apk --quiet add curl
@@ -171,14 +171,13 @@ ensure_curl_dependency() {
       fi
       ;;
     esac
-    printf '%s\n' 'ok.'
   fi
   command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
 ensure_sudo_dependency() {
   if ! command -v sudo > /dev/null 2>&1; then
-    printf '%s' 'Installing sudo depencency... '
+    log_info 'Installing sudo depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       apk --quiet add sudo
@@ -218,14 +217,13 @@ ensure_sudo_dependency() {
       fi
       ;;
     esac
-    printf '%s\n' 'ok.'
   fi
   command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
 ensure_xargs_dependency() {
   if ! command -v xargs > /dev/null 2>&1; then
-    printf '%s' 'Installing xargs depencency... '
+    log_info 'Installing xargs depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       apk --quiet add findutils
@@ -269,7 +267,6 @@ ensure_xargs_dependency() {
     esac
     command -v xargs > /dev/null 2>&1 ||
       throw_error "Unable to install 'xargs'. Report this error at ${NODEBUILDER_REPO}."
-    printf '%s\n' 'ok.'
   fi
 }
 
@@ -340,7 +337,7 @@ handle_exit() {
 
 # shellcheck disable=SC2317
 handle_sigint() {
-  printf '\n%s\n' 'Detected Ctrl+C. Exiting.'
+  log_warning 'Detected Ctrl+C. Exiting.'
   handle_exit
   exit 0
 }
@@ -389,7 +386,7 @@ install_build_dependencies() {
     if [ -n "${install_build_command_function}" ]; then
       "${install_build_command_function}"
     else
-      printf '%s\n  %s\n' 'failed.' 'Unable to determine build dependencies. Attempting to compile without verifying dependencies.'
+      log_warning 'Unable to determine build dependencies. Attempting to compile but might see errors.'
     fi
     ;;
   esac
@@ -503,7 +500,7 @@ install_build_dependencies_zypper() {
 }
 
 install_runtime_dependencies() {
-  printf '%s' 'Ensuring runtime dependencies... '
+  log_info 'Ensuring runtime dependencies.'
   case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
     install_runtime_dependencies_apk
@@ -552,7 +549,6 @@ install_runtime_dependencies() {
     fi
     ;;
   esac
-  printf '%s\n' 'ok.'
 }
 
 install_runtime_dependencies_apk() {
@@ -576,7 +572,7 @@ install_runtime_dependencies_aptget() {
 
 install_runtime_dependencies_darwin() {
   if ! command -v git > /dev/null 2>&1; then
-    printf '%s\n%s' 'not found.' 'Installing git via the Xcode Command Line Tools... '
+    log_info 'Installing git via the Xcode Command Line Tools.'
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
     readonly CLT_INSTALL_IN_PROGRESS='/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress'
@@ -591,7 +587,7 @@ install_runtime_dependencies_darwin() {
     sudo rm "${CLT_INSTALL_IN_PROGRESS}"
 
     if command -v git > /dev/null 2>&1; then
-      printf '%s\n' 'ok.'
+      :
     elif [ "${unattended}" = 'true' ]; then
       throw_error 'Failed to install Xcode Command Line Tools. Try re-running without -u/--unattended or manually installing git.'
     else
@@ -656,7 +652,7 @@ install_runtime_dependencies_zypper() {
 }
 
 install_system_updates() {
-  printf '%s' 'Performing a system upgrade... '
+  log_info 'Performing a system upgrade.'
   case "${TARGET_OPERATING_SYSTEM}" in
   alpine)
     install_system_updates_apk
@@ -714,7 +710,6 @@ install_system_updates() {
     sudo reboot
     exit 0
   fi
-  printf '%s\n' 'ok.'
 }
 
 install_system_updates_apk() {
@@ -1030,7 +1025,7 @@ check_internet_status
 is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
 install_runtime_dependencies
 
-printf '%s' "Checking for Bitcoin Core ${target_bitcoin_version}... "
+log_info "Checking for Bitcoin Core ${target_bitcoin_version}..."
 if command -v bitcoind > /dev/null 2>&1; then
   current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1 | cut -c23-)"
 else
@@ -1074,47 +1069,47 @@ esac
 readonly TARGET_BITCOIN_VERSION_PADDED
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
-  printf '%s\n' 'ok.'
+  log_info "Found Bitcoin Core ${target_bitcoin_version}."
 elif [ "${compile_bitcoin:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ]; then
-  printf '%s\n  %s' 'no.' 'Ensuring compile dependencies... '
+  log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
+  log_info 'Ensuring compile dependencies.'
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   install_build_dependencies
-  printf '%s\n  %s' 'ok.' 'Downloading Bitcoin source code... '
+  log_info 'Downloading Bitcoin source code.'
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 &&
     [ "${TARGET_KERNEL}" != 'Darwin' ] &&
     torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" ||
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}"
   cd "${COMPILE_DIRECTORY}"/
-  printf '%s\n  %s' 'ok.' 'Analyzing hardware configuration... '
+  log_info 'Analyzing hardware configuration.'
   command -v autoreconf > /dev/null 2>&1 ||
     throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
-  printf '%s\n  %s' 'ok.' 'Configuring the build environment... '
+  log_info 'Configuring the build environment.'
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
   else
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
   fi
-  printf '%s\n  %s' 'ok.' 'Compiling source code, please wait... '
+  log_info 'Compiling source code. Please wait.'
   make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
-  printf '%s\n  %s' 'ok.' 'Running compile checks, please wait... '
+  log_info 'Running compile checks. Please wait.'
   make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
-  printf '%s\n  %s' 'ok.' 'Installing Bitcoin Core... '
+  log_info 'Installing Bitcoin Core.'
   make install > /dev/null 2>&1 || sudo make install > /dev/null
-  printf '%s\n' 'ok.'
   cd - > /dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
   rm -rf "${COMPILE_DIRECTORY:?}"/
   current_bitcoin_version="${target_bitcoin_version}"
 else
-  printf '%s\n' 'no.'
+  log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
   readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
   readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
   readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
@@ -1143,7 +1138,7 @@ else
     readonly GPG_SIGNATURES_FILE="${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILENAME}"
     readonly GUIX_SIGS_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/guix.sigs"
     readonly GUIX_SIGS_DESTINATION_DIRECTORY="${HOME}/Downloads/guix.sigs"
-    printf '  %s' 'Downloading Bitcoin Core... '
+    log_info 'Downloading Bitcoin Core.'
     if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
       torsocks curl --fail --silent --show-error --location --retry 2 --output "${BITCOIN_HASH_FILE}" "${BITCOIN_HASH_FILE_SOURCE}" ||
         curl --fail --silent --show-error --location --retry 5 --output "${BITCOIN_HASH_FILE}" "${BITCOIN_HASH_FILE_SOURCE}"
@@ -1156,9 +1151,7 @@ else
       curl --fail --silent --show-error --location --retry 5 --output "${GPG_SIGNATURES_FILE}" "${GPG_SIGNATURES_FILE_SOURCE}"
       curl --fail --silent --show-error --location --retry 5 --output "${BITCOIN_TARBALL_TEMPORARY_DIRECTORY}" "${BITCOIN_TARBALL_FILE_SOURCE}"
     fi
-    printf '%s\n' 'ok.'
 
-    printf '  %s' 'Validating the checksum... '
     cd "${TEMP_DIRECTORY}"/
     if command -v sha256sum > /dev/null; then
       readonly SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
@@ -1174,9 +1167,8 @@ else
       throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${BITCOIN_HASH_FILE}."
       ;;
     esac
-    printf '%s\n' 'ok.'
+    log_info 'Validated the checksum.'
 
-    printf '  %s' 'Validating the signatures... '
     if [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ]; then
       gpg --quiet --import "${GUIX_SIGS_DESTINATION_DIRECTORY}"/builder-keys/*.gpg
     else
@@ -1190,7 +1182,7 @@ else
     pgrep '^gpg-agent$' > /dev/null && gpgconf --kill gpg-agent
     pgrep '^keyboxd$' > /dev/null && gpgconf --kill keyboxd
     if [ "${GPG_GOOD_SIGNATURE_COUNT}" -ge "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
-      printf '%s\n' "${GPG_GOOD_SIGNATURE_COUNT} good."
+      log_info "Found ${GPG_GOOD_SIGNATURE_COUNT} good signatures."
       [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
       mv "${BITCOIN_TARBALL_TEMPORARY_DIRECTORY}" "${BITCOIN_TARBALL_DESTINATION_PATH}"
       [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ] || mv "${GUIX_SIGS_TEMPORARY_DIRECTORY}" "${GUIX_SIGS_DESTINATION_DIRECTORY}"
@@ -1201,12 +1193,11 @@ else
     fi
   fi
 
-  printf '  %s' 'Extracting Bitcoin Core... '
+  log_info 'Extracting Bitcoin Core.'
   [ -d "${BITCOIN_CORE_EXTRACT_DIR}"/ ] || mkdir "${BITCOIN_CORE_EXTRACT_DIR}"
   tar -xzf "${BITCOIN_TARBALL_DESTINATION_PATH}" -C "${BITCOIN_CORE_EXTRACT_DIR}"/ --strip-components=1
-  printf '%s\n' 'ok.'
 
-  printf '  %s' 'Running the unit tests... '
+  log_info 'Running the unit tests.'
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
     codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
   fi
@@ -1218,7 +1209,7 @@ else
     throw_error 'Unit tests failed.'
     ;;
   esac
-  printf '%s\n  %s' 'ok.' 'Installing Bitcoin Core... '
+  log_info 'Installing Bitcoin Core.'
   [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
     mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
     sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
@@ -1267,12 +1258,11 @@ else
   for man_page in bitcoind.1 bitcoin-qt.1 bitcoin-cli.1 bitcoin-tx.1 bitcoin-util.1 bitcoin-wallet.1; do
     sudo install -c -m 644 "${BITCOIN_INSTALL_MAN_SOURCE}/${man_page}" "${BITCOIN_INSTALL_MAN_DESTINATION}/"
   done
-  printf '%s\n' 'ok.'
 
-  printf '  %s' 'Removing installation files... '
+  log_info 'Removing installation files.'
   rm -r "${BITCOIN_CORE_EXTRACT_DIR:?}/"
   rm -r "${TEMP_DIRECTORY:?}/"
-  printf '%s\n' 'ok.'
+  log_info 'INFO: Bitcoin Core installation complete.'
 fi
 
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
@@ -1280,11 +1270,10 @@ fi
 # If bitcoin.conf doesn't already exist, use default settings
 [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
 if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
-  printf '%s' 'Setting the default node behavior... '
+  log_info 'Setting the default node behavior.'
   is_running_in_ci && set_bitcoin_core_option 'debug' 'net'
   set_bitcoin_core_option 'mempoolfullrbf' '1'
   set_bitcoin_core_option 'server' '1'
-  printf '%s\n' 'ok.'
 fi
 
 case "${TARGET_KERNEL}" in
@@ -1302,29 +1291,25 @@ Darwin) ;; #TODO: Add macOS memory check
     "$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%f\n", mem_total_mib / mib_gib_factor}')"
 
   if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
-    printf '%s' 'Configuring for minimal memory usage... '
+    log_warning 'Configuring for minimal memory usage.'
     set_if_unset_bitcoin_core_option 'dbcache' '4'
     set_if_unset_bitcoin_core_option 'maxmempool' '5'
     set_if_unset_bitcoin_core_option 'maxconnections' '4'
     [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
-    printf '%s\n' 'ok.'
   elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
-    printf '%s' 'Configuring for reduced memory usage... '
+    log_warning 'Configuring for reduced memory usage.'
     set_if_unset_bitcoin_core_option 'dbcache' '100'
     set_if_unset_bitcoin_core_option 'maxmempool' '50'
     set_if_unset_bitcoin_core_option 'maxconnections' '10'
     [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
-    printf '%s\n' 'ok.'
   elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
-    printf '%s' 'Configuring for conservative memory usage... '
+    log_warning 'Configuring for conservative memory usage.'
     set_if_unset_bitcoin_core_option 'dbcache' '225'
     set_if_unset_bitcoin_core_option 'maxmempool' '150'
-    printf '%s\n' 'ok.'
   fi
   ;;
 esac
 
-printf '%s' 'Checking data already synced... '
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
@@ -1346,11 +1331,10 @@ else
   readonly INITIAL_CHAINSTATE_SIZE_IN_MIB=0
 fi
 readonly INITIAL_DATA_ALREADY_SYNCED_IN_MIB=$((INITIAL_BLOCKS_SIZE_IN_MIB + INITIAL_CHAINSTATE_SIZE_IN_MIB))
-printf '%s\n' "$((INITIAL_DATA_ALREADY_SYNCED_IN_MIB / MIB_TO_GIB)) GiB."
+log_info "Found data already synced... $((INITIAL_DATA_ALREADY_SYNCED_IN_MIB / MIB_TO_GIB)) GiB."
 
-printf '%s' 'Checking free space in home directory... '
 free_space_in_mib="$(get_free_space_in_mib)"
-printf '%s\n' "$((free_space_in_mib / MIB_TO_GIB)) GiB."
+log_info "Found free space available... $((free_space_in_mib / MIB_TO_GIB)) GiB."
 
 ## This constant will need to be adjusted over time as the chain grows
 ## or need to find how to generate this dynamically in a trustless way.
@@ -1366,27 +1350,26 @@ if [ "${prune_value}" -eq 0 ]; then
   if [ "$((free_space_in_mib + INITIAL_DATA_ALREADY_SYNCED_IN_MIB))" -lt "${ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB}" ]; then
     throw_error "Not enough storage to disable pruning. Free up ${ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB} GiB or use a positive value less than $((free_space_in_mib + INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) \(MiB\)."
   fi
-  printf '  %s' 'Configuring with the disabled prune option... '
+  log_info 'Configuring with the disabled prune option.'
   set_bitcoin_core_option 'prune' "${prune_value}"
-  printf '%s\n' 'ok.'
 # check if the user passed in a prune value
 elif [ "${prune_value}" -gt 0 ]; then
   if [ "$((free_space_in_mib + INITIAL_DATA_ALREADY_SYNCED_IN_MIB))" -lt "${prune_value}" ]; then
     throw_error "Prune value ${prune_value} too large. Run without setting prune or use a value less than $((free_space_in_mib + INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) \(MiB\)."
   fi
-  printf '  %s' "Configuring with the ${prune_value} MiB prune option... "
+  log_info "Configuring with the ${prune_value} MiB prune option."
   set_bitcoin_core_option 'prune' "${prune_value}"
-  printf '%s\n' 'ok.'
 # check that a prune value doesn't already exist in the config file
 elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
-    printf '  %s\n' 'Your node will run as an unpruned full node.'
+    log_info 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
   elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 80 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     throw_error 'You are too low on disk space to run Bitcoin Core.'
   else
     if [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 40 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
-      printf '  %s\n  %s\n' 'Your disk space is low.' 'Setting blocks-only mode and the minimum 0.55 GiB prune.'
+      log_warning 'Your disk space is low.'
+      log_info 'Setting blocks-only mode and the minimum 0.55 GiB prune.'
       set_bitcoin_core_option 'blocksonly' '1'
       readonly PRUNE_AMOUNT_IN_MIB='550'
     else
@@ -1400,13 +1383,14 @@ elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
         readonly PRUNE_RATIO=80
       fi
       readonly PRUNE_AMOUNT_IN_MIB=$((free_space_in_mib * PRUNE_RATIO / 100))
-      printf '  Pruning to %d GiB (%d%% of the free space).\n  You can change this in ~/.bitcoin/bitcoin.conf.\n' "$((PRUNE_AMOUNT_IN_MIB / MIB_TO_GIB))" "${PRUNE_RATIO}"
+      log_info "Pruning to $((PRUNE_AMOUNT_IN_MIB / MIB_TO_GIB)) GiB (${PRUNE_RATIO}% of the free space)."
+      log_info 'You can change this in ~/.bitcoin/bitcoin.conf.'
     fi
     set_bitcoin_core_option 'prune' "${PRUNE_AMOUNT_IN_MIB}"
   fi
 fi
 
-printf '%s' 'Starting Bitcoin Core... '
+log_info 'Starting Bitcoin Core.'
 if is_running_in_ci ||
   is_running_in_container ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
@@ -1417,12 +1401,11 @@ else
   setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
 fi
 
-printf '%s\n  %s' 'ok.' 'Checking the RPC status... '
+log_info 'Checking the RPC status.'
 readonly BITCOIN_RPC_TIMEOUT=60
 if ! bitcoin-cli --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
-  throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds"
+  throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds."
 fi
-printf '%s\n' 'ok.'
 
 readonly SLEEP_TIME='10'
 blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
@@ -1430,26 +1413,18 @@ ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
 if [ "${ibd_status}" = 'true' ]; then
   if ! is_running_in_container; then
-    printf '%s' 'Disabling system sleep, suspend, and hibernate... '
+    log_info 'Disabling system sleep, suspend, and hibernate.'
     if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
       caffeinate -sw "$(cat "${BITCOIN_DATA_DIRECTORY}/bitcoind.pid")" &
     else
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
-    printf '%s\n%s\n%s' \
-      'ok.' \
-      "Close this Terminal window by clicking on the 'X'." \
-      "This screen will refresh in ${SLEEP_TIME} seconds."
+    log_info "Close this Terminal window by clicking on the 'X'."
+    log_info "This screen will refresh in ${SLEEP_TIME} seconds."
   fi
-  sleep_count=1
-  while [ "${sleep_count}" -le "${SLEEP_TIME}" ]; do
-    sleep 1
-    printf '%s' '.'
-    sleep_count=$((sleep_count + 1))
-  done
-  printf '\n'
+  sleep "${SLEEP_TIME}"
 else
-  printf '  %s\n' 'Your node has already synced the blockchain.'
+  log_info 'Your node has already synced the blockchain.'
 fi
 
 while [ "${ibd_status}" = 'true' ]; do
@@ -1531,5 +1506,5 @@ while [ "${ibd_status}" = 'true' ]; do
   ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 done
 
-printf '%s\n' 'This script has completed successfully.'
+log_info 'This script has completed successfully.'
 exit 0
