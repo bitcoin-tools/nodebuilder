@@ -120,7 +120,7 @@ display_macos_warning() {
   log_warning 'macOS has an unpatched security vulnerability called GoFetch.'
   log_warning 'Avoid security-critical actions, such as securing significant funds.'
   if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
-    printf '%s' 'PRESS ENTER to continue or press Ctrl+C to exit... '
+    log_info 'PRESS ENTER to continue or press Ctrl+C to exit.'
     read -r _
   fi
 }
@@ -703,10 +703,10 @@ install_system_updates() {
   elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
     printf '\n%s\n%s\n' 'REBOOT IS REQUIRED to upgrade the following packages:' "$(cat /var/run/reboot-required.pkgs)"
     if [ "${unattended}" = 'false' ]; then
-      printf '\n%s' 'PRESS ENTER to reboot or press Ctrl+C to exit... '
+      log_info 'PRESS ENTER to reboot or press Ctrl+C to exit.'
       read -r _
     fi
-    printf '%s\n' 'Rebooting.'
+    log_warning 'Rebooting.'
     sudo reboot
     exit 0
   fi
@@ -844,7 +844,7 @@ reset_console_color() {
 }
 
 run_unit_tests() {
-  printf '%s' 'Testing get_cursor_column...'
+  printf '%s' 'Testing get_cursor_column.'
   test_get_cursor_column
   printf '%s\n' 'PASS'
   return 0
@@ -1035,7 +1035,6 @@ check_internet_status
 is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
 install_runtime_dependencies
 
-log_info "Checking for Bitcoin Core ${target_bitcoin_version}..."
 if command -v bitcoind > /dev/null 2>&1; then
   current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1 | cut -c23-)"
 else
