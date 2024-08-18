@@ -1253,7 +1253,7 @@ else
   log_info 'Removing installation files.'
   rm -r "${BITCOIN_CORE_EXTRACT_DIR:?}/"
   rm -r "${TEMP_DIRECTORY:?}/"
-  log_info 'INFO: Bitcoin Core installation complete.'
+  log_info 'Bitcoin Core installation complete.'
 fi
 
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
@@ -1267,40 +1267,8 @@ if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
   set_bitcoin_core_option 'server' '1'
 fi
 
-case "${TARGET_KERNEL}" in
-Darwin) ;; #TODO: Add macOS memory check
-*)
-  readonly PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')"
-  readonly PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')"
-  readonly SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')"
-  readonly SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')"
-  readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
-  readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
-  readonly FREE_MEMORY="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
-  readonly TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')"
 
-  log_info "Checking system memory... ${FREE_MEMORY} of ${TOTAL_MEMORY} GiB free."
-
-  if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
-    log_warning 'Configuring for minimal memory usage.'
-    set_if_unset_bitcoin_core_option 'dbcache' '4'
-    set_if_unset_bitcoin_core_option 'maxmempool' '5'
-    set_if_unset_bitcoin_core_option 'maxconnections' '4'
-    [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
-  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
-    log_warning 'Configuring for reduced memory usage.'
-    set_if_unset_bitcoin_core_option 'dbcache' '100'
-    set_if_unset_bitcoin_core_option 'maxmempool' '50'
-    set_if_unset_bitcoin_core_option 'maxconnections' '10'
-    [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
-  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
-    log_warning 'Configuring for conservative memory usage.'
-    set_if_unset_bitcoin_core_option 'dbcache' '225'
-    set_if_unset_bitcoin_core_option 'maxmempool' '150'
-  fi
-  ;;
-esac
-
+# MEMORY
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
@@ -1380,6 +1348,41 @@ elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
     set_bitcoin_core_option 'prune' "${PRUNE_AMOUNT_IN_MIB}"
   fi
 fi
+
+# PRUNING
+case "${TARGET_KERNEL}" in
+Darwin) ;; #TODO: Add macOS memory check
+*)
+  readonly PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')"
+  readonly PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')"
+  readonly SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')"
+  readonly SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')"
+  readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
+  readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
+  readonly FREE_MEMORY="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
+  readonly TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')"
+
+  log_info "Checking system memory... ${FREE_MEMORY} of ${TOTAL_MEMORY} GiB free."
+
+  if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
+    log_warning 'Configuring for minimal memory usage.'
+    set_if_unset_bitcoin_core_option 'dbcache' '4'
+    set_if_unset_bitcoin_core_option 'maxmempool' '5'
+    set_if_unset_bitcoin_core_option 'maxconnections' '4'
+    [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
+  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
+    log_warning 'Configuring for reduced memory usage.'
+    set_if_unset_bitcoin_core_option 'dbcache' '100'
+    set_if_unset_bitcoin_core_option 'maxmempool' '50'
+    set_if_unset_bitcoin_core_option 'maxconnections' '10'
+    [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
+  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
+    log_warning 'Configuring for conservative memory usage.'
+    set_if_unset_bitcoin_core_option 'dbcache' '225'
+    set_if_unset_bitcoin_core_option 'maxmempool' '150'
+  fi
+  ;;
+esac
 
 log_info 'Starting Bitcoin Core.'
 if is_running_in_ci ||
