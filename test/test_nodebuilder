@@ -205,10 +205,9 @@ for message in \
   'INFO: Detected: running (Linux|macOS).$' \
   'INFO: Checking for internet.$' \
   'INFO: Internet checks passed.$' \
-  'INFO: Checking for Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?...$' \
   'INFO: (Failed to find|Found) Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?.$' \
-  'INFO: Installing Bitcoin Core... ok.$' \
-  'INFO: Setting the default node behavior... ok.$' \
+  'INFO: Installing Bitcoin Core.$' \
+  'INFO: Setting the default node behavior.$' \
   'INFO: Found data already synced... [0-9]+ GiB.$' \
   'INFO: Found free space available... [0-9]+ [GM]iB.$' \
   'INFO: Starting Bitcoin Core.$' \
