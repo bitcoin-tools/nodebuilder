@@ -230,8 +230,8 @@ for message in \
   'libzmq' \
   'BDB' \
   'Berkeley DB' \
-  'Checking system memory... 0 GiB of 0 GiB free.' \
-  'Checking system memory... 0.0 GiB of 0.0 GiB free.' \
+  'Checking system memory... 0 of 0 GiB free.' \
+  'Checking system memory... 0.0 of 0.0 GiB free.' \
   'INFO: Found free space available... 0 GiB.' \
   'Sync progress:              [0-9]+\.[0-9]{4} %' \
   'Disk free space:            (0 G|[0-9]+ M)iB'; do
