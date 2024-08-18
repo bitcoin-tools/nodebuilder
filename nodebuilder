@@ -810,6 +810,15 @@ log_info() {
     "$*"
 }
 
+log_success() {
+  printf '\n'
+  printf '[%s]  DONE: %s' \
+    "$(get_log_timestamp)" \
+    "${CONSOLE_COLOR_GREEN}$*"
+  reset_console_color
+  printf '\n'
+}
+
 log_warning() {
   printf '\n'
   printf '[%s]  WARN: %s' \
@@ -879,6 +888,7 @@ throw_error() {
 }
 
 readonly CONSOLE_COLOR_RED="$(tput setaf 1)"
+readonly CONSOLE_COLOR_GREEN="$(tput setaf 2)"
 readonly CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
 readonly CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 
@@ -1506,5 +1516,5 @@ while [ "${ibd_status}" = 'true' ]; do
   ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 done
 
-log_info 'This script has completed successfully.'
+log_success 'This script has completed successfully.'
 exit 0
