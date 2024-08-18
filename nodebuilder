@@ -1425,7 +1425,7 @@ else
 fi
 
 printf '%s\n  %s' 'ok.' 'Checking the RPC status... '
-readonly BITCOIN_RPC_TIMEOUT=60
+readonly BITCOIN_RPC_TIMEOUT=300
 if ! bitcoin-cli --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
   throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds"
 fi
