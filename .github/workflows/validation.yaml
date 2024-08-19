@@ -166,6 +166,7 @@ jobs:
         with:
           config_file: 'resources/config/linkspector.yaml'
           fail_on_error: true
+          reporter: github-check
 
   conventional-commits:
     name: Check pull request title
