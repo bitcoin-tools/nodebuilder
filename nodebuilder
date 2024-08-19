@@ -768,7 +768,6 @@ is_valid_bitcoin_version() {
 }
 
 log_error() {
-  printf '\n'
   printf "[%s] ERROR: ${CONSOLE_COLOR_RED}%s" \
     "$(get_log_timestamp)" \
     "$*" \
@@ -784,7 +783,6 @@ log_info() {
 }
 
 log_success() {
-  printf '\n'
   printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN}%s" \
     "$(get_log_timestamp)" \
     "$*"
@@ -793,7 +791,6 @@ log_success() {
 }
 
 log_warning() {
-  printf '\n'
   printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW}%s" \
     "$(get_log_timestamp)" \
     "$*"
