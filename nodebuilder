@@ -73,12 +73,12 @@ create_application_shortcuts() {
     fi
   fi
 
-  if ! [ -d "${DESKTOP_DIRECTORY}" ]; then
+  if [ ! -d "${DESKTOP_DIRECTORY}" ]; then
     mkdir -p "${DESKTOP_DIRECTORY}"
   elif [ -f "${DESKTOP_DIRECTORY}/${OLD_SHORTCUT_FILENAME}" ]; then
     rm "${DESKTOP_DIRECTORY}/${OLD_SHORTCUT_FILENAME}"
   fi
-  if [ -d "${APPLICATIONS_DIRECTORY}" ]; then
+  if [ ! -d "${APPLICATIONS_DIRECTORY}" ]; then
     mkdir -p "${APPLICATIONS_DIRECTORY}"
   elif [ -f "${APPLICATIONS_DIRECTORY}/${OLD_SHORTCUT_FILENAME}" ]; then
     rm "${APPLICATIONS_DIRECTORY}/${OLD_SHORTCUT_FILENAME}"
