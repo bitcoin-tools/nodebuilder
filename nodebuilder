@@ -785,9 +785,9 @@ log_info() {
 
 log_success() {
   printf '\n'
-  printf '[%s]  DONE: %s' \
+  printf '[%s]  DONE: ${CONSOLE_COLOR_GREEN}%s' \
     "$(get_log_timestamp)" \
-    "${CONSOLE_COLOR_GREEN}$*"
+    "$*"
   reset_console_color
   printf '\n'
 }
