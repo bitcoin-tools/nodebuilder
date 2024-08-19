@@ -778,7 +778,7 @@ log_error() {
 }
 
 log_info() {
-  printf '[%s] INFO: %s\n' \
+  printf '[%s]  INFO: %s\n' \
     "$(get_log_timestamp)" \
     "$*"
 }
