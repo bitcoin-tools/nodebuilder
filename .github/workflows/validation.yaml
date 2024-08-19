@@ -166,6 +166,11 @@ jobs:
         with:
           config-file: 'resources/config/markdown-link-check.json' 
           use-verbose-mode: 'yes'
+      - name: Run linkspector on markdown
+        uses: umbrelladocs/action-linkspector@v1
+        with:
+          config_file: 'resources/config/linkspector.yaml'
+          fail_on_error: true
 
   conventional-commits:
     name: Check pull request title
