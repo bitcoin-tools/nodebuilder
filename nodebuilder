@@ -866,6 +866,7 @@ throw_error() {
   exit 1
 }
 
+echo "DEBUG: TERM IS ${TERM}"
 # Set the console color based on tput results or the TERM environmental variable
 if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
   CONSOLE_COLOR_RED="$(tput setaf 1)"
