@@ -821,6 +821,7 @@ print_version() {
 }
 
 reset_console_color() {
+  # shellcheck disable=SC2059
   printf "${CONSOLE_COLOR_NORMAL}"
 }
 
