@@ -57,6 +57,7 @@ create_application_shortcuts() {
   readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
   readonly SHORTCUT_IMAGE_SOURCE="${BITCOIN_CORE_REPO}/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
   readonly SHORTCUT_FILENAME='bitcoin-qt.desktop'
+  readonly OLD_SHORTCUT_FILENAME='bitcoin_core.desktop'
 
   [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
   if ! [ -f "${SHORTCUT_IMAGE_FILE}" ]; then
@@ -72,8 +73,17 @@ create_application_shortcuts() {
     fi
   fi
 
-  [ -d "${DESKTOP_DIRECTORY}" ] || mkdir -p "${DESKTOP_DIRECTORY}"
-  [ -d "${APPLICATIONS_DIRECTORY}" ] || mkdir -p "${APPLICATIONS_DIRECTORY}"
+  if ! [ -d "${DESKTOP_DIRECTORY}" ]; then
+    mkdir -p "${DESKTOP_DIRECTORY}"
+  elif [ -f "${DESKTOP_DIRECTORY}/${OLD_SHORTCUT_FILENAME}" ]; then
+    rm "${DESKTOP_DIRECTORY}/${OLD_SHORTCUT_FILENAME}"
+  fi
+  if [ -d "${APPLICATIONS_DIRECTORY}" ]; then
+    mkdir -p "${APPLICATIONS_DIRECTORY}"
+  elif [ -f "${APPLICATIONS_DIRECTORY}/${OLD_SHORTCUT_FILENAME}" ]; then
+    rm "${APPLICATIONS_DIRECTORY}/${OLD_SHORTCUT_FILENAME}"
+  fi
+
   ## Create desktop entries on the user's Desktop and 'Show Applications' directories
   cat << EOF | tee "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}" > "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
 [Desktop Entry]
@@ -113,7 +123,6 @@ EOF
   else
     gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true
   fi
-
 }
 
 display_macos_warning() {
