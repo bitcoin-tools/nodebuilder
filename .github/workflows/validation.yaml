@@ -161,11 +161,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run markdown-link-check on documentation
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
+      - name: Run linkspector on markdown
+        uses: umbrelladocs/action-linkspector@v1
         with:
-          config-file: 'resources/config/markdown-link-check.json' 
-          use-verbose-mode: 'yes'
+          config_file: 'resources/config/linkspector.yaml'
+          fail_on_error: true
+          reporter: github-check
 
   conventional-commits:
     name: Check pull request title
