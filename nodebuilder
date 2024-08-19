@@ -985,7 +985,7 @@ if is_running_in_ci ||
   sudo --validate --noninteractive > /dev/null 2>&1; then
   :
 else
-  printf '%s\n' 'Please enter your sudo password if requested.'
+  printf '%s\n' 'Please enter your password to log in, if requested.'
   sudo --validate
 fi
 
