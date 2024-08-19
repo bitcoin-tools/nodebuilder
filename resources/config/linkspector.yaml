@@ -1,0 +1,8 @@
+dirs:
+  - ./
+  - test
+aliveStatusCodes:
+  - 200
+  - 201
+  - 204
+  
