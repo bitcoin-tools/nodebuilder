@@ -867,7 +867,7 @@ throw_error() {
 }
 
 # Set the console color based on tput results or the TERM environmental variable
-if command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null)" -ge 8 ]; then
+if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
   CONSOLE_COLOR_RED="$(tput setaf 1)"
   CONSOLE_COLOR_GREEN="$(tput setaf 2)"
   CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
