@@ -37,7 +37,7 @@ check_internet_to_address() {
 clear_the_terminal() {
   if is_running_in_ci || is_running_in_container; then
     return
-  elif ! [ -t 1 ]; then
+  elif [ ! -t 1 ]; then
     # stdout is not a terminal perhaps redirected or piped
     return
   elif command -v clear > /dev/null 2>&1; then
@@ -60,7 +60,7 @@ create_application_shortcuts() {
   readonly OLD_SHORTCUT_FILENAME='bitcoin_core.desktop'
 
   [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
-  if ! [ -f "${SHORTCUT_IMAGE_FILE}" ]; then
+  if [ ! -f "${SHORTCUT_IMAGE_FILE}" ]; then
     # shellcheck disable=SC2015
     if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
       torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200' ||
@@ -1124,7 +1124,7 @@ else
   readonly BITCOIN_TARBALL_FILENAME="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${TARGET_BITCOIN_TARBALL_OS}.tar.gz"
   readonly BITCOIN_TARBALL_DESTINATION_PATH="${HOME}/Downloads/${BITCOIN_TARBALL_FILENAME}"
 
-  if ! [ -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ]; then
+  if [ ! -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ]; then
     readonly BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
     readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
     readonly BITCOIN_HASH_FILENAME='SHA256SUMS'
