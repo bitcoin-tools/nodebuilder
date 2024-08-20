@@ -1469,9 +1469,9 @@ while [ "${ibd_status}" = 'true' ]; do
     headers_sync_last_log_line="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
     if [ -n "${headers_sync_last_log_line}" ]; then
       headers_sync_progress_percent="$(echo "${headers_sync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)"
-      printf 'Headers sync progress:      %.2f %%\n' "${headers_sync_progress_percent}"
+      printf 'Headers sync progress:      %.1f %%\n' "${headers_sync_progress_percent}"
     else
-      printf 'Headers sync progress:      %.2f %%\n' '0.00'
+      printf 'Headers sync progress:      %.1f %%\n' '0.0'
     fi
   else
     log_info 'Syncing the blockchain. Please be patient.'
