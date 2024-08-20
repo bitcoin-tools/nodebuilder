@@ -1101,6 +1101,7 @@ FreeBSD)
   TARGET_BITCOIN_TARBALL_OS=''
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   log_info "Detected: running FreeBSD."
+  ;;
 *)
   throw_error 'Unknown target kernel type.'
   ;;
