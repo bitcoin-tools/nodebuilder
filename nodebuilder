@@ -1173,7 +1173,7 @@ else
     fi
     readonly SHA256_CHECK
     cd - > /dev/null
-    
+
     case "${SHA256_CHECK}" in
     *'OK'*) ;;
     *)
