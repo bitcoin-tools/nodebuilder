@@ -391,6 +391,7 @@ install_build_dependencies() {
     ;;
   FreeBSD)
     install_build_dependencies_freebsd
+    ;;
   *)
     install_build_command_function=''
     for package_manager in \
