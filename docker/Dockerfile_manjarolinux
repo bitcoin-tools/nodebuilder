@@ -7,7 +7,7 @@ FROM manjarolinux/base:latest@sha256:8ce11ea4ac9771e8dc1817569628151491cee5c13e0
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.7.0
+ARG NODEBUILDER_VERSION=v1.7.1-beta
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
