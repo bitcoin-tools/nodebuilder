@@ -554,7 +554,7 @@ install_runtime_dependencies_darwin() {
     sudo touch "${CLT_INSTALL_IN_PROGRESS}"
     CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | \
       sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'" && readonly CLT_LABEL_COMMAND
-    readonly CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
+    CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")" && readonly CLT_LABEL
     if [ -n "${CLT_LABEL}" ]; then
       sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" > /dev/null
     else
