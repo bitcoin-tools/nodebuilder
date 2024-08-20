@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
-# shellcheck disable=SC2155
 
 set -o errexit
 set -o nounset
@@ -332,8 +331,8 @@ get_operating_system() {
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     printf '%s\n' 'Darwin'
   else
-    readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
-    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+    OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID
+    OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID_LIKE
     if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
       printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
     else
@@ -439,7 +438,7 @@ install_build_dependencies_darwin() {
 
 install_build_dependencies_dnf() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_dnf.txt"
-  readonly OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
+  OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)" && readonly OS_MAJOR_VERSION_ID
 
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
   amzn)
@@ -587,10 +586,11 @@ install_runtime_dependencies_darwin() {
     log_info 'Ensuring git dependency via the Xcode Command Line Tools.'
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
-    readonly CLT_INSTALL_IN_PROGRESS='/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress'
+    CLT_INSTALL_IN_PROGRESS='/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress' && readonly CLT_INSTALL_IN_PROGRESS
     sudo touch "${CLT_INSTALL_IN_PROGRESS}"
-    readonly CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
-    readonly CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
+    CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | \
+      sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'" && readonly CLT_LABEL_COMMAND
+    CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")" && readonly CLT_LABEL
     if [ -n "${CLT_LABEL}" ]; then
       sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" > /dev/null
     else
@@ -998,10 +998,10 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-readonly TEMP_DIRECTORY="$(mktemp -d)"
-readonly TARGET_ARCHITECTURE="$(uname -m)"
-readonly TARGET_KERNEL="$(uname -s)"
-readonly TARGET_OPERATING_SYSTEM="$(get_operating_system)"
+TEMP_DIRECTORY="$(mktemp -d)" && readonly TEMP_DIRECTORY
+TARGET_ARCHITECTURE="$(uname -m)" && readonly TARGET_ARCHITECTURE
+TARGET_KERNEL="$(uname -s)" && readonly TARGET_KERNEL
+TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_SYSTEM
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
@@ -1191,7 +1191,7 @@ else
         git clone --depth 1 --quiet "${GUIX_SIGS_REPO}.git" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
       gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
     fi
-    readonly GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')"
+    GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')" && readonly GPG_GOOD_SIGNATURE_COUNT
     pgrep '^gpg-agent$' > /dev/null && gpgconf --kill gpg-agent
     pgrep '^keyboxd$' > /dev/null && gpgconf --kill keyboxd
     if [ "${GPG_GOOD_SIGNATURE_COUNT}" -ge "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
@@ -1214,7 +1214,7 @@ else
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
     codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
   fi
-  readonly UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
+  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)" && readonly UNIT_TEST_RESPONSE
   case "${UNIT_TEST_RESPONSE}" in
   *'No errors detected'*) ;;
   *)
@@ -1293,23 +1293,25 @@ fi
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    readonly INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
+    INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
   else
-    readonly INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
+    INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
   fi
 else
-  readonly INITIAL_BLOCKS_SIZE_IN_MIB=0
+  INITIAL_BLOCKS_SIZE_IN_MIB=0
 fi
+readonly INITIAL_BLOCKS_SIZE_IN_MIB
 readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
 if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    readonly INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
+    INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
   else
-    readonly INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
+    INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
   fi
 else
-  readonly INITIAL_CHAINSTATE_SIZE_IN_MIB=0
+  INITIAL_CHAINSTATE_SIZE_IN_MIB=0
 fi
+readonly INITIAL_CHAINSTATE_SIZE_IN_MIB
 readonly INITIAL_DATA_ALREADY_SYNCED_IN_MIB=$((INITIAL_BLOCKS_SIZE_IN_MIB + INITIAL_CHAINSTATE_SIZE_IN_MIB))
 log_info "Found data already synced... $((INITIAL_DATA_ALREADY_SYNCED_IN_MIB / MIB_TO_GIB)) GiB."
 
@@ -1374,16 +1376,16 @@ fi
 case "${TARGET_KERNEL}" in
 Darwin) ;; #TODO: Add macOS memory check
 *)
-  readonly PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')"
-  readonly PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')"
-  readonly SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')"
-  readonly SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')"
+  PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')" && readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
+  PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')" && readonly PHYSICAL_MEMORY_FREE_IN_MIB
+  SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')" && readonly SWAP_MEMORY_TOTAL_IN_MIB
+  SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')" && readonly SWAP_MEMORY_FREE_IN_MIB
   readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
   readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
-  readonly FREE_MEMORY="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
-  readonly TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')"
+  free_memory="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
+  TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')" && readonly TOTAL_MEMORY
 
-  log_info "Checking system memory... ${FREE_MEMORY} of ${TOTAL_MEMORY} GiB free."
+  log_info "Checking system memory... ${free_memory} of ${TOTAL_MEMORY} GiB free."
 
   if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
     log_warning 'Configuring for minimal memory usage.'
