@@ -771,32 +771,24 @@ is_valid_bitcoin_version() {
 }
 
 log_error() {
-  printf "[%s] ERROR: ${CONSOLE_COLOR_RED}%s" \
-    "$(get_log_timestamp)" \
-    "$*" \
+  printf "[%s] ERROR: ${CONSOLE_COLOR_RED}%s" "$(get_log_timestamp)" "$*" \
     >&2
   reset_console_color
   printf '\n' >&2
 }
 
 log_info() {
-  printf '[%s]  INFO: %s\n' \
-    "$(get_log_timestamp)" \
-    "$*"
+  printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
 }
 
 log_success() {
-  printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN}%s" \
-    "$(get_log_timestamp)" \
-    "$*"
+  printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN}%s" "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
 }
 
 log_warning() {
-  printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW}%s" \
-    "$(get_log_timestamp)" \
-    "$*"
+  printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW}%s" "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
 }
