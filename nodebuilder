@@ -1148,6 +1148,7 @@ else
     readonly GPG_SIGNATURES_FILE="${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILENAME}"
     readonly GUIX_SIGS_TEMPORARY_DIRECTORY="${TEMP_DIRECTORY}/guix.sigs"
     readonly GUIX_SIGS_DESTINATION_DIRECTORY="${HOME}/Downloads/guix.sigs"
+
     log_info 'Downloading Bitcoin Core.'
     if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
       torsocks curl --fail --silent --show-error --location --retry 2 --output "${BITCOIN_HASH_FILE}" "${BITCOIN_HASH_FILE_SOURCE}" ||
@@ -1171,7 +1172,8 @@ else
       throw_error "Either sha256sum or shasum must on PATH. Please open an issue at ${NODEBUILDER_REPO}."
     fi
     readonly SHA256_CHECK
-    cd "${HOME}"/
+    cd - > /dev/null
+
     case "${SHA256_CHECK}" in
     *'OK'*) ;;
     *)
