@@ -7,7 +7,7 @@ dependencies:
 docker:
   - 'docker/Dockerfile*'
 docker-gentoo:
-  - 'docker/Dockerfile_genoo'
+  - 'docker/Dockerfile_gentoo'
 helpers:
   - '.github/scripts/**'
 markdown:
