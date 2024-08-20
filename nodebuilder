@@ -74,11 +74,8 @@ create_application_shortcuts() {
   fi
 
   for shortcut_directory in "${DESKTOP_DIRECTORY}" "${APPLICATIONS_DIRECTORY}"; do
-    if [ ! -d "${shortcut_directory}" ]; then
-      mkdir -p "${shortcut_directory}"
-    elif [ -f "${shortcut_directory}/${OLD_SHORTCUT_FILENAME}" ]; then
-      rm "${shortcut_directory}/${OLD_SHORTCUT_FILENAME}"
-    fi
+    [ -d "${shortcut_directory}" ] || mkdir -p "${shortcut_directory}"
+    [ -f "${shortcut_directory}/${OLD_SHORTCUT_FILENAME}" ] && rm "${shortcut_directory}/${OLD_SHORTCUT_FILENAME}"
   done
 
   ## Create desktop entries on the user's Desktop and 'Show Applications' directories
