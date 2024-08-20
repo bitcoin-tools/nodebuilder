@@ -294,6 +294,7 @@ ensure_xargs_dependency() {
       ;;
     FreeBSD)
       sudo pkg install -y findutils > /dev/null
+      ;;
     *)
       if command -v apk > /dev/null; then
         apk --quiet add findutils
