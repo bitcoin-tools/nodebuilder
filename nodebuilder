@@ -168,7 +168,7 @@ ensure_curl_dependency() {
   if command -v dnf > /dev/null 2>&1; then
     sudo dnf install --allowerasing --assumeyes curl > /dev/null
   elif ! command -v curl > /dev/null 2>&1; then
-    log_info 'Installing curl depencency.'
+    log_info 'Ensuring curl depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       apk --quiet add curl
@@ -216,7 +216,7 @@ ensure_curl_dependency() {
 
 ensure_sudo_dependency() {
   if ! command -v sudo > /dev/null 2>&1; then
-    log_info 'Installing sudo depencency.'
+    log_info 'Ensuring sudo depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       apk --quiet add sudo
@@ -262,7 +262,7 @@ ensure_sudo_dependency() {
 
 ensure_xargs_dependency() {
   if ! command -v xargs > /dev/null 2>&1; then
-    log_info 'Installing xargs depencency.'
+    log_info 'Ensuring xargs depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       apk --quiet add findutils
@@ -584,7 +584,7 @@ install_runtime_dependencies_aptget() {
 
 install_runtime_dependencies_darwin() {
   if ! command -v git > /dev/null 2>&1; then
-    log_info 'Installing git via the Xcode Command Line Tools.'
+    log_info 'Ensuring git dependency via the Xcode Command Line Tools.'
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
     readonly CLT_INSTALL_IN_PROGRESS='/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress'
