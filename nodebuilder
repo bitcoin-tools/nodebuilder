@@ -194,6 +194,9 @@ ensure_curl_dependency() {
     Darwin)
       throw_error "Please install the 'curl' dependency."
       ;;
+    FreeBSD)
+      sudo pkg install -y curl > /dev/null
+      ;;
     *)
       if command -v apk > /dev/null; then
         apk --quiet add curl
@@ -239,6 +242,9 @@ ensure_sudo_dependency() {
       ;;
     clear-linux-os)
       swupd bundle-add sudo > /dev/null
+      ;;
+    FreeBSD)
+      pkg install -y sudo > /dev/null
       ;;
     *)
       if command -v apk > /dev/null; then
@@ -286,6 +292,8 @@ ensure_xargs_dependency() {
     clear-linux-os)
       swupd bundle-add findutils > /dev/null
       ;;
+    FreeBSD)
+      sudo pkg install -y findutils > /dev/null
     *)
       if command -v apk > /dev/null; then
         apk --quiet add findutils
@@ -329,8 +337,8 @@ get_memory_metric_in_mib() {
 }
 
 get_operating_system() {
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    printf '%s\n' 'Darwin'
+  if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
+    printf '%s\n' "${TARGET_KERNEL}"
   else
     readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
     readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
@@ -380,6 +388,8 @@ install_build_dependencies() {
   Darwin)
     install_build_dependencies_darwin
     ;;
+  FreeBSD)
+    install_build_dependencies_freebsd
   *)
     install_build_command_function=''
     for package_manager in \
@@ -482,6 +492,15 @@ install_build_dependencies_emerge() {
   fi
 }
 
+install_build_dependencies_freebsd() {
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_freebsd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo pkg install -y > /dev/null
+}
+
 install_build_dependencies_pacman() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_pacman.txt"
   command -v torsocks > /dev/null 2>&1 &&
@@ -537,6 +556,9 @@ install_runtime_dependencies() {
     ;;
   Darwin)
     install_runtime_dependencies_darwin
+    ;;
+  FreeBSD)
+    install_runtime_dependencies_freebsd
     ;;
   *)
     install_runtime_command_function=''
@@ -633,6 +655,16 @@ install_runtime_dependencies_emerge() {
   printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
 }
 
+install_runtime_dependencies_freebsd() {
+ readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_freebsd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo pkg install -y > /dev/null
+ 
+}
+
 install_runtime_dependencies_pacman() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_pacman.txt"
   readonly STDERR_DEPENDENCIES_LOG_FILE="${TEMP_DIRECTORY}/stderr_runtime_dependencies_log"
@@ -686,6 +718,9 @@ install_system_updates() {
     ;;
   clear-linux-os)
     install_system_updates_swupd
+    ;;
+  FreeBSD)
+    install_system_updates_freebsd
     ;;
   *)
     if command -v apk > /dev/null; then
@@ -765,6 +800,12 @@ install_system_updates_emerge() {
 
   emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
 }
+
+install_system_updates_freebsd() {
+  sudo pkg update -f > /dev/null
+  sudo pkg upgrade --yes > /dev/null
+}
+
 install_system_updates_pacman() {
   sudo pacman -Syu --noconfirm --quiet > /dev/null
 }
@@ -1015,11 +1056,11 @@ Linux)
 Darwin)
   SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
   ;;
+FreeBSD)
+  SYS_CORES_COUNT="$(sysctl -n hw.ncpu)"
+  ;;
 MINGW* | Cygwin)
   throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
-  ;;
-FreeBSD)
-  throw_error "FreeBSD is not supported. Please open an issue at ${NODEBUILDER_REPO}."
   ;;
 *)
   throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
@@ -1054,6 +1095,10 @@ Darwin)
   log_info "Detected: running macOS."
   [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
   ;;
+FreeBSD)
+  TARGET_BITCOIN_TARBALL_OS=''
+  BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
+  log_info "Detected: running FreeBSD."
 *)
   throw_error 'Unknown target kernel type.'
   ;;
@@ -1114,7 +1159,8 @@ if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ];
   log_info "Found Bitcoin Core ${target_bitcoin_version}."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
-  [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ]; then
+  [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
+  [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ] ||; then
   log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
   compile_bitcoin_from_source
   current_bitcoin_version="${target_bitcoin_version}"
