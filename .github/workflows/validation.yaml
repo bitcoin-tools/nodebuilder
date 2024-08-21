@@ -284,6 +284,7 @@ jobs:
 
   run-nodebuilder-freebsd-vm:
     name: Test nodebuilder on FreeBSD
+    needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
         github.event.action == 'prerelease' ||
