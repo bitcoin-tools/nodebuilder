@@ -9,5 +9,6 @@ libzmq4
 pkgconf
 python3
 sqlite3
+qt5-buildtools
 qt5-gui
 qt5-widgets
