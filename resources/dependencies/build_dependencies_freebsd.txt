@@ -1,0 +1,12 @@
+autoconf
+automake
+boost-libs
+gmake
+libevent
+libqrencode
+libtool
+libzmq
+pkgconf
+python3
+sqlite3
+qt5-gui
