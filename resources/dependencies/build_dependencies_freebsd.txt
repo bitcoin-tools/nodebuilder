@@ -5,7 +5,7 @@ gmake
 libevent
 libqrencode
 libtool
-libzmq
+libzmq4
 pkgconf
 python3
 sqlite3
