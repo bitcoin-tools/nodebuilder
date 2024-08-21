@@ -71,7 +71,7 @@ compile_bitcoin_from_source() {
     ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null ;;
   'FreeBSD')
     # TODO: suppress stdout
-    ./configure --without-bdb ==enable-suppress-external-warnings MAKE=gmake ;;
+    ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake ;;
   *)
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null ;;
   esac
