@@ -80,9 +80,9 @@ compile_bitcoin_from_source() {
   log_info 'Compiling source code. Please wait.'
   echo "DEBUG SYS_CORES_COUNT: ${SYS_CORES_COUNT}"
   echo "DEBUG SYS_CORES_PLUS_ONE: ${SYS_CORES_PLUS_ONE}"
-  make -j${SYS_CORES_PLUS_ONE}
+  make --jobs ${SYS_CORES_PLUS_ONE}
   log_info 'Running compile checks. Please wait.'
-  make -j "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+  make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
   log_info 'Installing Bitcoin Core.'
