@@ -338,10 +338,13 @@ ensure_xargs_dependency() {
 }
 
 get_free_space_in_mib() {
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
-  else
+  case "${TARGET_KERNEL}" in
+  'Darwin' | 'FreeBSD')
+    /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d 
+    ;;
+  *)
     df --output=avail --block-size='1MiB' "${HOME}" | sed 1d
+    ;;
   fi
 }
 
