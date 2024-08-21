@@ -76,6 +76,8 @@ compile_bitcoin_from_source() {
     ./configure --without-bdb --enable-suppress-external-warnings > /dev/null ;;
   esac
   log_info 'Compiling source code. Please wait.'
+  echo "DEBUG SYS_CORES_COUNT: ${SYS_CORES_COUNT}"
+  echo "DEBUG SYS_CORES_PLUS_ONE: ${SYS_CORES_PLUS_ONE}"
   make --jobs "${SYS_CORES_PLUS_ONE}"
   log_info 'Running compile checks. Please wait.'
   make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
