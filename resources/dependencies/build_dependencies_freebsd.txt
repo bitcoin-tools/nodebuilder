@@ -1,6 +1,7 @@
 autoconf
 automake
 boost-libs
+gettext
 gmake
 libevent
 libqrencode
