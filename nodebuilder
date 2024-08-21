@@ -1049,7 +1049,7 @@ readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.7.1-beta'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
-readonly DEBUG_ONLY_FREEBSD_DEPENCENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/251-add-freebsd-support/resources/dependencies"
+readonly DEBUG_ONLY_FREEBSD_DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/251-add-freebsd-support/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
 Linux)
