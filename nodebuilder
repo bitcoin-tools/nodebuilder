@@ -94,7 +94,11 @@ compile_bitcoin_from_source() {
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
   log_info 'Installing Bitcoin Core.'
-  make install > /dev/null 2>&1 || sudo make install > /dev/null
+  if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
+    gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
+  else
+    make install > /dev/null 2>&1 || sudo make install > /dev/null
+  fi
   cd - > /dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
   rm -rf "${COMPILE_DIRECTORY:?}"/
