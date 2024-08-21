@@ -10,3 +10,4 @@ pkgconf
 python3
 sqlite3
 qt5-gui
+qt5-widgets
