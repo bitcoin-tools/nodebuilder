@@ -66,11 +66,15 @@ compile_bitcoin_from_source() {
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   log_info 'Configuring the build environment.'
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
-  else
-    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
-  fi
+  case "${TARGET_KERNEL}" in
+  'Darwin')
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null ;;
+  'FreeBSD')
+    # TODO: suppress stdout
+    ./configure --without-bdb ==enable-suppress-external-warnings MAKE=gmake ;;
+  *)
+    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null ;;
+  esac
   log_info 'Compiling source code. Please wait.'
   make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
   log_info 'Running compile checks. Please wait.'
