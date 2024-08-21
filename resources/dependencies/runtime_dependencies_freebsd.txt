@@ -3,6 +3,4 @@ git
 gnupg
 gzip
 jq
-procps
 sudo
-tar
