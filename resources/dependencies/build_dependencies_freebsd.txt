@@ -11,4 +11,5 @@ python3
 sqlite3
 qt5-buildtools
 qt5-gui
+qt5-linguisttools
 qt5-widgets
