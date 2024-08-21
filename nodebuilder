@@ -345,7 +345,7 @@ get_free_space_in_mib() {
   *)
     df --output=avail --block-size='1MiB' "${HOME}" | sed 1d
     ;;
-  fi
+  esac
 }
 
 get_log_timestamp() {
