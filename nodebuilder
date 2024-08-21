@@ -68,12 +68,14 @@ compile_bitcoin_from_source() {
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
   'Darwin')
-    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null ;;
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
+    ;;
   'FreeBSD')
-    # TODO: suppress stdout
-    ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake ;;
+    ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
+    ;;
   *)
-    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null ;;
+    ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
+    ;;
   esac
   log_info 'Compiling source code. Please wait.'
   echo "DEBUG SYS_CORES_COUNT: ${SYS_CORES_COUNT}"
