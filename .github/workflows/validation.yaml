@@ -308,7 +308,7 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           prepare: pkg install -y curl
-          run: ./nodebuilder --ref "${GITHUB_SHA}"
+          run: ./nodebuilder
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
