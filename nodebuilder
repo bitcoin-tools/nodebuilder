@@ -1056,14 +1056,11 @@ readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCI
 readonly DEBUG_ONLY_FREEBSD_DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/251-add-freebsd-support/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
-Linux)
+Linux | FreeBSD)
   SYS_CORES_COUNT="$(nproc)"
   ;;
 Darwin)
   SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
-  ;;
-FreeBSD)
-  SYS_CORES_COUNT="$(sysctl -n hw.ncpu)"
   ;;
 MINGW* | Cygwin)
   throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
