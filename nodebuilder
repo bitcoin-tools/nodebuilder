@@ -81,9 +81,9 @@ compile_bitcoin_from_source() {
   echo "DEBUG SYS_CORES_COUNT: ${SYS_CORES_COUNT}"
   echo "DEBUG SYS_CORES_PLUS_ONE: ${SYS_CORES_PLUS_ONE}"
   if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    gmake --jobs "${SYS_CORES_PLUS_ONE}"
+    gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
   else
-    make --jobs "${SYS_CORES_PLUS_ONE}"
+    make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
   fi
   log_info 'Running compile checks. Please wait.'
   if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
