@@ -296,7 +296,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Test nodebuilder in FreeBSD
+      - name: Test the console output
         uses: vmactions/freebsd-vm@v1
         with:
           prepare: |
@@ -306,7 +306,7 @@ jobs:
             sysctl -a | grep ' memory' | head -2
             df -h
             date -u
-          run: ./nodebuilder
+          run: /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
