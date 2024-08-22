@@ -315,7 +315,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: freebsd-source-bitcoin-debug.log
-          path: /home/runner/.bitcoin/debug.log
+          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
