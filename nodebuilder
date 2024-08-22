@@ -1555,7 +1555,7 @@ while [ "${ibd_status}" = 'true' ]; do
     printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
 
-    if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
+    if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
       current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
     else
       current_chain_tip_timestamp="$(date -d @"${last_block_time}" | cut -c 5-)"
