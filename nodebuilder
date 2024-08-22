@@ -1442,7 +1442,7 @@ elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
 fi
 
 case "${TARGET_KERNEL}" in
-Darwin) ;; #TODO: Add macOS memory check
+Darwin) ;;  #TODO: Add macOS memory check
 FreeBSD) ;; #TODO: Add FreeBSD memory check
 *)
   PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')" && readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
