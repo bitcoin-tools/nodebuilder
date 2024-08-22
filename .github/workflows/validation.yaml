@@ -308,6 +308,7 @@ jobs:
             date -u
           run: |
             /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            find / -type f -name debug.log 2>/dev/null
             cp "${HOME}/.bitcoon/debug.log" .
       - name: Search for path for Bitcoin Core debug.log
         run: find / -type f -name 'debug.log' 2> /dev/null || true
