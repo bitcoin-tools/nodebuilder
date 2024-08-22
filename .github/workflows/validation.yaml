@@ -307,6 +307,12 @@ jobs:
             df -h
             date -u
           run: ./nodebuilder
+      - name: Save Bitcoin Core log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: freebsd-source-bitcoin-debug.log
+          path: /home/runner/.bitcoin/debug.log
+
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
