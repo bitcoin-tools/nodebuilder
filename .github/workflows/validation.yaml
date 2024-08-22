@@ -318,7 +318,6 @@ jobs:
           name: freebsd-source-bitcoin-debug.log
           path: /home/runner/.bitcoin/debug.log
 
-
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
     needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
