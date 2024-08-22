@@ -1496,10 +1496,11 @@ ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
 if [ "${ibd_status}" = 'true' ]; then
   if ! is_running_in_container; then
-    log_info 'Disabling system sleep, suspend, and hibernate.'
     if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
+      log_info 'Disabling system sleep, suspend, and hibernate.'
       caffeinate -sw "$(cat "${BITCOIN_DATA_DIRECTORY}/bitcoind.pid")" &
-    else
+    elif [ "${TARGET_KERNEL}" = 'Linux' ]; then
+      log_info 'Disabling system sleep, suspend, and hibernate.'
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
     log_info "Close this Terminal window by clicking on the 'X'."
