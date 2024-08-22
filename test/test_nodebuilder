@@ -111,7 +111,7 @@ while [ $# -gt 0 ]; do
   -r | --ref)
     [ -z "$2" ] && throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
     readonly GIT_REF_SHORT_NAME="$2"
-    validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
+    [ "$(uname -s)" = 'FreeBSD' ] || validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
     shift
     ;;
   *)
