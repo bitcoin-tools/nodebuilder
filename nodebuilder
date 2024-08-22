@@ -1116,7 +1116,7 @@ Darwin)
   [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
   ;;
 FreeBSD)
-  TARGET_BITCOIN_TARBALL_OS=''
+  TARGET_BITCOIN_TARBALL_OS='linux-gnu'
   BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
   log_info "Detected: running FreeBSD."
   ;;
@@ -1180,8 +1180,7 @@ if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ];
   log_info "Found Bitcoin Core ${target_bitcoin_version}."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
-  [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
-  [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ]; then
+  [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ]; then
   log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
   compile_bitcoin_from_source
   current_bitcoin_version="${target_bitcoin_version}"
