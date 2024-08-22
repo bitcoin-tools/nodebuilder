@@ -78,8 +78,6 @@ compile_bitcoin_from_source() {
     ;;
   esac
   log_info 'Compiling source code. Please wait.'
-  echo "DEBUG SYS_CORES_COUNT: ${SYS_CORES_COUNT}"
-  echo "DEBUG SYS_CORES_PLUS_ONE: ${SYS_CORES_PLUS_ONE}"
   if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
     gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
   else
