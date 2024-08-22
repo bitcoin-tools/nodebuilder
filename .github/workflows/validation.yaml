@@ -307,7 +307,6 @@ jobs:
             df -h
             date -u
           run: ./nodebuilder
-          sync: no
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
