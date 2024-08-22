@@ -283,7 +283,7 @@ jobs:
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-freebsd-vm:
-    name: Test nodebuilder on FreeBSD
+    name: Test source on FreeBSD
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
