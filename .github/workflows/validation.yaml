@@ -307,6 +307,8 @@ jobs:
             df -h
             date -u
           run: /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+      - name: Search for path for Bitcoin Core debug.log
+        run: find / -type d -name '.bitcoin'
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
