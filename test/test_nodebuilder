@@ -7,8 +7,8 @@ set -o errexit
 set -o nounset
 
 get_operating_system() {
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    printf '%s\n' 'Darwin'
+  if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
+    printf '%s\n' "${TARGET_KERNEL}"
   else
     readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
     readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
@@ -139,7 +139,7 @@ readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAM
 
 case "${TARGET_KERNEL}" in
 Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
-Linux) bitcoin_data_directory="${HOME}/.bitcoin" ;;
+Linux | FreeBSD) bitcoin_data_directory="${HOME}/.bitcoin" ;;
 MINGW*) throw_error 'Windows is not supported.' ;;
 *) throw_error 'Your operating system is not supported.' ;;
 esac
