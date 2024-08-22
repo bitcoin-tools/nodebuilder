@@ -81,7 +81,10 @@ jobs:
             --enable deprecate-which
             --enable quote-safe-variables
             --enable require-variable-braces
-          SHFMT_OPTS: --indent 2 --space-redirects
+          SHFMT_OPTS: >-
+            --case-indent
+            --indent 2
+            --space-redirects
 
   yaml-lint:
     name: Lint the yaml code
