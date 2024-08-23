@@ -515,7 +515,7 @@ install_build_dependencies_emerge() {
 }
 
 install_build_dependencies_freebsd() {
-  readonly BUILD_DEPENDENCIES_URL="${DEBUG_ONLY_FREEBSD_DEPENDENCIES_BASE_URL}/build_dependencies_freebsd.txt"
+  readonly BUILD_DEPENDENCIES_URL="${FREEBSD_DEPENDENCIES_BASE_URL}/build_dependencies_freebsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
@@ -679,7 +679,7 @@ install_runtime_dependencies_emerge() {
 }
 
 install_runtime_dependencies_freebsd() {
-  readonly RUNTIME_DEPENDENCIES_URL="${DEBUG_ONLY_FREEBSD_DEPENDENCIES_BASE_URL}/runtime_dependencies_freebsd.txt"
+  readonly RUNTIME_DEPENDENCIES_URL="${FREEBSD_DEPENDENCIES_BASE_URL}/runtime_dependencies_freebsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -1070,7 +1070,7 @@ readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.7.1-beta'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
-readonly DEBUG_ONLY_FREEBSD_DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/251-add-freebsd-support/resources/dependencies"
+readonly FREEBSD_DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/master/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
 Linux | FreeBSD)
