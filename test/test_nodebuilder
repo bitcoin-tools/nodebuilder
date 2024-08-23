@@ -8,19 +8,19 @@ set -o nounset
 
 get_operating_system() {
   case "${TARGET_KERNEL}" in
-  Darwin | FreeBSD)
-    printf '%s\n' "${TARGET_KERNEL}"
-    ;;
-  *)
-    readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
-    readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
+    Darwin | FreeBSD)
+      printf '%s\n' "${TARGET_KERNEL}"
+      ;;
+    *)
+      readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+      readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
 
-    if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
-      printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
-    else
-      throw_error 'Failed to determine OS release type'
-    fi
-    ;;
+      if [ -n "${OS_RELEASE_ID_LIKE}" ] || [ -n "${OS_RELEASE_ID}" ]; then
+        printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
+      else
+        throw_error 'Failed to determine OS release type'
+      fi
+      ;;
   esac
 }
 
@@ -98,28 +98,28 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
 
 while [ $# -gt 0 ]; do
   case "$1" in
-  -b | --bitcoin-version)
-    [ -z "$2" ] && throw_error 'No argument supplied for -b|--bitcoin-version.' "${LINENO}"
-    readonly TARGET_BITCOIN_VERSION="$2"
-    validate_bitcoin_version "${TARGET_BITCOIN_VERSION}"
-    shift
-    ;;
-  -c | --compile)
-    readonly COMPILE_BITCOIN='true'
-    ;;
-  -h | --help)
-    print_usage
-    exit 0
-    ;;
-  -r | --ref)
-    [ -z "$2" ] && throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
-    readonly GIT_REF_SHORT_NAME="$2"
-    [ "$(uname -s)" = 'FreeBSD' ] || validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
-    shift
-    ;;
-  *)
-    throw_error "'$1' is invalid. Use -h or --help for available options."
-    ;;
+    -b | --bitcoin-version)
+      [ -z "$2" ] && throw_error 'No argument supplied for -b|--bitcoin-version.' "${LINENO}"
+      readonly TARGET_BITCOIN_VERSION="$2"
+      validate_bitcoin_version "${TARGET_BITCOIN_VERSION}"
+      shift
+      ;;
+    -c | --compile)
+      readonly COMPILE_BITCOIN='true'
+      ;;
+    -h | --help)
+      print_usage
+      exit 0
+      ;;
+    -r | --ref)
+      [ -z "$2" ] && throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
+      readonly GIT_REF_SHORT_NAME="$2"
+      [ "$(uname -s)" = 'FreeBSD' ] || validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
+      shift
+      ;;
+    *)
+      throw_error "'$1' is invalid. Use -h or --help for available options."
+      ;;
   esac
   shift
 done
@@ -141,10 +141,10 @@ readonly NODEBUILDER_REPO_URL='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
 
 case "${TARGET_KERNEL}" in
-Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
-Linux | FreeBSD) bitcoin_data_directory="${HOME}/.bitcoin" ;;
-MINGW*) throw_error 'Windows is not supported.' ;;
-*) throw_error 'Your operating system is not supported.' ;;
+  Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
+  Linux | FreeBSD) bitcoin_data_directory="${HOME}/.bitcoin" ;;
+  MINGW*) throw_error 'Windows is not supported.' ;;
+  *) throw_error 'Your operating system is not supported.' ;;
 esac
 bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 

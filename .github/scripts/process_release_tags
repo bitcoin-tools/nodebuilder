@@ -28,10 +28,10 @@ throw_error() {
 open_url() {
   url="$1"
   case "${TARGET_KERNEL}" in
-  Darwin*) open "${url}" ;;
-  Linux*) xdg-open "${url}" ;;
-  CYGWIN* | MINGW32* | MSYS* | MINGW*) start "${url}" ;;
-  *) echo "Unsupported OS, please open the URL manually: ${url}" ;;
+    Darwin*) open "${url}" ;;
+    Linux*) xdg-open "${url}" ;;
+    CYGWIN* | MINGW32* | MSYS* | MINGW*) start "${url}" ;;
+    *) echo "Unsupported OS, please open the URL manually: ${url}" ;;
   esac
 }
 
