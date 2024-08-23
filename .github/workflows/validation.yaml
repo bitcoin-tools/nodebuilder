@@ -297,10 +297,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test the console output
-        id: test-nodebuilder
         uses: vmactions/freebsd-vm@v1
         timeout-minutes: 180
-        continue-on-error: true
         with:
           prepare: |
             uname -a
@@ -312,33 +310,11 @@ jobs:
           run: |
             /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             cp "${HOME}/.bitcoin/debug.log" .
-      - name: If test failed, debug nodebuilder
-        if: steps.test-nodebuilder.outcome == 'failure'
-        uses: vmactions/freebsd-vm@v1
-        timeout-minutes: 180
-        env:
-            CI_NODEBUILDER_URL: https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
-        with:
-          prepare: pkg install --yes wget
-          envs: 'CI_NODEBUILDER_URL'
-          run: |
-            if [ -n "$(ls /usr/local/bin/*bitcoin*)" ]; then
-              rm /usr/local/bin/*bitcoin*
-            fi
-            wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
-            chmod u+x nodebuilder
-            /bin/sh -x ./nodebuilder
-            cp "${HOME}/.bitcoin/debug.log" ./rerun-debug.log
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: freebsd-source-bitcoin-debug.log
-          path: |
-            /home/runner/work/nodebuilder/nodebuilder/debug.log
-            /home/runner/work/nodebuilder/nodebuilder/rerun-debug.log
-      - name: If test failed, fail the job
-        if: steps.test-nodebuilder.outcome == 'failure'
-        run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
+          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
