@@ -7,9 +7,11 @@ set -o errexit
 set -o nounset
 
 get_operating_system() {
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    printf '%s\n' 'Darwin'
-  else
+  case "${TARGET_KERNEL}" in
+  Darwin | FreeBSD)
+    printf '%s\n' "${TARGET_KERNEL}"
+    ;;
+  *)
     readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
     readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
 
@@ -18,7 +20,8 @@ get_operating_system() {
     else
       throw_error 'Failed to determine OS release type'
     fi
-  fi
+    ;;
+  esac
 }
 
 handle_exit() {
@@ -111,7 +114,7 @@ while [ $# -gt 0 ]; do
   -r | --ref)
     [ -z "$2" ] && throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
     readonly GIT_REF_SHORT_NAME="$2"
-    validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
+    [ "$(uname -s)" = 'FreeBSD' ] || validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
     shift
     ;;
   *)
@@ -139,7 +142,7 @@ readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAM
 
 case "${TARGET_KERNEL}" in
 Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
-Linux) bitcoin_data_directory="${HOME}/.bitcoin" ;;
+Linux | FreeBSD) bitcoin_data_directory="${HOME}/.bitcoin" ;;
 MINGW*) throw_error 'Windows is not supported.' ;;
 *) throw_error 'Your operating system is not supported.' ;;
 esac
@@ -202,7 +205,7 @@ if [ -s test_output_stderr.txt ]; then
 fi
 
 for message in \
-  'INFO: Detected: running (Linux|macOS).$' \
+  'INFO: Detected: running (Linux|macOS|FreeBSD).$' \
   'INFO: Checking for internet.$' \
   'INFO: Internet checks passed.$' \
   'INFO: (Failed to find|Found) Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?.$' \
@@ -243,6 +246,7 @@ for message in \
 done
 
 if [ "${COMPILE_BITCOIN}" = 'true' ] ||
+  [ "${TARGET_KERNEL}" = 'FreeBSD' ] ||
   { [ -f /etc/os-release ] && [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]; }; then
   for message in \
     'INFO: Ensuring compile dependencies.$' \
@@ -281,13 +285,20 @@ fi
 if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
   for message in \
     'INFO: Ensuring runtime dependencies.$' \
-    'INFO: Creating application shortcuts.$' \
-    'Checking system memory... [0-9]+\.[0-9] of [0-9]+\.[0-9] GiB free.$'; do
+    'INFO: Creating application shortcuts.$'; do
     if ! grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
       printf '%s\n' "FAILURE: Expected message ${message} not found."
       exit 1
     fi
   done
+fi
+
+if [ "${TARGET_KERNEL}" = 'Linux' ]; then
+  message='Checking system memory... [0-9]+\.[0-9] of [0-9]+\.[0-9] GiB free.$'
+  if ! grep -Eq "${message}" test_output_stdout.txt > /dev/null 2>&1; then
+    printf '%s\n' "FAILURE: Expected message ${message} not found."
+    exit 1
+  fi
 fi
 
 printf '%s\n' 'PASS: All console output tests passed.'
