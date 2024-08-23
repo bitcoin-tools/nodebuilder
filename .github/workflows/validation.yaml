@@ -312,7 +312,7 @@ jobs:
           run: |
             /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             cp "${HOME}/.bitcoin/debug.log" .
-      - name: If test failed, debug nodebuilder ${{ matrix.additional-args }}
+      - name: If test failed, debug nodebuilder
         if: steps.test-nodebuilder.outcome == 'failure'
         uses: vmactions/freebsd-vm@v1
         timeout-minutes: 180
