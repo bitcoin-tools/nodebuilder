@@ -10,6 +10,7 @@ get_operating_system() {
   case "${TARGET_KERNEL}"
   Darwin | FreeBSD)
     printf '%s\n' "${TARGET_KERNEL}"
+    ;;
   *)
     readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
     readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
@@ -19,6 +20,7 @@ get_operating_system() {
     else
       throw_error 'Failed to determine OS release type'
     fi
+    ;;
   esac
 }
 
