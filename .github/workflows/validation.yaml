@@ -327,13 +327,15 @@ jobs:
             fi
             wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
             chmod u+x nodebuilder
-            /bin/sh -x ./nodebuilder ${{ matrix.additional-args }}
-            cp "${HOME}/.bitcoin/debug.log" .
+            /bin/sh -x ./nodebuilder
+            cp "${HOME}/.bitcoin/debug.log" ./rerun-debug.log
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: freebsd-source-bitcoin-debug.log
-          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
+          path: |
+            /home/runner/work/nodebuilder/nodebuilder/debug.log
+            /home/runner/work/nodebuilder/nodebuilder/rerun-debug.log
       - name: If test failed, fail the job
         if: steps.test-nodebuilder.outcome == 'failure'
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
