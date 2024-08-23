@@ -7,9 +7,10 @@ set -o errexit
 set -o nounset
 
 get_operating_system() {
-  if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
+  case "${TARGET_KERNEL}"
+  Darwin | FreeBSD)
     printf '%s\n' "${TARGET_KERNEL}"
-  else
+  *)
     readonly OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
     readonly OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
 
@@ -18,7 +19,7 @@ get_operating_system() {
     else
       throw_error 'Failed to determine OS release type'
     fi
-  fi
+  esac
 }
 
 handle_exit() {
