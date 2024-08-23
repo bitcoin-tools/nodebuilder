@@ -169,45 +169,45 @@ ensure_curl_dependency() {
   elif ! command -v curl > /dev/null 2>&1; then
     log_info 'Ensuring curl depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
-    alpine)
-      apk --quiet add curl
-      ;;
-    debian | ubuntu)
-      sudo apt-get install -y curl > /dev/null
-      ;;
-    fedora* | rhel | centos* | rocky | ol)
-      sudo dnf install --allowerasing --assumeyes curl > /dev/null
-      ;;
-    gentoo)
-      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail net-misc/curl
-      ;;
-    arch | endeavouros | garuda | manjaro)
-      sudo pacman -Syu --needed --noconfirm curl > /dev/null
-      ;;
-    suse | *opensuse*)
-      sudo zypper --non-interactive --quiet install curl > /dev/null
-      ;;
-    clear-linux-os)
-      sudo swupd bundle-add curl > /dev/null
-      ;;
-    Darwin)
-      throw_error "Please install the 'curl' dependency."
-      ;;
-    *)
-      if command -v apk > /dev/null; then
+      alpine)
         apk --quiet add curl
-      elif command -v apt-get > /dev/null; then
-        sudo apt-get -qq install -y curl > /dev/null
-      elif command -v dnf > /dev/null; then
+        ;;
+      debian | ubuntu)
+        sudo apt-get install -y curl > /dev/null
+        ;;
+      fedora* | rhel | centos* | rocky | ol)
         sudo dnf install --allowerasing --assumeyes curl > /dev/null
-      elif command -v pacman > /dev/null; then
+        ;;
+      gentoo)
+        emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail net-misc/curl
+        ;;
+      arch | endeavouros | garuda | manjaro)
         sudo pacman -Syu --needed --noconfirm curl > /dev/null
-      elif command -v zypper > /dev/null; then
+        ;;
+      suse | *opensuse*)
         sudo zypper --non-interactive --quiet install curl > /dev/null
-      else
-        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
-      fi
-      ;;
+        ;;
+      clear-linux-os)
+        sudo swupd bundle-add curl > /dev/null
+        ;;
+      Darwin)
+        throw_error "Please install the 'curl' dependency."
+        ;;
+      *)
+        if command -v apk > /dev/null; then
+          apk --quiet add curl
+        elif command -v apt-get > /dev/null; then
+          sudo apt-get -qq install -y curl > /dev/null
+        elif command -v dnf > /dev/null; then
+          sudo dnf install --allowerasing --assumeyes curl > /dev/null
+        elif command -v pacman > /dev/null; then
+          sudo pacman -Syu --needed --noconfirm curl > /dev/null
+        elif command -v zypper > /dev/null; then
+          sudo zypper --non-interactive --quiet install curl > /dev/null
+        else
+          throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
+        fi
+        ;;
     esac
   fi
   command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error at ${NODEBUILDER_REPO}."
@@ -217,43 +217,43 @@ ensure_sudo_dependency() {
   if ! command -v sudo > /dev/null 2>&1; then
     log_info 'Ensuring sudo depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
-    alpine)
-      apk --quiet add sudo
-      ;;
-    debian | ubuntu)
-      apt-get install -y sudo > /dev/null
-      ;;
-    fedora* | rhel | centos* | rocky | ol)
-      dnf install --allowerasing --assumeyes sudo > /dev/null
-      ;;
-    gentoo)
-      emerge --sync --quiet
-      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail app-admin/sudo
-      ;;
-    arch | endeavouros | garuda | manjaro)
-      pacman -Syu --needed --noconfirm sudo > /dev/null
-      ;;
-    suse | *opensuse*)
-      zypper --non-interactive --quiet install sudo > /dev/null
-      ;;
-    clear-linux-os)
-      swupd bundle-add sudo > /dev/null
-      ;;
-    *)
-      if command -v apk > /dev/null; then
+      alpine)
         apk --quiet add sudo
-      elif command -v apt-get > /dev/null; then
-        apt-get -qq install -y sudo > /dev/null
-      elif command -v dnf > /dev/null; then
-        dnf install sudo > /dev/null
-      elif command -v pacman > /dev/null; then
+        ;;
+      debian | ubuntu)
+        apt-get install -y sudo > /dev/null
+        ;;
+      fedora* | rhel | centos* | rocky | ol)
+        dnf install --allowerasing --assumeyes sudo > /dev/null
+        ;;
+      gentoo)
+        emerge --sync --quiet
+        emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail app-admin/sudo
+        ;;
+      arch | endeavouros | garuda | manjaro)
         pacman -Syu --needed --noconfirm sudo > /dev/null
-      elif command -v zypper > /dev/null; then
+        ;;
+      suse | *opensuse*)
         zypper --non-interactive --quiet install sudo > /dev/null
-      else
-        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
-      fi
-      ;;
+        ;;
+      clear-linux-os)
+        swupd bundle-add sudo > /dev/null
+        ;;
+      *)
+        if command -v apk > /dev/null; then
+          apk --quiet add sudo
+        elif command -v apt-get > /dev/null; then
+          apt-get -qq install -y sudo > /dev/null
+        elif command -v dnf > /dev/null; then
+          dnf install sudo > /dev/null
+        elif command -v pacman > /dev/null; then
+          pacman -Syu --needed --noconfirm sudo > /dev/null
+        elif command -v zypper > /dev/null; then
+          zypper --non-interactive --quiet install sudo > /dev/null
+        else
+          throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
+        fi
+        ;;
     esac
   fi
   command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
@@ -263,45 +263,45 @@ ensure_xargs_dependency() {
   if ! command -v xargs > /dev/null 2>&1; then
     log_info 'Ensuring xargs depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
-    alpine)
-      apk --quiet add findutils
-      ;;
-    debian | ubuntu)
-      apt-get install -y findutils > /dev/null
-      ;;
-    fedora* | rhel | centos* | rocky | ol)
-      dnf install --allowerasing --assumeyes findutils > /dev/null
-      ;;
-    gentoo)
-      emerge --sync --quiet
-      emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail sys-apps/findutils
-      ;;
-    arch | endeavouros | garuda | manjaro)
-      pacman -Syu --needed --noconfirm findutils > /dev/null
-      ;;
-    suse | *opensuse*)
-      zypper --non-interactive --quiet install findutils > /dev/null
-      ;;
-    clear-linux-os)
-      swupd bundle-add findutils > /dev/null
-      ;;
-    *)
-      if command -v apk > /dev/null; then
+      alpine)
         apk --quiet add findutils
-      elif command -v apt-get > /dev/null; then
-        apt-get -qq install -y findutils > /dev/null
-      elif command -v dnf > /dev/null; then
-        dnf install findutils > /dev/null
-      elif command -v pacman > /dev/null; then
+        ;;
+      debian | ubuntu)
+        apt-get install -y findutils > /dev/null
+        ;;
+      fedora* | rhel | centos* | rocky | ol)
+        dnf install --allowerasing --assumeyes findutils > /dev/null
+        ;;
+      gentoo)
+        emerge --sync --quiet
+        emerge --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail sys-apps/findutils
+        ;;
+      arch | endeavouros | garuda | manjaro)
         pacman -Syu --needed --noconfirm findutils > /dev/null
-      elif command -v zypper > /dev/null; then
+        ;;
+      suse | *opensuse*)
         zypper --non-interactive --quiet install findutils > /dev/null
-      else
-        [ -f /etc/os-release ] && cat /etc/os-release
-        [ -f /etc/lsb-release ] && cat /etc/lsb-release
-        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
-      fi
-      ;;
+        ;;
+      clear-linux-os)
+        swupd bundle-add findutils > /dev/null
+        ;;
+      *)
+        if command -v apk > /dev/null; then
+          apk --quiet add findutils
+        elif command -v apt-get > /dev/null; then
+          apt-get -qq install -y findutils > /dev/null
+        elif command -v dnf > /dev/null; then
+          dnf install findutils > /dev/null
+        elif command -v pacman > /dev/null; then
+          pacman -Syu --needed --noconfirm findutils > /dev/null
+        elif command -v zypper > /dev/null; then
+          zypper --non-interactive --quiet install findutils > /dev/null
+        else
+          [ -f /etc/os-release ] && cat /etc/os-release
+          [ -f /etc/lsb-release ] && cat /etc/lsb-release
+          throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
+        fi
+        ;;
     esac
     command -v xargs > /dev/null 2>&1 ||
       throw_error "Unable to install 'xargs'. Report this error at ${NODEBUILDER_REPO}."
@@ -355,51 +355,51 @@ handle_sigint() {
 
 install_build_dependencies() {
   case "${TARGET_OPERATING_SYSTEM}" in
-  alpine)
-    install_build_dependencies_apk
-    ;;
-  debian | ubuntu)
-    install_build_dependencies_aptget
-    ;;
-  fedora* | rhel | centos* | rocky | ol)
-    install_build_dependencies_dnf
-    ;;
-  gentoo)
-    install_build_dependencies_emerge
-    ;;
-  arch | endeavouros | garuda | manjaro)
-    install_build_dependencies_pacman
-    ;;
-  suse | *opensuse*)
-    install_build_dependencies_zypper
-    ;;
-  clear-linux-os)
-    install_build_dependencies_swupd
-    ;;
-  Darwin)
-    install_build_dependencies_darwin
-    ;;
-  *)
-    install_build_command_function=''
-    for package_manager in \
-      apk \
-      apt-get \
-      dnf \
-      emerge \
-      pacman \
-      swupd \
-      zypper; do
-      if command -v "${package_manager}" > /dev/null; then
-        install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
-        break
+    alpine)
+      install_build_dependencies_apk
+      ;;
+    debian | ubuntu)
+      install_build_dependencies_aptget
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
+      install_build_dependencies_dnf
+      ;;
+    gentoo)
+      install_build_dependencies_emerge
+      ;;
+    arch | endeavouros | garuda | manjaro)
+      install_build_dependencies_pacman
+      ;;
+    suse | *opensuse*)
+      install_build_dependencies_zypper
+      ;;
+    clear-linux-os)
+      install_build_dependencies_swupd
+      ;;
+    Darwin)
+      install_build_dependencies_darwin
+      ;;
+    *)
+      install_build_command_function=''
+      for package_manager in \
+        apk \
+        apt-get \
+        dnf \
+        emerge \
+        pacman \
+        swupd \
+        zypper; do
+        if command -v "${package_manager}" > /dev/null; then
+          install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
+          break
+        fi
+      done
+      if [ -n "${install_build_command_function}" ]; then
+        "${install_build_command_function}"
+      else
+        log_warning 'Unable to determine build dependencies. Attempting to compile but might see errors.'
       fi
-    done
-    if [ -n "${install_build_command_function}" ]; then
-      "${install_build_command_function}"
-    else
-      log_warning 'Unable to determine build dependencies. Attempting to compile but might see errors.'
-    fi
-    ;;
+      ;;
   esac
 }
 
@@ -441,16 +441,16 @@ install_build_dependencies_dnf() {
   OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)" && readonly OS_MAJOR_VERSION_ID
 
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
-  amzn)
-    throw_error "Building from source on Amazon Linux is unsupported."
-    ;;
-  rhel)
-    sudo subscription-manager identity > /dev/null 2>&1 ||
-      throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
-    sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms" ||
-      throw_error "Failed to enable EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
-    ;;
-  *) ;;
+    amzn)
+      throw_error "Building from source on Amazon Linux is unsupported."
+      ;;
+    rhel)
+      sudo subscription-manager identity > /dev/null 2>&1 ||
+        throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
+      sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms" ||
+        throw_error "Failed to enable EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
+      ;;
+    *) ;;
   esac
 
   dnf list installed epel-release > /dev/null 2>&1 ||
@@ -513,52 +513,52 @@ install_build_dependencies_zypper() {
 install_runtime_dependencies() {
   log_info 'Ensuring runtime dependencies.'
   case "${TARGET_OPERATING_SYSTEM}" in
-  alpine)
-    install_runtime_dependencies_apk
-    ;;
-  debian | ubuntu)
-    install_runtime_dependencies_aptget
-    ;;
-  fedora* | rhel | centos* | rocky | ol)
-    install_runtime_dependencies_dnf
-    ;;
-  gentoo)
-    install_runtime_dependencies_emerge
-    ;;
-  arch | endeavouros | garuda | manjaro)
-    install_runtime_dependencies_pacman
-    ;;
-  suse | *opensuse*)
-    install_runtime_dependencies_zypper
-    ;;
-  clear-linux-os)
-    install_runtime_dependencies_swupd
-    ;;
-  Darwin)
-    install_runtime_dependencies_darwin
-    ;;
-  *)
-    install_runtime_command_function=''
-    for package_manager in \
-      apk \
-      apt-get \
-      dnf \
-      emerge \
-      pacman \
-      swupd \
-      zypper; do
-      if command -v "${package_manager}" > /dev/null; then
-        install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
-        break
-      fi
-    done
+    alpine)
+      install_runtime_dependencies_apk
+      ;;
+    debian | ubuntu)
+      install_runtime_dependencies_aptget
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
+      install_runtime_dependencies_dnf
+      ;;
+    gentoo)
+      install_runtime_dependencies_emerge
+      ;;
+    arch | endeavouros | garuda | manjaro)
+      install_runtime_dependencies_pacman
+      ;;
+    suse | *opensuse*)
+      install_runtime_dependencies_zypper
+      ;;
+    clear-linux-os)
+      install_runtime_dependencies_swupd
+      ;;
+    Darwin)
+      install_runtime_dependencies_darwin
+      ;;
+    *)
+      install_runtime_command_function=''
+      for package_manager in \
+        apk \
+        apt-get \
+        dnf \
+        emerge \
+        pacman \
+        swupd \
+        zypper; do
+        if command -v "${package_manager}" > /dev/null; then
+          install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
+          break
+        fi
+      done
 
-    if [ -n "${install_runtime_command_function}" ]; then
-      "${install_runtime_command_function}"
-    else
-      throw_error 'Unknown package manager. This version of Linux is not supported.'
-    fi
-    ;;
+      if [ -n "${install_runtime_command_function}" ]; then
+        "${install_runtime_command_function}"
+      else
+        throw_error 'Unknown package manager. This version of Linux is not supported.'
+      fi
+      ;;
   esac
 }
 
@@ -666,46 +666,46 @@ install_runtime_dependencies_zypper() {
 install_system_updates() {
   log_info 'Performing a system upgrade.'
   case "${TARGET_OPERATING_SYSTEM}" in
-  alpine)
-    install_system_updates_apk
-    ;;
-  debian | ubuntu)
-    install_system_updates_aptget
-    ;;
-  fedora* | rhel | centos* | rocky | ol)
-    install_system_updates_dnf
-    ;;
-  gentoo)
-    install_system_updates_emerge
-    ;;
-  arch | endeavouros | garuda | manjaro)
-    install_system_updates_pacman
-    ;;
-  suse | *opensuse*)
-    install_system_updates_zypper
-    ;;
-  clear-linux-os)
-    install_system_updates_swupd
-    ;;
-  *)
-    if command -v apk > /dev/null; then
+    alpine)
       install_system_updates_apk
-    elif command -v apt-get > /dev/null; then
+      ;;
+    debian | ubuntu)
       install_system_updates_aptget
-    elif command -v dnf > /dev/null; then
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
       install_system_updates_dnf
-    elif command -v emerge > /dev/null; then
+      ;;
+    gentoo)
       install_system_updates_emerge
-    elif command -v pacman > /dev/null; then
+      ;;
+    arch | endeavouros | garuda | manjaro)
       install_system_updates_pacman
-    elif command -v swupd > /dve/null; then
-      install_system_updates_swupd
-    elif command -v zypper > /dev/null; then
+      ;;
+    suse | *opensuse*)
       install_system_updates_zypper
-    else
-      throw_error 'This version of Linux is not supported.'
-    fi
-    ;;
+      ;;
+    clear-linux-os)
+      install_system_updates_swupd
+      ;;
+    *)
+      if command -v apk > /dev/null; then
+        install_system_updates_apk
+      elif command -v apt-get > /dev/null; then
+        install_system_updates_aptget
+      elif command -v dnf > /dev/null; then
+        install_system_updates_dnf
+      elif command -v emerge > /dev/null; then
+        install_system_updates_emerge
+      elif command -v pacman > /dev/null; then
+        install_system_updates_pacman
+      elif command -v swupd > /dve/null; then
+        install_system_updates_swupd
+      elif command -v zypper > /dev/null; then
+        install_system_updates_zypper
+      else
+        throw_error 'This version of Linux is not supported.'
+      fi
+      ;;
   esac
 
   # Stop running if the Docker container base image is outdated
@@ -903,18 +903,18 @@ if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; 
   CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 else
   case "${TERM}" in
-  xterm* | screen* | tmux* | linux | gnome-terminal | konsole)
-    CONSOLE_COLOR_RED='\033[31m'
-    CONSOLE_COLOR_GREEN='\033[32m'
-    CONSOLE_COLOR_YELLOW='\033[33m'
-    CONSOLE_COLOR_NORMAL='\033[0m'
-    ;;
-  *)
-    CONSOLE_COLOR_RED=''
-    CONSOLE_COLOR_GREEN=''
-    CONSOLE_COLOR_YELLOW=''
-    CONSOLE_COLOR_NORMAL=''
-    ;;
+    xterm* | screen* | tmux* | linux | gnome-terminal | konsole)
+      CONSOLE_COLOR_RED='\033[31m'
+      CONSOLE_COLOR_GREEN='\033[32m'
+      CONSOLE_COLOR_YELLOW='\033[33m'
+      CONSOLE_COLOR_NORMAL='\033[0m'
+      ;;
+    *)
+      CONSOLE_COLOR_RED=''
+      CONSOLE_COLOR_GREEN=''
+      CONSOLE_COLOR_YELLOW=''
+      CONSOLE_COLOR_NORMAL=''
+      ;;
   esac
 fi
 readonly CONSOLE_COLOR_RED
@@ -938,53 +938,53 @@ unit_tests='false'
 
 while [ $# -gt 0 ]; do
   case "$1" in
-  -b | --bitcoin-version)
-    if [ $# -eq 1 ]; then
-      throw_error '-b/--bitcoin-version requires an argument.'
-    fi
-    if is_valid_bitcoin_version "$2"; then
-      target_bitcoin_version="$2"
-    else
-      throw_error "The Bitcoin version '$2' is not valid. Please use a value such as '27.0' from https://bitcoincore.org/bin/."
-    fi
-    shift
-    ;;
-  -c | --compile)
-    compile_bitcoin_flag='true'
-    ;;
-  -h | --help)
-    print_usage
-    exit 0
-    ;;
-  -p | --prune)
-    if [ $# -eq 1 ]; then
-      throw_error '-p/--prune requires an argument'
-    fi
-    case $2 in
-    *[!0-9]*) # if $2 contains any non-numeric characters
-      throw_error "The prune value '$2' must be a positive integer or zero to disable pruning"
+    -b | --bitcoin-version)
+      if [ $# -eq 1 ]; then
+        throw_error '-b/--bitcoin-version requires an argument.'
+      fi
+      if is_valid_bitcoin_version "$2"; then
+        target_bitcoin_version="$2"
+      else
+        throw_error "The Bitcoin version '$2' is not valid. Please use a value such as '27.0' from https://bitcoincore.org/bin/."
+      fi
+      shift
       ;;
-    *) ;;
-    esac
-    if [ "$2" -gt 0 ] && [ "$2" -lt 550 ]; then
-      throw_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning"
-    fi
-    prune_value="$2"
-    shift
-    ;;
-  -t | --test)
-    unit_tests='true'
-    ;;
-  -u | --unattended)
-    unattended='true'
-    ;;
-  -V | --version)
-    print_version
-    ;;
-  *)
-    printf '%s\n%s\n' "Error: '$1' is invalid." 'Use -h or --help for available options.'
-    exit 1
-    ;;
+    -c | --compile)
+      compile_bitcoin_flag='true'
+      ;;
+    -h | --help)
+      print_usage
+      exit 0
+      ;;
+    -p | --prune)
+      if [ $# -eq 1 ]; then
+        throw_error '-p/--prune requires an argument'
+      fi
+      case $2 in
+        *[!0-9]*) # if $2 contains any non-numeric characters
+          throw_error "The prune value '$2' must be a positive integer or zero to disable pruning"
+          ;;
+        *) ;;
+      esac
+      if [ "$2" -gt 0 ] && [ "$2" -lt 550 ]; then
+        throw_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning"
+      fi
+      prune_value="$2"
+      shift
+      ;;
+    -t | --test)
+      unit_tests='true'
+      ;;
+    -u | --unattended)
+      unattended='true'
+      ;;
+    -V | --version)
+      print_version
+      ;;
+    *)
+      printf '%s\n%s\n' "Error: '$1' is invalid." 'Use -h or --help for available options.'
+      exit 1
+      ;;
   esac
   shift
 done
@@ -1009,21 +1009,21 @@ readonly NODEBUILDER_DEPENDENCIES_TAG='v1.7.1-beta'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
-Linux)
-  SYS_CORES_COUNT="$(nproc)"
-  ;;
-Darwin)
-  SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
-  ;;
-MINGW* | Cygwin)
-  throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
-  ;;
-FreeBSD)
-  throw_error "FreeBSD is not supported. Please open an issue at ${NODEBUILDER_REPO}."
-  ;;
-*)
-  throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
-  ;;
+  Linux)
+    SYS_CORES_COUNT="$(nproc)"
+    ;;
+  Darwin)
+    SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
+    ;;
+  MINGW* | Cygwin)
+    throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
+    ;;
+  FreeBSD)
+    throw_error "FreeBSD is not supported. Please open an issue at ${NODEBUILDER_REPO}."
+    ;;
+  *)
+    throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
+    ;;
 esac
 readonly SYS_CORES_COUNT
 readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
@@ -1042,21 +1042,21 @@ fi
 
 clear_the_terminal
 case "${TARGET_KERNEL}" in
-Linux)
-  TARGET_BITCOIN_TARBALL_OS='linux-gnu'
-  BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
-  log_info 'Detected: running Linux.'
-  is_running_in_container && log_info 'Detected: running in Docker.'
-  ;;
-Darwin)
-  TARGET_BITCOIN_TARBALL_OS='apple-darwin'
-  BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-  log_info "Detected: running macOS."
-  [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
-  ;;
-*)
-  throw_error 'Unknown target kernel type.'
-  ;;
+  Linux)
+    TARGET_BITCOIN_TARBALL_OS='linux-gnu'
+    BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
+    log_info 'Detected: running Linux.'
+    is_running_in_container && log_info 'Detected: running in Docker.'
+    ;;
+  Darwin)
+    TARGET_BITCOIN_TARBALL_OS='apple-darwin'
+    BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
+    log_info "Detected: running macOS."
+    [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
+    ;;
+  *)
+    throw_error 'Unknown target kernel type.'
+    ;;
 esac
 
 readonly TARGET_BITCOIN_TARBALL_OS
@@ -1076,37 +1076,37 @@ fi
 
 # If version is like 'xx.yy.zz' or 'xx.yy' or 'xx', pad it as 'xx.yy.zz.0'
 case "${current_bitcoin_version}" in
-'' | *[.]*[.]*[.]*)
-  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}"
-  ;;
-*[.]*[.]*)
-  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0"
-  ;;
-*[.]*)
-  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0"
-  ;;
-*)
-  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0.0"
-  ;;
+  '' | *[.]*[.]*[.]*)
+    CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}"
+    ;;
+  *[.]*[.]*)
+    CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0"
+    ;;
+  *[.]*)
+    CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0"
+    ;;
+  *)
+    CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0.0"
+    ;;
 esac
 readonly CURRENT_BITCOIN_VERSION_PADDED
 
 case "${target_bitcoin_version}" in
-'')
-  throw_error 'Bitcoin Core target version is not set.'
-  ;;
-*[.]*[.]*[.]*)
-  TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
-  ;;
-*[.]*[.]*)
-  TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
-  ;;
-*[.]*)
-  TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
-  ;;
-*)
-  TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
-  ;;
+  '')
+    throw_error 'Bitcoin Core target version is not set.'
+    ;;
+  *[.]*[.]*[.]*)
+    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
+    ;;
+  *[.]*[.]*)
+    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
+    ;;
+  *[.]*)
+    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
+    ;;
+  *)
+    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
+    ;;
 esac
 readonly TARGET_BITCOIN_VERSION_PADDED
 
@@ -1175,10 +1175,10 @@ else
     cd - > /dev/null
 
     case "${SHA256_CHECK}" in
-    *'OK'*) ;;
-    *)
-      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${BITCOIN_HASH_FILE}."
-      ;;
+      *'OK'*) ;;
+      *)
+        throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${BITCOIN_HASH_FILE}."
+        ;;
     esac
     log_info 'Validated the checksum.'
 
@@ -1216,11 +1216,11 @@ else
   fi
   UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)" && readonly UNIT_TEST_RESPONSE
   case "${UNIT_TEST_RESPONSE}" in
-  *'No errors detected'*) ;;
-  *)
-    printf '\n%s\n' "${UNIT_TEST_RESPONSE}"
-    throw_error 'Unit tests failed.'
-    ;;
+    *'No errors detected'*) ;;
+    *)
+      printf '\n%s\n' "${UNIT_TEST_RESPONSE}"
+      throw_error 'Unit tests failed.'
+      ;;
   esac
   log_info 'Installing Bitcoin Core.'
   [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
@@ -1228,26 +1228,26 @@ else
     sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
     throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
   case "${TARGET_KERNEL}" in
-  Linux)
-    sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.so.0.0.0 "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.so.0.0.0
-    (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
-    (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
-    PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
-    ;;
-  Darwin)
-    sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.0.dylib "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.0.dylib
-    (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
-    sudo update_dyld_shared_cache
+    Linux)
+      sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.so.0.0.0 "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.so.0.0.0
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
+      PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
+      ;;
+    Darwin)
+      sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.0.dylib "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.0.dylib
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
+      sudo update_dyld_shared_cache
 
-    if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
-      for bitcoin_executable in bitcoin-cli bitcoin-qt bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do
-        codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}"
-      done
-    fi
-    ;;
-  *)
-    throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
-    ;;
+      if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
+        for bitcoin_executable in bitcoin-cli bitcoin-qt bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do
+          codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}"
+        done
+      fi
+      ;;
+    *)
+      throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
+      ;;
   esac
 
   [ -d "${BITCOIN_INSTALL_BIN_DESTINATION}" ] ||
@@ -1374,37 +1374,37 @@ fi
 
 # PRUNING
 case "${TARGET_KERNEL}" in
-Darwin) ;; #TODO: Add macOS memory check
-*)
-  PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')" && readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
-  PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')" && readonly PHYSICAL_MEMORY_FREE_IN_MIB
-  SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')" && readonly SWAP_MEMORY_TOTAL_IN_MIB
-  SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')" && readonly SWAP_MEMORY_FREE_IN_MIB
-  readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
-  readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
-  free_memory="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
-  TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')" && readonly TOTAL_MEMORY
+  Darwin) ;; #TODO: Add macOS memory check
+  *)
+    PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')" && readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
+    PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')" && readonly PHYSICAL_MEMORY_FREE_IN_MIB
+    SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')" && readonly SWAP_MEMORY_TOTAL_IN_MIB
+    SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')" && readonly SWAP_MEMORY_FREE_IN_MIB
+    readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
+    readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
+    free_memory="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
+    TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')" && readonly TOTAL_MEMORY
 
-  log_info "Checking system memory... ${free_memory} of ${TOTAL_MEMORY} GiB free."
+    log_info "Checking system memory... ${free_memory} of ${TOTAL_MEMORY} GiB free."
 
-  if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
-    log_warning 'Configuring for minimal memory usage.'
-    set_if_unset_bitcoin_core_option 'dbcache' '4'
-    set_if_unset_bitcoin_core_option 'maxmempool' '5'
-    set_if_unset_bitcoin_core_option 'maxconnections' '4'
-    [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
-  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
-    log_warning 'Configuring for reduced memory usage.'
-    set_if_unset_bitcoin_core_option 'dbcache' '100'
-    set_if_unset_bitcoin_core_option 'maxmempool' '50'
-    set_if_unset_bitcoin_core_option 'maxconnections' '10'
-    [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
-  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
-    log_warning 'Configuring for conservative memory usage.'
-    set_if_unset_bitcoin_core_option 'dbcache' '225'
-    set_if_unset_bitcoin_core_option 'maxmempool' '150'
-  fi
-  ;;
+    if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
+      log_warning 'Configuring for minimal memory usage.'
+      set_if_unset_bitcoin_core_option 'dbcache' '4'
+      set_if_unset_bitcoin_core_option 'maxmempool' '5'
+      set_if_unset_bitcoin_core_option 'maxconnections' '4'
+      [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
+    elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
+      log_warning 'Configuring for reduced memory usage.'
+      set_if_unset_bitcoin_core_option 'dbcache' '100'
+      set_if_unset_bitcoin_core_option 'maxmempool' '50'
+      set_if_unset_bitcoin_core_option 'maxconnections' '10'
+      [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
+    elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
+      log_warning 'Configuring for conservative memory usage.'
+      set_if_unset_bitcoin_core_option 'dbcache' '225'
+      set_if_unset_bitcoin_core_option 'maxmempool' '150'
+    fi
+    ;;
 esac
 
 log_info 'Starting Bitcoin Core.'
@@ -1454,8 +1454,8 @@ while [ "${ibd_status}" = 'true' ]; do
 
   # Handle case of early sync (e^-8 or e^-9) by replacing scientific notation with decimal percent
   case "${sync_progress}" in
-  *e*) sync_progress_percent='0.0000001' ;;
-  *) sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')" ;;
+    *e*) sync_progress_percent='0.0000001' ;;
+    *) sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')" ;;
   esac
 
   free_space_in_mib="$(get_free_space_in_mib)"
