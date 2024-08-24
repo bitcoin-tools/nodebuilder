@@ -6,7 +6,8 @@
 set -o errexit
 set -o nounset
 
-get_operating_system() {
+get_operating_system()
+{
   case "${TARGET_KERNEL}" in
     Darwin | FreeBSD)
       printf '%s\n' "${TARGET_KERNEL}"
@@ -24,19 +25,22 @@ get_operating_system() {
   esac
 }
 
-handle_exit() {
+handle_exit()
+{
   kill_tail_process
   [ -f nodebuilder ] && rm nodebuilder
   [ -f test_output_stdout.txt ] && rm test_output_stdout.txt
   [ -f test_output_stderr.txt ] && rm test_output_stderr.txt
 }
 
-handle_error() {
+handle_error()
+{
   handle_exit
   printf '%s\n' 'Test failed.'
 }
 
-is_valid_bitcoin_version() {
+is_valid_bitcoin_version()
+{
   [ -z "$1" ] && throw_error 'No arguemnt passed into is_valid_bitcoin_version().'
   readonly BITCOIN_VERSION_TO_CHECK="$1"
   for version in ${VALID_BITCOIN_VERSION_LIST}; do
@@ -46,7 +50,8 @@ is_valid_bitcoin_version() {
   return 1
 }
 
-kill_tail_process() {
+kill_tail_process()
+{
   if kill -0 "${tail_pid}" > /dev/null 2>&1; then
     kill -TERM "${tail_pid}" ||
       kill -INT "${tail_pid}" ||
@@ -55,7 +60,8 @@ kill_tail_process() {
   fi
 }
 
-print_usage() {
+print_usage()
+{
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' 'Options:'
   printf '%s\n' '-b, --bitcoin-version   Specify the Bitcoin version'
@@ -64,7 +70,8 @@ print_usage() {
   printf '%s\n' '-r, --ref               Choose a git tef to test'
 }
 
-throw_error() {
+throw_error()
+{
   if [ -z "${2:-}" ]; then
     echo "ERROR: $1" >&2
   else
@@ -73,7 +80,8 @@ throw_error() {
   exit 1
 }
 
-validate_bitcoin_version() {
+validate_bitcoin_version()
+{
   [ -z "$1" ] && throw_error 'No arguemnt passed into validate_bitcoin_version().'
   readonly BITCOIN_VERSION_TO_VALIDATE="$1"
   if ! is_valid_bitcoin_version "${BITCOIN_VERSION_TO_VALIDATE}"; then
@@ -81,7 +89,8 @@ validate_bitcoin_version() {
   fi
 }
 
-validate_git_ref_short_name() {
+validate_git_ref_short_name()
+{
   [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ] ||
     throw_error 'Not inside a Git repository.' "${LINENO}"
   [ "$(basename "$(git rev-parse --show-toplevel)")" = 'nodebuilder' ] ||
@@ -247,7 +256,9 @@ done
 
 if [ "${COMPILE_BITCOIN}" = 'true' ] ||
   [ "${TARGET_KERNEL}" = 'FreeBSD' ] ||
-  { [ -f /etc/os-release ] && [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]; }; then
+  {
+    [ -f /etc/os-release ] && [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]
+  }; then
   for message in \
     'INFO: Ensuring compile dependencies.$' \
     'INFO: Downloading Bitcoin source code.$' \

@@ -83,6 +83,7 @@ jobs:
             --enable require-variable-braces
           SHFMT_OPTS: >-
               --case-indent
+              --func-next-line
               --indent 2
               --space-redirects
 
