@@ -104,8 +104,8 @@ compile_bitcoin_from_source()
   else
     make install > /dev/null 2>&1 || sudo make install > /dev/null
   fi
-  [ -n "${KEEP-SUDO-ALIVE_PID:-}" ] && \
-    ps -p "${KEEP_SUDO_ALIVE_PID}" && \
+  [ -n "${KEEP-SUDO-ALIVE_PID:-}" ] &&
+    ps -p "${KEEP_SUDO_ALIVE_PID}" &&
     kill "${KEEP_SUDO_ALIVE_PID}"
   cd - > /dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
@@ -393,10 +393,10 @@ get_operating_system()
 # shellcheck disable=SC2317
 handle_exit()
 {
-  [ -n "${TEMP_DIRECTORY:-}" ] && \
+  [ -n "${TEMP_DIRECTORY:-}" ] &&
     rm -rf -- "${TEMP_DIRECTORY:?}"/
-  [ -n "${KEEP-SUDO-ALIVE_PID:-}" ] && \
-    ps -p "${KEEP_SUDO_ALIVE_PID}" && \
+  [ -n "${KEEP-SUDO-ALIVE_PID:-}" ] &&
+    ps -p "${KEEP_SUDO_ALIVE_PID}" &&
     kill "${KEEP_SUDO_ALIVE_PID}"
 }
 
