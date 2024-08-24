@@ -395,7 +395,7 @@ handle_exit()
 {
   [ -n "${TEMP_DIRECTORY:-}" ] &&
     rm -rf -- "${TEMP_DIRECTORY:?}"/
-  [ -n "${KEEP-SUDO-ALIVE_PID:-}" ] &&
+  [ -n "${KEEP_SUDO_ALIVE_PID:-}" ] &&
     ps -p "${KEEP_SUDO_ALIVE_PID}" &&
     kill "${KEEP_SUDO_ALIVE_PID}"
 }
