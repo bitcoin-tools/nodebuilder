@@ -5,13 +5,15 @@
 set -o errexit
 set -o nounset
 
-check_dpkg_lock() {
+check_dpkg_lock()
+{
   if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; then
     throw_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
   fi
 }
 
-check_internet_status() {
+check_internet_status()
+{
   ensure_curl_dependency
   log_info 'Checking for internet.'
   ( (check_internet_to_address 1.1.1.1 ||
@@ -23,7 +25,8 @@ check_internet_status() {
   log_info 'Internet checks passed.'
 }
 
-check_internet_to_address() {
+check_internet_to_address()
+{
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
   readonly CHECK_INTERNET_TIMEOUT='10'
@@ -33,7 +36,8 @@ check_internet_to_address() {
     curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
 }
 
-clear_the_terminal() {
+clear_the_terminal()
+{
   if is_running_in_ci || is_running_in_container; then
     return
   elif [ ! -t 1 ]; then
@@ -48,7 +52,8 @@ clear_the_terminal() {
   fi
 }
 
-compile_bitcoin_from_source() {
+compile_bitcoin_from_source()
+{
   log_info 'Ensuring compile dependencies.'
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
@@ -102,7 +107,8 @@ compile_bitcoin_from_source() {
   rm -rf "${COMPILE_DIRECTORY:?}"/
 }
 
-create_application_shortcuts() {
+create_application_shortcuts()
+{
   log_info 'Creating application shortcuts.'
   readonly DESKTOP_DIRECTORY="${HOME}/Desktop"
   readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
@@ -172,7 +178,8 @@ EOF
   fi
 }
 
-display_macos_warning() {
+display_macos_warning()
+{
   log_warning 'macOS has an unpatched security vulnerability called GoFetch.'
   log_warning 'Avoid security-critical actions, such as securing significant funds.'
   if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
@@ -181,7 +188,8 @@ display_macos_warning() {
   fi
 }
 
-ensure_curl_dependency() {
+ensure_curl_dependency()
+{
   if command -v dnf > /dev/null 2>&1; then
     sudo dnf install --allowerasing --assumeyes curl > /dev/null
   elif ! command -v curl > /dev/null 2>&1; then
@@ -234,7 +242,8 @@ ensure_curl_dependency() {
   command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
-ensure_sudo_dependency() {
+ensure_sudo_dependency()
+{
   if ! command -v sudo > /dev/null 2>&1; then
     log_info 'Ensuring sudo depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
@@ -283,7 +292,8 @@ ensure_sudo_dependency() {
   command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
-ensure_xargs_dependency() {
+ensure_xargs_dependency()
+{
   if ! command -v xargs > /dev/null 2>&1; then
     log_info 'Ensuring xargs depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
@@ -335,7 +345,8 @@ ensure_xargs_dependency() {
   fi
 }
 
-get_free_space_in_mib() {
+get_free_space_in_mib()
+{
   case "${TARGET_KERNEL}" in
     'Darwin' | 'FreeBSD')
       /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
@@ -346,18 +357,21 @@ get_free_space_in_mib() {
   esac
 }
 
-get_log_timestamp() {
+get_log_timestamp()
+{
   date +'%Y-%m-%dT%H:%M:%S'
 }
 
-get_memory_metric_in_mib() {
+get_memory_metric_in_mib()
+{
   metric_to_query="$1"
   awk -v metric="${metric_to_query}" \
     -v kib_mib_factor="${KIB_TO_MIB}" \
     '$0 ~ metric { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
 }
 
-get_operating_system() {
+get_operating_system()
+{
   if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
     printf '%s\n' "${TARGET_KERNEL}"
   else
@@ -372,18 +386,21 @@ get_operating_system() {
 }
 
 # shellcheck disable=SC2317
-handle_exit() {
+handle_exit()
+{
   [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
 }
 
 # shellcheck disable=SC2317
-handle_sigint() {
+handle_sigint()
+{
   log_warning 'Detected Ctrl+C. Exiting.'
   handle_exit
   exit 0
 }
 
-install_build_dependencies() {
+install_build_dependencies()
+{
   case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       install_build_dependencies_apk
@@ -436,7 +453,8 @@ install_build_dependencies() {
   esac
 }
 
-install_build_dependencies_apk() {
+install_build_dependencies_apk()
+{
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_apk.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
@@ -446,7 +464,8 @@ install_build_dependencies_apk() {
     grep -v 'ICU with non-English locales' -A2 -B1 || true
 }
 
-install_build_dependencies_aptget() {
+install_build_dependencies_aptget()
+{
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_aptget.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
@@ -457,7 +476,8 @@ install_build_dependencies_aptget() {
   DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12
 }
 
-install_build_dependencies_darwin() {
+install_build_dependencies_darwin()
+{
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_darwin.txt"
   #TODO: wrap this command with torsocks-curl with curl fallback
   sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
@@ -469,7 +489,8 @@ install_build_dependencies_darwin() {
   printf '%s\n' "${dependencies}" | xargs brew install --quiet > /dev/null
 }
 
-install_build_dependencies_dnf() {
+install_build_dependencies_dnf()
+{
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_dnf.txt"
   OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)" && readonly OS_MAJOR_VERSION_ID
 
@@ -497,7 +518,8 @@ install_build_dependencies_dnf() {
   printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
 }
 
-install_build_dependencies_emerge() {
+install_build_dependencies_emerge()
+{
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_emerge.txt"
   printf '\n'
   command -v torsocks > /dev/null 2>&1 &&
@@ -514,7 +536,8 @@ install_build_dependencies_emerge() {
   fi
 }
 
-install_build_dependencies_freebsd() {
+install_build_dependencies_freebsd()
+{
   readonly BUILD_DEPENDENCIES_URL="${FREEBSD_DEPENDENCIES_BASE_URL}/build_dependencies_freebsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
@@ -523,7 +546,8 @@ install_build_dependencies_freebsd() {
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
 }
 
-install_build_dependencies_pacman() {
+install_build_dependencies_pacman()
+{
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_pacman.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
@@ -533,7 +557,8 @@ install_build_dependencies_pacman() {
   grep -v 'skipping' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
 }
 
-install_build_dependencies_swupd() {
+install_build_dependencies_swupd()
+{
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_swupd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
@@ -542,7 +567,8 @@ install_build_dependencies_swupd() {
   printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
 }
 
-install_build_dependencies_zypper() {
+install_build_dependencies_zypper()
+{
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_zypper.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
@@ -552,7 +578,8 @@ install_build_dependencies_zypper() {
   export CXX=g++-13
 }
 
-install_runtime_dependencies() {
+install_runtime_dependencies()
+{
   log_info 'Ensuring runtime dependencies.'
   case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
@@ -607,7 +634,8 @@ install_runtime_dependencies() {
   esac
 }
 
-install_runtime_dependencies_apk() {
+install_runtime_dependencies_apk()
+{
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_apk.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
@@ -616,7 +644,8 @@ install_runtime_dependencies_apk() {
   printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add
 }
 
-install_runtime_dependencies_aptget() {
+install_runtime_dependencies_aptget()
+{
   check_dpkg_lock
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_aptget.txt"
   command -v torsocks > /dev/null 2>&1 &&
@@ -626,7 +655,8 @@ install_runtime_dependencies_aptget() {
   printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
 }
 
-install_runtime_dependencies_darwin() {
+install_runtime_dependencies_darwin()
+{
   if ! command -v git > /dev/null 2>&1; then
     log_info 'Ensuring git dependency via the Xcode Command Line Tools.'
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
@@ -659,7 +689,8 @@ install_runtime_dependencies_darwin() {
   fi
 }
 
-install_runtime_dependencies_dnf() {
+install_runtime_dependencies_dnf()
+{
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_dnf.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
@@ -668,7 +699,8 @@ install_runtime_dependencies_dnf() {
   printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
 }
 
-install_runtime_dependencies_emerge() {
+install_runtime_dependencies_emerge()
+{
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_emerge.txt"
   printf '\n'
   command -v torsocks > /dev/null 2>&1 &&
@@ -678,7 +710,8 @@ install_runtime_dependencies_emerge() {
   printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "${SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
 }
 
-install_runtime_dependencies_freebsd() {
+install_runtime_dependencies_freebsd()
+{
   readonly RUNTIME_DEPENDENCIES_URL="${FREEBSD_DEPENDENCIES_BASE_URL}/runtime_dependencies_freebsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
@@ -687,7 +720,8 @@ install_runtime_dependencies_freebsd() {
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
 }
 
-install_runtime_dependencies_pacman() {
+install_runtime_dependencies_pacman()
+{
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_pacman.txt"
   readonly STDERR_DEPENDENCIES_LOG_FILE="${TEMP_DIRECTORY}/stderr_runtime_dependencies_log"
   command -v torsocks > /dev/null 2>&1 &&
@@ -699,7 +733,8 @@ install_runtime_dependencies_pacman() {
   rm "${STDERR_DEPENDENCIES_LOG_FILE}"
 }
 
-install_runtime_dependencies_swupd() {
+install_runtime_dependencies_swupd()
+{
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_swupd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
@@ -708,7 +743,8 @@ install_runtime_dependencies_swupd() {
   printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
 }
 
-install_runtime_dependencies_zypper() {
+install_runtime_dependencies_zypper()
+{
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_zypper.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
@@ -717,7 +753,8 @@ install_runtime_dependencies_zypper() {
   printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
 }
 
-install_system_updates() {
+install_system_updates()
+{
   log_info 'Performing a system upgrade.'
   case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
@@ -781,11 +818,13 @@ install_system_updates() {
   fi
 }
 
-install_system_updates_apk() {
+install_system_updates_apk()
+{
   apk update --quiet && apk upgrade --quiet
 }
 
-install_system_updates_aptget() {
+install_system_updates_aptget()
+{
   check_dpkg_lock
   readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
@@ -793,11 +832,13 @@ install_system_updates_aptget() {
   rm "${STDERR_INSTALL_LOG_FILE}"
 }
 
-install_system_updates_dnf() {
+install_system_updates_dnf()
+{
   sudo dnf clean all && sudo dnf --assumeyes --quiet upgrade > /dev/null
 }
 
-install_system_updates_emerge() {
+install_system_updates_emerge()
+{
   readonly GENTOO_EBUILD_REPOSITORY='/var/db/repos/gentoo'
   readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs ${SYS_CORES_COUNT} --load-average ${SYS_CORES_PLUS_ONE} --quiet --quiet-build --quiet-fail --deep --newuse @world"
   readonly EMERGE_MAX_RETRIES='3'
@@ -823,24 +864,29 @@ install_system_updates_emerge() {
   emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
 }
 
-install_system_updates_freebsd() {
+install_system_updates_freebsd()
+{
   sudo pkg update > /dev/null
   sudo pkg upgrade --yes > /dev/null
 }
 
-install_system_updates_pacman() {
+install_system_updates_pacman()
+{
   sudo pacman -Syu --noconfirm --quiet > /dev/null
 }
 
-install_system_updates_swupd() {
+install_system_updates_swupd()
+{
   sudo swupd update --quiet > /dev/null
 }
 
-install_system_updates_zypper() {
+install_system_updates_zypper()
+{
   sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
 }
 
-is_running_in_ci() {
+is_running_in_ci()
+{
   if [ "${CI:-false}" = 'true' ]; then
     return 0
   else
@@ -848,7 +894,8 @@ is_running_in_ci() {
   fi
 }
 
-is_running_in_container() {
+is_running_in_container()
+{
   if [ -f /proc/1/cgroup ] && grep -q 'docker\|lxc\|actions_job' /proc/1/cgroup; then
     return 0
   elif [ -f /proc/1/mountinfo ] && grep -q 'docker\|lxc\|actions_job' /proc/1/mountinfo; then
@@ -858,7 +905,8 @@ is_running_in_container() {
   fi
 }
 
-is_valid_bitcoin_version() {
+is_valid_bitcoin_version()
+{
   [ -z "$1" ] && throw_error 'No arguemnt passed into is_valid_bitcoin_version().'
   bitcoin_version_to_check="$1"
   for version in ${VALID_BITCOIN_VERSION_LIST}; do
@@ -869,30 +917,35 @@ is_valid_bitcoin_version() {
   return 1
 }
 
-log_error() {
+log_error()
+{
   printf "[%s] ERROR: ${CONSOLE_COLOR_RED}%s" "$(get_log_timestamp)" "$*" \
     >&2
   reset_console_color
   printf '\n' >&2
 }
 
-log_info() {
+log_info()
+{
   printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
 }
 
-log_success() {
+log_success()
+{
   printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN}%s" "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
 }
 
-log_warning() {
+log_warning()
+{
   printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW}%s" "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
 }
 
-print_usage() {
+print_usage()
+{
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' 'Options:'
   printf '%s\n' '-b, --bitcoin-version   Specify the Bitcoin version'
@@ -904,24 +957,28 @@ print_usage() {
   printf '%s\n' '-V, --version           Print the nodebuilder version'
 }
 
-print_version() {
+print_version()
+{
   printf '%s\n' 'nodebuilder 1.7.1-beta'
   printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
 }
 
-reset_console_color() {
+reset_console_color()
+{
   # shellcheck disable=SC2059
   printf "${CONSOLE_COLOR_NORMAL}"
 }
 
-run_unit_tests() {
+run_unit_tests()
+{
   log_info 'TODO: Run unit tests on functions.'
   return 0
 }
 
-set_bitcoin_core_option() {
+set_bitcoin_core_option()
+{
   option="$1"
   value="$2"
   if [ -f "${BITCOIN_CORE_CONFIG_FILE:?}" ]; then
@@ -934,7 +991,8 @@ set_bitcoin_core_option() {
 }
 
 # This function sets a Bitcoin Core option in the configuration file if it's not already set.
-set_if_unset_bitcoin_core_option() {
+set_if_unset_bitcoin_core_option()
+{
   option="$1"
   value="$2"
   # create a blank config file if it doesn't exist
@@ -946,7 +1004,8 @@ set_if_unset_bitcoin_core_option() {
     printf '%s\n' "${option}=${value}" >> "${BITCOIN_CORE_CONFIG_FILE:?}"
 }
 
-throw_error() {
+throw_error()
+{
   if [ $# -eq 1 ]; then
     log_error "$1"
   elif [ $# -gt 1 ]; then
@@ -1292,13 +1351,25 @@ else
   case "${TARGET_KERNEL}" in
     Linux)
       sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.so.0.0.0 "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.so.0.0.0
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || { sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0; }; })
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || { sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so; }; })
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
+          sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
+        }
+      })
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
+          sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
+        }
+      })
       PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
       ;;
     Darwin)
       sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.0.dylib "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.0.dylib
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && { sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || { sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib; }; })
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
+          sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
+        }
+      })
       sudo update_dyld_shared_cache
 
       if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then

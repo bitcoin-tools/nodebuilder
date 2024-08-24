@@ -7,7 +7,8 @@ set -o errexit
 set -o nounset
 
 # Error handling function
-handle_error() {
+handle_error()
+{
   echo "An error occurred on line $1" >&2
   exit 1
 }
@@ -16,7 +17,8 @@ handle_error() {
 trap 'if [ $? -gt 0 ]; then handle_error ${LINENO:-}; fi' EXIT
 
 # Error throwing function
-throw_error() {
+throw_error()
+{
   # Print the error message to stderr
   echo "$1" >&2
 
@@ -25,7 +27,8 @@ throw_error() {
 }
 
 # Open URL function
-open_url() {
+open_url()
+{
   url="$1"
   case "${TARGET_KERNEL}" in
     Darwin*) open "${url}" ;;
@@ -36,7 +39,8 @@ open_url() {
 }
 
 # Git operations function
-push_changes_to_branch() {
+push_changes_to_branch()
+{
   # Stash any changes if there are any
   if [ -n "$(git status --porcelain)" ]; then
     git stash
@@ -60,7 +64,8 @@ push_changes_to_branch() {
 }
 
 # Prepare to push changes
-prepare_to_push_changes() {
+prepare_to_push_changes()
+{
   # Change to the repository directory
   cd "${REPO_PATH}"
   git fetch origin master
@@ -72,7 +77,8 @@ prepare_to_push_changes() {
 }
 
 # Replace function
-replace_in_files() {
+replace_in_files()
+{
   # Replace the old version with the new version in all files
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
     find . -type f -exec env LANG=C sed -i '' "s/$1/$2/g" {} \;
@@ -81,7 +87,8 @@ replace_in_files() {
   fi
 }
 
-validate_branch() {
+validate_branch()
+{
   cd "${REPO_PATH}"
   git fetch origin
   if ! git show-ref --verify --quiet refs/remotes/origin/"$1"; then
@@ -89,7 +96,8 @@ validate_branch() {
   fi
 }
 
-validate_semver() {
+validate_semver()
+{
   if ! echo "$1" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
     throw_error "Invalid version: $1. Version must be in SemVer format without any suffix like '-beta'."
   fi
