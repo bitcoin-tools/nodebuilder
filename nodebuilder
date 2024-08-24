@@ -83,6 +83,8 @@ compile_bitcoin_from_source()
       ;;
   esac
   log_info 'Compiling source code. Please wait.'
+  keep_sudo_alive &
+  readonly KEEP_SUDO_ALIVE_PID="$!"
   if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
     gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
   else
@@ -102,6 +104,9 @@ compile_bitcoin_from_source()
   else
     make install > /dev/null 2>&1 || sudo make install > /dev/null
   fi
+  [ -n "${KEEP-SUDO-ALIVE_PID:-}" ] && \
+    ps -p "${KEEP_SUDO_ALIVE_PID}" && \
+    kill "${KEEP_SUDO_ALIVE_PID}"
   cd - > /dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
   rm -rf "${COMPILE_DIRECTORY:?}"/
@@ -388,7 +393,11 @@ get_operating_system()
 # shellcheck disable=SC2317
 handle_exit()
 {
-  [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
+  [ -n "${TEMP_DIRECTORY:-}" ] && \
+    rm -rf -- "${TEMP_DIRECTORY:?}"/
+  [ -n "${KEEP-SUDO-ALIVE_PID:-}" ] && \
+    ps -p "${KEEP_SUDO_ALIVE_PID}" && \
+    kill "${KEEP_SUDO_ALIVE_PID}"
 }
 
 # shellcheck disable=SC2317
@@ -915,6 +924,14 @@ is_valid_bitcoin_version()
     fi
   done
   return 1
+}
+
+keep_sudo_alive()
+{
+  while true; do
+    sudo -n true
+    sleep 60
+  done
 }
 
 log_error()
