@@ -225,7 +225,7 @@ bitcoin_tarball_download_validate()
   bitcoin_tarball_validate
 }
 
-bitcoin_tarball_download_extract_install()
+bitcoin_tarball_download_extract_test_install()
 {
   readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
   readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
@@ -241,14 +241,103 @@ bitcoin_tarball_download_extract_install()
   readonly BITCOIN_TARBALL_FILENAME="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${TARGET_BITCOIN_TARBALL_OS}.tar.gz"
   readonly BITCOIN_TARBALL_DESTINATION_PATH="${HOME}/Downloads/${BITCOIN_TARBALL_FILENAME}"
 
-  if [ ! -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ]; then
-    bitcoin_tarball_download_validate
-  fi
+  [ ! -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ] || bitcoin_tarball_download_validate
+  bitcoin_tarball_extract
+  bitcoin_tarball_test
+  bitcoin_tarball_install
 
+  log_info 'Removing installation files.'
+  rm -r "${BITCOIN_CORE_EXTRACT_DIR:?}/"
+  rm -r "${TEMP_DIRECTORY:?}/"
+  log_info 'Bitcoin Core installation complete.'
+}
+
+bitcoin_tarball_extract()
+{
   log_info 'Extracting Bitcoin Core.'
   [ -d "${BITCOIN_CORE_EXTRACT_DIR}"/ ] || mkdir "${BITCOIN_CORE_EXTRACT_DIR}"
   tar -xzf "${BITCOIN_TARBALL_DESTINATION_PATH}" -C "${BITCOIN_CORE_EXTRACT_DIR}"/ --strip-components=1
+}
 
+bitcoin_tarball_install()
+{
+  log_info 'Installing Bitcoin Core.'
+  # install the libraries
+  [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
+    mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
+    sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
+    throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
+  case "${TARGET_KERNEL}" in
+    Linux)
+      sudo cp \
+        "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.so.0.0.0" \
+        "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.so.0.0.0"
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
+          sudo rm -f libbitcoinconsensus.so.0
+          sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
+        }
+      })
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
+          sudo rm -f libbitcoinconsensus.so
+          sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
+        }
+      })
+      PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' \
+        ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
+      ;;
+    Darwin)
+      sudo cp \
+        "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.0.dylib" \
+        "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.0.dylib"
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
+          sudo rm -f libbitcoinconsensus.dylib
+          sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
+        }
+      })
+      sudo update_dyld_shared_cache
+      ;;
+    *)
+      throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
+      ;;
+  esac
+
+  # install the binaries
+  [ -d "${BITCOIN_INSTALL_BIN_DESTINATION}" ] ||
+    mkdir -p "${BITCOIN_INSTALL_BIN_DESTINATION}" 2> /dev/null ||
+    sudo mkdir "${BITCOIN_INSTALL_BIN_DESTINATION}" ||
+    throw_error "Unable to create directory ${BITCOIN_INSTALL_BIN_DESTINATION}."
+  for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet test_bitcoin; do
+    [ "${TARGET_KERNEL}" = 'Darwin' ] && [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
+      codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}"
+    sudo install -c \
+      "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}" \
+      "${BITCOIN_INSTALL_BIN_DESTINATION}/"
+  done
+
+  # install the header files
+  [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
+    mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
+    sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
+    throw_error "Unable to create directory ${BITCOIN_INSTALL_INCLUDE_DESTINATION}."
+  sudo install -c -m 644 \
+    "${BITCOIN_INSTALL_INCLUDE_SOURCE}/bitcoinconsensus.h" \
+    "${BITCOIN_INSTALL_INCLUDE_DESTINATION}/"
+
+  # install the binary man pages
+  [ -d "${BITCOIN_INSTALL_MAN_DESTINATION}" ] ||
+    mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" 2> /dev/null ||
+    sudo mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" ||
+    throw_error "Unable to create directory ${BITCOIN_INSTALL_MAN_DESTINATION}."
+  for man_page in bitcoind.1 bitcoin-qt.1 bitcoin-cli.1 bitcoin-tx.1 bitcoin-util.1 bitcoin-wallet.1; do
+    sudo install -c -m 644 "${BITCOIN_INSTALL_MAN_SOURCE}/${man_page}" "${BITCOIN_INSTALL_MAN_DESTINATION}/"
+  done
+}
+
+bitcoin_tarball_test()
+{
   log_info 'Running the unit tests.'
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
     codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
@@ -261,72 +350,7 @@ bitcoin_tarball_download_extract_install()
       throw_error 'Unit tests failed.'
       ;;
   esac
-  log_info 'Installing Bitcoin Core.'
-  [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
-    sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
-    throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
-  case "${TARGET_KERNEL}" in
-    Linux)
-      sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.so.0.0.0 "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.so.0.0.0
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
-          sudo rm -f libbitcoinconsensus.so.0 && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
-        }
-      })
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
-          sudo rm -f libbitcoinconsensus.so && sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
-        }
-      })
-      PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
-      ;;
-    Darwin)
-      sudo cp "${BITCOIN_INSTALL_LIB_SOURCE}"/libbitcoinconsensus.0.dylib "${BITCOIN_INSTALL_LIB_DESTINATION}"/libbitcoinconsensus.0.dylib
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
-          sudo rm -f libbitcoinconsensus.dylib && sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
-        }
-      })
-      sudo update_dyld_shared_cache
 
-      if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
-        for bitcoin_executable in bitcoin-cli bitcoin-qt bitcoin-tx bitcoin-util bitcoin-wallet bitcoind; do
-          codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}"
-        done
-      fi
-      ;;
-    *)
-      throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
-      ;;
-  esac
-
-  [ -d "${BITCOIN_INSTALL_BIN_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_BIN_DESTINATION}" 2> /dev/null ||
-    sudo mkdir "${BITCOIN_INSTALL_BIN_DESTINATION}" ||
-    throw_error "Unable to create directory ${BITCOIN_INSTALL_BIN_DESTINATION}."
-  for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet test_bitcoin; do
-    sudo install -c "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}" "${BITCOIN_INSTALL_BIN_DESTINATION}/"
-  done
-
-  [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
-    sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
-    throw_error "Unable to create directory ${BITCOIN_INSTALL_INCLUDE_DESTINATION}."
-  sudo install -c -m 644 "${BITCOIN_INSTALL_INCLUDE_SOURCE}"/bitcoinconsensus.h "${BITCOIN_INSTALL_INCLUDE_DESTINATION}/"
-
-  [ -d "${BITCOIN_INSTALL_MAN_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" 2> /dev/null ||
-    sudo mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" ||
-    throw_error "Unable to create directory ${BITCOIN_INSTALL_MAN_DESTINATION}."
-  for man_page in bitcoind.1 bitcoin-qt.1 bitcoin-cli.1 bitcoin-tx.1 bitcoin-util.1 bitcoin-wallet.1; do
-    sudo install -c -m 644 "${BITCOIN_INSTALL_MAN_SOURCE}/${man_page}" "${BITCOIN_INSTALL_MAN_DESTINATION}/"
-  done
-
-  log_info 'Removing installation files.'
-  rm -r "${BITCOIN_CORE_EXTRACT_DIR:?}/"
-  rm -r "${TEMP_DIRECTORY:?}/"
-  log_info 'Bitcoin Core installation complete.'
 }
 
 bitcoin_tarball_validate()
@@ -1427,7 +1451,7 @@ elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   current_bitcoin_version="${target_bitcoin_version}"
 else
   log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
-  bitcoin_tarball_download_extract_install
+  bitcoin_tarball_download_extract_test_install
 fi
 
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
