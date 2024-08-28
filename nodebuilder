@@ -241,7 +241,7 @@ bitcoin_tarball_download_extract_test_install()
   readonly BITCOIN_TARBALL_FILENAME="bitcoin-${target_bitcoin_version}-${TARGET_ARCHITECTURE}-${TARGET_BITCOIN_TARBALL_OS}.tar.gz"
   readonly BITCOIN_TARBALL_DESTINATION_PATH="${HOME}/Downloads/${BITCOIN_TARBALL_FILENAME}"
 
-  [ ! -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ] || bitcoin_tarball_download_validate
+  [ -f "${BITCOIN_TARBALL_DESTINATION_PATH}" ] || bitcoin_tarball_download_validate
   bitcoin_tarball_extract
   bitcoin_tarball_test
   bitcoin_tarball_install
