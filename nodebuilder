@@ -403,8 +403,8 @@ bitcoin_tarball_validate_count_signatures()
     gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
   fi
 
-  SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')"
-  readonly SIGNATURE_COUNT
+  SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')" &&
+    readonly SIGNATURE_COUNT
   pgrep '^gpg-agent$' > /dev/null && gpgconf --kill gpg-agent
   pgrep '^keyboxd$' > /dev/null && gpgconf --kill keyboxd
   printf '%s\n' "${SIGNATURE_COUNT}"
