@@ -176,7 +176,6 @@ fi
 printf 'Executing command: %s\n' "${RUN_NODEBUILDER_COMMAND}"
 "${RUN_NODEBUILDER_COMMAND}" > test_output_stdout.txt 2> test_output_stderr.txt ||
   throw_error "Failed to execute nodebuilder command."
-fi
 
 # After the script runs successfully
 rm nodebuilder
