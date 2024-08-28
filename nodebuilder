@@ -350,10 +350,26 @@ bitcoin_tarball_test()
       throw_error 'Unit tests failed.'
       ;;
   esac
-
 }
 
 bitcoin_tarball_validate()
+{
+  bitcoin_tarball_validate_checksum
+
+  GPG_GOOD_SIGNATURE_COUNT="$(bitcoin_tarball_validate_count_signatures)" && readonly GPG_GOOD_SIGNATURE_COUNT
+  if [ "${GPG_GOOD_SIGNATURE_COUNT}" -lt "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
+    throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILE}."
+  fi
+  log_info "Found ${GPG_GOOD_SIGNATURE_COUNT} good signatures."
+
+  [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
+  mv "${BITCOIN_TARBALL_TEMPORARY_PATH}" "${BITCOIN_TARBALL_DESTINATION_PATH}"
+  [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ] || mv "${GUIX_SIGS_TEMPORARY_DIRECTORY}" "${GUIX_SIGS_DESTINATION_DIRECTORY}"
+  [ -f "${BITCOIN_HASH_FILE}" ] && rm "${BITCOIN_HASH_FILE}"
+  [ -f "${GPG_SIGNATURES_FILE}" ] && rm "${GPG_SIGNATURES_FILE}"
+}
+
+bitcoin_tarball_validate_checksum()
 {
   cd "${TEMP_DIRECTORY}"/
   if command -v sha256sum > /dev/null; then
@@ -373,7 +389,10 @@ bitcoin_tarball_validate()
       ;;
   esac
   log_info 'Validated the checksum.'
+}
 
+bitcoin_tarball_validate_count_signatures()
+{
   if [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ]; then
     gpg --quiet --import "${GUIX_SIGS_DESTINATION_DIRECTORY}"/builder-keys/*.gpg
   else
@@ -383,19 +402,12 @@ bitcoin_tarball_validate()
       git clone --depth 1 --quiet "${GUIX_SIGS_REPO}.git" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
     gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
   fi
-  GPG_GOOD_SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')" && readonly GPG_GOOD_SIGNATURE_COUNT
+
+  SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')"
+  readonly SIGNATURE_COUNT
   pgrep '^gpg-agent$' > /dev/null && gpgconf --kill gpg-agent
   pgrep '^keyboxd$' > /dev/null && gpgconf --kill keyboxd
-  if [ "${GPG_GOOD_SIGNATURE_COUNT}" -ge "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
-    log_info "Found ${GPG_GOOD_SIGNATURE_COUNT} good signatures."
-    [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
-    mv "${BITCOIN_TARBALL_TEMPORARY_PATH}" "${BITCOIN_TARBALL_DESTINATION_PATH}"
-    [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ] || mv "${GUIX_SIGS_TEMPORARY_DIRECTORY}" "${GUIX_SIGS_DESTINATION_DIRECTORY}"
-    rm "${BITCOIN_HASH_FILE}"
-    rm "${GPG_SIGNATURES_FILE}"
-  else
-    throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILE}."
-  fi
+  printf '%s\n' "${SIGNATURE_COUNT}"
 }
 
 ensure_curl_dependency()
