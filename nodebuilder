@@ -210,7 +210,7 @@ ensure_curl_dependency()
       arch | endeavouros | garuda | manjaro)
         sudo pacman -Syu --needed --noconfirm curl > /dev/null
         ;;
-      suse | *opensuse*)
+      suse | sles | *opensuse*)
         sudo zypper --non-interactive --quiet install curl > /dev/null
         ;;
       clear-linux-os)
@@ -263,7 +263,7 @@ ensure_sudo_dependency()
       arch | endeavouros | garuda | manjaro)
         pacman -Syu --needed --noconfirm sudo > /dev/null
         ;;
-      suse | *opensuse*)
+      suse | sles | *opensuse*)
         zypper --non-interactive --quiet install sudo > /dev/null
         ;;
       clear-linux-os)
@@ -313,7 +313,7 @@ ensure_xargs_dependency()
       arch | endeavouros | garuda | manjaro)
         pacman -Syu --needed --noconfirm findutils > /dev/null
         ;;
-      suse | *opensuse*)
+      suse | sles | *opensuse*)
         zypper --non-interactive --quiet install findutils > /dev/null
         ;;
       clear-linux-os)
@@ -417,7 +417,7 @@ install_build_dependencies()
     arch | endeavouros | garuda | manjaro)
       install_build_dependencies_pacman
       ;;
-    suse | *opensuse*)
+    suse | sles | *opensuse*)
       install_build_dependencies_zypper
       ;;
     clear-linux-os)
@@ -597,7 +597,7 @@ install_runtime_dependencies()
     arch | endeavouros | garuda | manjaro)
       install_runtime_dependencies_pacman
       ;;
-    suse | *opensuse*)
+    suse | sles | *opensuse*)
       install_runtime_dependencies_zypper
       ;;
     clear-linux-os)
@@ -772,7 +772,7 @@ install_system_updates()
     arch | endeavouros | garuda | manjaro)
       install_system_updates_pacman
       ;;
-    suse | *opensuse*)
+    suse | sles | *opensuse*)
       install_system_updates_zypper
       ;;
     clear-linux-os)
