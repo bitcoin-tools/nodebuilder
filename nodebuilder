@@ -2,6 +2,7 @@
 #
 # A minimally-interactive script for launching a Bitcoin Core node
 
+set -x
 set -o errexit
 set -o nounset
 
