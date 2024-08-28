@@ -310,7 +310,7 @@ bitcoin_tarball_install()
     mkdir -p "${BITCOIN_INSTALL_BIN_DESTINATION}" 2> /dev/null ||
     sudo mkdir "${BITCOIN_INSTALL_BIN_DESTINATION}" ||
     throw_error "Unable to create directory ${BITCOIN_INSTALL_BIN_DESTINATION}."
-  for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet test_bitcoin; do
+  for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet; do
     [ "${TARGET_KERNEL}" = 'Darwin' ] && [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
       codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}"
     sudo install -c \
