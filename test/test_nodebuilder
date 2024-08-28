@@ -169,7 +169,7 @@ if [ -n "${nodebuilder_args}" ]; then
   printf "Running nodebuilder with '%s' args\n" "${NODEBUILDER_ARGS_TRIMMED}"
   readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
 else
-  readonly RUN_NODEBUILDER_COMMAND="./nodebuilder"
+  readonly RUN_NODEBUILDER_COMMAND="sh -x ./nodebuilder"
 fi
 
 # Execute the script with optional command line arguments
