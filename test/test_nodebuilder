@@ -217,7 +217,7 @@ for message in \
   'INFO: Detected: running (Linux|macOS|FreeBSD).$' \
   'INFO: Checking for internet.$' \
   'INFO: Internet checks passed.$' \
-  'INFO: Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)? (not )?found.$' \
+  'INFO: Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)? (not|was) found.$' \
   'INFO: Installing Bitcoin Core.$' \
   'INFO: Setting the default node behavior.$' \
   'INFO: Found data already synced... [0-9]+ GiB.$' \
