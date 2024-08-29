@@ -1236,11 +1236,11 @@ elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ]; then
-  log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
+  log_info "Bitcoin Core ${target_bitcoin_version} not found."
   compile_bitcoin_from_source
   current_bitcoin_version="${target_bitcoin_version}"
 else
-  log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
+  log_info "Bitcoin Core ${target_bitcoin_version} not found."
   readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
   readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
   readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
