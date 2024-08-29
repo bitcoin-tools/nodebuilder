@@ -1453,16 +1453,16 @@ esac
 readonly TARGET_BITCOIN_VERSION_PADDED
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
-  log_info "Found Bitcoin Core ${target_bitcoin_version}."
+  log_info "Bitcoin Core ${target_bitcoin_version} was found."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ]; then
-  log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
+  log_info "Bitcoin Core ${target_bitcoin_version} not found."
   compile_bitcoin_from_source
   current_bitcoin_version="${target_bitcoin_version}"
 else
-  log_info "Failed to find Bitcoin Core ${target_bitcoin_version}."
+  log_info "Bitcoin Core ${target_bitcoin_version} not found."
   bitcoin_tarball_download_extract_test_install
 fi
 
