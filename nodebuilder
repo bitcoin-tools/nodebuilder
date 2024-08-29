@@ -792,7 +792,7 @@ install_system_updates()
         install_system_updates_emerge
       elif command -v pacman > /dev/null; then
         install_system_updates_pacman
-      elif command -v swupd > /dve/null; then
+      elif command -v swupd > /dev/null; then
         install_system_updates_swupd
       elif command -v zypper > /dev/null; then
         install_system_updates_zypper
