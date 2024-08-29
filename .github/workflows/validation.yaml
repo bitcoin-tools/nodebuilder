@@ -337,21 +337,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { dockerfile: Dockerfile_alpine, container: Alpine }
-          - { dockerfile: Dockerfile_amazonlinux, container: Amazon Linux }
-          - { dockerfile: Dockerfile_archlinux, container: Arch }
-          - { dockerfile: Dockerfile_clearlinux, container: Clear Linux }
-          - { dockerfile: Dockerfile_debian, container: Debian }
-          - { dockerfile: Dockerfile_fedora, container: Fedora }
-          - { dockerfile: Dockerfile_kali, container: Kali }
-          - { dockerfile: Dockerfile_manjarolinux, container: Manjaro }
-          - { dockerfile: Dockerfile_oraclelinux, container: Oracle Linux }
-          - { dockerfile: Dockerfile_redhat-ubi9, container: Red Hat Enterprise }
-          - { dockerfile: Dockerfile_rockylinux, container: Rocky Linux }
-          - { dockerfile: Dockerfile_sles, container: SUSE Enterprise }
-          - { dockerfile: Dockerfile, container: Ubuntu }
-          - { dockerfile: Dockerfile_opensuse-leap, container: openSUSE Leap }
-          - { dockerfile: Dockerfile_opensuse-tumbleweed, container: openSUSE Tumbleweed }
+          - { container: Alpine, dockerfile: Dockerfile_alpine }
+          - { container: Amazon Linux, dockerfile: Dockerfile_amazonlinux }
+          - { container: Arch, dockerfile: Dockerfile_archlinux }
+          - { container: Clear Linux, dockerfile: Dockerfile_clearlinux }
+          - { container: Debian, dockerfile: Dockerfile_debian }
+          - { container: Fedora, dockerfile: Dockerfile_fedora }
+          - { container: Kali, dockerfile: Dockerfile_kali }
+          - { container: Manjaro, dockerfile: Dockerfile_manjarolinux }
+          - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
+          - { container: Red Hat Enterprise, dockerfile: Dockerfile_redhat-ubi9 }
+          - { container: Rocky Linux, dockerfile: Dockerfile_rockylinux }
+          - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
+          - { container: Ubuntu, dockerfile: Dockerfile }
+          - { container: openSUSE Leap, dockerfile: Dockerfile_opensuse-leap }
+          - { container: openSUSE Tumbleweed, dockerfile: Dockerfile_opensuse-tumbleweed }
     steps:
       - uses: actions/checkout@v4
       - name: Check the current OS version
