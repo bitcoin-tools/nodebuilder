@@ -5,6 +5,7 @@ ArmanTheParman
 BTRFS
 DNF
 ECC
+FreeBSD
 GPT
 LTS
 MSI
