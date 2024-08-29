@@ -1231,7 +1231,7 @@ esac
 readonly TARGET_BITCOIN_VERSION_PADDED
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
-  log_info "Found Bitcoin Core ${target_bitcoin_version}."
+  log_info "Bitcoin Core ${target_bitcoin_version} was found."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
