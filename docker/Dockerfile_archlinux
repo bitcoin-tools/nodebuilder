@@ -7,7 +7,7 @@ FROM archlinux:latest@sha256:7dba90fa0171e5f23fd41500f15263b61bf4f95464f527d7152
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.7.1
+ARG NODEBUILDER_VERSION=v1.8.0-beta
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
