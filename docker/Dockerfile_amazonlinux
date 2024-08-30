@@ -7,7 +7,7 @@ FROM amazonlinux:latest@sha256:171fe68a5c4114e48c19513c6341da2c6d693454f62edddaf
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.8.0-beta
+ARG NODEBUILDER_VERSION=v1.8.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
