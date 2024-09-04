@@ -83,25 +83,34 @@ compile_bitcoin_from_source()
       ;;
   esac
   log_info 'Compiling source code. Please wait.'
-  if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
-  else
-    make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
-  fi
+  case "${TARGET_KERNEL}" in
+    FreeBSD | OpenBSD)
+      gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
+      ;;
+    *)
+      make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
+      ;;
+  esac
   log_info 'Running compile checks. Please wait.'
-  if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-  else
-    make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-  fi
+  case "${TARGET_KERNEL}" in
+    FreeBSD | OpenBSD)
+      gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2>&1
+      ;;
+    *)
+      make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2>&1
+      ;;
+  esac
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
   log_info 'Installing Bitcoin Core.'
-  if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
-  else
-    make install > /dev/null 2>&1 || sudo make install > /dev/null
-  fi
+  case "${TARGET_KERNEL}" in
+    FreeBSD | OpenBSD)
+      gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
+      ;;
+    *)
+      make install > /dev/null 2>&1 || sudo make install > /dev/null
+      ;;
+  esac
   cd - > /dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
   rm -rf "${COMPILE_DIRECTORY:?}"/
@@ -444,6 +453,9 @@ ensure_curl_dependency()
       FreeBSD)
         sudo pkg install -y curl > /dev/null
         ;;
+      OpenBSD)
+        sudo pkg_add curl
+        ;;
       *)
         if command -v apk > /dev/null; then
           apk --quiet add curl
@@ -493,6 +505,9 @@ ensure_sudo_dependency()
         ;;
       FreeBSD)
         pkg install -y sudo > /dev/null
+        ;;
+      OpenBSD)
+        pkg_add sudo
         ;;
       *)
         if command -v apk > /dev/null; then
@@ -544,6 +559,9 @@ ensure_xargs_dependency()
       FreeBSD)
         sudo pkg install -y findutils > /dev/null
         ;;
+      OpenBSD)
+        sudo pkg_add findutils
+        ;;
       *)
         if command -v apk > /dev/null; then
           apk --quiet add findutils
@@ -570,7 +588,7 @@ ensure_xargs_dependency()
 get_free_space_in_mib()
 {
   case "${TARGET_KERNEL}" in
-    'Darwin' | 'FreeBSD')
+    Darwin | FreeBSD | OpenBSD)
       /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
       ;;
     *)
@@ -594,17 +612,20 @@ get_memory_metric_in_mib()
 
 get_operating_system()
 {
-  if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    printf '%s\n' "${TARGET_KERNEL}"
-  else
-    OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID
-    OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID_LIKE
-    if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
-      printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
-    else
-      throw_error 'Failed to determine OS release type'
-    fi
-  fi
+  case "${TARGET_KERNEL}" in
+    Darwin | FreeBSD | OpenBSD)
+      printf '%s\n' "${TARGET_KERNEL}"
+      ;;
+    *)
+      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID
+      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID_LIKE
+      if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
+        printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
+      else
+        throw_error 'Failed to determine OS release type'
+      fi
+      ;;
+  esac
 }
 
 # shellcheck disable=SC2317
@@ -650,6 +671,9 @@ install_build_dependencies()
       ;;
     FreeBSD)
       install_build_dependencies_freebsd
+      ;;
+    OpenBSD)
+      install_build_dependencies_openbsd
       ;;
     *)
       install_build_command_function=''
@@ -768,6 +792,17 @@ install_build_dependencies_freebsd()
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
 }
 
+
+install_build_dependencies_openbsd()
+{
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo pkg_add > /dev/null
+}
+
 install_build_dependencies_pacman()
 {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_pacman.txt"
@@ -830,6 +865,9 @@ install_runtime_dependencies()
       ;;
     FreeBSD)
       install_runtime_dependencies_freebsd
+      ;;
+    OpenBSD)
+      install_runtime_dependencies_openbsd
       ;;
     *)
       install_runtime_command_function=''
