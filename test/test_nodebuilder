@@ -246,7 +246,7 @@ for message in \
   'libzmq' \
   'BDB' \
   'Berkeley DB' \
-  "WARN: TERM variable '[0-9A-Za-z]*' is not recognized. Disabling color."
+  "TERM variable '[0-9A-Za-z]*' is not recognized. Disabling color." \
   'Checking system memory... 0 of 0 GiB free.' \
   'Checking system memory... 0.0 of 0.0 GiB free.' \
   'INFO: Found free space available... 0 GiB.' \
