@@ -340,9 +340,8 @@ jobs:
         with:
           prepare: |
             uname -a
-            cat /etc/os-release
-            nproc
-            sysctl -a | grep ' memory' | head -2
+            sysctl hw.ncpu
+            sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h
             date -u
           run: |
