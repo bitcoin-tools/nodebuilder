@@ -1233,7 +1233,7 @@ throw_error()
   elif [ $# -gt 1 ]; then
     log_error "$@"
   else
-    log_error "Unknown error thrown."
+    log_error 'Unknown error thrown.'
   fi
   handle_exit
   exit 1
@@ -1247,7 +1247,8 @@ if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; 
   CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 else
   case "${TERM}" in
-    xterm* | screen* | tmux* | linux | gnome-terminal | konsole)
+    '' | xterm* | screen* | tmux* | linux | gnome-terminal | konsole | rxvt* | \
+      putty | mintty | alacritty | st)
       CONSOLE_COLOR_RED='\033[31m'
       CONSOLE_COLOR_GREEN='\033[32m'
       CONSOLE_COLOR_YELLOW='\033[33m'
@@ -1258,6 +1259,7 @@ else
       CONSOLE_COLOR_GREEN=''
       CONSOLE_COLOR_YELLOW=''
       CONSOLE_COLOR_NORMAL=''
+      log_warning "TERM variable '${TERM}' is not recognized. Disabling color."
       ;;
   esac
 fi
