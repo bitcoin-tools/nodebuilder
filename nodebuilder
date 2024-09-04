@@ -792,7 +792,6 @@ install_build_dependencies_freebsd()
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
 }
 
-
 install_build_dependencies_openbsd()
 {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
@@ -1734,7 +1733,7 @@ while [ "${ibd_status}" = 'true' ]; do
     log_info 'Syncing the blockchain. Please be patient.'
     printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
-    
+
     case "${TARGET_KERNEL}" in
       Darwin | FreeBSD | OpenBSD)
         current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
