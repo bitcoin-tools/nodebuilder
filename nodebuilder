@@ -72,10 +72,10 @@ compile_bitcoin_from_source()
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
-    'Darwin')
+    Darwin)
       ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
       ;;
-    'FreeBSD')
+    FreeBSD | OpenBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > "${HOME}/configure_results"
       ;;
     *)
@@ -980,6 +980,16 @@ install_runtime_dependencies_freebsd()
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
 }
 
+install_runtime_dependencies_openbsd()
+{
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_openbsd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
+}
+
 install_runtime_dependencies_pacman()
 {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_pacman.txt"
@@ -1040,6 +1050,9 @@ install_system_updates()
       ;;
     FreeBSD)
       install_system_updates_freebsd
+      ;;
+    OpenBSD)
+      install_system_updates_openbsd
       ;;
     *)
       if command -v apk > /dev/null; then
@@ -1128,6 +1141,11 @@ install_system_updates_freebsd()
 {
   sudo pkg update > /dev/null
   sudo pkg upgrade --yes > /dev/null
+}
+
+install_system_updates_openbsd()
+{
+  sudo pkg_add -u > /dev/null
 }
 
 install_system_updates_pacman()
@@ -1397,6 +1415,9 @@ case "${TARGET_KERNEL}" in
   Darwin)
     SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
     ;;
+  OpenBSD)
+    SYS_CORES_COUNT="$(sysctl -n hw.ncpu)"
+    ;;
   MINGW* | Cygwin)
     throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
     ;;
@@ -1421,7 +1442,7 @@ fi
 
 clear_the_terminal
 case "${TARGET_KERNEL}" in
-  Linux | FreeBSD)
+  Linux | FreeBSD | OpenBSD)
     TARGET_BITCOIN_TARBALL_OS='linux-gnu'
     BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
     log_info "Detected: running ${TARGET_KERNEL}."
@@ -1494,7 +1515,8 @@ if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ];
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
-  [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ]; then
+  [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ] ||
+  [ "${TARGET_OPERATING_SYSTEM}" = 'OpenBSD' ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   compile_bitcoin_from_source
   current_bitcoin_version="${target_bitcoin_version}"
@@ -1598,8 +1620,7 @@ elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
 fi
 
 case "${TARGET_KERNEL}" in
-  Darwin) ;;
-  FreeBSD) ;;
+  Darwin | FreeBSD | OpenBSD) ;;
   *)
     PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')" && readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
     PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')" && readonly PHYSICAL_MEMORY_FREE_IN_MIB
@@ -1713,12 +1734,15 @@ while [ "${ibd_status}" = 'true' ]; do
     log_info 'Syncing the blockchain. Please be patient.'
     printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
-
-    if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-      current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
-    else
-      current_chain_tip_timestamp="$(date -d @"${last_block_time}" | cut -c 5-)"
-    fi
+    
+    case "${TARGET_KERNEL}" in
+      Darwin | FreeBSD | OpenBSD)
+        current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
+        ;;
+      *)
+        current_chain_tip_timestamp="$(date -d @"${last_block_time}" | cut -c 5-)"
+        ;;
+    esac
     printf 'Current chain tip:          %s\n' "${current_chain_tip_timestamp}"
 
     printf '%s' 'Chain sync size:            '
