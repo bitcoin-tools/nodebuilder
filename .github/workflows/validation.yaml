@@ -320,6 +320,40 @@ jobs:
           name: freebsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
 
+  run-nodebuilder-openbsd:
+    name: Test source on OpenBSD
+    needs: [changes, shell-lint, yaml-lint]
+    if: >-
+      ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test the console output
+        uses: vmactions/openbsd-vm@v1
+        timeout-minutes: 180
+        with:
+          prepare: |
+            uname -a
+            cat /etc/os-release
+            nproc
+            sysctl -a | grep ' memory' | head -2
+            df -h
+            date -u
+          run: |
+            /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+      - name: Save Bitcoin Core log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: freebsd-source-bitcoin-debug.log
+          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
+
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
     needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
