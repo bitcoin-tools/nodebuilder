@@ -807,7 +807,9 @@ install_build_dependencies_openbsd()
       sudo pkg_add "${package}" > /dev/null
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "\-archive\-" | sort -V | tail -1)"
+      echo "DEBUG: found package_latest_version=${package_latest_version}"
       [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
+      [ "${package}" = 'automake' ] && automake_package_latest_version="${package_latest_version}"
       echo "DEBUG: package_latest_version=${package_latest_version}"
       if [ -n "${package_latest_version}" ]; then
         sudo pkg_add "${package_latest_version}" > /dev/null
@@ -816,8 +818,11 @@ install_build_dependencies_openbsd()
       fi
     fi
   done
-  AUTOMAKE_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)"
-  export AUTOMAKE_VERSION
+
+  AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)" &&
+    export AUTOCONF_VERSION
+  AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)" &&
+    export AUTOMAKE_VERSION
 }
 
 install_build_dependencies_pacman()
