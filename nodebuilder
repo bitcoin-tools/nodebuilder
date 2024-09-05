@@ -822,11 +822,11 @@ install_build_dependencies_openbsd()
   done
 
   # major-minor version only
-  echo "DEBUG: using autoconf "{autoconf_package_latest_version}"
+  echo "DEBUG: using autoconf {autoconf_package_latest_version}"
   AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
     export AUTOCONF_VERSION
   echo "DEBUG: AUTOCONF_VERSION=${AUTOCONF_VERSION}"
-  echo "DEBUG: using autoconf "{automake_package_latest_version}"
+  echo "DEBUG: using autoconf {automake_package_latest_version}"
   AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
     export AUTOMAKE_VERSION
   echo "DEBUG: AUTOMAKE_VERSION=${AUTOMAKE_VERSION}"
