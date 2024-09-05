@@ -803,7 +803,7 @@ install_build_dependencies_openbsd()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
     echo "DEBUG: checking package '${package}'"
-    package_latest_version="$(pkg_info -a | grep "^${package}\-" | grep -v "\-archive\-" | sort -V | tail -1 || true)"
+    package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "\-archive\-" | sort -V | tail -1 || true)"
     echo "DEBUG: package_latest_version=${package_latest_version}"
     if [ -n "${package_latest_version}" ]; then
       sudo pkg_add "${package_latest_version}" > /dev/null
