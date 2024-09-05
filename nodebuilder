@@ -806,7 +806,7 @@ install_build_dependencies_openbsd()
       echo "DEBUG: caught package ${package}"
       sudo pkg_add "${package}" > /dev/null
     else
-      package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "\-archive\-" | sort -V | tail -1)"
+      package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "\-[0-9A-Za-z]*\-" | sort -V | tail -1)"
       echo "DEBUG: found package_latest_version=${package_latest_version}"
       [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
       [ "${package}" = 'automake' ] && automake_package_latest_version="${package_latest_version}"
