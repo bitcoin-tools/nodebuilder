@@ -802,7 +802,7 @@ install_build_dependencies_openbsd()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
-    if pkg_info -Q "${package}" >/dev/null 2>&1; then
+    if pkg_info -Q "${package}" > /dev/null 2>&1; then
       sudo pkg_add "${package}"
     else
       package_latest_version="$(pkg_info -a | grep "^${package}-" | tail -1 || true)"
