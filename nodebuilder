@@ -819,9 +819,10 @@ install_build_dependencies_openbsd()
     fi
   done
 
-  AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)" &&
+  # major-minor version only
+  AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
     export AUTOCONF_VERSION
-  AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)" &&
+  AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
     export AUTOMAKE_VERSION
   echo "DEBUG: searching for aclocal"
   sudo find / -name aclocal 2> /dev/null
