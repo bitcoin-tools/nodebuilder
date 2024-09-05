@@ -1,0 +1,10 @@
+autoconf
+automake
+boost-headers
+gmake
+libevent
+libtool
+pkg-config
+qrencode
+qt5-qtbase
+qt5-qttools
