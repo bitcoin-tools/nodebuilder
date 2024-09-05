@@ -804,7 +804,7 @@ install_build_dependencies_openbsd()
   for package in ${dependencies}; do
     if [ "${package}" = 'sqlite3' ]; then
       echo "DEBUG: caught package ${package}"
-      sudo pkg_add "${package}" > /dev/null      
+      sudo pkg_add "${package}" > /dev/null
     else
       echo "DEBUG: checking package '${package}'"
       pkg_info -Q "${package}"
