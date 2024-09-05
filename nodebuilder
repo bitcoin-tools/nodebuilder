@@ -823,6 +823,8 @@ install_build_dependencies_openbsd()
     export AUTOCONF_VERSION
   AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)" &&
     export AUTOMAKE_VERSION
+  echo "DEBUG: searching for aclocal-1.16.5"
+  sudo find / -name aclocal-1.16.5 2> /dev/null
 }
 
 install_build_dependencies_pacman()
