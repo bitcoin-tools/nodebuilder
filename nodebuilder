@@ -68,8 +68,7 @@ compile_bitcoin_from_source()
   log_info 'Analyzing hardware configuration.'
   command -v autoreconf > /dev/null 2>&1 ||
     throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
-  ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-  grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
+  ./autogen.sh
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
     Darwin)
