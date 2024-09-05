@@ -813,7 +813,7 @@ install_build_dependencies_openbsd()
       echo "DEBUG: package_latest_version=${package_latest_version}"
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
-      elif [ "$(echo package_latest_version | cut -d' ' -f2)" != '(installed)' ]; then
+      elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
         sudo pkg_add "${package_latest_version}" > /dev/null
       fi
     fi
