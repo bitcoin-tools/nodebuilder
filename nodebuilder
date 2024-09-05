@@ -801,7 +801,18 @@ install_build_dependencies_openbsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo pkg_add > /dev/null
+  for package in ${dependencies}; do
+    if pkg_info -Q "${package}" >/dev/null 2>&1; then
+      sudo pkg_add "${package}"
+    else
+      package_latest_version="$(pkg_info -a | grep "^${package}-" | tail -1 || true)"
+      if [ -n "${package_latest_version}" ]; then
+        sudo pkg_add "${package_latest_version}"
+      else
+        throw_error "Package '${package}' was not found in pkg_info."
+      fi
+    fi
+  done
 }
 
 install_build_dependencies_pacman()
