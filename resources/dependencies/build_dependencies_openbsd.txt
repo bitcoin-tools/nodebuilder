@@ -1,11 +1,11 @@
-autoconf--
-automake--
+autoconf
+automake
 boost
 gmake
 libevent
 libqrencode
 libtool
-python--
+python
 sqlite3
 qtbase
 qttools
