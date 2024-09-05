@@ -507,7 +507,7 @@ ensure_sudo_dependency()
         pkg install -y sudo > /dev/null
         ;;
       OpenBSD)
-        pkg_add sudo
+        pkg_add sudo--
         ;;
       *)
         if command -v apk > /dev/null; then
