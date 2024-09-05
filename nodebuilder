@@ -990,7 +990,7 @@ install_runtime_dependencies_openbsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
+  printf '%s\n' "${dependencies}" | xargs sudo pkg_add > /dev/null
 }
 
 install_runtime_dependencies_pacman()
