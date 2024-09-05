@@ -803,19 +803,12 @@ install_build_dependencies_openbsd()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
     echo "DEBUG: checking package '${package}'"
-    if pkg_info -Q "${package}" > /dev/null 2>&1; then
-      echo "DEBUG: installing unambiguous package '${package}'"
-      sudo pkg_add "${package}" > /dev/null
+    package_latest_version="$(pkg_info -a | grep "^${package}-" | sort -V tail -1 || true)"
+    echo "DEBUG: package_latest_version=${package_latest_version}"
+    if [ -n "${package_latest_version}" ]; then
+      sudo pkg_add "${package_latest_version}" > /dev/null
     else
-      package_all_versions="$(pkg_info -a | grep "^${package}-" || true)"
-      echo "DEBUG: package_all_versions=${package_all_versions}"
-      package_latest_version="$(pkg_info -a | grep "^${package}-" | tail -1 || true)"
-      echo "DEBUG: package_all_versions=${package_latest_version}"
-      if [ -n "${package_latest_version}" ]; then
-        sudo pkg_add "${package_latest_version}" > /dev/null
-      else
-        throw_error "Package '${package}' was not found in pkg_info."
-      fi
+      throw_error "Package '${package}' was not found in pkg_info."
     fi
   done
 }
