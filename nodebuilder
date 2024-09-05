@@ -801,13 +801,13 @@ install_build_dependencies_openbsd()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
+    echo "DEBUG: checking package '${package}'"
     if [ "${package}" = 'sqlite3' ]; then
       echo "DEBUG: caught package ${package}"
       sudo pkg_add "${package}" > /dev/null
     else
-      echo "DEBUG: checking package '${package}'"
-      pkg_info -Q "${package}"
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "\-archive\-" | sort -V | tail -1)"
+      [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
       echo "DEBUG: package_latest_version=${package_latest_version}"
       if [ -n "${package_latest_version}" ]; then
         sudo pkg_add "${package_latest_version}" > /dev/null
@@ -816,6 +816,7 @@ install_build_dependencies_openbsd()
       fi
     fi
   done
+  export AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)"
 }
 
 install_build_dependencies_pacman()
