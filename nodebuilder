@@ -454,7 +454,7 @@ ensure_curl_dependency()
         sudo pkg install -y curl > /dev/null
         ;;
       OpenBSD)
-        sudo pkg_add curl
+        sudo pkg_add curl > /dev/null
         ;;
       *)
         if command -v apk > /dev/null; then
@@ -507,7 +507,7 @@ ensure_sudo_dependency()
         pkg install -y sudo > /dev/null
         ;;
       OpenBSD)
-        pkg_add sudo--
+        pkg_add sudo-- > /dev/null
         ;;
       *)
         if command -v apk > /dev/null; then
@@ -560,7 +560,7 @@ ensure_xargs_dependency()
         sudo pkg install -y findutils > /dev/null
         ;;
       OpenBSD)
-        sudo pkg_add findutils
+        sudo pkg_add findutils > /dev/null
         ;;
       *)
         if command -v apk > /dev/null; then
@@ -805,14 +805,14 @@ install_build_dependencies_openbsd()
     echo "DEBUG: checking package '${package}'"
     if pkg_info -Q "${package}" > /dev/null 2>&1; then
       echo "DEBUG: installing unambiguous package '${package}'"
-      sudo pkg_add "${package}"
+      sudo pkg_add "${package}" > /dev/null
     else
       package_all_versions="$(pkg_info -a | grep "^${package}-" || true)"
       echo "DEBUG: package_all_versions=${package_all_versions}"
       package_latest_version="$(pkg_info -a | grep "^${package}-" | tail -1 || true)"
       echo "DEBUG: package_all_versions=${package_latest_version}"
       if [ -n "${package_latest_version}" ]; then
-        sudo pkg_add "${package_latest_version}"
+        sudo pkg_add "${package_latest_version}" > /dev/null
       else
         throw_error "Package '${package}' was not found in pkg_info."
       fi
