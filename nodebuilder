@@ -816,8 +816,8 @@ install_build_dependencies_openbsd()
       fi
     fi
   done
-  AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)"
-  export AUTOCONF_VERSION
+  AUTOMAKE_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2)"
+  export AUTOMAKE_VERSION
 }
 
 install_build_dependencies_pacman()
