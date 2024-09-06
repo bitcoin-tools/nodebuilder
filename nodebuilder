@@ -94,10 +94,10 @@ compile_bitcoin_from_source()
   log_info 'Running compile checks. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | OpenBSD)
-      gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2>&1
+      gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
       ;;
     *)
-      make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2>&1
+      make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
       ;;
   esac
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
