@@ -591,8 +591,11 @@ ensure_xargs_dependency()
 get_free_space_in_mib()
 {
   case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD | OpenBSD)
-      /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
+    Darwin | FreeBSD)
+      /bin/df -m "${HOME}" | awk 'NR==2 {print $4}'
+      ;;
+    OpenBSD)
+      /bin/df "${HOME}" | awk 'NR==2 {print $4/1024}'
       ;;
     *)
       df --output=avail --block-size='1MiB' "${HOME}" | sed 1d
