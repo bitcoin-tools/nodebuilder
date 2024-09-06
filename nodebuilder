@@ -592,7 +592,7 @@ get_free_space_in_mib()
       /bin/df -m "${HOME}" | awk 'NR==2 {print $4}'
       ;;
     OpenBSD)
-      /bin/df "${HOME}" | awk 'NR==2 {printf '%.0f\n', $4/1024}'
+      /bin/df "${HOME}" | awk 'NR==2 {printf '%.0f', $4/1024}'
       ;;
     *)
       df --output=avail --block-size='1MiB' "${HOME}" | sed 1d
