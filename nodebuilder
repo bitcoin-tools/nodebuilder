@@ -75,11 +75,8 @@ compile_bitcoin_from_source()
     Darwin)
       ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
       ;;
-    FreeBSD)
+    FreeBSD | OpenBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
-      ;;
-    OpenBSD)
-      ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake
       ;;
     *)
       ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
