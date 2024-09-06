@@ -813,24 +813,21 @@ install_build_dependencies_openbsd()
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
-        echo "DEBUG: installing ${package_latest_version}"
         sudo pkg_add "${package_latest_version}" > /dev/null
-        echo "DEBUG: finished install of ${package_latest_version}"
+        echo "DEBUG: install complete of ${package_latest_version}"
       fi
     fi
   done
 
   # major-minor version only
-  echo "DEBUG: using autoconf {autoconf_package_latest_version}"
   AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
     export AUTOCONF_VERSION
-  echo "DEBUG: AUTOCONF_VERSION=${AUTOCONF_VERSION}"
-  echo "DEBUG: using autoconf {automake_package_latest_version}"
   AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
     export AUTOMAKE_VERSION
+  echo "DEBUG: autoconf_package_latest_version=${autoconf_package_latest_version}"
+  echo "DEBUG: AUTOCONF_VERSION=${AUTOCONF_VERSION}"
+  echo "DEBUG: automake_package_latest_version=${automake_package_latest_version}"
   echo "DEBUG: AUTOMAKE_VERSION=${AUTOMAKE_VERSION}"
-  echo "DEBUG: searching for aclocal"
-  sudo find / -name aclocal 2> /dev/null
 }
 
 install_build_dependencies_pacman()
