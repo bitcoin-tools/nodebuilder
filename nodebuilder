@@ -807,10 +807,9 @@ install_build_dependencies_openbsd()
       sudo pkg_add "${package}" > /dev/null
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
-      echo "DEBUG: found package_latest_version=${package_latest_version}"
+      echo "DEBUG: package_latest_version=${package_latest_version}"
       [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
       [ "${package}" = 'automake' ] && automake_package_latest_version="${package_latest_version}"
-      echo "DEBUG: package_latest_version=${package_latest_version}"
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
