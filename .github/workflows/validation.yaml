@@ -343,7 +343,7 @@ jobs:
             sysctl hw.ncpu
             sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h "${HOME}"
-            df -m "${HOME}"
+            df "${HOME}"
             date -u
           run: |
             /bin/sh -x ./nodebuilder
