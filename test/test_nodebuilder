@@ -123,9 +123,12 @@ while [ $# -gt 0 ]; do
     -r | --ref)
       [ -z "$2" ] && throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
       readonly GIT_REF_SHORT_NAME="$2"
-      if [ "$(uname -s)" != 'FreeBSD' ] && [ "$(uname -s)" != 'OpenBSD' ]; then
-        validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
-      fi
+      case "$(uname -s)" in
+        FreeBSD | OpenBSD) ;;
+        *)
+          validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
+          ;;
+      esac
       shift
       ;;
     *)
