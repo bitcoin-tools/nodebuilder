@@ -186,7 +186,7 @@ EOF
     gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true 2> /dev/null; then
     :
   else
-    log_warning "Unable to set shortcut as trusted. Please open an issue at ${NODEBUILDER_REPO}."
+    log_warning "If the desktop shortcut is failing, please open an issue at ${NODEBUILDER_REPO}."
   fi
 }
 
