@@ -1492,7 +1492,7 @@ case "${TARGET_KERNEL}" in
       is_running_in_ci && is_running_as_root; then
       # To satisfy disk space in OpenBSD CI runner
       BITCOIN_DATA_DIRECTORY='/home/bitcoin/.bitcoin'
-      mkdir --parents "${BITCOIN_DATA_DIRECTORY}"
+      mkdir -p "${BITCOIN_DATA_DIRECTORY}"
     else
       BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
     fi
