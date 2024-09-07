@@ -216,6 +216,7 @@ if [ -s "${STDERR_TEST_FILENAME}" ]; then
   exit 1
 fi
 
+# Positve matches for all environments
 for message in \
   'INFO: Detected: running (Linux|macOS|FreeBSD).$' \
   'INFO: Checking for internet.$' \
@@ -241,6 +242,7 @@ for message in \
   fi
 done
 
+# Negative matches for all environments
 for message in \
   'apt-utils' \
   'libzmq' \
@@ -259,6 +261,7 @@ for message in \
   fi
 done
 
+# Positve matches when compiling from source
 if [ "${COMPILE_BITCOIN}" = 'true' ] ||
   [ "${TARGET_KERNEL}" = 'FreeBSD' ] ||
   {
@@ -275,6 +278,7 @@ if [ "${COMPILE_BITCOIN}" = 'true' ] ||
       exit 1
     fi
   done
+# Positive matches when downloading package
 else
   for message in \
     'INFO: Downloading Bitcoin Core.$' \
@@ -298,6 +302,7 @@ else
   fi
 fi
 
+# Positive matches for all environments except macOS
 if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
   for message in \
     'INFO: Ensuring runtime dependencies.$' \
@@ -309,6 +314,7 @@ if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
   done
 fi
 
+# Positve matches for Linux kernel environments
 if [ "${TARGET_KERNEL}" = 'Linux' ]; then
   message='Checking system memory... [0-9]+\.[0-9] of [0-9]+\.[0-9] GiB free.$'
   if ! grep -Eq "${message}" "${STDOUT_TEST_FILENAME}" > /dev/null 2>&1; then
