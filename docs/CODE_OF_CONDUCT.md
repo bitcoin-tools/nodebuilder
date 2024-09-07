@@ -14,12 +14,12 @@ Being a dick.
 
 ## Reporting
 
-Tag the agressor in a public [discussion](https://github.com/bitcoin-tools/nodebuilder/discussions) or open a [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
+Tag the aggressor in a public [discussion](https://github.com/bitcoin-tools/nodebuilder/discussions) or open a [security advisory](https://github.com/bitcoin-tools/nodebuilder/security/advisories/new).
 
 ## Enforcement
 
-Suspected violators will be drawn and quartered then given a fair trial.
+Suspects will be publicly shamed, drawn and quartered, then given by a fair trial.
 
 ## Further Reading
 
-[Rough conensus](https://datatracker.ietf.org/doc/html/rfc7282#section-3)
+[Rough consensus](https://datatracker.ietf.org/doc/html/rfc7282#section-3)
