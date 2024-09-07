@@ -311,7 +311,7 @@ jobs:
             sysctl -a | grep ' memory' | head -2
             df -h
             df
-            echo "${TERM}"
+            echo "${TERM:-TERMisnotfound}"
             commmand -v tput
             tput colors
             date -u
@@ -348,7 +348,7 @@ jobs:
             sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h
             df
-            echo "${TERM}"
+            echo "${TERM:-TERMisnotfound}"
             commmand -v tput
             tput colors
             date -u
