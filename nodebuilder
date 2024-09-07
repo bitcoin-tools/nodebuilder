@@ -1488,7 +1488,7 @@ fi
 [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
 if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
   log_info 'Setting the default node behavior.'
-  set_bitcoin_core_option 'datadir' "${BITCOIN_DATA_DIRECOTRY}"
+  set_bitcoin_core_option 'datadir' "${BITCOIN_DATA_DIRECTORY}"
   is_running_in_ci && set_bitcoin_core_option 'debug' 'net'
   set_bitcoin_core_option 'mempoolfullrbf' '1'
   set_bitcoin_core_option 'server' '1'
