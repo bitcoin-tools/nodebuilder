@@ -1396,8 +1396,9 @@ clear_the_terminal
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
     TARGET_BITCOIN_TARBALL_OS='linux-gnu'
+    is_running_as_root && echo 'DEBUG: running as root'
     is_running_in_ci && echo 'DEBUG: running in CI'
-    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] && is_running_as_root; then
+    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] && is_running_in_ci && is_running_as_root; then
       BITCOIN_DATA_DIRECTORY='/home/bitcoin/.bitcoin'
       mkdir --parents "${BITCOIN_DATA_DIRECTORY}"
     else
