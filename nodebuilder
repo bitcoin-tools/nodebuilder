@@ -1627,12 +1627,12 @@ fi
 
 log_info 'Checking the RPC status.'
 readonly BITCOIN_RPC_TIMEOUT=300
-if ! bitcoin-cli --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
+if ! bitcoin-cli -datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
   throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds."
 fi
 
 readonly SLEEP_TIME='10'
-blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
+blockchain_info=$(bitcoin-cli -datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
 ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
 if [ "${ibd_status}" = 'true' ]; then
@@ -1727,7 +1727,7 @@ while [ "${ibd_status}" = 'true' ]; do
   printf '%s' "This screen will refresh in ${SLEEP_TIME} seconds."
   sleep "${SLEEP_TIME}"
 
-  blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
+  blockchain_info=$(bitcoin-cli -datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
   printf '\n'
   ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 done
