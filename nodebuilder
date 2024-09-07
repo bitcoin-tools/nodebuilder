@@ -571,10 +571,10 @@ get_free_space_in_mib()
 {
   case "${TARGET_KERNEL}" in
     'Darwin' | 'FreeBSD')
-      /bin/df -m "${bitcoin_data_directory}" | awk '{print $4}' | sed 1d
+      /bin/df -m "${BITCOIN_DATA_DIRECTORY}" | awk '{print $4}' | sed 1d
       ;;
     *)
-      df --output=avail --block-size='1MiB' "${bitcoin_data_directory}" | sed 1d
+      df --output=avail --block-size='1MiB' "${BITCOIN_DATA_DIRECTORY}" | sed 1d
       ;;
   esac
 }
