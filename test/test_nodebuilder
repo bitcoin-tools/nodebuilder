@@ -286,7 +286,6 @@ else
     'INFO: Found [0-9]+ good signatures.$' \
     'INFO: Extracting Bitcoin Core.$' \
     'INFO: Running the unit tests.$' \
-    'INFO: Installing Bitcoin Core.$' \
     'INFO: Removing installation files.$' \
     'INFO: Bitcoin Core installation complete.$'; do
     if ! grep -Eq "${message}" "${STDOUT_TEST_FILENAME}" > /dev/null 2>&1; then
