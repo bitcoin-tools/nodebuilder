@@ -159,7 +159,7 @@ Comment[ar]=اتصل بشبكة بيتكوين نظير إلى نظير
 Comment[pl]=Połącz z siecią typu peer-to-peer Bitcoin
 Comment[sv]=Anslut till Bitcoin nätverket för peer-to-peer
 Comment[hi]=बिटकॉइन पीयर-टू-पीयर नेटवर्क से कनेक्ट करें
-Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt; else bitcoind --daemonwait; fi'
+Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt -datadir="${BITCOIN_DATA_DIRECTORY}"; else bitcoind --daemonwait -datadir="${BITCOIN_DATA_DIRECTORY}"; fi'
 Terminal=false
 Type=Application
 Icon=${SHORTCUT_IMAGE_FILE}
@@ -1107,6 +1107,15 @@ install_system_updates_zypper()
   sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
 }
 
+is_running_as_root()
+{
+  if [ "$(id -u)" -eq 0 ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 is_running_in_ci()
 {
   if [ "${CI:-false}" = 'true' ]; then
@@ -1386,16 +1395,23 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
-    TARGET_BITCOIN_TARBALL_OS='linux-gnu'
-    BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
     log_info "Detected: running ${TARGET_KERNEL}."
+    TARGET_BITCOIN_TARBALL_OS='linux-gnu'
+    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
+      is_running_in_ci &&
+      is_running_as_root; then
+      BITCOIN_DATA_DIRECTORY='/home/bitcoin/.bitcoin'
+      mkdir --parents "${BITCOIN_DATA_DIRECTORY}"
+    else
+      BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
+    fi
     is_running_in_container && log_info 'Detected: running in Docker.'
     ;;
   Darwin)
-    TARGET_BITCOIN_TARBALL_OS='apple-darwin'
-    BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
     log_info 'Detected: running macOS.'
     [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
+    TARGET_BITCOIN_TARBALL_OS='apple-darwin'
+    BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
     ;;
   *)
     throw_error "Unknown target kernel type '${TARGET_KERNEL}'."
@@ -1473,12 +1489,13 @@ fi
 [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
 if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
   log_info 'Setting the default node behavior.'
+  set_bitcoin_core_option 'datadir' "${BITCOIN_DATA_DIRECTORY}"
   is_running_in_ci && set_bitcoin_core_option 'debug' 'net'
   set_bitcoin_core_option 'mempoolfullrbf' '1'
   set_bitcoin_core_option 'server' '1'
 fi
 
-# MEMORY
+# Synced data and prune checks
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
   if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
@@ -1561,6 +1578,7 @@ elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
   fi
 fi
 
+# Memory checks
 case "${TARGET_KERNEL}" in
   Darwin) ;;
   FreeBSD) ;;
@@ -1573,7 +1591,6 @@ case "${TARGET_KERNEL}" in
     readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
     free_memory="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
     TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')" && readonly TOTAL_MEMORY
-
     log_info "Checking system memory... ${free_memory} of ${TOTAL_MEMORY} GiB free."
 
     if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
@@ -1601,11 +1618,11 @@ if is_running_in_ci ||
   is_running_in_container ||
   [ -z "${DISPLAY}" ] ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
-  bitcoind --daemonwait > /dev/null
+  bitcoind --daemonwait -datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null
 elif [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-  nohup bitcoin-qt > /dev/null 2>&1 < /dev/null &
+  nohup bitcoin-qt -datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
 else
-  setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
+  setsid bitcoin-qt -datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
 fi
 
 log_info 'Checking the RPC status.'
