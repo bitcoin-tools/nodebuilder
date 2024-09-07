@@ -1409,9 +1409,9 @@ case "${TARGET_KERNEL}" in
     ;;
   Darwin)
     log_info 'Detected: running macOS.'
+    [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
     TARGET_BITCOIN_TARBALL_OS='apple-darwin'
     BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-    [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
     ;;
   *)
     throw_error "Unknown target kernel type '${TARGET_KERNEL}'."
