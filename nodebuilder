@@ -1395,22 +1395,22 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
+    log_info "Detected: running ${TARGET_KERNEL}."
     TARGET_BITCOIN_TARBALL_OS='linux-gnu'
-    is_running_as_root && echo 'DEBUG: running as root'
-    is_running_in_ci && echo 'DEBUG: running in CI'
-    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] && is_running_in_ci && is_running_as_root; then
+    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
+      is_running_in_ci &&
+      is_running_as_root; then
       BITCOIN_DATA_DIRECTORY='/home/bitcoin/.bitcoin'
       mkdir --parents "${BITCOIN_DATA_DIRECTORY}"
     else
       BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
     fi
-    log_info "Detected: running ${TARGET_KERNEL}."
     is_running_in_container && log_info 'Detected: running in Docker.'
     ;;
   Darwin)
+    log_info 'Detected: running macOS.'
     TARGET_BITCOIN_TARBALL_OS='apple-darwin'
     BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-    log_info 'Detected: running macOS.'
     [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
     ;;
   *)
