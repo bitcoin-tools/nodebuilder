@@ -168,7 +168,7 @@ Comment[ar]=اتصل بشبكة بيتكوين نظير إلى نظير
 Comment[pl]=Połącz z siecią typu peer-to-peer Bitcoin
 Comment[sv]=Anslut till Bitcoin nätverket för peer-to-peer
 Comment[hi]=बिटकॉइन पीयर-टू-पीयर नेटवर्क से कनेक्ट करें
-Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}"; else bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}"; fi'
+Exec=sh -c 'if command -v bitcoin-qt > /dev/null 2>&1; then bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}"; else bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}"; fi'
 Terminal=false
 Type=Application
 Icon=${SHORTCUT_IMAGE_FILE}
@@ -182,7 +182,7 @@ EOF
   ## Make the desktop shortcut trusted
   if is_running_in_ci || is_running_in_container; then
     :
-  elif command -v gio >/dev/null 2>&1 &&
+  elif command -v gio > /dev/null 2>&1 &&
     gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true 2> /dev/null; then
     :
   else
