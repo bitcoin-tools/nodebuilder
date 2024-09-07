@@ -182,8 +182,11 @@ EOF
   ## Make the desktop shortcut trusted
   if is_running_in_ci || is_running_in_container; then
     :
-  elif [ "${TARGET_KERNEL}" = 'Linux' ] && command -v gio >/dev/null 2>&1; then
-    gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true
+  elif command -v gio >/dev/null 2>&1 &&
+    gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true 2> /dev/null; then
+    :
+  else
+    log_warning "Unable to set shortcut as trusted. Please open an issue at ${NODEBUILDER_REPO}."
   fi
 }
 
