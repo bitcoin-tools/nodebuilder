@@ -159,7 +159,7 @@ Comment[ar]=اتصل بشبكة بيتكوين نظير إلى نظير
 Comment[pl]=Połącz z siecią typu peer-to-peer Bitcoin
 Comment[sv]=Anslut till Bitcoin nätverket för peer-to-peer
 Comment[hi]=बिटकॉइन पीयर-टू-पीयर नेटवर्क से कनेक्ट करें
-Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt -datadir="${BITCOIN_DATA_DIRECTORY}"; else bitcoind --daemonwait -datadir="${BITCOIN_DATA_DIRECTORY}"; fi'
+Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}"; else bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}"; fi'
 Terminal=false
 Type=Application
 Icon=${SHORTCUT_IMAGE_FILE}
@@ -1618,21 +1618,21 @@ if is_running_in_ci ||
   is_running_in_container ||
   [ -z "${DISPLAY}" ] ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
-  bitcoind --daemonwait -datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null
+  bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null
 elif [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-  nohup bitcoin-qt -datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
+  nohup bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
 else
-  setsid bitcoin-qt -datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
+  setsid bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
 fi
 
 log_info 'Checking the RPC status.'
 readonly BITCOIN_RPC_TIMEOUT=300
-if ! bitcoin-cli --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
+if ! bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
   throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds."
 fi
 
 readonly SLEEP_TIME='10'
-blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
+blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
 ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
 if [ "${ibd_status}" = 'true' ]; then
@@ -1727,7 +1727,7 @@ while [ "${ibd_status}" = 'true' ]; do
   printf '%s' "This screen will refresh in ${SLEEP_TIME} seconds."
   sleep "${SLEEP_TIME}"
 
-  blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
+  blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
   printf '\n'
   ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 done
