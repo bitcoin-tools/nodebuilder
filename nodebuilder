@@ -1109,7 +1109,7 @@ install_system_updates_zypper()
 
 is_running_as_root()
 {
-  if [ "$(id --user)" -eq 0 ]; then
+  if [ "$(id -u)" -eq 0 ]; then
     return 0
   else
     return 1
