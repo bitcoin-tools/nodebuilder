@@ -7,6 +7,5 @@ libqrencode
 libtool
 python
 sqlite3
-qtbase
 qttools
 zeromq
