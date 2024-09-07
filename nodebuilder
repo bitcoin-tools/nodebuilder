@@ -96,7 +96,7 @@ compile_bitcoin_from_source()
   fi
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
-  log_info 'Installing Bitcoin Core.'
+  log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
     gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
   else
@@ -261,7 +261,7 @@ bitcoin_tarball_extract()
 
 bitcoin_tarball_install()
 {
-  log_info 'Installing Bitcoin Core.'
+  log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   # install the libraries
   [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
     mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
