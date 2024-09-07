@@ -310,6 +310,7 @@ jobs:
             nproc
             sysctl -a | grep ' memory' | head -2
             df -h
+            df
             date -u
           run: |
             /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
@@ -342,8 +343,8 @@ jobs:
             uname -a
             sysctl hw.ncpu
             sysctl -a | grep 'hw.physmem\|hw.usermem'
-            df -h "${HOME}"
-            df "${HOME}"
+            df -h
+            df
             date -u
           run: |
             /bin/sh -x ./nodebuilder
