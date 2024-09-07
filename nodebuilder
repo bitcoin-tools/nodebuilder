@@ -589,13 +589,13 @@ get_free_space_in_mib()
 {
   case "${TARGET_KERNEL}" in
     Darwin | FreeBSD)
-      /bin/df -m "${HOME}" | awk 'NR==2 {print $4}'
+      /bin/df -m "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
       ;;
     OpenBSD)
-      printf '%s\n' $(($(/bin/df "${HOME}" | awk 'NR==2 {print $4}') / 1024))
+      printf '%s\n' $(($(/bin/df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}') / 1024))
       ;;
     *)
-      df --output=avail --block-size='1MiB' "${HOME}" | sed 1d
+      df --output=avail --block-size='1MiB' "${BITCOIN_DATA_DIRECTORY}" | sed 1d
       ;;
   esac
 }
