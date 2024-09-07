@@ -1488,7 +1488,7 @@ case "${TARGET_KERNEL}" in
   Linux | FreeBSD | OpenBSD)
     log_info "Detected: running ${TARGET_KERNEL}."
     TARGET_BITCOIN_TARBALL_OS='linux-gnu'
-    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] && 
+    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
       is_running_in_ci && is_running_as_root; then
       # To satisfy disk space in OpenBSD CI runner
       BITCOIN_DATA_DIRECTORY='/home/bitcoin/.bitcoin'
