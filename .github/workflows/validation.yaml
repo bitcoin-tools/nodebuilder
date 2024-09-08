@@ -354,7 +354,8 @@ jobs:
             date -u
           run: |
             /bin/sh -x ./nodebuilder
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+            [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
+            find / -name debug.log 2> /dev/null | grep bitcoin || true
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
