@@ -1501,22 +1501,28 @@ fi
 # Synced data and prune checks
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-  else
-    INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-  fi
+  case "${TARGET_KERNEL}" in
+    Darwin | FreeBSD)
+      INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
+      ;;
+    *)
+      INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
+      ;;
+  esac
 else
   INITIAL_BLOCKS_SIZE_IN_MIB=0
 fi
 readonly INITIAL_BLOCKS_SIZE_IN_MIB
 readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
 if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-  else
-    INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-  fi
+  case "${TARGET_KERNEL}" in
+    Darwin | FreeBSD)
+      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
+      ;;
+    *)
+      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
+      ;;
+  esac
 else
   INITIAL_CHAINSTATE_SIZE_IN_MIB=0
 fi
