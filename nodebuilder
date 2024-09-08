@@ -1581,9 +1581,6 @@ else
   bitcoin_tarball_download_extract_test_install
 fi
 
-# DEBUG FOR OPENBSD ONLY!
-[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
-
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
 # If bitcoin.conf doesn't already exist, use default settings
@@ -1724,6 +1721,9 @@ case "${TARGET_KERNEL}" in
     fi
     ;;
 esac
+
+# DEBUG FOR OPENBSD ONLY!
+[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
 
 log_info 'Starting Bitcoin Core.'
 if is_running_in_ci ||
