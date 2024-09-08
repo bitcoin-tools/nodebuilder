@@ -1438,7 +1438,6 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-
 [ "${unit_tests}" = 'true' ] && run_unit_tests
 
 trap 'if [ $? -eq 0 ]; then handle_exit; else throw_error "Unhandled error at line ${LINENO:-}."; fi' EXIT
@@ -1452,7 +1451,6 @@ TEMP_DIRECTORY="$(mktemp -d)" && readonly TEMP_DIRECTORY
 TARGET_ARCHITECTURE="$(uname -m)" && readonly TARGET_ARCHITECTURE
 TARGET_KERNEL="$(uname -s)" && readonly TARGET_KERNEL
 TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_SYSTEM
-
 
 # DEBUG FOR OPENBSD ONLY!
 [ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
