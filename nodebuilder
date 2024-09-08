@@ -54,7 +54,7 @@ clear_the_terminal()
 
 compile_bitcoin_from_source()
 {
-  log_info 'Ensuring compile dependencies.'
+  log_info 'Ensuring build dependencies.'
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   install_build_dependencies
@@ -805,7 +805,7 @@ install_build_dependencies_zypper()
 
 install_runtime_dependencies()
 {
-  log_info 'Ensuring runtime dependencies.'
+  log_info 'Ensuring base dependencies.'
   case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       install_runtime_dependencies_apk
