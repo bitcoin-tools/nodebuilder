@@ -808,20 +808,16 @@ install_build_dependencies_openbsd()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
-    echo "DEBUG: checking package '${package}'"
     if [ "${package}" = 'sqlite3' ]; then
-      echo "DEBUG: caught package ${package}"
       sudo pkg_add "${package}" > /dev/null
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
-      echo "DEBUG: package_latest_version=${package_latest_version}"
       [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
       [ "${package}" = 'automake' ] && automake_package_latest_version="${package_latest_version}"
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
         sudo pkg_add "${package_latest_version}" > /dev/null
-        echo "DEBUG: install complete of ${package_latest_version}"
       fi
     fi
   done
