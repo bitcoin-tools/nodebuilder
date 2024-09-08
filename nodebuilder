@@ -1452,9 +1452,6 @@ TARGET_ARCHITECTURE="$(uname -m)" && readonly TARGET_ARCHITECTURE
 TARGET_KERNEL="$(uname -s)" && readonly TARGET_KERNEL
 TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_SYSTEM
 
-# DEBUG FOR OPENBSD ONLY!
-[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
-
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.8.0'
@@ -1568,6 +1565,9 @@ case "${target_bitcoin_version}" in
     ;;
 esac
 readonly TARGET_BITCOIN_VERSION_PADDED
+
+# DEBUG FOR OPENBSD ONLY!
+[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
