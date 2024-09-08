@@ -1566,9 +1566,6 @@ case "${target_bitcoin_version}" in
 esac
 readonly TARGET_BITCOIN_VERSION_PADDED
 
-# DEBUG FOR OPENBSD ONLY!
-[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
-
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
@@ -1583,6 +1580,9 @@ else
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   bitcoin_tarball_download_extract_test_install
 fi
+
+# DEBUG FOR OPENBSD ONLY!
+[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
 
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
