@@ -58,6 +58,7 @@ compile_bitcoin_from_source()
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   install_build_dependencies
+
   log_info 'Downloading Bitcoin source code.'
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 &&
@@ -65,11 +66,13 @@ compile_bitcoin_from_source()
     torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" ||
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}"
   cd "${COMPILE_DIRECTORY}"/
+
   log_info 'Analyzing hardware configuration.'
   command -v autoreconf > /dev/null 2>&1 ||
     throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
+
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
     Darwin)
@@ -83,6 +86,10 @@ compile_bitcoin_from_source()
       ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
       ;;
   esac
+
+  # DEBUG FOR OPENBSD ONLY!
+  [ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
+
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | OpenBSD)
@@ -93,6 +100,7 @@ compile_bitcoin_from_source()
       make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
       ;;
   esac
+
   log_info 'Running compile checks. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | OpenBSD)
@@ -105,6 +113,7 @@ compile_bitcoin_from_source()
   esac
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
+
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   case "${TARGET_KERNEL}" in
     FreeBSD | OpenBSD)
@@ -115,6 +124,7 @@ compile_bitcoin_from_source()
       make install > /dev/null 2>&1 || sudo make install > /dev/null
       ;;
   esac
+
   cd - > /dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
   rm -rf "${COMPILE_DIRECTORY:?}"/
@@ -1790,8 +1800,6 @@ while [ "${ibd_status}" = 'true' ]; do
       printf 'Headers presync progress:   %.1f %%\n' '0.0'
     fi
   elif [ "${blocks}" -eq 0 ]; then
-    # DEBUG FOR OPENBSD ONLY!
-    [ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
     log_info 'Syncing the block headers (second pass).'
     printf 'Headers synced:             %d\n' "${headers}"
     headers_sync_last_log_line="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
