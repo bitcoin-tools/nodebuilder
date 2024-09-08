@@ -1740,9 +1740,6 @@ if ! bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeou
   throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds."
 fi
 
-# DEBUG FOR OPENBSD ONLY!
-[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
-
 readonly SLEEP_TIME='10'
 blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
 ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
@@ -1793,6 +1790,8 @@ while [ "${ibd_status}" = 'true' ]; do
       printf 'Headers presync progress:   %.1f %%\n' '0.0'
     fi
   elif [ "${blocks}" -eq 0 ]; then
+    # DEBUG FOR OPENBSD ONLY!
+    [ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
     log_info 'Syncing the block headers (second pass).'
     printf 'Headers synced:             %d\n' "${headers}"
     headers_sync_last_log_line="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
