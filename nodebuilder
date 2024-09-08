@@ -1722,9 +1722,6 @@ case "${TARGET_KERNEL}" in
     ;;
 esac
 
-# DEBUG FOR OPENBSD ONLY!
-[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
-
 log_info 'Starting Bitcoin Core.'
 if is_running_in_ci ||
   is_running_in_container ||
@@ -1742,6 +1739,9 @@ readonly BITCOIN_RPC_TIMEOUT=300
 if ! bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
   throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds."
 fi
+
+# DEBUG FOR OPENBSD ONLY!
+[ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
 
 readonly SLEEP_TIME='10'
 blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
