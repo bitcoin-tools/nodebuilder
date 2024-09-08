@@ -1836,9 +1836,9 @@ while [ "${ibd_status}" = 'true' ]; do
   fi
 
   if [ "${size_on_disk_in_mib}" -ge 1 ] && (is_running_in_ci || is_running_in_container); then
+    log_success 'The blockchain download is progressing. Exiting the script.'
     # DEBUG FOR OPENBSD ONLY!
     [ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
-    log_success 'The blockchain download is progressing. Exiting the script.'
     exit 0
   fi
 
