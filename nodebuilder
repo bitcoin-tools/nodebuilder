@@ -595,7 +595,7 @@ get_free_space_in_mib()
       /bin/df -m "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
       ;;
     OpenBSD)
-      printf '%s\n' $(($(df -k "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}') / 1024))
+      BLOCKSIZE=1M df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
       ;;
     *)
       df --output=avail --block-size='1MiB' "${BITCOIN_DATA_DIRECTORY}" | sed 1d
@@ -1594,7 +1594,7 @@ if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
       INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
       ;;
     OpenBSD)
-      INITIAL_BLOCKS_SIZE_IN_MIB="$(($(du -d0 -k "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1) / 1024))"
+      INITIAL_BLOCKS_SIZE_IN_MIB="$(BLOCKSIZE=1M du -d0 "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
       ;;
     *)
       INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
@@ -1607,11 +1607,11 @@ readonly INITIAL_BLOCKS_SIZE_IN_MIB
 readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
 if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
   case "${TARGET_KERNEL}" in
-    Darwin)
+    Darwin | FreeBSD)
       INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
       ;;
     OpenBSD)
-      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(($(du -d0 -k "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1) / 1024))"
+      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(BLOCKSIZE=1M du -d0 "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
       ;;
     *)
       INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
