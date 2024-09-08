@@ -86,10 +86,6 @@ compile_bitcoin_from_source()
       ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
       ;;
   esac
-
-  # DEBUG FOR OPENBSD ONLY!
-  [ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
-
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | OpenBSD)
@@ -1810,6 +1806,10 @@ while [ "${ibd_status}" = 'true' ]; do
       printf 'Headers sync progress:      %.1f %%\n' '0.0'
     fi
   else
+    
+    # DEBUG FOR OPENBSD ONLY!
+    [ "${TARGET_KERNEL}" = 'OpenBSD' ] && echo 'DEBUG STEP HIT FOR OPENBSD' && exit 0
+
     log_info 'Syncing the blockchain. Please be patient.'
     printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
