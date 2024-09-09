@@ -7,7 +7,7 @@ FROM fedora:latest@sha256:b7b4b222c2a433e831c006a49a397009640cc30e097824410a35b1
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.8.1-beta
+ARG NODEBUILDER_VERSION=v1.8.1
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
