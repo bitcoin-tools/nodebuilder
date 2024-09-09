@@ -5,7 +5,7 @@ FROM registry.suse.com/suse/sle15:latest@sha256:eef766f6c08218352f82d4ed7277f6c0
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.8.0
+ARG NODEBUILDER_VERSION=v1.8.1
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
