@@ -184,7 +184,7 @@ ensure_sudo_dependency() {
     printf '%s' 'Installing sudo depencency... '
     case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
-      sudo apk --quiet add sudo
+      apk --quiet add sudo
       ;;
     debian | ubuntu)
       apt-get install -y sudo > /dev/null
