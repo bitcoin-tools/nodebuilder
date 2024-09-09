@@ -80,7 +80,6 @@ compile_bitcoin_from_source()
       ;;
     FreeBSD | OpenBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
-      echo "DEBUG: exit status for configure was $?"
       ;;
     *)
       ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
@@ -90,7 +89,6 @@ compile_bitcoin_from_source()
   case "${TARGET_KERNEL}" in
     FreeBSD | OpenBSD)
       gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
-      echo "DEBUG: exit status for gmake was $?"
       ;;
     *)
       make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
@@ -101,7 +99,6 @@ compile_bitcoin_from_source()
   case "${TARGET_KERNEL}" in
     FreeBSD | OpenBSD)
       gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-      echo "DEBUG: exit status for gmake check was $?"
       ;;
     *)
       make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
@@ -114,7 +111,6 @@ compile_bitcoin_from_source()
   case "${TARGET_KERNEL}" in
     FreeBSD | OpenBSD)
       gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
-      echo "DEBUG: exit status for gmake install was $?"
       ;;
     *)
       make install > /dev/null 2>&1 || sudo make install > /dev/null
@@ -468,7 +464,6 @@ ensure_curl_dependency()
         ;;
       OpenBSD)
         sudo pkg_add curl > /dev/null
-        echo "DEBUG: exit status for pkg_add curl was $?"
         ;;
       *)
         if command -v apk > /dev/null; then
@@ -522,7 +517,6 @@ ensure_sudo_dependency()
         ;;
       OpenBSD)
         pkg_add sudo-- > /dev/null
-        echo "DEBUG: exit status for pkg_add sudo was $?"
         ;;
       *)
         if command -v apk > /dev/null; then
@@ -576,7 +570,6 @@ ensure_xargs_dependency()
         ;;
       OpenBSD)
         sudo pkg_add findutils > /dev/null
-        echo "DEBUG: exit status for pkg_add findutils was $?"
         ;;
       *)
         if command -v apk > /dev/null; then
@@ -823,7 +816,6 @@ install_build_dependencies_openbsd()
   for package in ${dependencies}; do
     if [ "${package}" = 'sqlite3' ]; then
       sudo pkg_add "${package}" > /dev/null
-      echo "DEBUG: exit status for pkg_add ${package} was $?"
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
       [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
@@ -832,7 +824,6 @@ install_build_dependencies_openbsd()
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
         sudo pkg_add "${package_latest_version}" > /dev/null
-        echo "DEBUG: exit status for pkg_add ${package} was $?"
       fi
     fi
   done
@@ -1031,7 +1022,6 @@ install_runtime_dependencies_openbsd()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
   printf '%s\n' "${dependencies}" | xargs sudo pkg_add > /dev/null
-  echo "DEBUG: exit status for pkg_add runtime deps was $?"
 }
 
 install_runtime_dependencies_pacman()
@@ -1190,7 +1180,6 @@ install_system_updates_freebsd()
 install_system_updates_openbsd()
 {
   sudo pkg_add -u > /dev/null
-  echo "DEBUG: exit status for pkg_add -u was $?"
 }
 
 install_system_updates_pacman()
