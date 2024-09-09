@@ -54,7 +54,7 @@ clear_the_terminal()
 
 compile_bitcoin_from_source()
 {
-  log_info 'Ensuring build dependencies.'
+  log_info 'Ensuring compile dependencies.'
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   install_build_dependencies
