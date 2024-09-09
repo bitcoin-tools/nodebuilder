@@ -311,7 +311,7 @@ jobs:
             sysctl -a | grep ' memory' | head -2
             df -h
             df
-            echo "${TERM:-TERMisnotfound}"
+            echo "${TERM:-TERM is not found}"
             commmand -v tput
             tput colors
             date -u
@@ -348,12 +348,12 @@ jobs:
             sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h
             df
-            echo "${TERM:-TERMisnotfound}"
+            echo "${TERM:-TERM is not found}"
             commmand -v tput
             tput colors
             date -u
           run: |
-            /bin/sh -x ./nodebuilder
+            /bin/sh -c ./nodebuilder
             [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
             find / -name debug.log 2> /dev/null | grep bitcoin || true
       - name: Save Bitcoin Core log as artifact
