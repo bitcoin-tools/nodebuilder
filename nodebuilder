@@ -805,7 +805,7 @@ install_build_dependencies_zypper()
 
 install_runtime_dependencies()
 {
-  log_info 'Ensuring runtime dependencies.'
+  log_info 'Ensuring base dependencies.'
   case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       install_runtime_dependencies_apk
