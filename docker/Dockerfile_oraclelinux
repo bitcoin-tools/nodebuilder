@@ -7,7 +7,7 @@ FROM oraclelinux:9@sha256:fc45980f03296723dc6f0f9beb0a92eac51e88a6a074330c0bb818
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.8.0
+ARG NODEBUILDER_VERSION=v1.8.1-beta
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
