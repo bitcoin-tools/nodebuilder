@@ -268,7 +268,7 @@ if [ "${COMPILE_BITCOIN}" = 'true' ] ||
     [ -f /etc/os-release ] && [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]
   }; then
   for message in \
-    'INFO: Ensuring build dependencies.$' \
+    'INFO: Ensuring compile dependencies.$' \
     'INFO: Downloading Bitcoin source code.$' \
     'INFO: Analyzing hardware configuration.$' \
     'INFO: Configuring the build environment.$' \
