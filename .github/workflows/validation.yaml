@@ -267,14 +267,9 @@ jobs:
         continue-on-error: true
       - name: If test failed, debug nodebuilder ${{ matrix.additional-args }}
         if: steps.test-nodebuilder.outcome == 'failure'
-        env:
-          CI_NODEBUILDER_URL: https://github.com/bitcoin-tools/nodebuilder/raw/${GITHUB_SHA}/nodebuilder
         run: |
-          if [ -n "$(ls /usr/local/bin/*bitcoin* 2> /dev/null)" ]; then
+          [ -n "$(ls /usr/local/bin/*bitcoin* 2> /dev/null)" ] &&
             rm /usr/local/bin/*bitcoin*
-          fi
-          wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
-          chmod u+x nodebuilder
           /bin/sh -x ./nodebuilder ${{ matrix.additional-args }}
         timeout-minutes: 120
       - name: Save Bitcoin Core log as artifact
