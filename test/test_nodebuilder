@@ -9,7 +9,7 @@ set -o nounset
 get_operating_system()
 {
   case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD)
+    Darwin | FreeBSD | OpenBSD)
       printf '%s\n' "${TARGET_KERNEL}"
       ;;
     *)
@@ -123,7 +123,12 @@ while [ $# -gt 0 ]; do
     -r | --ref)
       [ -z "$2" ] && throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
       readonly GIT_REF_SHORT_NAME="$2"
-      [ "$(uname -s)" = 'FreeBSD' ] || validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
+      case "$(uname -s)" in
+        FreeBSD | OpenBSD) ;;
+        *)
+          validate_git_ref_short_name "${GIT_REF_SHORT_NAME}"
+          ;;
+      esac
       shift
       ;;
     *)
@@ -154,7 +159,7 @@ readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAM
 
 case "${TARGET_KERNEL}" in
   Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
-  Linux | FreeBSD) bitcoin_data_directory="${HOME}/.bitcoin" ;;
+  Linux | FreeBSD | OpenBSD) bitcoin_data_directory="${HOME}/.bitcoin" ;;
   MINGW*) throw_error 'Windows is not supported.' ;;
   *) throw_error 'Your operating system is not supported.' ;;
 esac
@@ -218,7 +223,7 @@ fi
 
 # Positve matches for all environments
 for message in \
-  'INFO: Detected: running (Linux|macOS|FreeBSD).$' \
+  'INFO: Detected: running (Linux|macOS|FreeBSD|OpenBSD).$' \
   'INFO: Checking for internet.$' \
   'INFO: Internet checks passed.$' \
   'INFO: Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)? (not|was) found.$' \
@@ -264,6 +269,7 @@ done
 # Positve matches when compiling from source
 if [ "${COMPILE_BITCOIN}" = 'true' ] ||
   [ "${TARGET_KERNEL}" = 'FreeBSD' ] ||
+  [ "${TARGET_KERNEL}" = 'OpenBSD' ] ||
   {
     [ -f /etc/os-release ] && [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ]
   }; then
