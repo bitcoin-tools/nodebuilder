@@ -29,11 +29,11 @@ check_internet_to_address()
 {
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
-  readonly CHECK_INTERNET_TIMEOUT='10'
+  readonly CHECK_INTERNET_TIMEOUT_SECONDS='10'
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "${TARGET_OPERATING_SYSTEM}" != 'Darwin' ] &&
-    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null ||
-    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
+    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null ||
+    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
 }
 
 clear_the_terminal()
