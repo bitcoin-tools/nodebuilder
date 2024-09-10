@@ -10,6 +10,7 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.8.1/node
 
 [![Supports: Docker](https://img.shields.io/badge/supports-Docker-blue.svg?logo=docker)](https://docs.docker.com)
 [![Suppprts: FreeBSD](https://img.shields.io/badge/supports-FreeBSD-blue.svg?logo=freebsd)](https://www.freebsd.org)
+[![Suppprts: OpenBSD](https://img.shields.io/badge/supports-OpenBSD-blue.svg?logo=openbsd)](https://www.openbsd.org)
 [![Supports: Linux](https://img.shields.io/badge/supports-Linux-blue.svg?logo=linux)](https://en.wikipedia.org/wiki/List_of_Linux_distributions)
 [![Supports: macOS](https://img.shields.io/badge/supports-macOS-blue.svg?logo=apple)](https://support.apple.com/guide/mac-help/welcome/mac)
 
