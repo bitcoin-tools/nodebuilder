@@ -1397,7 +1397,7 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
-    log_info "Detected: runnin ${TARGET_KERNEL}."
+    log_info "Detected: running ${TARGET_KERNEL}."
     TARGET_BITCOIN_TARBALL_OS='linux-gnu'
     if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
       is_running_in_ci &&
