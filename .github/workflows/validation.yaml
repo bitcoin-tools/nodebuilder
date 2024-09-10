@@ -268,8 +268,8 @@ jobs:
       - name: If test failed, debug nodebuilder ${{ matrix.additional-args }}
         if: steps.test-nodebuilder.outcome == 'failure'
         run: |
-          readonly CI_NODEBUILDER_URL="https://github.com/bitcoin-tools/nodebuilder/raw/${GITHUB_SHA}/nodebuilder"
-          readonly CI_NODEBUILDER_SCRIPT="$(basename "${CI_NODEBUILDER_URL}")"
+          CI_NODEBUILDER_URL="https://github.com/bitcoin-tools/nodebuilder/raw/${GITHUB_SHA}/nodebuilder"
+          CI_NODEBUILDER_SCRIPT="$(basename "${CI_NODEBUILDER_URL}")"
           [ -n "$(ls /usr/local/bin/*bitcoin* 2> /dev/null)" ] &&
             rm /usr/local/bin/*bitcoin*
           wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}" &&
