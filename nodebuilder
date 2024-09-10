@@ -1263,7 +1263,7 @@ if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; 
 else
   case "${TERM:-}" in
     '' | xterm* | screen* | tmux* | linux | gnome-terminal | konsole | rxvt* | \
-      putty | mintty | alacritty | st)
+      putty | mintty | alacritty | st | su)
       CONSOLE_COLOR_RED='\033[31m'
       CONSOLE_COLOR_GREEN='\033[32m'
       CONSOLE_COLOR_YELLOW='\033[33m'
@@ -1397,7 +1397,7 @@ fi
 clear_the_terminal
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
-    log_info "Detected: running ${TARGET_KERNEL}."
+    log_info "Detected: runnin ${TARGET_KERNEL}."
     TARGET_BITCOIN_TARBALL_OS='linux-gnu'
     if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
       is_running_in_ci &&
