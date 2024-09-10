@@ -312,7 +312,8 @@ jobs:
             df -h
             date -u
           run: |
-            /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with non-zero status" >&2 && exit 1
             [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
