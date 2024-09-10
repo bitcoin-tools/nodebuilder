@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 # openSUSE is a robust Linux distribution that offers a great balance of stability and modernity.
 # This Dockerfile is ideal for users seeking a reliable, versatile operating system.
-FROM opensuse/tumbleweed:latest@sha256:0ec4d676309c9b8f89c75bca4b6e333a4991959330f38831074cee35ba22ec53
+FROM opensuse/tumbleweed:latest@sha256:00d4cc884c3d9513b48e8bcf523de112042de058ce400a9147d0a8c40f59aa7d
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.8.0
+ARG NODEBUILDER_VERSION=v1.8.1
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder

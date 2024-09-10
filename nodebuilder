@@ -872,7 +872,7 @@ install_build_dependencies_zypper()
 
 install_runtime_dependencies()
 {
-  log_info 'Ensuring runtime dependencies.'
+  log_info 'Ensuring base dependencies.'
   case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       install_runtime_dependencies_apk
@@ -1283,7 +1283,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.8.0'
+  printf '%s\n' 'nodebuilder 1.8.1'
   printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1353,7 +1353,6 @@ if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; 
 else
   case "${TERM:-}" in
     '' | xterm* | screen* | tmux* | linux | gnome-terminal | konsole | rxvt* | \
-      putty | mintty | alacritty | st | su | vt220)
       CONSOLE_COLOR_RED='\033[31m'
       CONSOLE_COLOR_GREEN='\033[32m'
       CONSOLE_COLOR_YELLOW='\033[33m'
@@ -1452,7 +1451,7 @@ TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_S
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.8.0'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.8.1'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
@@ -1832,7 +1831,7 @@ while [ "${ibd_status}" = 'true' ]; do
     exit 0
   fi
 
-  printf '%s\n\n' 'Synchronizing can take days weeks on a slow connection.'
+  printf '%s\n\n' 'The chain sync can take several days or even weeks.'
   printf '%s\n' "Close this Terminal window by clicking on the 'X'."
   printf '%s' "This screen will refresh in ${SLEEP_TIME} seconds."
   sleep "${SLEEP_TIME}"

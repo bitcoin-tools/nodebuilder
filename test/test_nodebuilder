@@ -310,7 +310,7 @@ fi
 # Positive matches for all environments except macOS
 if [ "${TARGET_KERNEL}" != 'Darwin' ]; then
   for message in \
-    'INFO: Ensuring runtime dependencies.$' \
+    'INFO: Ensuring base dependencies.$' \
     'INFO: Creating application shortcuts.$'; do
     if ! grep -Eq "${message}" "${STDOUT_TEST_FILENAME}" > /dev/null 2>&1; then
       printf '%s\n' "FAILURE: Expected message ${message} not found."
