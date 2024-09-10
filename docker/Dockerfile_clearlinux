@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Clear Linux is known for its minimalistic approach and is optimized for performance and security.
-FROM clearlinux:latest@sha256:139338a813f27293ed5d8a552efc24d90cd10e533b2f79cd27046b03f496df0c
+FROM clearlinux:latest@sha256:322dd6e628fbb959041466f8e248f2accfd41729af38798800807b551bfce096
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
