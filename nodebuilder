@@ -809,9 +809,7 @@ install_build_dependencies_freebsd()
 
 install_build_dependencies_openbsd()
 {
-  # TODO: on next release, set this back to dependnecies base URL
-  #readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.9.0-beta/resources/dependencies/build_dependencies_openbsd.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
@@ -1017,9 +1015,7 @@ install_runtime_dependencies_freebsd()
 
 install_runtime_dependencies_openbsd()
 {
-  # TODO: on next release, set this back to dependnecies base URL
-  #readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_openbsd.txt"
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/v1.9.0-beta/resources/dependencies/runtime_dependencies_openbsd.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_openbsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -1284,7 +1280,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.8.1'
+  printf '%s\n' 'nodebuilder 1.9.0'
   printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1453,7 +1449,7 @@ TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_S
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.8.1'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
