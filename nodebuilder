@@ -29,11 +29,11 @@ check_internet_to_address()
 {
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
-  readonly CHECK_INTERNET_TIMEOUT='10'
+  readonly CHECK_INTERNET_TIMEOUT_SECONDS='10'
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "${TARGET_OPERATING_SYSTEM}" != 'Darwin' ] &&
-    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null ||
-    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
+    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null ||
+    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
 }
 
 clear_the_terminal()
@@ -1730,12 +1730,12 @@ else
 fi
 
 log_info 'Checking the RPC status.'
-readonly BITCOIN_RPC_TIMEOUT=300
-if ! bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
-  throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds."
+readonly BITCOIN_RPC_TIMEOUT_SECONDS=300
+if ! bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT_SECONDS}" getrpcinfo > /dev/null; then
+  throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT_SECONDS} seconds."
 fi
 
-readonly SLEEP_TIME='10'
+readonly SLEEP_TIME_SECONDS='10'
 blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
 ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
@@ -1749,9 +1749,9 @@ if [ "${ibd_status}" = 'true' ]; then
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
     log_info "Close this Terminal window by clicking on the 'X'."
-    log_info "This screen will refresh in ${SLEEP_TIME} seconds."
+    log_info "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
   fi
-  sleep "${SLEEP_TIME}"
+  sleep "${SLEEP_TIME_SECONDS}"
 else
   log_info 'Your node has already synced the blockchain.'
 fi
@@ -1831,8 +1831,8 @@ while [ "${ibd_status}" = 'true' ]; do
 
   printf '%s\n\n' 'The chain sync can take several days or even weeks.'
   printf '%s\n' "Close this Terminal window by clicking on the 'X'."
-  printf '%s' "This screen will refresh in ${SLEEP_TIME} seconds."
-  sleep "${SLEEP_TIME}"
+  printf '%s' "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
+  sleep "${SLEEP_TIME_SECONDS}"
 
   blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
   printf '\n'
