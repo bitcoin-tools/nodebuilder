@@ -1542,23 +1542,27 @@ case "${current_bitcoin_version}" in
 esac
 readonly CURRENT_BITCOIN_VERSION_PADDED
 
-case "${target_bitcoin_version}" in
-  '')
-    throw_error 'Bitcoin Core target version is not set.'
-    ;;
-  *[.]*[.]*[.]*)
-    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
-    ;;
-  *[.]*[.]*)
-    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
-    ;;
-  *[.]*)
-    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
-    ;;
-  *)
-    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
-    ;;
-esac
+if [ -n "${CURRENT_BITCOIN_VERSION_PADDED}" ]; then
+  case "${target_bitcoin_version}" in
+    '')
+      throw_error 'Bitcoin Core target version is not set.'
+      ;;
+    *[.]*[.]*[.]*)
+      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
+      ;;
+    *[.]*[.]*)
+      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
+      ;;
+    *[.]*)
+      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
+      ;;
+    *)
+      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
+      ;;
+  esac
+else
+  TARGET_BITCOIN_VERSION_PADDED='0.0.0.0'
+fi
 readonly TARGET_BITCOIN_VERSION_PADDED
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
