@@ -6,7 +6,7 @@ FROM clearlinux:latest@sha256:322dd6e628fbb959041466f8e248f2accfd41729af38798800
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.9.1-beta
+ARG NODEBUILDER_VERSION=v1.9.1
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
