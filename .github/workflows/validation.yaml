@@ -267,15 +267,14 @@ jobs:
         continue-on-error: true
       - name: If test failed, debug nodebuilder ${{ matrix.additional-args }}
         if: steps.test-nodebuilder.outcome == 'failure'
-        env:
-          CI_NODEBUILDER_URL: https://github.com/bitcoin-tools/nodebuilder/raw/master/nodebuilder
         run: |
-          if [ -n "$(ls /usr/local/bin/*bitcoin*)" ]; then
+          CI_NODEBUILDER_URL="https://github.com/bitcoin-tools/nodebuilder/raw/${GITHUB_SHA}/nodebuilder"
+          CI_NODEBUILDER_SCRIPT="$(basename "${CI_NODEBUILDER_URL}")"
+          [ -n "$(ls /usr/local/bin/*bitcoin* 2> /dev/null)" ] &&
             rm /usr/local/bin/*bitcoin*
-          fi
-          wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}"
-          chmod u+x nodebuilder
-          /bin/sh -x ./nodebuilder ${{ matrix.additional-args }}
+          wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}" &&
+            chmod u+x "${CI_NODEBUILDER_SCRIPT}"
+          sh -x "./${CI_NODEBUILDER_SCRIPT}" ${{ matrix.additional-args }}
         timeout-minutes: 120
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
@@ -310,9 +309,14 @@ jobs:
             nproc
             sysctl -a | grep ' memory' | head -2
             df -h
+            df
+            echo "${TERM:-TERM is not found}"
+            commmand -v tput
+            tput colors
             date -u
           run: |
-            /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with non-zero status" >&2 && exit 1
             [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
@@ -344,15 +348,62 @@ jobs:
             sysctl -n hw.ncpu
             sysctl -n hw.physmem
             swapctl -l
+            sysctl hw.ncpu
+            sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h
+            df
+            echo "${TERM:-TERM is not found}"
+            commmand -v tput
+            tput colors
             date -u
           run: |
-            /bin/sh -x ./nodebuilder
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
+            [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
+            find / -name debug.log 2> /dev/null | grep bitcoin || true
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: netbsd-source-bitcoin-debug.log
+          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
+
+  run-nodebuilder-openbsd:
+    name: Test source on OpenBSD
+    needs: [changes, shell-lint, yaml-lint]
+    if: >-
+      ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test the console output
+        uses: vmactions/openbsd-vm@v1
+        timeout-minutes: 180
+        with:
+          prepare: |
+            uname -a
+            sysctl hw.ncpu
+            sysctl -a | grep 'hw.physmem\|hw.usermem'
+            df -h
+            df
+            echo "${TERM:-TERM is not found}"
+            commmand -v tput
+            tput colors
+            date -u
+          run: |
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
+            [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
+            find / -name debug.log 2> /dev/null | grep bitcoin || true
+      - name: Save Bitcoin Core log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openbsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
 
   run-nodebuilder-docker:

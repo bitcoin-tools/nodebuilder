@@ -29,11 +29,11 @@ check_internet_to_address()
 {
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
-  readonly CHECK_INTERNET_TIMEOUT='10'
+  readonly CHECK_INTERNET_TIMEOUT_SECONDS='10'
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 && [ "${TARGET_OPERATING_SYSTEM}" != 'Darwin' ] &&
-    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null ||
-    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
+    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null ||
+    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
 }
 
 clear_the_terminal()
@@ -58,6 +58,7 @@ compile_bitcoin_from_source()
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
   install_build_dependencies
+
   log_info 'Downloading Bitcoin source code.'
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 &&
@@ -65,43 +66,60 @@ compile_bitcoin_from_source()
     torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" ||
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}"
   cd "${COMPILE_DIRECTORY}"/
+
   log_info 'Analyzing hardware configuration.'
   command -v autoreconf > /dev/null 2>&1 ||
     throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
   ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
+
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
-    'Darwin')
+    Darwin)
       ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
       ;;
-    'FreeBSD')
+    FreeBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
+      ;;
+    OpenBSD)
+      ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
       ;;
     *)
       ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
       ;;
   esac
   log_info 'Compiling source code. Please wait.'
-  if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
-  else
-    make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
-  fi
+  case "${TARGET_KERNEL}" in
+    FreeBSD | OpenBSD)
+      gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
+      ;;
+    *)
+      make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
+      ;;
+  esac
+
   log_info 'Running compile checks. Please wait.'
-  if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-  else
-    make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-  fi
+  case "${TARGET_KERNEL}" in
+    FreeBSD | OpenBSD)
+      gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+      ;;
+    *)
+      make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+      ;;
+  esac
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
-  log_info 'Installing Bitcoin Core.'
-  if [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
-  else
-    make install > /dev/null 2>&1 || sudo make install > /dev/null
-  fi
+
+  log_info "Installing Bitcoin Core ${target_bitcoin_version}."
+  case "${TARGET_KERNEL}" in
+    FreeBSD | OpenBSD)
+      gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
+      ;;
+    *)
+      make install > /dev/null 2>&1 || sudo make install > /dev/null
+      ;;
+  esac
+
   cd - > /dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
   rm -rf "${COMPILE_DIRECTORY:?}"/
@@ -159,7 +177,7 @@ Comment[ar]=اتصل بشبكة بيتكوين نظير إلى نظير
 Comment[pl]=Połącz z siecią typu peer-to-peer Bitcoin
 Comment[sv]=Anslut till Bitcoin nätverket för peer-to-peer
 Comment[hi]=बिटकॉइन पीयर-टू-पीयर नेटवर्क से कनेक्ट करें
-Exec=sh -c 'if command -v bitcoin-qt >/dev/null 2>&1; then bitcoin-qt; else bitcoind --daemonwait; fi'
+Exec=sh -c 'if command -v bitcoin-qt > /dev/null 2>&1; then bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}"; else bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}"; fi'
 Terminal=false
 Type=Application
 Icon=${SHORTCUT_IMAGE_FILE}
@@ -173,8 +191,11 @@ EOF
   ## Make the desktop shortcut trusted
   if is_running_in_ci || is_running_in_container; then
     :
+  elif command -v gio > /dev/null 2>&1 &&
+    gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true 2> /dev/null; then
+    :
   else
-    gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true
+    log_warning "If the desktop shortcut is failing, please open an issue at ${NODEBUILDER_REPO}."
   fi
 }
 
@@ -261,7 +282,7 @@ bitcoin_tarball_extract()
 
 bitcoin_tarball_install()
 {
-  log_info 'Installing Bitcoin Core.'
+  log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   # install the libraries
   [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
     mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
@@ -418,7 +439,7 @@ ensure_curl_dependency()
     log_info 'Ensuring curl depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
       alpine)
-        apk --quiet add curl
+        sudo apk --quiet add curl
         ;;
       debian | ubuntu)
         sudo apt-get install -y curl > /dev/null
@@ -444,9 +465,12 @@ ensure_curl_dependency()
       FreeBSD)
         sudo pkg install -y curl > /dev/null
         ;;
+      OpenBSD)
+        sudo pkg_add curl > /dev/null
+        ;;
       *)
         if command -v apk > /dev/null; then
-          apk --quiet add curl
+          sudo apk --quiet add curl
         elif command -v apt-get > /dev/null; then
           sudo apt-get -qq install -y curl > /dev/null
         elif command -v dnf > /dev/null; then
@@ -494,6 +518,9 @@ ensure_sudo_dependency()
       FreeBSD)
         pkg install -y sudo > /dev/null
         ;;
+      OpenBSD)
+        pkg_add sudo-- > /dev/null
+        ;;
       *)
         if command -v apk > /dev/null; then
           apk --quiet add sudo
@@ -520,7 +547,7 @@ ensure_xargs_dependency()
     log_info 'Ensuring xargs depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
       alpine)
-        apk --quiet add findutils
+        sudo apk --quiet add findutils
         ;;
       debian | ubuntu)
         apt-get install -y findutils > /dev/null
@@ -544,9 +571,12 @@ ensure_xargs_dependency()
       FreeBSD)
         sudo pkg install -y findutils > /dev/null
         ;;
+      OpenBSD)
+        sudo pkg_add findutils > /dev/null
+        ;;
       *)
         if command -v apk > /dev/null; then
-          apk --quiet add findutils
+          sudo apk --quiet add findutils
         elif command -v apt-get > /dev/null; then
           apt-get -qq install -y findutils > /dev/null
         elif command -v dnf > /dev/null; then
@@ -570,11 +600,14 @@ ensure_xargs_dependency()
 get_free_space_in_mib()
 {
   case "${TARGET_KERNEL}" in
-    'Darwin' | 'FreeBSD')
-      /bin/df -m "${HOME}" | awk '{print $4}' | sed 1d
+    Darwin | FreeBSD)
+      /bin/df -m "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
+      ;;
+    OpenBSD)
+      BLOCKSIZE=1M df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
       ;;
     *)
-      df --output=avail --block-size='1MiB' "${HOME}" | sed 1d
+      df --output=avail --block-size='1MiB' "${BITCOIN_DATA_DIRECTORY}" | sed 1d
       ;;
   esac
 }
@@ -594,17 +627,20 @@ get_memory_metric_in_mib()
 
 get_operating_system()
 {
-  if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-    printf '%s\n' "${TARGET_KERNEL}"
-  else
-    OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID
-    OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID_LIKE
-    if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
-      printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
-    else
-      throw_error 'Failed to determine OS release type'
-    fi
-  fi
+  case "${TARGET_KERNEL}" in
+    Darwin | FreeBSD | OpenBSD)
+      printf '%s\n' "${TARGET_KERNEL}"
+      ;;
+    *)
+      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID
+      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID_LIKE
+      if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
+        printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
+      else
+        throw_error 'Failed to determine OS release type'
+      fi
+      ;;
+  esac
 }
 
 # shellcheck disable=SC2317
@@ -650,6 +686,9 @@ install_build_dependencies()
       ;;
     FreeBSD)
       install_build_dependencies_freebsd
+      ;;
+    OpenBSD)
+      install_build_dependencies_openbsd
       ;;
     *)
       install_build_command_function=''
@@ -768,6 +807,35 @@ install_build_dependencies_freebsd()
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
 }
 
+install_build_dependencies_openbsd()
+{
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  for package in ${dependencies}; do
+    if [ "${package}" = 'sqlite3' ]; then
+      sudo pkg_add "${package}" > /dev/null
+    else
+      package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
+      [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
+      [ "${package}" = 'automake' ] && automake_package_latest_version="${package_latest_version}"
+      if [ -z "${package_latest_version}" ]; then
+        throw_error "Package '${package}' was not found in pkg_info."
+      elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
+        sudo pkg_add "${package_latest_version}" > /dev/null
+      fi
+    fi
+  done
+
+  # major-minor version only
+  AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
+    export AUTOCONF_VERSION
+  AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
+    export AUTOMAKE_VERSION
+}
+
 install_build_dependencies_pacman()
 {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_pacman.txt"
@@ -802,7 +870,7 @@ install_build_dependencies_zypper()
 
 install_runtime_dependencies()
 {
-  log_info 'Ensuring runtime dependencies.'
+  log_info 'Ensuring base dependencies.'
   case "${TARGET_OPERATING_SYSTEM}" in
     alpine)
       install_runtime_dependencies_apk
@@ -830,6 +898,9 @@ install_runtime_dependencies()
       ;;
     FreeBSD)
       install_runtime_dependencies_freebsd
+      ;;
+    OpenBSD)
+      install_runtime_dependencies_openbsd
       ;;
     *)
       install_runtime_command_function=''
@@ -942,6 +1013,16 @@ install_runtime_dependencies_freebsd()
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
 }
 
+install_runtime_dependencies_openbsd()
+{
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_openbsd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo pkg_add > /dev/null
+}
+
 install_runtime_dependencies_pacman()
 {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_pacman.txt"
@@ -1003,6 +1084,9 @@ install_system_updates()
     FreeBSD)
       install_system_updates_freebsd
       ;;
+    OpenBSD)
+      install_system_updates_openbsd
+      ;;
     *)
       if command -v apk > /dev/null; then
         install_system_updates_apk
@@ -1042,7 +1126,8 @@ install_system_updates()
 
 install_system_updates_apk()
 {
-  apk update --quiet && apk upgrade --quiet
+  sudo apk update --quiet
+  sudo apk upgrade --quiet
 }
 
 install_system_updates_aptget()
@@ -1092,6 +1177,11 @@ install_system_updates_freebsd()
   sudo pkg upgrade --yes > /dev/null
 }
 
+install_system_updates_openbsd()
+{
+  sudo pkg_add -u > /dev/null
+}
+
 install_system_updates_pacman()
 {
   sudo pacman -Syu --noconfirm --quiet > /dev/null
@@ -1105,6 +1195,15 @@ install_system_updates_swupd()
 install_system_updates_zypper()
 {
   sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
+}
+
+is_running_as_root()
+{
+  if [ "$(id -u)" -eq 0 ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 is_running_in_ci()
@@ -1141,7 +1240,7 @@ is_valid_bitcoin_version()
 
 log_error()
 {
-  printf "[%s] ERROR: ${CONSOLE_COLOR_RED}%s" "$(get_log_timestamp)" "$*" \
+  printf "[%s] ERROR: ${CONSOLE_COLOR_RED:-}%s" "$(get_log_timestamp)" "$*" \
     >&2
   reset_console_color
   printf '\n' >&2
@@ -1154,14 +1253,14 @@ log_info()
 
 log_success()
 {
-  printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN}%s" "$(get_log_timestamp)" "$*"
+  printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
 }
 
 log_warning()
 {
-  printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW}%s" "$(get_log_timestamp)" "$*"
+  printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW:-}%s" "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
 }
@@ -1181,7 +1280,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.8.0'
+  printf '%s\n' 'nodebuilder 1.9.0'
   printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1190,7 +1289,7 @@ print_version()
 reset_console_color()
 {
   # shellcheck disable=SC2059
-  printf "${CONSOLE_COLOR_NORMAL}"
+  printf "${CONSOLE_COLOR_NORMAL:-}"
 }
 
 run_unit_tests()
@@ -1239,26 +1338,25 @@ throw_error()
   exit 1
 }
 
-# Set the console color based on tput results or the TERM environmental variable
+CONSOLE_COLOR_RED=''
+CONSOLE_COLOR_GREEN=''
+CONSOLE_COLOR_YELLOW=''
+CONSOLE_COLOR_NORMAL=''
 if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
   CONSOLE_COLOR_RED="$(tput setaf 1)"
   CONSOLE_COLOR_GREEN="$(tput setaf 2)"
   CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
   CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 else
-  case "${TERM}" in
+  case "${TERM:-}" in
     '' | xterm* | screen* | tmux* | linux | gnome-terminal | konsole | rxvt* | \
-      putty | mintty | alacritty | st)
+      putty | mintty | alacritty | st | su | vt220)
       CONSOLE_COLOR_RED='\033[31m'
       CONSOLE_COLOR_GREEN='\033[32m'
       CONSOLE_COLOR_YELLOW='\033[33m'
       CONSOLE_COLOR_NORMAL='\033[0m'
       ;;
     *)
-      CONSOLE_COLOR_RED=''
-      CONSOLE_COLOR_GREEN=''
-      CONSOLE_COLOR_YELLOW=''
-      CONSOLE_COLOR_NORMAL=''
       log_warning "TERM variable '${TERM}' is not recognized. Disabling color."
       ;;
   esac
@@ -1351,7 +1449,7 @@ TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_S
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.8.0'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
@@ -1360,6 +1458,9 @@ case "${TARGET_KERNEL}" in
     ;;
   Darwin)
     SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
+    ;;
+  OpenBSD)
+    SYS_CORES_COUNT="$(sysctl -n hw.ncpu)"
     ;;
   MINGW* | Cygwin)
     throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
@@ -1385,17 +1486,24 @@ fi
 
 clear_the_terminal
 case "${TARGET_KERNEL}" in
-  Linux | FreeBSD)
-    TARGET_BITCOIN_TARBALL_OS='linux-gnu'
-    BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
+  Linux | FreeBSD | OpenBSD)
     log_info "Detected: running ${TARGET_KERNEL}."
+    TARGET_BITCOIN_TARBALL_OS='linux-gnu'
+    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
+      is_running_in_ci && is_running_as_root; then
+      # To satisfy disk space in OpenBSD CI runner
+      BITCOIN_DATA_DIRECTORY='/home/bitcoin/.bitcoin'
+      mkdir -p "${BITCOIN_DATA_DIRECTORY}"
+    else
+      BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
+    fi
     is_running_in_container && log_info 'Detected: running in Docker.'
     ;;
   Darwin)
-    TARGET_BITCOIN_TARBALL_OS='apple-darwin'
-    BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
     log_info 'Detected: running macOS.'
     [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
+    TARGET_BITCOIN_TARBALL_OS='apple-darwin'
+    BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
     ;;
   *)
     throw_error "Unknown target kernel type '${TARGET_KERNEL}'."
@@ -1458,7 +1566,8 @@ if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ];
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
-  [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ]; then
+  [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ] ||
+  [ "${TARGET_OPERATING_SYSTEM}" = 'OpenBSD' ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   compile_bitcoin_from_source
   current_bitcoin_version="${target_bitcoin_version}"
@@ -1473,30 +1582,43 @@ fi
 [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
 if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
   log_info 'Setting the default node behavior.'
+  set_bitcoin_core_option 'datadir' "${BITCOIN_DATA_DIRECTORY}"
   is_running_in_ci && set_bitcoin_core_option 'debug' 'net'
   set_bitcoin_core_option 'mempoolfullrbf' '1'
   set_bitcoin_core_option 'server' '1'
 fi
 
-# MEMORY
+# Synced data and prune checks
 readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
 if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-  else
-    INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-  fi
+  case "${TARGET_KERNEL}" in
+    Darwin | FreeBSD)
+      INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
+      ;;
+    OpenBSD)
+      INITIAL_BLOCKS_SIZE_IN_MIB="$(BLOCKSIZE=1M du -d0 "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
+      ;;
+    *)
+      INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
+      ;;
+  esac
 else
   INITIAL_BLOCKS_SIZE_IN_MIB=0
 fi
 readonly INITIAL_BLOCKS_SIZE_IN_MIB
 readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
 if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
-  if [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-    INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-  else
-    INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-  fi
+  case "${TARGET_KERNEL}" in
+    Darwin | FreeBSD)
+      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
+      ;;
+    OpenBSD)
+      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(BLOCKSIZE=1M du -d0 "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
+      ;;
+    *)
+      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
+      ;;
+  esac
 else
   INITIAL_CHAINSTATE_SIZE_IN_MIB=0
 fi
@@ -1561,9 +1683,9 @@ elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
   fi
 fi
 
+# Memory checks
 case "${TARGET_KERNEL}" in
-  Darwin) ;;
-  FreeBSD) ;;
+  Darwin | FreeBSD | OpenBSD) ;;
   *)
     PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')" && readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
     PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')" && readonly PHYSICAL_MEMORY_FREE_IN_MIB
@@ -1573,7 +1695,6 @@ case "${TARGET_KERNEL}" in
     readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
     free_memory="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
     TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')" && readonly TOTAL_MEMORY
-
     log_info "Checking system memory... ${free_memory} of ${TOTAL_MEMORY} GiB free."
 
     if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
@@ -1599,23 +1720,23 @@ esac
 log_info 'Starting Bitcoin Core.'
 if is_running_in_ci ||
   is_running_in_container ||
-  [ -z "${DISPLAY}" ] ||
+  [ -z "${DISPLAY:-}" ] ||
   ! command -v bitcoin-qt > /dev/null 2>&1; then
-  bitcoind --daemonwait > /dev/null
+  bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null
 elif [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-  nohup bitcoin-qt > /dev/null 2>&1 < /dev/null &
+  nohup bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
 else
-  setsid bitcoin-qt > /dev/null 2>&1 < /dev/null &
+  setsid bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
 fi
 
 log_info 'Checking the RPC status.'
-readonly BITCOIN_RPC_TIMEOUT=300
-if ! bitcoin-cli --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT}" getrpcinfo > /dev/null; then
-  throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT} seconds."
+readonly BITCOIN_RPC_TIMEOUT_SECONDS=300
+if ! bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT_SECONDS}" getrpcinfo > /dev/null; then
+  throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT_SECONDS} seconds."
 fi
 
-readonly SLEEP_TIME='10'
-blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
+readonly SLEEP_TIME_SECONDS='10'
+blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
 ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 
 if [ "${ibd_status}" = 'true' ]; then
@@ -1628,9 +1749,9 @@ if [ "${ibd_status}" = 'true' ]; then
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
     log_info "Close this Terminal window by clicking on the 'X'."
-    log_info "This screen will refresh in ${SLEEP_TIME} seconds."
+    log_info "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
   fi
-  sleep "${SLEEP_TIME}"
+  sleep "${SLEEP_TIME_SECONDS}"
 else
   log_info 'Your node has already synced the blockchain.'
 fi
@@ -1678,11 +1799,14 @@ while [ "${ibd_status}" = 'true' ]; do
     printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
     printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
 
-    if [ "${TARGET_KERNEL}" = 'Darwin' ] || [ "${TARGET_KERNEL}" = 'FreeBSD' ]; then
-      current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
-    else
-      current_chain_tip_timestamp="$(date -d @"${last_block_time}" | cut -c 5-)"
-    fi
+    case "${TARGET_KERNEL}" in
+      Darwin | FreeBSD | OpenBSD)
+        current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
+        ;;
+      *)
+        current_chain_tip_timestamp="$(date -d @"${last_block_time}" | cut -c 5-)"
+        ;;
+    esac
     printf 'Current chain tip:          %s\n' "${current_chain_tip_timestamp}"
 
     printf '%s' 'Chain sync size:            '
@@ -1705,12 +1829,12 @@ while [ "${ibd_status}" = 'true' ]; do
     exit 0
   fi
 
-  printf '%s\n\n' 'Synchronizing can take days weeks on a slow connection.'
+  printf '%s\n\n' 'The chain sync can take several days or even weeks.'
   printf '%s\n' "Close this Terminal window by clicking on the 'X'."
-  printf '%s' "This screen will refresh in ${SLEEP_TIME} seconds."
-  sleep "${SLEEP_TIME}"
+  printf '%s' "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
+  sleep "${SLEEP_TIME_SECONDS}"
 
-  blockchain_info=$(bitcoin-cli --rpcwait getblockchaininfo)
+  blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
   printf '\n'
   ibd_status=$(echo "${blockchain_info}" | jq '.initialblockdownload')
 done
