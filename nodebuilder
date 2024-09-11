@@ -1280,7 +1280,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.9.0'
+  printf '%s\n' 'nodebuilder 1.9.0-beta'
   printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1449,7 +1449,7 @@ TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_S
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.0'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.0-beta'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
