@@ -357,7 +357,7 @@ jobs:
             tput colors
             date -u
           run: |
-            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            sh -x ./nodebuilder
             [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
             [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
             find / -name debug.log 2> /dev/null | grep bitcoin || true
