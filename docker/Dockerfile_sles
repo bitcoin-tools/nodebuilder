@@ -1,7 +1,5 @@
 # syntax=docker/dockerfile:1
-# Arch Linux is a minimalist, rolling-release distribution.
-# This Dockerfile is ideal for users who prefer a hands-on approach and a clean, streamlined environment.
-FROM archlinux:latest@sha256:dbcf6a01a24a56c96b179d40f2425fd257f58e6ff8c5c54c1aa66251442d6f80
+FROM registry.suse.com/suse/sle15:latest@sha256:45affaf5ebab8674d7a67f9ad67ed3e774fadbb2a801bed76c3516c758cc5724
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
@@ -18,6 +16,9 @@ RUN uname -a \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
+
+# TODO: remove this line after next release
+RUN zypper --non-interactive install procps
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

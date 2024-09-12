@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Arch Linux is a minimalist, rolling-release distribution.
-# This Dockerfile is ideal for users who prefer a hands-on approach and a clean, streamlined environment.
-FROM archlinux:latest@sha256:dbcf6a01a24a56c96b179d40f2425fd257f58e6ff8c5c54c1aa66251442d6f80
+# Debian is the foundation of countless other distributions, including Ubuntu and Linux Mint.
+# This Dockerfile is ideal for users who want a stable, secure, and lightweight environment.
+FROM kalilinux/kali-last-release@sha256:12370bd75f8c05a62f2a98808a06651e1cb79307c439ffd4f015cc4c2e34d5e1
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
@@ -18,6 +18,13 @@ RUN uname -a \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
+
+# Install system updates and dependencies.
+RUN apt-get -qq update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --no-install-recommends \
+  ca-certificates curl 'sudo' \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
