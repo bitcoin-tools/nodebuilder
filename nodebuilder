@@ -1117,6 +1117,9 @@ install_system_updates()
     FreeBSD)
       install_system_updates_freebsd
       ;;
+    NetBSD)
+      install_system_updates_netbsd
+      ;;
     OpenBSD)
       install_system_updates_openbsd
       ;;
@@ -1209,7 +1212,6 @@ install_system_updates_freebsd()
   sudo pkg update > /dev/null
   sudo pkg upgrade --yes > /dev/null
 }
-
 
 install_system_updates_netbsd()
 {
