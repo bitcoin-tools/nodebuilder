@@ -17,5 +17,8 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
+# TODO: remove this line after next release
+RUN zypper --non-interactive install procps
+
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
