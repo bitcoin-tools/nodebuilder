@@ -243,7 +243,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check the current environment
         run: |
-          uname -s
           uname -a
           ${{ matrix.check-environment-command }}
           df -h
@@ -344,6 +343,7 @@ jobs:
         timeout-minutes: 180
         with:
           prepare: |
+            uname -s
             uname -a
             sysctl -n kern.version
             sysctl -n hw.ncpu
