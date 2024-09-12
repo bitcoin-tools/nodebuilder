@@ -18,7 +18,7 @@ RUN uname -a \
   && date -u
 
 # TODO: remove this line after next release
-RUN zypper install procps
+RUN zypper --non-interactive install procps
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
