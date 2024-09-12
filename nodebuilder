@@ -1215,7 +1215,7 @@ install_system_updates_freebsd()
 
 install_system_updates_netbsd()
 {
-  hash pkgin 2>/dev/null ||
+  hash pkgin 2> /dev/null ||
     pkg_add pkgin > /dev/null
   sudo pkgin update > /dev/null
   sudo pkgin upgrade
