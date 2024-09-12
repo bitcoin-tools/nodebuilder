@@ -353,8 +353,14 @@ jobs:
             df -h
             df
             echo "${TERM:-TERM is not found}"
+            echo 'command:'
+            sleep 1
             command -v tput
+            echo 'hash:'
+            sleep 1
             hash tput
+            echo 'which:'
+            sleep 1
             which tput
             tput colors
             date -u
