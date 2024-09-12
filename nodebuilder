@@ -518,7 +518,10 @@ ensure_sudo_dependency()
       FreeBSD)
         pkg install -y sudo > /dev/null
         ;;
-      NetBSD | OpenBSD)
+      NetBSD)
+        pkgin add sudo > /dev/null
+        ;;
+      OpenBSD)
         pkg_add sudo-- > /dev/null
         ;;
       *)
