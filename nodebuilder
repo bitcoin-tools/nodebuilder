@@ -543,7 +543,10 @@ ensure_sudo_dependency()
         ;;
     esac
   fi
-  command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
+  command -v sudo > /dev/null 2>&1 ||
+    hash sudo 2>/dev/null ||
+    which sudo > /dev/null ||
+    throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
 ensure_xargs_dependency()
