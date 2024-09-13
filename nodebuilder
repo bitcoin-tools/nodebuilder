@@ -184,7 +184,7 @@ Icon=${SHORTCUT_IMAGE_FILE}
 MimeType=x-scheme-handler/bitcoin;
 Categories=Office;Finance;P2P;Network;Qt;
 StartupNotify=true
-StartupWMClass=Bitcoin-qt
+StartupWMClass=org.bitcoin.bitcoin-qt
 EOF
   chmod u+x "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}"
   chmod u+x "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
@@ -1332,7 +1332,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.9.0'
+  printf '%s\n' 'nodebuilder 1.9.1'
   printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1502,7 +1502,7 @@ TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)" && readonly TARGET_OPERATING_SYSTE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.0'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.1'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 case "${TARGET_KERNEL}" in
@@ -1595,23 +1595,27 @@ case "${current_bitcoin_version}" in
 esac
 readonly CURRENT_BITCOIN_VERSION_PADDED
 
-case "${target_bitcoin_version}" in
-  '')
-    throw_error 'Bitcoin Core target version is not set.'
-    ;;
-  *[.]*[.]*[.]*)
-    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
-    ;;
-  *[.]*[.]*)
-    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
-    ;;
-  *[.]*)
-    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
-    ;;
-  *)
-    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
-    ;;
-esac
+if [ -n "${CURRENT_BITCOIN_VERSION_PADDED}" ]; then
+  case "${target_bitcoin_version}" in
+    '')
+      throw_error 'Bitcoin Core target version is not set.'
+      ;;
+    *[.]*[.]*[.]*)
+      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
+      ;;
+    *[.]*[.]*)
+      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
+      ;;
+    *[.]*)
+      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
+      ;;
+    *)
+      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
+      ;;
+  esac
+else
+  TARGET_BITCOIN_VERSION_PADDED='0.0.0.0'
+fi
 readonly TARGET_BITCOIN_VERSION_PADDED
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then

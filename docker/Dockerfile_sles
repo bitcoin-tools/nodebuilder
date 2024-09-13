@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
-FROM registry.suse.com/suse/sle15:latest@sha256:887c83266ee8ae4a83c215974a814abbb2007f0a445a67fac7079e922e846133
+FROM registry.suse.com/suse/sle15:latest@sha256:45affaf5ebab8674d7a67f9ad67ed3e774fadbb2a801bed76c3516c758cc5724
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.9.0
+ARG NODEBUILDER_VERSION=v1.9.1
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
@@ -16,6 +16,9 @@ RUN uname -a \
   && df -h \
   && grep Mem /proc/meminfo \
   && date -u
+
+# TODO: remove this line after next release
+RUN zypper --non-interactive install procps
 
 # Download and execute the script.
 RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
