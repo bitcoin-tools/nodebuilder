@@ -1179,7 +1179,7 @@ install_system_updates_freebsd()
 
 install_system_updates_openbsd()
 {
-  sudo pkg_add -u > /dev/null
+  sudo pkg_add -uu > /dev/null
 }
 
 install_system_updates_pacman()
