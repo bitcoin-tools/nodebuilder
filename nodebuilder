@@ -519,10 +519,8 @@ ensure_sudo_dependency()
         pkg install -y sudo > /dev/null
         ;;
       NetBSD)
-        hash pkgin 2> /dev/null || {
-          readonly NETBSD_PKGIN_DEPENDENCY_URL="https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${TARGET_ARCHITECTURE}/${TARGET_OPERATING_SYSTEM_RELEASE/All/pkgin-23.8.1nb4.tgz"
-          pkg_add "${NETBSD_PKGIN_DEPENDENCY_URL}"
-        }
+        hash pkgin 2> /dev/null ||
+          pkg_add "https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${TARGET_ARCHITECTURE}/${TARGET_OPERATING_SYSTEM_RELEASE/All/pkgin-23.8.1nb4.tgz" > /dev/null
         pkgin add sudo > /dev/null
         ;;
       OpenBSD)
