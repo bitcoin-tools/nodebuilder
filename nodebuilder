@@ -543,6 +543,7 @@ ensure_sudo_dependency()
         ;;
     esac
   fi
+  # shellcheck disable=SC2230
   command -v sudo > /dev/null 2>&1 ||
     hash sudo 2> /dev/null ||
     which sudo > /dev/null ||
