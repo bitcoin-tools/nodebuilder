@@ -519,6 +519,7 @@ ensure_sudo_dependency()
         pkg install -y sudo > /dev/null
         ;;
       NetBSD)
+        hash pkgin 2> /dev/null || pkg_add pkgin
         pkgin add sudo > /dev/null
         ;;
       OpenBSD)
