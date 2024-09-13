@@ -1495,7 +1495,7 @@ TEMP_DIRECTORY="$(mktemp -d)" && readonly TEMP_DIRECTORY
 TARGET_ARCHITECTURE="$(uname -m)" && readonly TARGET_ARCHITECTURE
 TARGET_KERNEL="$(uname -s)" && readonly TARGET_KERNEL
 TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_SYSTEM
-TARGET_OPERATIN_SYSTEM_RELEASE="$(uname -r)" && readonly TARGET_OPERATING_SYSTEM_RELEASE
+TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)" && readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
