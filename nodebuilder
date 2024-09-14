@@ -1516,7 +1516,9 @@ readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
 
 check_internet_status
-[ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
+is_running_in_ci ||
+  [ "${TARGET_KERNEL}" = 'Darwin' ] ||
+  install_system_updates
 install_runtime_dependencies
 
 if command -v bitcoind > /dev/null 2>&1; then
