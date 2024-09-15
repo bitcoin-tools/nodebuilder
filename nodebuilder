@@ -532,7 +532,7 @@ ensure_sudo_dependency()
       NetBSD)
         ensure_netbsd_pkgin_dependency
         pkgin update > /dev/null
-        pkgin install sudo > /dev/null
+        pkgin -y install sudo > /dev/null
         ;;
       OpenBSD)
         pkg_add sudo-- > /dev/null
