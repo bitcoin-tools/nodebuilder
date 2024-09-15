@@ -1108,11 +1108,15 @@ install_system_updates()
       ;;
   esac
 
-  # Stop running if the Docker container base image is outdated
-  if [ -f /var/run/reboot-required ] && is_running_in_container; then
+  if [ skip_reboot_on_system_update = 'true' ]; then
+    :
+  elif [ ! -f /var/run/reboot-required]; then
+    :
+  elif is_running_in_container; then
     throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
-  # Reboot the system unless it's running in CI/CD
-  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
+  elif is_running_in_ci; then
+    log_info 'Skipping required reboot in CI/CD environment.'
+  else
     printf '\n%s\n%s\n' 'REBOOT IS REQUIRED to upgrade the following packages:' "$(cat /var/run/reboot-required.pkgs)"
     if [ "${unattended}" = 'false' ]; then
       log_info 'PRESS ENTER to reboot or press Ctrl+C to exit.'
@@ -1272,6 +1276,7 @@ print_usage()
   printf '%s\n' '-b, --bitcoin-version   Specify the Bitcoin version'
   printf '%s\n' '-c, --compile           Build Bitcoin from source'
   printf '%s\n' '-h, --help              Display this help message'
+  printf '%s\n' '-r, --skip-reboot       Skip reboot on system updates'
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
   printf '%s\n' '-t, --test              Run unit tests on functions'
   printf '%s\n' '-u, --unattended        Run in non-interactive mode'
@@ -1377,6 +1382,7 @@ target_bitcoin_version='27.1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
+skip_reboot_on_system_update='false'
 unattended='false'
 unit_tests='false'
 
@@ -1415,6 +1421,9 @@ while [ $# -gt 0 ]; do
       fi
       prune_value="$2"
       shift
+      ;;
+    -r | --skip-reboot)
+      skip_reboot_on_system_update='true'
       ;;
     -t | --test)
       unit_tests='true'
