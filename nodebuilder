@@ -469,6 +469,7 @@ ensure_curl_dependency()
         ensure_netbsd_pkgin_dependency
         sudo pkgin update > /dev/null
         sudo pkgin -y install curl > /dev/null
+        ;;
       OpenBSD)
         sudo pkg_add curl > /dev/null
         ;;
