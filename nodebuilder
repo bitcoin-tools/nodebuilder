@@ -1179,7 +1179,7 @@ install_system_updates_freebsd()
 
 install_system_updates_openbsd()
 {
-  sudo pkg_add -u > /dev/null
+  sudo pkg_add -uu > /dev/null
 }
 
 install_system_updates_pacman()
@@ -1516,7 +1516,9 @@ readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
 
 check_internet_status
-is_running_in_ci || [ "${TARGET_KERNEL}" = 'Darwin' ] || install_system_updates
+is_running_in_ci ||
+  [ "${TARGET_KERNEL}" = 'Darwin' ] ||
+  install_system_updates
 install_runtime_dependencies
 
 if command -v bitcoind > /dev/null 2>&1; then
