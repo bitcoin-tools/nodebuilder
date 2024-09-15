@@ -1109,7 +1109,7 @@ install_system_updates()
   esac
 
   if [ skip_reboot_on_system_update = 'true' ]; then
-    :
+    log_info 'DEBUG SKIP REBOOT TRUE'
   elif [ ! -f /var/run/reboot-required]; then
     :
   elif is_running_in_container; then
