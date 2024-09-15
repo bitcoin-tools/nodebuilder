@@ -1633,10 +1633,10 @@ log_info "Found free space available... $((free_space_in_mib / MIB_TO_GIB)) GiB.
 ## or need to find how to generate this dynamically in a trustless way.
 ## The lower this number is, the more likely disk space errors during IBD.
 ## The higher this number is, the more likely a node will be to prune.
-## The sweet spot is about 50 to 100 GB more than the size of blocks/ + chainstate/ using this:
+## The sweet spot is about 50, 75, or 100 GB more than the size of blocks/ + chainstate/ using this:
 ## `echo $((($(du -md0 ~/.bitcoin/blocks/ | cut -f1) + $(du -md0 ~/.bitcoin/chainstate/ | cut -f1)) / 1024))`
 ## which is 647 GiB, as of September 2024.
-readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB='747'
+readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB='722'
 readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB=$((ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB * MIB_TO_GIB))
 
 # check if the user wants to disable pruning
