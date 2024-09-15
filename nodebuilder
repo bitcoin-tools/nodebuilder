@@ -845,7 +845,10 @@ install_build_dependencies_netbsd()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
     log_info "DEBUG INSTALLING ${package}"
-    sudo pkgin -y install "${package}"
+    if ! sudo pkgin -y install "${package}"; then
+      cat /var/db/pkgin/pkg_install-err.log
+      throw_error "DEBUG FAILED TO INSTALL: ${package}"
+    fi
   done
 }
 
