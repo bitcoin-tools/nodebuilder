@@ -5,7 +5,7 @@ gmake
 libevent
 libtool
 pkg-config
-python3
+python312
 qrencode
 qt5-qtbase
 qt5-qttools
