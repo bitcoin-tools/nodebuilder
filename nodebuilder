@@ -1108,9 +1108,9 @@ install_system_updates()
       ;;
   esac
 
-  if [ skip_reboot_on_system_update = 'true' ]; then
+  if [ "${skip_reboot_on_system_update:-false}" = 'true' ]; then
     log_info 'DEBUG SKIP REBOOT TRUE'
-  elif [ ! -f /var/run/reboot-required]; then
+  elif [ ! -f /var/run/reboot-required ]; then
     :
   elif is_running_in_container; then
     throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
