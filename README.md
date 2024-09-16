@@ -92,14 +92,22 @@ You can set multiple options. Here are two ways to compile Bitcoin 27.1 unattend
 
 ## Prerequisites
 
-1. An active internet connection (of course)
-2. A POSIX-compatible operating system
-   - [FreeBSD](https://www.freebsd.org)
-   - Linux - [Alpine](https://wiki.alpinelinux.org/wiki/Installation), [Arch](https://github.com/archlinux/archinstall) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides), [Debian](https://en.wikipedia.org/wiki/Debian) or any derivative like [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview), [Fedora](https://fedoraproject.org/workstation/download), [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
+1. An active internet connection
+2. `curl`, which the script will attempt to automatically install or you can install with a package manager
+3. A supported operating system
+   - Any system that can run [Docker](./docker/)
+   - Linux distributions
+     - [Alpine](https://wiki.alpinelinux.org/wiki/Installation)
+     - [Arch](https://github.com/archlinux/archinstall) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
+     - [Clear Linux](https://www.clearlinux.org/downloads.html)
+     - [Debian](https://en.wikipedia.org/wiki/Debian) or any derivative like [Kali](https://www.kali.org/get-kali) or [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview)
+     - [Gentoo](https://www.gentoo.org/get-started)
+     - [Fedora](https://fedoraproject.org/workstation/download), [Red Hat](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux), [Amazon Linux](https://docs.aws.amazon.com/linux), [Oracle Linux](https://www.oracle.com/linux), [Rocky Linux](https://rockylinux.org/download), etc.
+     - [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
    - [macOS](https://en.wikipedia.org/wiki/MacOS)
-   - Or, any system that can run [Docker](./docker/)
-   - On Windows, either run nodebuilder in WSL (Windows Subsystem for Linux) or in a [Docker container](#optional-docker-container)
-4. `curl`, which the script will attempt to automatically install or you can install with a package manager
+   - [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) and [Docker](#optional-docker-container) on Windows
+   - [FreeBSD](https://www.freebsd.org)
+   - [OpenBSD](http://openbsd.org)
 
 This POSIX-compliant script installs a minimal number of [runtime dependencies](./resources/dependencies/) that aren't defined in POSIX.
 
