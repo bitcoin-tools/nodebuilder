@@ -26,8 +26,8 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.9.1/node
 ## Table of Contents
 
 - [Usage](#usage)
-  - [(Optional) Docker Container](#optional-docker-container)
   - [(Optional) Command-Line Arguments](#optional-command-line-arguments)
+  - [(Optional) Docker Container](#optional-docker-container)
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
   - [Which Parts of My System Does This Script Touch?](#which-parts-of-my-system-does-this-script-touch)
@@ -52,24 +52,6 @@ chmod u+x nodebuilder
 ./nodebuilder
 ```
 
-### (Optional) Docker Container
-
-A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distribution: Alpine, Amazon, Arch, Clear, Debian, Fedora, Gentoo, Manjaro, openSUSE Leap, openSUSE Tumbleweed, Oracle, Red Hat Enterprise, Rocky, and SUSE Enterprise.
-
-To run the Ubuntu base image, clone the repository and build the default container.
-
-```
-git clone https://github.com/bitcoin-tools/nodebuilder
-cd nodebuilder/docker/
-docker build .
-```
-
-To use an [alternative base image](docker/), clone the repository and build a different container. For example, to run nodebuilder on Alpine Linux, run:
-
-```
-docker build -f Dockerfile_alpine .
-```
-
 ### (Optional) Command-Line Arguments
 
 `nodebuilder` supports optional arguments to override the default semi-automated settings:
@@ -92,13 +74,30 @@ You can set multiple options. Here are two ways to compile Bitcoin 27.1 unattend
 ./nodebuilder --bitcoin-version 27.1 --compile --prune 50000 --unattended
 ```
 
+### (Optional) Docker Container
+
+A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distribution: Alpine, Amazon, Arch, Clear, Debian, Fedora, Gentoo, Manjaro, openSUSE Leap, openSUSE Tumbleweed, Oracle, Red Hat Enterprise, Rocky, and SUSE Enterprise.
+
+To run the Ubuntu base image, clone the repository and build the default container.
+
+```
+git clone https://github.com/bitcoin-tools/nodebuilder
+cd nodebuilder/docker/
+docker build .
+```
+
+To use an [alternative base image](docker/), clone the repository and build a different container. For example, to run nodebuilder on Alpine Linux, run:
+
+```
+docker build -f Dockerfile_alpine .
+```
+
 ## Prerequisites
 
 1. An active internet connection
 2. `curl`, which the script will attempt to automatically install or you can install with a package manager
 3. A supported operating system
-   - [FreeBSD](https://www.freebsd.org)
-   - [OpenBSD](http://openbsd.org)
+   - Any system that can run [Docker](./docker/)
    - Linux distributions
      - [Alpine](https://wiki.alpinelinux.org/wiki/Installation)
      - [Arch](https://github.com/archlinux/archinstall) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
@@ -108,8 +107,9 @@ You can set multiple options. Here are two ways to compile Bitcoin 27.1 unattend
      - [Fedora](https://fedoraproject.org/workstation/download), [Red Hat](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux), [Amazon Linux](https://docs.aws.amazon.com/linux), [Oracle Linux](https://www.oracle.com/linux), [Rocky Linux](https://rockylinux.org/download), etc.
      - [SUSE](https://documentation.suse.com/sles/) or any derivative like [openSUSE Leap](https://get.opensuse.org/leap/)
    - [macOS](https://en.wikipedia.org/wiki/MacOS)
-   - Or, any system that can run [Docker](./docker/)
-   - On Windows, use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) or [Docker](#optional-docker-container)
+   - [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) and [Docker](#optional-docker-container) on Windows
+   - [FreeBSD](https://www.freebsd.org)
+   - [OpenBSD](http://openbsd.org)
 
 This POSIX-compliant script installs a minimal number of [runtime dependencies](./resources/dependencies/) that aren't defined in POSIX.
 
