@@ -26,8 +26,8 @@ sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v1.9.1/node
 ## Table of Contents
 
 - [Usage](#usage)
-  - [(Optional) Docker Container](#optional-docker-container)
   - [(Optional) Command-Line Arguments](#optional-command-line-arguments)
+  - [(Optional) Docker Container](#optional-docker-container)
 - [Prerequisites](#prerequisites)
 - [What Does This Script Do?](#what-does-this-script-do)
   - [Which Parts of My System Does This Script Touch?](#which-parts-of-my-system-does-this-script-touch)
@@ -52,24 +52,6 @@ chmod u+x nodebuilder
 ./nodebuilder
 ```
 
-### (Optional) Docker Container
-
-A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distribution: Alpine, Amazon, Arch, Clear, Debian, Fedora, Gentoo, Manjaro, openSUSE Leap, openSUSE Tumbleweed, Oracle, Red Hat Enterprise, Rocky, and SUSE Enterprise.
-
-To run the Ubuntu base image, clone the repository and build the default container.
-
-```
-git clone https://github.com/bitcoin-tools/nodebuilder
-cd nodebuilder/docker/
-docker build .
-```
-
-To use an [alternative base image](docker/), clone the repository and build a different container. For example, to run nodebuilder on Alpine Linux, run:
-
-```
-docker build -f Dockerfile_alpine .
-```
-
 ### (Optional) Command-Line Arguments
 
 `nodebuilder` supports optional arguments to override the default semi-automated settings:
@@ -88,6 +70,24 @@ You can set multiple options. Here are two ways to compile Bitcoin 27.1 unattend
 ```sh
 ./nodebuilder -b 27.1 -c -p 50000 -u
 ./nodebuilder --bitcoin-version 27.1 --compile --prune 50000 --unattended
+```
+
+### (Optional) Docker Container
+
+A nodebuilder Docker container can either run on Ubuntu (default) or on an alternative Linux distribution: Alpine, Amazon, Arch, Clear, Debian, Fedora, Gentoo, Manjaro, openSUSE Leap, openSUSE Tumbleweed, Oracle, Red Hat Enterprise, Rocky, and SUSE Enterprise.
+
+To run the Ubuntu base image, clone the repository and build the default container.
+
+```
+git clone https://github.com/bitcoin-tools/nodebuilder
+cd nodebuilder/docker/
+docker build .
+```
+
+To use an [alternative base image](docker/), clone the repository and build a different container. For example, to run nodebuilder on Alpine Linux, run:
+
+```
+docker build -f Dockerfile_alpine .
 ```
 
 ## Prerequisites
