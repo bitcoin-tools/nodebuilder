@@ -1530,7 +1530,7 @@ readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
 
 check_internet_status
-[ "${skip_system_update}" = 'true' ] ||
+[ "${skip_system_update:-false}" = 'true' ] ||
   [ "${TARGET_KERNEL}" = 'Darwin' ] ||
   is_running_in_ci ||
   install_system_updates
