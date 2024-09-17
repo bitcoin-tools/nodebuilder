@@ -228,7 +228,16 @@ bitcoin_tarball_download()
 
 bitcoin_tarball_download_validate()
 {
-  readonly BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
+  case "${target_bitcoin_version}" in
+    *rc*)
+      target_bitcoin_version_without_rc="${target_bitcoin_version%rc*}"
+      target_bitcoin_version_rc_number="${target_bitcoin_version##*rc}"
+      BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version_without_rc}/test.rc${target_bitcoin_version_rc_number}"
+      ;;
+    *)
+      BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
+      ;;
+  esac && readonly BITCOIN_SOURCE
   readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
   readonly BITCOIN_HASH_FILENAME='SHA256SUMS'
   readonly BITCOIN_HASH_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_HASH_FILENAME}"
@@ -283,47 +292,50 @@ bitcoin_tarball_extract()
 bitcoin_tarball_install()
 {
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
-  # install the libraries
-  [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
-    sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
-    throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
-  case "${TARGET_KERNEL}" in
-    Linux)
-      sudo cp \
-        "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.so.0.0.0" \
-        "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.so.0.0.0"
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
-          sudo rm -f libbitcoinconsensus.so.0
-          sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
-        }
-      })
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
-          sudo rm -f libbitcoinconsensus.so
-          sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
-        }
-      })
-      PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' \
-        ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
-      ;;
-    Darwin)
-      sudo cp \
-        "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.0.dylib" \
-        "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.0.dylib"
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
-          sudo rm -f libbitcoinconsensus.dylib
-          sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
-        }
-      })
-      sudo update_dyld_shared_cache
-      ;;
-    *)
-      throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
-      ;;
-  esac
+
+  if [ -d "${BITCOIN_INSTALL_LIB_SOURCE}" ]; then
+    # install the libraries
+    [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
+      mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
+      sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
+      throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
+    case "${TARGET_KERNEL}" in
+      Linux)
+        sudo cp \
+          "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.so.0.0.0" \
+          "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.so.0.0.0"
+        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+          sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
+            sudo rm -f libbitcoinconsensus.so.0
+            sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
+          }
+        })
+        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+          sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
+            sudo rm -f libbitcoinconsensus.so
+            sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
+          }
+        })
+        PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' \
+          ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
+        ;;
+      Darwin)
+        sudo cp \
+          "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.0.dylib" \
+          "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.0.dylib"
+        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+          sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
+            sudo rm -f libbitcoinconsensus.dylib
+            sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
+          }
+        })
+        sudo update_dyld_shared_cache
+        ;;
+      *)
+        throw_error "Unsupported OS. Please use the --compile option."
+        ;;
+    esac
+  fi
 
   # install the binaries
   [ -d "${BITCOIN_INSTALL_BIN_DESTINATION}" ] ||
@@ -338,14 +350,16 @@ bitcoin_tarball_install()
       "${BITCOIN_INSTALL_BIN_DESTINATION}/"
   done
 
-  # install the header files
-  [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
-    sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
-    throw_error "Unable to create directory ${BITCOIN_INSTALL_INCLUDE_DESTINATION}."
-  sudo install -c -m 644 \
-    "${BITCOIN_INSTALL_INCLUDE_SOURCE}/bitcoinconsensus.h" \
-    "${BITCOIN_INSTALL_INCLUDE_DESTINATION}/"
+  if [ -d "${BITCOIN_INSTALL_INCLUDE_SOURCE}" ]; then
+    # install the header files
+    [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
+      mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
+      sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
+      throw_error "Unable to create directory ${BITCOIN_INSTALL_INCLUDE_DESTINATION}."
+    sudo install -c -m 644 \
+      "${BITCOIN_INSTALL_INCLUDE_SOURCE}/bitcoinconsensus.h" \
+      "${BITCOIN_INSTALL_INCLUDE_DESTINATION}/"
+  fi
 
   # install the binary man pages
   [ -d "${BITCOIN_INSTALL_MAN_DESTINATION}" ] ||
@@ -1108,11 +1122,15 @@ install_system_updates()
       ;;
   esac
 
-  # Stop running if the Docker container base image is outdated
-  if [ -f /var/run/reboot-required ] && is_running_in_container; then
+  if [ "${skip_system_update_reboot:-false}" = 'true' ]; then
+    :
+  elif [ ! -f /var/run/reboot-required ]; then
+    :
+  elif is_running_in_container; then
     throw_error "The Docker base image is outdated. Please open an issue at ${NODEBUILDER_REPO}."
-  # Reboot the system unless it's running in CI/CD
-  elif [ -f /var/run/reboot-required ] && ! is_running_in_ci; then
+  elif is_running_in_ci; then
+    log_info 'Skipping required reboot in CI/CD environment.'
+  else
     printf '\n%s\n%s\n' 'REBOOT IS REQUIRED to upgrade the following packages:' "$(cat /var/run/reboot-required.pkgs)"
     if [ "${unattended}" = 'false' ]; then
       log_info 'PRESS ENTER to reboot or press Ctrl+C to exit.'
@@ -1228,12 +1246,15 @@ is_running_in_container()
 
 is_valid_bitcoin_version()
 {
-  [ -z "$1" ] && throw_error 'No arguemnt passed into is_valid_bitcoin_version().'
+  [ -z "$1" ] && throw_error 'No argument passed into is_valid_bitcoin_version().'
   bitcoin_version_to_check="$1"
   for version in ${VALID_BITCOIN_VERSION_LIST}; do
-    if [ "${bitcoin_version_to_check}" = "${version}" ]; then
-      return 0
-    fi
+    case "${bitcoin_version_to_check}" in
+      "${version}" | "${version}rc[1-9]")
+        return 0
+        ;;
+      *) ;;
+    esac
   done
   return 1
 }
@@ -1273,6 +1294,8 @@ print_usage()
   printf '%s\n' '-c, --compile           Build Bitcoin from source'
   printf '%s\n' '-h, --help              Display this help message'
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
+  printf '%s\n' '-r, --skip-reboot       Skip reboot on system updates'
+  printf '%s\n' '-s, --skip-update       Skip install of system updates'
   printf '%s\n' '-t, --test              Run unit tests on functions'
   printf '%s\n' '-u, --unattended        Run in non-interactive mode'
   printf '%s\n' '-V, --version           Print the nodebuilder version'
@@ -1373,10 +1396,12 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 28.0'
 
-target_bitcoin_version='28.0'
+target_bitcoin_version='28.0rc1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
+skip_system_update='false'
+skip_system_update_reboot='false'
 unattended='false'
 unit_tests='false'
 
@@ -1415,6 +1440,12 @@ while [ $# -gt 0 ]; do
       fi
       prune_value="$2"
       shift
+      ;;
+    -r | --skip-reboot)
+      skip_system_update_reboot='true'
+      ;;
+    -s | --skip-update)
+      skip_system_update='true'
       ;;
     -t | --test)
       unit_tests='true'
@@ -1516,8 +1547,9 @@ readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
 
 check_internet_status
-is_running_in_ci ||
+[ "${skip_system_update:-false}" = 'true' ] ||
   [ "${TARGET_KERNEL}" = 'Darwin' ] ||
+  is_running_in_ci ||
   install_system_updates
 install_runtime_dependencies
 
