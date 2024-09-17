@@ -1383,8 +1383,8 @@ target_bitcoin_version='27.1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
-skip_system_update_reboot='false'
 skip_system_update='false'
+skip_system_update_reboot='false'
 unattended='false'
 unit_tests='false'
 
