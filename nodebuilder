@@ -1108,7 +1108,7 @@ install_system_updates()
       ;;
   esac
 
-  if [ "${skip_reboot_on_system_update:-false}" = 'true' ]; then
+  if [ "${skip_system_update_reboot:-false}" = 'true' ]; then
     :
   elif [ ! -f /var/run/reboot-required ]; then
     :
@@ -1383,7 +1383,7 @@ target_bitcoin_version='27.1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
-skip_reboot_on_system_update='false'
+skip_system_update_reboot='false'
 skip_system_update='false'
 unattended='false'
 unit_tests='false'
@@ -1425,7 +1425,7 @@ while [ $# -gt 0 ]; do
       shift
       ;;
     -r | --skip-reboot)
-      skip_reboot_on_system_update='true'
+      skip_system_update_reboot='true'
       ;;
     -s | --skip-updates)
       skip_system_update='true'
