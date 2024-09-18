@@ -184,7 +184,7 @@ Icon=${SHORTCUT_IMAGE_FILE}
 MimeType=x-scheme-handler/bitcoin;
 Categories=Office;Finance;P2P;Network;Qt;
 StartupNotify=true
-StartupWMClass=org.bitcoin.bitcoin-qt
+StartupWMClass=Bitcoin-Qt
 EOF
   chmod u+x "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}"
   chmod u+x "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
@@ -293,8 +293,8 @@ bitcoin_tarball_install()
 {
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
 
+  # install the libraries
   if [ -d "${BITCOIN_INSTALL_LIB_SOURCE}" ]; then
-    # install the libraries
     [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
       mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
       sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
@@ -350,8 +350,8 @@ bitcoin_tarball_install()
       "${BITCOIN_INSTALL_BIN_DESTINATION}/"
   done
 
+  # install the header files
   if [ -d "${BITCOIN_INSTALL_INCLUDE_SOURCE}" ]; then
-    # install the header files
     [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
       mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
       sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
@@ -1396,7 +1396,7 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 28.0'
 
-target_bitcoin_version='28.0rc1'
+target_bitcoin_version='28.0rc2'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
