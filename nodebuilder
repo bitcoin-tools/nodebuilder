@@ -1108,7 +1108,7 @@ install_system_updates()
       ;;
   esac
 
-  if [ "${skip_reboot_on_system_update:-false}" = 'true' ]; then
+  if [ "${skip_system_update_reboot:-false}" = 'true' ]; then
     :
   elif [ ! -f /var/run/reboot-required ]; then
     :
@@ -1276,8 +1276,9 @@ print_usage()
   printf '%s\n' '-b, --bitcoin-version   Specify the Bitcoin version'
   printf '%s\n' '-c, --compile           Build Bitcoin from source'
   printf '%s\n' '-h, --help              Display this help message'
-  printf '%s\n' '-r, --skip-reboot       Skip reboot on system updates'
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
+  printf '%s\n' '-r, --skip-reboot       Skip reboot on system updates'
+  printf '%s\n' '-s, --skip-update       Skip install of system updates'
   printf '%s\n' '-t, --test              Run unit tests on functions'
   printf '%s\n' '-u, --unattended        Run in non-interactive mode'
   printf '%s\n' '-V, --version           Print the nodebuilder version'
@@ -1382,7 +1383,8 @@ target_bitcoin_version='27.1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
-skip_reboot_on_system_update='false'
+skip_system_update='false'
+skip_system_update_reboot='false'
 unattended='false'
 unit_tests='false'
 
@@ -1423,7 +1425,10 @@ while [ $# -gt 0 ]; do
       shift
       ;;
     -r | --skip-reboot)
-      skip_reboot_on_system_update='true'
+      skip_system_update_reboot='true'
+      ;;
+    -s | --skip-update)
+      skip_system_update='true'
       ;;
     -t | --test)
       unit_tests='true'
@@ -1525,8 +1530,9 @@ readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
 
 check_internet_status
-is_running_in_ci ||
+[ "${skip_system_update:-false}" = 'true' ] ||
   [ "${TARGET_KERNEL}" = 'Darwin' ] ||
+  is_running_in_ci ||
   install_system_updates
 install_runtime_dependencies
 
