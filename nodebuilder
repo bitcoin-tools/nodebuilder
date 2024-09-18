@@ -228,8 +228,17 @@ bitcoin_tarball_download()
 
 bitcoin_tarball_download_validate()
 {
-  readonly BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
-  readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
+  case "${target_bitcoin_version}" in
+    *rc*)
+      target_bitcoin_version_without_rc="${target_bitcoin_version%rc*}"
+      target_bitcoin_version_rc_number="${target_bitcoin_version##*rc}"
+      BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version_without_rc}/test.rc${target_bitcoin_version_rc_number}"
+      ;;
+    *)
+      BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
+      ;;
+  esac
+  readonly BITCOIN_SOURCE  readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
   readonly BITCOIN_HASH_FILENAME='SHA256SUMS'
   readonly BITCOIN_HASH_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_HASH_FILENAME}"
   readonly GPG_SIGNATURES_FILENAME='SHA256SUMS.asc'
@@ -1232,12 +1241,15 @@ is_running_in_container()
 
 is_valid_bitcoin_version()
 {
-  [ -z "$1" ] && throw_error 'No arguemnt passed into is_valid_bitcoin_version().'
+  [ -z "$1" ] && throw_error 'No argument passed into is_valid_bitcoin_version().'
   bitcoin_version_to_check="$1"
   for version in ${VALID_BITCOIN_VERSION_LIST}; do
-    if [ "${bitcoin_version_to_check}" = "${version}" ]; then
-      return 0
-    fi
+    case "${bitcoin_version_to_check}" in
+      "${version}" | "${version}rc[1-9]")
+        return 0
+        ;;
+      *) ;;
+    esac
   done
   return 1
 }
@@ -1379,7 +1391,7 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1'
 
-target_bitcoin_version='27.1'
+target_bitcoin_version='27.1rc1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
