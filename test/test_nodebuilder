@@ -226,8 +226,8 @@ for message in \
   'INFO: Detected: running (Linux|macOS|FreeBSD|OpenBSD).$' \
   'INFO: Checking for internet.$' \
   'INFO: Internet checks passed.$' \
-  'INFO: Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)? (not|was) found.$' \
-  'INFO: Installing Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?.$' \
+  'INFO: Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?(rc[1-9])? (not|was) found.$' \
+  'INFO: Installing Bitcoin Core [1-9][0-9]*\.[0-9]+(\.[0-9]+)?(rc[1-9])?.$' \
   'INFO: Setting the default node behavior.$' \
   'INFO: Found data already synced... [0-9]+ GiB.$' \
   'INFO: Found free space available... [0-9]+ [GM]iB.$' \
