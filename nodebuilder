@@ -238,7 +238,8 @@ bitcoin_tarball_download_validate()
       BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
       ;;
   esac
-  readonly BITCOIN_SOURCE  readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
+  readonly BITCOIN_SOURCE
+  readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
   readonly BITCOIN_HASH_FILENAME='SHA256SUMS'
   readonly BITCOIN_HASH_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_HASH_FILENAME}"
   readonly GPG_SIGNATURES_FILENAME='SHA256SUMS.asc'
