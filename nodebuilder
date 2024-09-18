@@ -1278,7 +1278,7 @@ print_usage()
   printf '%s\n' '-h, --help              Display this help message'
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
   printf '%s\n' '-r, --skip-reboot       Skip reboot on system updates'
-  printf '%s\n' '-s, --skip-updates      Skip install of system updates'
+  printf '%s\n' '-s, --skip-update      Skip install of system updates'
   printf '%s\n' '-t, --test              Run unit tests on functions'
   printf '%s\n' '-u, --unattended        Run in non-interactive mode'
   printf '%s\n' '-V, --version           Print the nodebuilder version'
@@ -1427,7 +1427,7 @@ while [ $# -gt 0 ]; do
     -r | --skip-reboot)
       skip_system_update_reboot='true'
       ;;
-    -s | --skip-updates)
+    -s | --skip-update)
       skip_system_update='true'
       ;;
     -t | --test)
