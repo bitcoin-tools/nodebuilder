@@ -293,46 +293,48 @@ bitcoin_tarball_install()
 {
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   # install the libraries
-  [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
-    sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
-    throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
-  case "${TARGET_KERNEL}" in
-    Linux)
-      sudo cp \
-        "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.so.0.0.0" \
-        "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.so.0.0.0"
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
-          sudo rm -f libbitcoinconsensus.so.0
-          sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
-        }
-      })
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
-          sudo rm -f libbitcoinconsensus.so
-          sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
-        }
-      })
-      PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' \
-        ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
-      ;;
-    Darwin)
-      sudo cp \
-        "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.0.dylib" \
-        "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.0.dylib"
-      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-        sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
-          sudo rm -f libbitcoinconsensus.dylib
-          sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
-        }
-      })
-      sudo update_dyld_shared_cache
-      ;;
-    *)
-      throw_error "UNSUPPORTED OS - unable to install Bitcoin Core."
-      ;;
-  esac
+  if [ -d "${BITCOIN_INSTALL_LIB_SOURCE}" ]; then
+    [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
+      mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
+      sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
+      throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
+    case "${TARGET_KERNEL}" in
+      Linux)
+        sudo cp \
+          "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.so.0.0.0" \
+          "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.so.0.0.0"
+        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+          sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
+            sudo rm -f libbitcoinconsensus.so.0
+            sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
+          }
+        })
+        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+          sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
+            sudo rm -f libbitcoinconsensus.so
+            sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
+          }
+        })
+        PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' \
+          ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
+        ;;
+      Darwin)
+        sudo cp \
+          "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.0.dylib" \
+          "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.0.dylib"
+        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+          sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
+            sudo rm -f libbitcoinconsensus.dylib
+            sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
+          }
+        })
+        sudo update_dyld_shared_cache
+        ;;
+      *)
+        throw_error "Unsupported OS. Please use the --compile option."
+        ;;
+    esac
+  fi
 
   # install the binaries
   [ -d "${BITCOIN_INSTALL_BIN_DESTINATION}" ] ||
@@ -348,13 +350,15 @@ bitcoin_tarball_install()
   done
 
   # install the header files
-  [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
-    sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
-    throw_error "Unable to create directory ${BITCOIN_INSTALL_INCLUDE_DESTINATION}."
-  sudo install -c -m 644 \
-    "${BITCOIN_INSTALL_INCLUDE_SOURCE}/bitcoinconsensus.h" \
-    "${BITCOIN_INSTALL_INCLUDE_DESTINATION}/"
+  if [ -d "${BITCOIN_INSTALL_INCLUDE_SOURCE}" ]; then
+    [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
+      mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
+      sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
+      throw_error "Unable to create directory ${BITCOIN_INSTALL_INCLUDE_DESTINATION}."
+    sudo install -c -m 644 \
+      "${BITCOIN_INSTALL_INCLUDE_SOURCE}/bitcoinconsensus.h" \
+      "${BITCOIN_INSTALL_INCLUDE_DESTINATION}/"
+  fi
 
   # install the binary man pages
   [ -d "${BITCOIN_INSTALL_MAN_DESTINATION}" ] ||
