@@ -351,7 +351,6 @@ bitcoin_tarball_install()
 
   # install the header files
   if [ -d "${BITCOIN_INSTALL_INCLUDE_SOURCE}" ]; then
-    # install the header files
     [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
       mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
       sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
