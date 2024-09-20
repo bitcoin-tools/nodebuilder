@@ -1395,7 +1395,7 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 28.0'
 
-target_bitcoin_version='28.0rc2'
+target_bitcoin_version='28.0rc1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
