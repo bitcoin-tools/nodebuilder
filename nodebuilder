@@ -83,7 +83,7 @@ compile_bitcoin_from_source()
       ;;
     NetBSD)
       echo 'DEBUG searching for boost root'
-      find /usr/pkg -name '*boost*' -type d 2>/dev/null
+      find /usr/pkg -name '*boost*' -type d 2> /dev/null
       echo 'DEBUG starting configure command'
       BOOST_ROOT=/usr/pkg/include/boost ./configure --with-gui=no --without-bdb --enable-suppress-external-warnings MAKE=gmake
       ;;
