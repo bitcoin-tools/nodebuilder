@@ -83,7 +83,7 @@ compile_bitcoin_from_source()
       ;;
     NetBSD)
       echo 'DEBUG searching for boost root'
-      find / -name '*boost*' -type d 2> /dev/null
+      find / -name '*boost*' -type d 2> /dev/null || true
       echo 'DEBUG searching for version file'
       find /usr/pkg/include/boost -name 'version.hpp' 2> /dev/null
       [ -f /usr/pkg/include/boost/version.hpp ] && cat /usr/pkg/include/boost/version.hpp
