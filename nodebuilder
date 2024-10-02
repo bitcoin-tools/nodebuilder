@@ -100,7 +100,7 @@ compile_bitcoin_from_source()
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
+      gmake --jobs "${SYS_CORES_PLUS_ONE}"
       ;;
     *)
       make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
