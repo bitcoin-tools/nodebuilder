@@ -747,7 +747,7 @@ install_build_dependencies_aptget()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
   # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
-  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12 > /dev/null 2>&1
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends gcc-12 > /dev/null 2>&1
 }
 
 install_build_dependencies_darwin()
