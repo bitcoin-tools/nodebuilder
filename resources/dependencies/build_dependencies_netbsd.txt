@@ -7,3 +7,4 @@ libtool
 pkg-config
 python312
 qt5-qtbase
+qt5-qttools
