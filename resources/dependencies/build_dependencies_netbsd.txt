@@ -6,3 +6,4 @@ libevent
 libtool
 pkg-config
 python312
+qt-tools
