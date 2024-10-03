@@ -82,13 +82,7 @@ compile_bitcoin_from_source()
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
       ;;
     NetBSD)
-      echo 'DEBUG searching for boost root'
-      find / -name '*boost*' -type d 2> /dev/null || true
-      echo 'DEBUG searching for version file'
-      find /usr/pkg/include/boost -name 'version.hpp' 2> /dev/null
-      [ -f /usr/pkg/include/boost/version.hpp ] && cat /usr/pkg/include/boost/version.hpp
-      echo 'DEBUG starting configure command'
-      ./configure --with-boost=/usr/pkg --with-gui=no --without-bdb --enable-suppress-external-warnings MAKE=gmake
+      ./configure --with-boost=/usr/pkg --with-gui=no --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
       ;;
     OpenBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
@@ -100,7 +94,7 @@ compile_bitcoin_from_source()
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${SYS_CORES_PLUS_ONE}"
+      gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
       ;;
     *)
       make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
