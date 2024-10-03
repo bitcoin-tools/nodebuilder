@@ -1562,14 +1562,12 @@ readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.1'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
-case "${TARGET_KERNEL}" in
-  NetBSD)
-    TEMP_DIRECTORY="${HOME}/nodebuilder_temp"
-    ;;
-  *)
-    TEMP_DIRECTORY="$(mktemp -d)"
-    ;;
-esac && readonly TEMP_DIRECTORY
+if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
+  # To satisfy disk space in NetBSD CI runner
+  TEMP_DIRECTORY="${HOME}/nodebuilder_temp"
+else
+  TEMP_DIRECTORY="$(mktemp -d)"
+fi && readonly TEMP_DIRECTORY
 
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
