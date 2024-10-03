@@ -343,7 +343,6 @@ jobs:
         timeout-minutes: 180
         with:
           prepare: |
-            uname -s
             uname -a
             sysctl -n kern.version
             sysctl -n hw.ncpu
@@ -352,18 +351,7 @@ jobs:
             sysctl hw.ncpu
             sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h
-            df
             echo "${TERM:-TERM is not found}"
-            echo 'command:'
-            sleep 1
-            command -v tput
-            echo 'hash:'
-            sleep 1
-            hash tput
-            echo 'which:'
-            sleep 1
-            which tput
-            tput colors
             date -u
           run: |
             sh -x ./nodebuilder
