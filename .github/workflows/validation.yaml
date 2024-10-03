@@ -346,10 +346,8 @@ jobs:
             uname -a
             sysctl -n kern.version
             sysctl -n hw.ncpu
-            sysctl -n hw.physmem
+            sysctl -n hw.physmem64
             swapctl -l
-            sysctl hw.ncpu
-            sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h
             echo "${TERM:-TERM is not found}"
             date -u
