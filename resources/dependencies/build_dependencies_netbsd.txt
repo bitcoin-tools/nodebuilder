@@ -1,6 +1,8 @@
 autoconf
 automake
 boost-headers
+dbus
+xorg
 gmake
 libevent
 libtool
