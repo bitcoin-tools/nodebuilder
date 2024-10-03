@@ -1552,7 +1552,6 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-TEMP_DIRECTORY="$(mktemp -d)" && readonly TEMP_DIRECTORY
 TARGET_ARCHITECTURE="$(uname -m)" && readonly TARGET_ARCHITECTURE
 TARGET_KERNEL="$(uname -s)" && readonly TARGET_KERNEL
 TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_SYSTEM
@@ -1562,6 +1561,15 @@ readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.1'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
+
+case "${TARGET_KERNEL}" in
+  NetBSD)
+    TEMP_DIRECTORY="${HOME}/nodebuilder_temp"
+    ;;
+  *)
+    TEMP_DIRECTORY="$(mktemp -d)"
+    ;;
+esac && readonly TEMP_DIRECTORY
 
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
@@ -1579,8 +1587,7 @@ case "${TARGET_KERNEL}" in
   *)
     throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
     ;;
-esac
-readonly SYS_CORES_COUNT
+esac && readonly SYS_CORES_COUNT
 readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 
 ensure_sudo_dependency
