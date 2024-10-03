@@ -6,4 +6,4 @@ libevent
 libtool
 pkg-config
 python312
-qt5-qttools
+qt5-qtbase
