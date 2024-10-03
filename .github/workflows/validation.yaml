@@ -343,13 +343,12 @@ jobs:
         timeout-minutes: 180
         with:
           prepare: |
+            echo "${TERM:-TERM is not found}"
             uname -a
-            sysctl -n kern.version
             sysctl -n hw.ncpu
             sysctl -n hw.physmem64
             swapctl -l
             df -h
-            echo "${TERM:-TERM is not found}"
             date -u
           run: |
             sh -x ./nodebuilder
