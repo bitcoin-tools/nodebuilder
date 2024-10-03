@@ -82,7 +82,7 @@ compile_bitcoin_from_source()
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
       ;;
     NetBSD)
-      ./configure --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake
+      ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake
       ;;
     OpenBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
