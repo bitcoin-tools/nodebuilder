@@ -1011,6 +1011,8 @@ install_runtime_dependencies_aptget()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
+  [ "${TARGET_ARCHITECTURE}" = 'riscv64' ] &&
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends libatomic1 > /dev/null 2>&1
 }
 
 install_runtime_dependencies_darwin()
