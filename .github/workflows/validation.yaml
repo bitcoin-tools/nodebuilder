@@ -428,6 +428,7 @@ jobs:
           githubToken: ${{ github.token }}
           run: |
             uname -a
+            id -u
             sh -x ./nodebuilder
             [ "$?" -gt 0 ] && echo "nodebuilder exited with status $?" >&2 && exit 1
             find / -name debug.log 2> /dev/null | grep bitcoin || true
