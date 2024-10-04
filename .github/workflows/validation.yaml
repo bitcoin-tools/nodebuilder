@@ -399,6 +399,38 @@ jobs:
         with:
           name: openbsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
+  
+  run-nodebuilder-riscv:
+    name: Test source on RISC-V
+    needs: [changes, shell-lint, yaml-lint]
+    if: >-
+      ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: riscv64, distro: ubuntu_latest }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test the console output
+        uses: uraimo/run-on-arch-action@v2
+        timeout-minutes: 180
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          githubToken: ${{ github.token }}
+          run: |
+            uname -a
+            sh -x ./nodebuilder
+            [ "$?" -gt 0 ] && echo "nodebuilder exited with status $?" >&2 && exit 1
+            find / -name debug.log 2> /dev/null | grep bitcoin || true
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
