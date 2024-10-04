@@ -860,12 +860,13 @@ install_build_dependencies_netbsd()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
-    log_info "DEBUG INSTALLING ${package}"
     if ! sudo pkgin -y install "${package}"; then
       cat /var/db/pkgin/pkg_install-err.log
-      throw_error "DEBUG FAILED TO INSTALL: ${package}"
+      throw_error "Failed to install ${package}"
     fi
   done
+  # TODO: Remove gcc12 installation on next line when NetBSD updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
+  sudo pkgin -y install gcc12
 }
 
 install_build_dependencies_openbsd()
