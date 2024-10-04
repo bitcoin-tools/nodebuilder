@@ -866,6 +866,8 @@ install_build_dependencies_netbsd()
       throw_error "DEBUG FAILED TO INSTALL: ${package}"
     fi
   done
+  # TODO: Remove gcc-12 installation on next line when NetBSD updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
+  sudo pkgin -y install gcc12 && PATH="/usr/pkg/gcc12/bin:${PATH}"
 }
 
 install_build_dependencies_openbsd()
