@@ -416,6 +416,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { arch: riscv64, distro: alpine_latest }
           - { arch: riscv64, distro: ubuntu_latest }
     steps:
       - uses: actions/checkout@v4
