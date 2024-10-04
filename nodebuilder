@@ -1559,7 +1559,7 @@ readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCI
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
   # To satisfy disk space in NetBSD CI runner
-  TEMP_DIRECTORY="${HOME}/nodebuilder_temp"
+  TEMP_DIRECTORY="/nodebuilder_temp"
 else
   TEMP_DIRECTORY="$(mktemp -d)"
 fi && readonly TEMP_DIRECTORY
