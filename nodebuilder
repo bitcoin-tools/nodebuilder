@@ -82,17 +82,7 @@ compile_bitcoin_from_source()
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
       ;;
     NetBSD)
-      if ! g++ --version; then
-        echo "${PATH}"
-        find /usr/pkg/bin -name 'g++*' -type f
-        find /usr/pkg/bin -name 'gcc*' -type f
-        throw_error 'no g++ found'
-      fi
-
-      if ! ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake; then
-        [ -f config.log ] && cat config.log
-        throw_error 'configure failed on NetBSD'
-      fi
+      ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
       ;;
     OpenBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
