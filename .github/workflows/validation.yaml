@@ -352,7 +352,6 @@ jobs:
             date -u
           run: |
             sh -x ./nodebuilder
-            find / -name .bitcoin -type d 2>/dev/null
             [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
             [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
             find / -name debug.log 2> /dev/null | grep bitcoin || true
