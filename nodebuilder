@@ -84,7 +84,9 @@ compile_bitcoin_from_source()
     NetBSD)
       if ! g++12 --version; then
         echo "${PATH}"
-        ls /usr/pkg/bin | grep g++
+        find /usr/pkg/bin -name 'g++*' -type f
+        find /usr/pkg/bin -name 'gcc*' -type f
+        throw_error 'no g++ found'
       fi
 
       if ! ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake CC=gcc12 CXX=g++12; then
