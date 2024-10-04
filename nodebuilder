@@ -82,6 +82,11 @@ compile_bitcoin_from_source()
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
       ;;
     NetBSD)
+      if ! g++12 --version; then
+        echo "${PATH}"
+        ls /usr/pkg/bin | grep g++
+      fi
+
       if ! ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake CC=gcc12 CXX=g++12; then
         [ -f config.log ] && cat config.log
         throw_error 'configure failed on NetBSD'
