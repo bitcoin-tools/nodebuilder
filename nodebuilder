@@ -1550,7 +1550,15 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-TARGET_ARCHITECTURE="$(uname -m)" && readonly TARGET_ARCHITECTURE
+case "$(uname -m") in
+  ppc64le)
+    TARGET_ARCHITECTURE='powerpc64'
+    ;;
+  *)
+    TARGET_ARCHITECTURE="$(uname -m)"
+    ;;
+esac && readonly TARGET_ARCHITECTURE
+
 TARGET_KERNEL="$(uname -s)" && readonly TARGET_KERNEL
 TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_SYSTEM
 TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)" && readonly TARGET_OPERATING_SYSTEM_RELEASE
