@@ -436,7 +436,6 @@ jobs:
             uname -a
             id -u
             df -h
-            commmand -v tput
             tput colors
             date -u
             mkdir -p "${PWD}/artifacts"
