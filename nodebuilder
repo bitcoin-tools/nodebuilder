@@ -1013,8 +1013,8 @@ install_runtime_dependencies_aptget()
     riscv64)
       sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends libatomic1 > /dev/null 2>&1
       ;;
-    
-  fi
+    *) ;;
+  esac
 }
 
 install_runtime_dependencies_darwin()
