@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Renovate
-        uses: renovatebot/github-action@v40.2.10
+        uses: renovatebot/github-action@v40.3.1
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -353,8 +353,7 @@ jobs:
           run: |
             sh -x ./nodebuilder
             [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
-            find / -name debug.log 2> /dev/null | grep bitcoin || true
+            [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:

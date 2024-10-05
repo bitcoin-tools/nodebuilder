@@ -82,7 +82,7 @@ compile_bitcoin_from_source()
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
       ;;
     NetBSD)
-      ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake
+      ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
       ;;
     OpenBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
@@ -853,20 +853,14 @@ install_build_dependencies_freebsd()
 
 install_build_dependencies_netbsd()
 {
-  # TODO: update the URL on next release
-  #readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_netbsd.txt"
-  readonly BUILD_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/build_dependencies_netbsd.txt'
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_netbsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  for package in ${dependencies}; do
-    log_info "DEBUG INSTALLING ${package}"
-    if ! sudo pkgin -y install "${package}"; then
-      cat /var/db/pkgin/pkg_install-err.log
-      throw_error "DEBUG FAILED TO INSTALL: ${package}"
-    fi
-  done
+  printf '%s\n' "${dependencies}" | xargs sudo pkgin -y install > /dev/null
+  # TODO: Remove gcc-12 installation on next line when NetBSD updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
+  sudo pkgin -y install gcc12 && export PATH="/usr/pkg/gcc12/bin:${PATH}"
 }
 
 install_build_dependencies_openbsd()
@@ -1083,9 +1077,7 @@ install_runtime_dependencies_freebsd()
 
 install_runtime_dependencies_netbsd()
 {
-  # TODO: update the URL on next release
-  #readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_netbsd.txt"
-  readonly RUNTIME_DEPENDENCIES_URL='https://github.com/bitcoin-tools/nodebuilder/raw/master/resources/dependencies/runtime_dependencies_netbsd.txt'
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_netbsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
@@ -1380,7 +1372,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.9.1'
+  printf '%s\n' 'nodebuilder 1.10.0'
   printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1471,9 +1463,9 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.11.0 0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 \0.14.3 0.15.2 \
     0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
-    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1'
+    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 28.0'
 
-target_bitcoin_version='27.1'
+target_bitcoin_version='28.0'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
@@ -1565,7 +1557,7 @@ TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)" && readonly TARGET_OPERATING_SYSTE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.1'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.10.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then

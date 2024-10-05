@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
-FROM registry.suse.com/suse/sle15:latest@sha256:aab7bc3ece351c9b6f3e41d68b51bfaac8e15c5a817b16daea66b3d2487dee26
+FROM registry.suse.com/suse/sle15:latest@sha256:78884b17c0b3941b12047305f4d88d8a36d18257847335ade0829ac4b05504f3
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.9.1
+ARG NODEBUILDER_VERSION=v1.10.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
