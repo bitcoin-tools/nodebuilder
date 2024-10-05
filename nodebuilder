@@ -1220,7 +1220,8 @@ install_system_updates_aptget()
 {
   check_dpkg_lock
   readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
+  sudo apt-get -qq update &&
+    sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
   grep -v 'apt-utils' "${STDERR_INSTALL_LOG_FILE}" >&2 || true
   rm "${STDERR_INSTALL_LOG_FILE}"
 }
