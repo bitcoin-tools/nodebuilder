@@ -392,7 +392,7 @@ jobs:
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
+            [ -f '/home/bitcoin/.bitcoin/debug.log' ] && cp '/home/bitcoin/.bitcoin/debug.log' .
             find / -name debug.log 2> /dev/null | grep bitcoin || true
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
@@ -432,12 +432,26 @@ jobs:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
           githubToken: ${{ github.token }}
-          run: |
+          setup: |
+            echo "${TERM:-TERM is not found}"
             uname -a
             id -u
+            df -h
+            commmand -v tput
+            tput colors
+            date -u
+            mkdir -p "${PWD}/artifacts"
+          dockerRunArgs: --volume "${PWD}/artifacts:/artifacts"
+          run: |
             sh -x ./nodebuilder
             [ "$?" -gt 0 ] && echo "nodebuilder exited with status $?" >&2 && exit 1
             find / -name debug.log 2> /dev/null | grep bitcoin || true
+            cp '${HOME}/.bitcoin/debug.log' '/artifacts/'
+      - name: Save Bitcoin Core log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.distro }}-${{ matrix.arch }}-bitcoin-debug.log
+          path: /artifacts/debug.log
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
