@@ -1005,8 +1005,15 @@ install_runtime_dependencies_aptget()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
-  if [ "${TARGET_ARCHITECTURE}" = 'riscv64' ]; then
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends libatomic1 > /dev/null 2>&1
+  case "${TARGET_ARCHITECTURE}" in
+    powerpc64)
+      # TODO: make this a CI step not in the script
+      sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends qemu-user-static > /dev/null 2>&1
+      ;;
+    riscv64)
+      sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends libatomic1 > /dev/null 2>&1
+      ;;
+    
   fi
 }
 
