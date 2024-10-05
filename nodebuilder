@@ -1550,7 +1550,7 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-case "$(uname -m") in
+case "$(uname -m)" in
   ppc64le)
     TARGET_ARCHITECTURE='powerpc64'
     ;;
