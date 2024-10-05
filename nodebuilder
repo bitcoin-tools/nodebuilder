@@ -524,7 +524,6 @@ ensure_sudo_dependency()
         apk --quiet add sudo
         ;;
       debian | ubuntu)
-        apt-get update > /dev/null
         apt-get install -y sudo > /dev/null
         ;;
       fedora* | rhel | centos* | rocky | ol)
