@@ -23,12 +23,14 @@ jobs:
           - clearlinux
           - debian
           - fedora
+          - kali
           - manjarolinux
           - opensuse-leap
           - opensuse-tumbleweed
           - oraclelinux
           - redhat-ubi9
           - rockylinux
+          - sles
     steps:
     - name: Checkout with history to get latest tag
       if: ${{ github.event_name != 'release' }}
