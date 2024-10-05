@@ -1008,7 +1008,7 @@ install_runtime_dependencies_aptget()
   case "${TARGET_ARCHITECTURE}" in
     powerpc64)
       # TODO: make this a CI step not in the script
-      sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends qemu-user-static > /dev/null 2>&1
+      sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends libc6:ppc64el > /dev/null 2>&1
       ;;
     riscv64)
       sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends libatomic1 > /dev/null 2>&1
