@@ -7,7 +7,7 @@ FROM opensuse/tumbleweed:latest@sha256:3bab47ddf7b5b90e4da32b53e88bdc26aa77b96c5
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.10.0-beta
+ARG NODEBUILDER_VERSION=v1.10.0-beta.2
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
