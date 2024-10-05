@@ -7,7 +7,7 @@ FROM opensuse/leap:latest@sha256:d3a517b66067d9f150dbd57d7ad28e0806025ad6f3a3e8c
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.10.0-beta.2
+ARG NODEBUILDER_VERSION=v1.10.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder

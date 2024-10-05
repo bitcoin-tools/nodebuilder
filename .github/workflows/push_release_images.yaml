@@ -52,7 +52,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
     - name: Set container image tags
       # Set the tags for the {container}-{version} and {container}
-      # For example: ':alpine-v1.10.0-beta.2' and ':alpine'
+      # For example: ':alpine-v1.10.0' and ':alpine'
       run: |
         TAGS="${{ env.DOCKERHUB_REPO }}:${{ matrix.container }}-${{ env.NODEBUILDER_VERSION }}"
         TAGS="${TAGS},${{ env.DOCKERHUB_REPO }}:${{ matrix.container }}"
@@ -100,7 +100,7 @@ jobs:
         # Push if the CI run isn't from a beta prerelease
         push: ${{ !github.event.release.prerelease }}
         # Set the tags for the ubuntu-{version}, ubuntu, {version}, and latest
-        # For example, ':ubuntu-v1.10.0-beta.2', ':ubuntu', ':v1.10.0-beta.2', and ':latest'
+        # For example, ':ubuntu-v1.10.0', ':ubuntu', ':v1.10.0', and ':latest'
         tags: |
           ${{ env.DOCKERHUB_REPO }}:${{ env.DEFAULT_IMAGE }}-${{ needs.build-and-push.outputs.nodebuilder-version }}
           ${{ env.DOCKERHUB_REPO }}:${{ env.DEFAULT_IMAGE }}
