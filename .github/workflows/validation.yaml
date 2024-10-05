@@ -21,6 +21,7 @@ jobs:
       ci: ${{ steps.filter.outputs.ci }}
       dependencies: ${{ steps.filter.outputs.dependencies }}
       docker: ${{ steps.filter.outputs.docker }}
+      docker-files: ${{ steps.filter.outputs.docker_files }}
       docker-gentoo: ${{ steps.filter.outputs.docker-gentoo }}
       markdown: ${{ steps.filter.outputs.markdown }}
       helpers: ${{ steps.filter.outputs.helpers }}
@@ -33,6 +34,7 @@ jobs:
       id: filter
       with:
         filters: resources/config/paths-filter.yaml
+        list-files: 'shell'
 
   dependencies-check:
     name: Check depencencies
@@ -410,7 +412,8 @@ jobs:
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true'
-      )
+      ) &&
+      startsWith(needs.changes.outputs.docker-files, matrix.dockerfile) == false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
