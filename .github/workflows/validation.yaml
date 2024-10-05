@@ -306,13 +306,12 @@ jobs:
         timeout-minutes: 180
         with:
           prepare: |
+            echo "${TERM:-TERM is not found}"
             uname -a
             cat /etc/os-release
             nproc
             sysctl -a | grep ' memory' | head -2
             df -h
-            df
-            echo "${TERM:-TERM is not found}"
             commmand -v tput
             tput colors
             date -u
@@ -381,12 +380,11 @@ jobs:
         timeout-minutes: 180
         with:
           prepare: |
+            echo "${TERM:-TERM is not found}"
             uname -a
             sysctl hw.ncpu
             sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h
-            df
-            echo "${TERM:-TERM is not found}"
             commmand -v tput
             tput colors
             date -u
@@ -412,8 +410,7 @@ jobs:
         needs.changes.outputs.dependencies == 'true' ||
         needs.changes.outputs.docker == 'true' ||
         needs.changes.outputs.shell == 'true'
-      ) &&
-      startsWith(needs.changes.outputs.docker-files, matrix.dockerfile) == false
+      )
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -439,8 +436,9 @@ jobs:
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
-        timeout-minutes: 100
+        if: contains(needs.changes.outputs.docker-files, matrix.dockerfile)
         uses: docker/build-push-action@v6
+        timeout-minutes: 100
         with:
           build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .
