@@ -458,7 +458,7 @@ ensure_curl_dependency()
         sudo apk --quiet add curl
         ;;
       debian | ubuntu)
-        sudo apt-get install -y curl > /dev/null
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl > /dev/null
         ;;
       fedora* | rhel | centos* | rocky | ol)
         sudo dnf install --allowerasing --assumeyes curl > /dev/null
@@ -493,7 +493,7 @@ ensure_curl_dependency()
         if command -v apk > /dev/null; then
           sudo apk --quiet add curl
         elif command -v apt-get > /dev/null; then
-          sudo apt-get -qq install -y curl > /dev/null
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y curl > /dev/null
         elif command -v dnf > /dev/null; then
           sudo dnf install --allowerasing --assumeyes curl > /dev/null
         elif command -v pacman > /dev/null; then
@@ -1220,7 +1220,7 @@ install_system_updates_aptget()
 {
   check_dpkg_lock
   readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
-  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
   grep -v 'apt-utils' "${STDERR_INSTALL_LOG_FILE}" >&2 || true
   rm "${STDERR_INSTALL_LOG_FILE}"
 }
