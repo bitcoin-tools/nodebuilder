@@ -525,7 +525,7 @@ ensure_sudo_dependency()
         ;;
       debian | ubuntu)
         apt-get update > /dev/null
-        apt-get install -y sudo > /dev/null
+        DEBIAN_FRONTEND=noninteractive apt-get install -y sudo > /dev/null
         ;;
       fedora* | rhel | centos* | rocky | ol)
         dnf install --allowerasing --assumeyes sudo > /dev/null
