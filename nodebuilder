@@ -1704,6 +1704,7 @@ if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
 fi
 
 INITIAL_DATA_ALREADY_SYNCED_IN_MIB="$(($(get_directory_size_in_mib "${BITCOIN_DATA_DIRECTORY}/blocks") + $(get_directory_size_in_mib "${BITCOIN_DATA_DIRECTORY}/chainstate")))"
+readonly INITIAL_DATA_ALREADY_SYNCED_IN_MIB
 log_info "Found data already synced... $((INITIAL_DATA_ALREADY_SYNCED_IN_MIB / MIB_TO_GIB)) GiB."
 
 free_space_in_mib="$(get_free_space_in_mib)"
