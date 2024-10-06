@@ -637,6 +637,21 @@ ensure_xargs_dependency()
   fi
 }
 
+get_directory_size_in_mib()
+{
+  if [ $# -ne 1 ]; then
+    throw_error 'get_directory_size_in_mib() requires 1 argument.'
+  fi
+
+  readonly directory_to_check="$1"
+
+  if [ -d "${directory_to_check}/" ]; then
+    BLOCKSIZE=1M du -d0 "${directory_to_check}" | cut -f1
+  else
+    printf '0\n'
+  fi
+}
+
 get_free_space_in_mib()
 {
   BLOCKSIZE=1M df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
