@@ -417,8 +417,6 @@ jobs:
         include:
           - { arch: aarch64, distro: alpine_latest }
           - { arch: aarch64, distro: ubuntu_latest }
-          - { arch: ppc64le, distro: alpine_latest }
-          - { arch: ppc64le, distro: ubuntu_latest }
           - { arch: riscv64, distro: alpine_latest }
           - { arch: riscv64, distro: ubuntu_latest }
     steps:
