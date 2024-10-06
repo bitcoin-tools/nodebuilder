@@ -1698,42 +1698,12 @@ if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
   set_bitcoin_core_option 'server' '1'
 fi
 
-# Synced data and prune checks
-readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
-if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
-  case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD | NetBSD)
-      INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-      ;;
-    OpenBSD)
-      INITIAL_BLOCKS_SIZE_IN_MIB="$(BLOCKSIZE=1M du -d0 "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-      ;;
-    *)
-      INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-      ;;
-  esac
-else
-  INITIAL_BLOCKS_SIZE_IN_MIB=0
-fi
+INITIAL_BLOCKS_SIZE_IN_MIB="$(get_directory_size_in_mib "${BITCOIN_DATA_DIRECTORY}/blocks")"
 readonly INITIAL_BLOCKS_SIZE_IN_MIB
-readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
-if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
-  case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD | NetBSD)
-      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-      ;;
-    OpenBSD)
-      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(BLOCKSIZE=1M du -d0 "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-      ;;
-    *)
-      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-      ;;
-  esac
-else
-  INITIAL_CHAINSTATE_SIZE_IN_MIB=0
-fi
+INITIAL_CHAINSTATE_SIZE_IN_MIB="$(get_directory_size_in_mib "${BITCOIN_DATA_DIRECTORY}/chainstate")"
 readonly INITIAL_CHAINSTATE_SIZE_IN_MIB
-readonly INITIAL_DATA_ALREADY_SYNCED_IN_MIB=$((INITIAL_BLOCKS_SIZE_IN_MIB + INITIAL_CHAINSTATE_SIZE_IN_MIB))
+INITIAL_DATA_ALREADY_SYNCED_IN_MIB="$((INITIAL_BLOCKS_SIZE_IN_MIB + INITIAL_CHAINSTATE_SIZE_IN_MIB))"
+readonly INITIAL_DATA_ALREADY_SYNCED_IN_MIB
 log_info "Found data already synced... $((INITIAL_DATA_ALREADY_SYNCED_IN_MIB / MIB_TO_GIB)) GiB."
 
 free_space_in_mib="$(get_free_space_in_mib)"
