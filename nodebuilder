@@ -639,17 +639,7 @@ ensure_xargs_dependency()
 
 get_free_space_in_mib()
 {
-  case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD | NetBSD)
-      /bin/df -m "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
-      ;;
-    OpenBSD)
-      BLOCKSIZE=1M df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
-      ;;
-    *)
-      df --output=avail --block-size='1MiB' "${BITCOIN_DATA_DIRECTORY}" | sed 1d
-      ;;
-  esac
+  BLOCKSIZE=1M df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
 }
 
 get_log_timestamp()
