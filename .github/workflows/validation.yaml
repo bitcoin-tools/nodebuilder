@@ -441,7 +441,11 @@ jobs:
             sh -x ./nodebuilder
             [ "$?" -gt 0 ] && echo "nodebuilder exited with status $?" >&2 && exit 1
             find / -name debug.log 2> /dev/null | grep bitcoin || true
-            cp "${HOME}/.bitcoin/debug.log" '/artifacts/'
+            cp "/root/.bitcoin/debug.log" '/artifacts/'
+      - name: find the debug log
+        run: find / -name debug.log
+      - name: find the artifact debug log
+        run: find / -name debug.log | grep artifacts
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
