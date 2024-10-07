@@ -443,6 +443,7 @@ jobs:
             [ "$?" -gt 0 ] && echo "nodebuilder exited with status $?" >&2 && exit 1
             find / -name debug.log 2> /dev/null | grep bitcoin || true
             cp "/root/.bitcoin/debug.log" '/artifacts/'
+            chmod o+r /artifacts/debug.log
       - name: find the debug log
         run: |
           find / -name debug.log 2> /dev/null || true
