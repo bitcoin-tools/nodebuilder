@@ -455,15 +455,15 @@ jobs:
           find / -name debug.log 2> /dev/null || true
       - name: check permissions of artifact log
         run: |
-          ls -l /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
-          ls -l "${HOME}/debug.log"
+          ls -l /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log || true
+          ls -l "${HOME}/debug.log" || true
       - name: Modify the permissions
         run: |
           chmod 777 "${HOME}/artifacts/debug.log"
       - name: check permissions again
         run: |
-          ls -l /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
-          ls -l "${HOME}/debug.log"
+          ls -l /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log || true
+          ls -l "${HOME}/debug.log" || true
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
