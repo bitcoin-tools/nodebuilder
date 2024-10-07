@@ -436,6 +436,7 @@ jobs:
             tput colors
             date -u
             mkdir -p "${PWD}/artifacts"
+            mkdir -p "${HOME}/artifacts"
           dockerRunArgs: --volume "${PWD}/artifacts:/artifacts"
           run: |
             sh -x ./nodebuilder
@@ -443,13 +444,25 @@ jobs:
             find / -name debug.log 2> /dev/null | grep bitcoin || true
             cp "/root/.bitcoin/debug.log" '/artifacts/'
       - name: find the debug log
-        run: find / -name debug.log 2> /dev/null || true
+        run: |
+          find / -name debug.log 2> /dev/null || true
+      - name: copy debug.log artifact to home directory
+        run: |
+          cp /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log ${HOME}/artifacts/
+      - name: find both of the debug logs
+        run: |
+          find / -name debug.log 2> /dev/null || true
       - name: check permissions of artifact log
-        run: ls -l /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
+        run: |
+          ls -l /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
+          ls -l ${HOME}/debug.log
       - name: Modify the permissions
-        run: chmod 777 /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
-      - name: chekc permissions again
-        run: ls -l /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
+        run: |
+          chmod 777 ${HOME}/artifacts/debug.log
+      - name: check permissions again
+        run: |
+          ls -l /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
+          ls -l ${HOME}/debug.log
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
