@@ -436,7 +436,11 @@ jobs:
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
-        if: contains(needs.changes.outputs.docker-files, matrix.dockerfile)
+        if: >-
+          needs.changes.outputs.ci == 'true' ||
+          needs.changes.outputs.dependencies == 'true' ||
+          contains(needs.changes.outputs.docker-files, matrix.dockerfile) ||
+          needs.changes.outputs.shell == 'true'
         uses: docker/build-push-action@v6
         timeout-minutes: 100
         with:
