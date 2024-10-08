@@ -91,12 +91,14 @@ validate_bitcoin_version()
 
 validate_git_ref_short_name()
 {
-  [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ] ||
-    throw_error 'Not inside a Git repository.' "${LINENO}"
-  [ "$(basename "$(git rev-parse --show-toplevel)")" = 'nodebuilder' ] ||
-    throw_error 'Not in the nodebuilder repository.' "${LINENO}"
-  git rev-parse --quiet --verify "$1" ||
-    throw_error "$1 is not a valid branch, tag, or commit." "${LINENO}"
+  if command -v git > /dev/null 2>&1; then
+    [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ] ||
+      throw_error 'Not inside a Git repository.' "${LINENO}"
+    [ "$(basename "$(git rev-parse --show-toplevel)")" = 'nodebuilder' ] ||
+      throw_error 'Not in the nodebuilder repository.' "${LINENO}"
+    git rev-parse --quiet --verify "$1" ||
+      throw_error "$1 is not a valid branch, tag, or commit." "${LINENO}"
+  fi
 }
 
 readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
