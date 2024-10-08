@@ -22,7 +22,6 @@ jobs:
       dependencies: ${{ steps.filter.outputs.dependencies }}
       docker: ${{ steps.filter.outputs.docker }}
       docker-files: ${{ steps.filter.outputs.docker_files }}
-      docker-gentoo: ${{ steps.filter.outputs.docker-gentoo }}
       markdown: ${{ steps.filter.outputs.markdown }}
       helpers: ${{ steps.filter.outputs.helpers }}
       shell: ${{ steps.filter.outputs.shell }}
