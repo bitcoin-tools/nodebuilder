@@ -392,15 +392,14 @@ jobs:
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
             [ -f '/home/bitcoin/.bitcoin/debug.log' ] && cp '/home/bitcoin/.bitcoin/debug.log' .
-            find / -name debug.log 2> /dev/null | grep bitcoin || true
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: openbsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
   
-  run-nodebuilder-riscv:
-    name: Test source on RISC-V
+  run-nodebuilder-qemu:
+    name: Test on QEMU
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
@@ -436,13 +435,10 @@ jobs:
             tput colors
             date -u
             mkdir -p "${PWD}/artifacts"
-            mkdir -p "${HOME}/artifacts"
           dockerRunArgs: --volume "${PWD}/artifacts:/artifacts"
           run: |
-            sh -x ./nodebuilder
-            [ "$?" -gt 0 ] && echo "nodebuilder exited with status $?" >&2 && exit 1
-            find / -name debug.log 2> /dev/null | grep bitcoin || true
-            cp "/root/.bitcoin/debug.log" '/artifacts/'
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            [ -f /root/.bitcoin/debug.log ] && cp /root/.bitcoin/debug.log /artifacts/
             chmod o+r /artifacts/debug.log
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
