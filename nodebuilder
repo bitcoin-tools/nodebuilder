@@ -180,7 +180,7 @@ Comment[ar]=اتصل بشبكة بيتكوين نظير إلى نظير
 Comment[pl]=Połącz z siecią typu peer-to-peer Bitcoin
 Comment[sv]=Anslut till Bitcoin nätverket för peer-to-peer
 Comment[hi]=बिटकॉइन पीयर-टू-पीयर नेटवर्क से कनेक्ट करें
-Exec=sh -c 'if command -v bitcoin-qt > /dev/null 2>&1; then bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}"; else bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}"; fi'
+Exec=${LAUNCH_BITCOIN_CORE_COMMAND}
 Terminal=false
 Type=Application
 Icon=${SHORTCUT_IMAGE_FILE}
@@ -1689,7 +1689,23 @@ elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
 else
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   bitcoin_tarball_download_extract_test_install
+  current_bitcoin_version="${target_bitcoin_version}"
 fi
+
+if
+  command -v bitcoin-qt > /dev/null 2>&1 &&
+    ! is_running_in_ci
+  ! is_running_in_container &&
+    {
+      [ -n "${DISPLAY:-}" ] || [ "${TARGET_KERNEL}" = 'Darwin' ]
+    }
+then
+  LAUNCH_BITCOIN_CORE_COMMAND="bitcoin-qt --datadir=${BITCOIN_DATA_DIRECTORY}"
+elif command -v bitcoind > /dev/null 2>&1; then
+  LAUNCH_BITCOIN_CORE_COMMAND="bitcoind --daemonwait --datadir=${BITCOIN_DATA_DIRECTORY}"
+else
+  throw_error "Failed to install Bitcoin Core ${target_bitcoin_version}."
+fi && readonly LAUNCH_BITCOIN_CORE_COMMAND
 
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
