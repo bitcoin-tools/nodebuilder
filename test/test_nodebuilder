@@ -183,8 +183,7 @@ fi
 # Execute the script with optional command line arguments
 printf 'Executing command: %s\n' "${RUN_NODEBUILDER_COMMAND}"
 if ! ${RUN_NODEBUILDER_COMMAND} \
-  > "${STDOUT_TEST_FILENAME}" \
-  2> "${STDERR_TEST_FILENAME}"; then
+  > "${STDOUT_TEST_FILENAME}"; then
   throw_error "Failed to execute nodebuilder command."
 fi
 
