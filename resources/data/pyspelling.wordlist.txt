@@ -42,6 +42,7 @@ chainstate
 dockerfilelint
 gzip
 hostname
+linter
 linters
 macOS
 nodebuilder
