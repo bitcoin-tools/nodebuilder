@@ -437,10 +437,22 @@ jobs:
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
         if: >-
-          needs.changes.outputs.ci == 'true' ||
-          needs.changes.outputs.dependencies == 'true' ||
-          contains(needs.changes.outputs.docker-files, matrix.dockerfile) ||
-          needs.changes.outputs.shell == 'true'
+          (
+            needs.changes.outputs.ci == 'true' ||
+            needs.changes.outputs.dependencies == 'true' ||
+            contains(needs.changes.outputs.docker-files, matrix.dockerfile) ||
+            needs.changes.outputs.shell == 'true'
+          )
+          &&
+          ( # Only run Gentoo when the Dockerfile changed or on scheduled runs or workflow_dispatch
+            matrix.container != 'Gentoo' ||
+            contains(needs.changes.outputs.docker-files, 'Dockerfile_gentoo') ||
+            (
+              github.event.action == '' &&
+              github.event.before == '' &&
+              github.event.inputs == null
+            )
+          )
         uses: docker/build-push-action@v6
         timeout-minutes: 300
         with:
