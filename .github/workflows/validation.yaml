@@ -151,6 +151,7 @@ jobs:
         with:
           config: 'resources/config/markdownlint.yaml'
           args: '*/*.md'
+          ignore: './docs/pull_request_template.md'
       - name: Check spelling
         uses: rojopolis/spellcheck-github-actions@v0
         with:
