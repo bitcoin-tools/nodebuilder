@@ -1,5 +1,7 @@
 # This is the configuration file for the markdown lint job in the Validation CI workflow.
 
+ignore: './docs/pull_request_template.md'
+
 default: true # includes/excludes all rules by default
 
 # Line length <https://github.com/DavidAnson/markdownlint/blob/master/doc/Rules.md#md013>
