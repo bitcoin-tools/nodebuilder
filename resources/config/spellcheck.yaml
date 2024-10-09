@@ -19,6 +19,11 @@ matrix:
       - code
       - pre
   sources:
-  - '**/*.md'
+  - 'README.md'
   - '.github/ISSUE_TEMPLATE/*.md'
+  - 'docs/CODE_OF_CONDUCT.MD'
+  - 'docs/CONTRIBUTING.MD'
+  - 'docs/SECURITY.MD'
+  - 'docs/lightning.MD'
+  - 'docs/usetor.MD'
   default_encoding: utf-8
