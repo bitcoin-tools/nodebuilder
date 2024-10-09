@@ -445,7 +445,6 @@ jobs:
           )
           &&
           (
-            # Only run Gentoo when the Dockerfile changed or on scheduled runs or workflow_dispatch
             matrix.container != 'Gentoo' ||
             contains(needs.changes.outputs.docker-files, 'Dockerfile_gentoo') ||
             (
