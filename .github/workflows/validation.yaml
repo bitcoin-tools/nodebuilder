@@ -211,7 +211,7 @@ jobs:
       fail-fast: false
       matrix:
         job-purpose: [package, source]
-        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-latest]
+        os: [ubuntu-22.04, ubuntu-24.04, macos-latest]
         include:
           - job-purpose: package
             additional-args: ''
@@ -234,10 +234,6 @@ jobs:
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
-          - os: macos-13
-            os-friendly-name: macOS 13
-            check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
-            path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
           - os: macos-latest
             os-friendly-name: macOS 14
             check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
