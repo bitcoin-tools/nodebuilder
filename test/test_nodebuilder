@@ -28,9 +28,15 @@ get_operating_system()
 handle_exit()
 {
   kill_tail_process
-  [ -f nodebuilder ] && rm nodebuilder
-  [ -f "${STDOUT_TEST_FILENAME}" ] && rm "${STDOUT_TEST_FILENAME}"
-  [ -f "${STDERR_TEST_FILENAME}" ] && rm "${STDERR_TEST_FILENAME}"
+  if [ -f nodebuilder ]; then
+    rm nodebuilder
+  fi
+  if [ -f "${STDOUT_TEST_FILENAME}" ]; then
+    rm "${STDOUT_TEST_FILENAME}"
+  fi
+  if [ -f "${STDERR_TEST_FILENAME}" ]; then
+    rm "${STDERR_TEST_FILENAME}"
+  fi
 }
 
 handle_error()
