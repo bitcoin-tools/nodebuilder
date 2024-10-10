@@ -81,6 +81,9 @@ compile_bitcoin_from_source()
     FreeBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
       ;;
+    NetBSD)
+      ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
+      ;;
     OpenBSD)
       ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
       ;;
@@ -90,7 +93,7 @@ compile_bitcoin_from_source()
   esac
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
-    FreeBSD | OpenBSD)
+    FreeBSD | NetBSD | OpenBSD)
       gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
       ;;
     *)
@@ -100,7 +103,7 @@ compile_bitcoin_from_source()
 
   log_info 'Running compile checks. Please wait.'
   case "${TARGET_KERNEL}" in
-    FreeBSD | OpenBSD)
+    FreeBSD | NetBSD | OpenBSD)
       gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
       ;;
     *)
@@ -112,7 +115,7 @@ compile_bitcoin_from_source()
 
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   case "${TARGET_KERNEL}" in
-    FreeBSD | OpenBSD)
+    FreeBSD | NetBSD | OpenBSD)
       gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
       ;;
     *)
@@ -177,7 +180,7 @@ Comment[ar]=اتصل بشبكة بيتكوين نظير إلى نظير
 Comment[pl]=Połącz z siecią typu peer-to-peer Bitcoin
 Comment[sv]=Anslut till Bitcoin nätverket för peer-to-peer
 Comment[hi]=बिटकॉइन पीयर-टू-पीयर नेटवर्क से कनेक्ट करें
-Exec=sh -c 'if command -v bitcoin-qt > /dev/null 2>&1; then bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}"; else bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}"; fi'
+Exec=${LAUNCH_BITCOIN_CORE_COMMAND}
 Terminal=false
 Type=Application
 Icon=${SHORTCUT_IMAGE_FILE}
@@ -406,7 +409,7 @@ bitcoin_tarball_validate()
 bitcoin_tarball_validate_checksum()
 {
   cd "${TEMP_DIRECTORY}"/
-  if command -v sha256sum > /dev/null; then
+  if command -v sha256sum > /dev/null && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
     SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
   elif command -v shasum > /dev/null; then
     SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
@@ -478,6 +481,11 @@ ensure_curl_dependency()
       FreeBSD)
         sudo pkg install -y curl > /dev/null
         ;;
+      NetBSD)
+        ensure_netbsd_pkgin_dependency
+        sudo pkgin update > /dev/null
+        sudo pkgin -y install curl > /dev/null
+        ;;
       OpenBSD)
         sudo pkg_add curl > /dev/null
         ;;
@@ -499,6 +507,12 @@ ensure_curl_dependency()
     esac
   fi
   command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error at ${NODEBUILDER_REPO}."
+}
+
+ensure_netbsd_pkgin_dependency()
+{
+  hash pkgin 2> /dev/null ||
+    pkg_add "https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${TARGET_ARCHITECTURE}/${TARGET_OPERATING_SYSTEM_RELEASE}/All/pkgin" > /dev/null
 }
 
 ensure_sudo_dependency()
@@ -531,6 +545,11 @@ ensure_sudo_dependency()
       FreeBSD)
         pkg install -y sudo > /dev/null
         ;;
+      NetBSD)
+        ensure_netbsd_pkgin_dependency
+        pkgin update > /dev/null
+        pkgin -y install sudo > /dev/null
+        ;;
       OpenBSD)
         pkg_add sudo-- > /dev/null
         ;;
@@ -551,7 +570,11 @@ ensure_sudo_dependency()
         ;;
     esac
   fi
-  command -v sudo > /dev/null 2>&1 || throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
+  # shellcheck disable=SC2230
+  command -v sudo > /dev/null 2>&1 ||
+    hash sudo 2> /dev/null ||
+    which sudo > /dev/null ||
+    throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
 ensure_xargs_dependency()
@@ -584,6 +607,10 @@ ensure_xargs_dependency()
       FreeBSD)
         sudo pkg install -y findutils > /dev/null
         ;;
+      NetBSD)
+        sudo pkgin update > /dev/null
+        sudo pkgin install findutils
+        ;;
       OpenBSD)
         sudo pkg_add findutils > /dev/null
         ;;
@@ -610,19 +637,24 @@ ensure_xargs_dependency()
   fi
 }
 
+get_directory_size_in_mib()
+{
+  if [ $# -ne 1 ]; then
+    throw_error 'get_directory_size_in_mib() requires 1 argument.'
+  fi
+
+  readonly directory_to_check="$1"
+
+  if [ -d "${directory_to_check}/" ]; then
+    BLOCKSIZE=1M du -d0 "${directory_to_check}" | cut -f1
+  else
+    printf '0\n'
+  fi
+}
+
 get_free_space_in_mib()
 {
-  case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD)
-      /bin/df -m "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
-      ;;
-    OpenBSD)
-      BLOCKSIZE=1M df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
-      ;;
-    *)
-      df --output=avail --block-size='1MiB' "${BITCOIN_DATA_DIRECTORY}" | sed 1d
-      ;;
-  esac
+  BLOCKSIZE=1M df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
 }
 
 get_log_timestamp()
@@ -641,7 +673,7 @@ get_memory_metric_in_mib()
 get_operating_system()
 {
   case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD | OpenBSD)
+    Darwin | FreeBSD | NetBSD | OpenBSD)
       printf '%s\n' "${TARGET_KERNEL}"
       ;;
     *)
@@ -700,6 +732,9 @@ install_build_dependencies()
     FreeBSD)
       install_build_dependencies_freebsd
       ;;
+    NetBSD)
+      install_build_dependencies_netbsd
+      ;;
     OpenBSD)
       install_build_dependencies_openbsd
       ;;
@@ -747,7 +782,7 @@ install_build_dependencies_aptget()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
   # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
-  DEBIAN_FRONTEND=noninteractive sudo apt-get -qq install --assume-yes --no-install-recommends gcc-12
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends gcc-12 > /dev/null 2>&1
 }
 
 install_build_dependencies_darwin()
@@ -818,6 +853,18 @@ install_build_dependencies_freebsd()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
+}
+
+install_build_dependencies_netbsd()
+{
+  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_netbsd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  printf '%s\n' "${dependencies}" | xargs sudo pkgin -y install > /dev/null
+  # TODO: Remove gcc-12 installation on next line when NetBSD updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
+  sudo pkgin -y install gcc12 && export PATH="/usr/pkg/gcc12/bin:${PATH}"
 }
 
 install_build_dependencies_openbsd()
@@ -911,6 +958,9 @@ install_runtime_dependencies()
       ;;
     FreeBSD)
       install_runtime_dependencies_freebsd
+      ;;
+    NetBSD)
+      install_runtime_dependencies_netbsd
       ;;
     OpenBSD)
       install_runtime_dependencies_openbsd
@@ -1026,6 +1076,16 @@ install_runtime_dependencies_freebsd()
   printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
 }
 
+install_runtime_dependencies_netbsd()
+{
+  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_netbsd.txt"
+  command -v torsocks > /dev/null 2>&1 &&
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
+  [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
+  printf '%s\n' "${dependencies}" | xargs sudo pkgin -y install > /dev/null
+}
+
 install_runtime_dependencies_openbsd()
 {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_openbsd.txt"
@@ -1096,6 +1156,9 @@ install_system_updates()
       ;;
     FreeBSD)
       install_system_updates_freebsd
+      ;;
+    NetBSD)
+      install_system_updates_netbsd
       ;;
     OpenBSD)
       install_system_updates_openbsd
@@ -1192,6 +1255,14 @@ install_system_updates_freebsd()
 {
   sudo pkg update > /dev/null
   sudo pkg upgrade --yes > /dev/null
+}
+
+install_system_updates_netbsd()
+{
+  hash pkgin 2> /dev/null ||
+    pkg_add pkgin > /dev/null
+  sudo pkgin update > /dev/null
+  sudo pkgin upgrade
 }
 
 install_system_updates_openbsd()
@@ -1307,7 +1378,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.9.1'
+  printf '%s\n' 'nodebuilder 1.10.0'
   printf '%s\n' 'Copyright (C) 2024 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1398,9 +1469,9 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.11.0 0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 \0.14.3 0.15.2 \
     0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
-    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1'
+    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 28.0'
 
-target_bitcoin_version='27.1'
+target_bitcoin_version='28.0'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
@@ -1481,15 +1552,22 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-TEMP_DIRECTORY="$(mktemp -d)" && readonly TEMP_DIRECTORY
 TARGET_ARCHITECTURE="$(uname -m)" && readonly TARGET_ARCHITECTURE
 TARGET_KERNEL="$(uname -s)" && readonly TARGET_KERNEL
 TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_SYSTEM
+TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)" && readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.9.1'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v1.10.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
+
+if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
+  # To satisfy disk space in NetBSD CI runner
+  TEMP_DIRECTORY="${HOME}/nodebuilder_temp"
+else
+  TEMP_DIRECTORY="$(mktemp -d)"
+fi && readonly TEMP_DIRECTORY
 
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
@@ -1498,7 +1576,7 @@ case "${TARGET_KERNEL}" in
   Darwin)
     SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
     ;;
-  OpenBSD)
+  NetBSD | OpenBSD)
     SYS_CORES_COUNT="$(sysctl -n hw.ncpu)"
     ;;
   MINGW* | Cygwin)
@@ -1507,8 +1585,7 @@ case "${TARGET_KERNEL}" in
   *)
     throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
     ;;
-esac
-readonly SYS_CORES_COUNT
+esac && readonly SYS_CORES_COUNT
 readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 
 ensure_sudo_dependency
@@ -1525,7 +1602,7 @@ fi
 
 clear_the_terminal
 case "${TARGET_KERNEL}" in
-  Linux | FreeBSD | OpenBSD)
+  Linux | FreeBSD | NetBSD | OpenBSD)
     log_info "Detected: running ${TARGET_KERNEL}."
     TARGET_BITCOIN_TARBALL_OS='linux-gnu'
     if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
@@ -1613,6 +1690,7 @@ elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ] ||
+  [ "${TARGET_OPERATING_SYSTEM}" = 'NetBSD' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'OpenBSD' ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   compile_bitcoin_from_source
@@ -1620,7 +1698,23 @@ elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
 else
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   bitcoin_tarball_download_extract_test_install
+  current_bitcoin_version="${target_bitcoin_version}"
 fi
+
+if
+  command -v bitcoin-qt > /dev/null 2>&1 &&
+    ! is_running_in_ci
+  ! is_running_in_container &&
+    {
+      [ -n "${DISPLAY:-}" ] || [ "${TARGET_KERNEL}" = 'Darwin' ]
+    }
+then
+  LAUNCH_BITCOIN_CORE_COMMAND="bitcoin-qt --datadir=${BITCOIN_DATA_DIRECTORY}"
+elif command -v bitcoind > /dev/null 2>&1; then
+  LAUNCH_BITCOIN_CORE_COMMAND="bitcoind --daemonwait --datadir=${BITCOIN_DATA_DIRECTORY}"
+else
+  throw_error "Failed to install Bitcoin Core ${target_bitcoin_version}."
+fi && readonly LAUNCH_BITCOIN_CORE_COMMAND
 
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
@@ -1634,42 +1728,8 @@ if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
   set_bitcoin_core_option 'server' '1'
 fi
 
-# Synced data and prune checks
-readonly BITCOIN_CORE_BLOCKS_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/blocks"
-if [ -d "${BITCOIN_CORE_BLOCKS_DIRECTORY}"/ ]; then
-  case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD)
-      INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-      ;;
-    OpenBSD)
-      INITIAL_BLOCKS_SIZE_IN_MIB="$(BLOCKSIZE=1M du -d0 "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-      ;;
-    *)
-      INITIAL_BLOCKS_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_BLOCKS_DIRECTORY}" | cut -f1)"
-      ;;
-  esac
-else
-  INITIAL_BLOCKS_SIZE_IN_MIB=0
-fi
-readonly INITIAL_BLOCKS_SIZE_IN_MIB
-readonly BITCOIN_CORE_CHAINSTATE_DIRECTORY="${BITCOIN_DATA_DIRECTORY}/chainstate"
-if [ -d "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}"/ ]; then
-  case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD)
-      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 -m "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-      ;;
-    OpenBSD)
-      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(BLOCKSIZE=1M du -d0 "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-      ;;
-    *)
-      INITIAL_CHAINSTATE_SIZE_IN_MIB="$(du -d0 --block-size='1MiB' "${BITCOIN_CORE_CHAINSTATE_DIRECTORY}" | cut -f1)"
-      ;;
-  esac
-else
-  INITIAL_CHAINSTATE_SIZE_IN_MIB=0
-fi
-readonly INITIAL_CHAINSTATE_SIZE_IN_MIB
-readonly INITIAL_DATA_ALREADY_SYNCED_IN_MIB=$((INITIAL_BLOCKS_SIZE_IN_MIB + INITIAL_CHAINSTATE_SIZE_IN_MIB))
+INITIAL_DATA_ALREADY_SYNCED_IN_MIB="$(($(get_directory_size_in_mib "${BITCOIN_DATA_DIRECTORY}/blocks") + $(get_directory_size_in_mib "${BITCOIN_DATA_DIRECTORY}/chainstate")))"
+readonly INITIAL_DATA_ALREADY_SYNCED_IN_MIB
 log_info "Found data already synced... $((INITIAL_DATA_ALREADY_SYNCED_IN_MIB / MIB_TO_GIB)) GiB."
 
 free_space_in_mib="$(get_free_space_in_mib)"
@@ -1732,7 +1792,7 @@ fi
 
 # Memory checks
 case "${TARGET_KERNEL}" in
-  Darwin | FreeBSD | OpenBSD) ;;
+  Darwin | FreeBSD | NetBSD | OpenBSD) ;;
   *)
     PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')" && readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
     PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')" && readonly PHYSICAL_MEMORY_FREE_IN_MIB
@@ -1847,7 +1907,7 @@ while [ "${ibd_status}" = 'true' ]; do
     printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
 
     case "${TARGET_KERNEL}" in
-      Darwin | FreeBSD | OpenBSD)
+      Darwin | FreeBSD | NetBSD | OpenBSD)
         current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
         ;;
       *)
