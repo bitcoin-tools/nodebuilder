@@ -22,7 +22,6 @@ jobs:
       dependencies: ${{ steps.filter.outputs.dependencies }}
       docker: ${{ steps.filter.outputs.docker }}
       docker-files: ${{ steps.filter.outputs.docker_files }}
-      docker-gentoo: ${{ steps.filter.outputs.docker-gentoo }}
       markdown: ${{ steps.filter.outputs.markdown }}
       helpers: ${{ steps.filter.outputs.helpers }}
       shell: ${{ steps.filter.outputs.shell }}
@@ -464,6 +463,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { container: Gentoo, dockerfile: Dockerfile_gentoo }
           - { container: Alpine, dockerfile: Dockerfile_alpine }
           - { container: Amazon Linux, dockerfile: Dockerfile_amazonlinux }
           - { container: Arch, dockerfile: Dockerfile_archlinux }
@@ -485,38 +485,24 @@ jobs:
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
         if: >-
-          needs.changes.outputs.ci == 'true' ||
-          needs.changes.outputs.dependencies == 'true' ||
-          contains(needs.changes.outputs.docker-files, matrix.dockerfile) ||
-          needs.changes.outputs.shell == 'true'
+          (
+            needs.changes.outputs.ci == 'true' ||
+            needs.changes.outputs.dependencies == 'true' ||
+            contains(needs.changes.outputs.docker-files, matrix.dockerfile) ||
+            needs.changes.outputs.shell == 'true'
+          )
+          &&
+          (
+            matrix.container != 'Gentoo' ||
+            contains(needs.changes.outputs.docker-files, 'Dockerfile_gentoo') ||
+            (
+              github.event.action == '' &&
+              github.event.before == '' &&
+              github.event.inputs == null
+            )
+          )
         uses: docker/build-push-action@v6
-        timeout-minutes: 100
-        with:
-          build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
-          context: .
-          file: docker/${{ matrix.dockerfile }}
-
-  run-nodebuilder-gentoo:
-    name: Docker image for ${{ matrix.container }}
-    needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
-    if: >-
-      needs.changes.outputs.docker-gentoo == 'true' ||
-      ( github.event.action == '' &&
-        github.event.before == '' &&
-        github.event.inputs == null )
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        container: [Gentoo]
-        include:
-          - { container: Gentoo, dockerfile: Dockerfile_gentoo }
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check the current OS version
-        run: grep 'VERSION\|ID' /etc/os-release && uname -a
-      - name: Build the ${{ matrix.container }} docker image
-        timeout-minutes: 200
-        uses: docker/build-push-action@v6
+        timeout-minutes: 300
         with:
           build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .

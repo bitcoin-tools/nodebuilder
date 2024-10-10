@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Gentoo is known for its customization, optimization at the expense of image build time.
+# Gentoo is known for its customization, optimization at the expense of image build time.asdf
 # This Dockerfile offers a stable base image but takes extra time to compile all dependencies.
 FROM gentoo/stage3:latest@sha256:2acd0df1f811a71df73a639fab369d317b8c95717b66204d7e45a3cd1d606ec4
 

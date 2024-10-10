@@ -5,6 +5,7 @@ ArmanTheParman
 BTRFS
 DNF
 ECC
+Exif
 FreeBSD
 GPT
 LTS
@@ -41,6 +42,8 @@ chainstate
 dockerfilelint
 gzip
 hostname
+linter
+linters
 macOS
 nodebuilder
 openSUSE
