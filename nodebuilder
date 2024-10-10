@@ -1268,14 +1268,14 @@ log_error()
 
 log_info()
 {
-  if [ "${quiet_mode}" = 'false' ]; then
+  if [ "${quiet_output}" = 'false' ]; then
     printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
   fi
 }
 
 log_success()
 {
-  if [ "${quiet_mode}" = 'false' ]; then
+  if [ "${quiet_output}" = 'false' ]; then
     printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
     reset_console_color
     printf '\n'
