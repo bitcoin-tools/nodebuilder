@@ -1448,6 +1448,7 @@ while [ $# -gt 0 ]; do
       ;;
     -q | --quiet)
       quiet_output='true'
+      ;;
     -r | --skip-reboot)
       skip_system_update_reboot='true'
       ;;
