@@ -1268,14 +1268,18 @@ log_error()
 
 log_info()
 {
-  printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
+  if [ "${quiet_mode}" = 'false' ]; then
+    printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
+  fi
 }
 
 log_success()
 {
-  printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
-  reset_console_color
-  printf '\n'
+  if [ "${quiet_mode}" = 'false' ]; then
+    printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
+    reset_console_color
+    printf '\n'
+  fi
 }
 
 log_warning()
@@ -1293,6 +1297,7 @@ print_usage()
   printf '%s\n' '-c, --compile           Build Bitcoin from source'
   printf '%s\n' '-h, --help              Display this help message'
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
+  printf '%s\n' '-q, --quiet             Suppress standard output'
   printf '%s\n' '-r, --skip-reboot       Skip reboot on system updates'
   printf '%s\n' '-s, --skip-update       Skip install of system updates'
   printf '%s\n' '-t, --test              Run unit tests on functions'
@@ -1399,6 +1404,7 @@ target_bitcoin_version='27.1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
+quiet_output='false'
 skip_system_update='false'
 skip_system_update_reboot='false'
 unattended='false'
@@ -1440,6 +1446,8 @@ while [ $# -gt 0 ]; do
       prune_value="$2"
       shift
       ;;
+    -q | --quiet)
+      quiet_output='true'
     -r | --skip-reboot)
       skip_system_update_reboot='true'
       ;;
