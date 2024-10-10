@@ -409,7 +409,7 @@ bitcoin_tarball_validate()
 bitcoin_tarball_validate_checksum()
 {
   cd "${TEMP_DIRECTORY}"/
-  if command -v sha256sum > /dev/null; then
+  if command -v sha256sum > /dev/null && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
     SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
   elif command -v shasum > /dev/null; then
     SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
