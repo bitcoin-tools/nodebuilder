@@ -524,8 +524,11 @@ ensure_sudo_dependency()
         apk --quiet add sudo
         ;;
       debian | ubuntu)
+        readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
         apt-get update > /dev/null
-        DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --quiet sudo > /dev/null
+        DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --quiet sudo > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
+        grep -v 'apt-utils' "${STDERR_INSTALL_LOG_FILE}" >&2 || true
+        rm "${STDERR_INSTALL_LOG_FILE}"
         ;;
       fedora* | rhel | centos* | rocky | ol)
         dnf install --allowerasing --assumeyes sudo > /dev/null
