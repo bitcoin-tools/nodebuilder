@@ -391,13 +391,60 @@ jobs:
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
-            find / -name debug.log 2> /dev/null | grep bitcoin || true
+            [ -f '/home/bitcoin/.bitcoin/debug.log' ] && cp '/home/bitcoin/.bitcoin/debug.log' .
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: openbsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
+  
+  run-nodebuilder-qemu:
+    name: Test on QEMU
+    needs: [changes, shell-lint, yaml-lint]
+    if: >-
+      ${{
+        github.event.action == 'prerelease' ||
+        github.event.action == 'published' ||
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.dependencies == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: aarch64, distro: alpine_latest }
+          - { arch: aarch64, distro: ubuntu_latest }
+          - { arch: riscv64, distro: alpine_latest }
+          - { arch: riscv64, distro: ubuntu_latest }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test the console output
+        uses: uraimo/run-on-arch-action@v2
+        timeout-minutes: 330
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          githubToken: ${{ github.token }}
+          setup: |
+            echo "${TERM:-TERM is not found}"
+            uname -a
+            id -u
+            df -h
+            tput colors
+            date -u
+            mkdir -p "${PWD}/artifacts"
+          dockerRunArgs: --volume "${PWD}/artifacts:/artifacts"
+          run: |
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            [ -f /root/.bitcoin/debug.log ] && cp /root/.bitcoin/debug.log /artifacts/
+            chmod o+r /artifacts/debug.log
+      - name: Save Bitcoin Core log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.distro }}-${{ matrix.arch }}-bitcoin-debug.log
+          path: /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
