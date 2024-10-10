@@ -20,5 +20,6 @@ matrix:
       - pre
   sources:
   - '**/*.md'
+  - '**/*.MD'
   - '.github/ISSUE_TEMPLATE/*.md'
   default_encoding: utf-8
