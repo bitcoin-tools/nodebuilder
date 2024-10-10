@@ -20,6 +20,7 @@ ProArt
 POSIX
 Proxmox
 PySpelling
+README
 RHEL
 SATA
 ShellCheck
