@@ -38,7 +38,7 @@ check_internet_to_address()
 
 clear_the_terminal()
 {
-  if is_running_in_ci || is_running_in_container; then
+  if [ "${quiet_output}" = 'true' ] || is_running_in_ci || is_running_in_container; then
     return
   elif [ ! -t 1 ]; then
     # stdout is not a terminal perhaps redirected or piped
