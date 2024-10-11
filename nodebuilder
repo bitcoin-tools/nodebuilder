@@ -1869,9 +1869,9 @@ if [ "${ibd_status}" = 'true' ]; then
       log_info 'Disabling system sleep, suspend, and hibernate.'
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
-    log_info "Close this Terminal window by clicking on the 'X'."
-    log_info "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
   fi
+  log_info "Close this Terminal window by clicking on the 'X'."
+  log_info "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
   sleep "${SLEEP_TIME_SECONDS}"
 else
   log_info 'Your node has already synced the blockchain.'
