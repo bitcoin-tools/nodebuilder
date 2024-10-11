@@ -240,7 +240,8 @@ bitcoin_tarball_download_validate()
     *)
       BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
       ;;
-  esac && readonly BITCOIN_SOURCE
+  esac
+  readonly BITCOIN_SOURCE
   readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
   readonly BITCOIN_HASH_FILENAME='SHA256SUMS'
   readonly BITCOIN_HASH_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_HASH_FILENAME}"
@@ -379,7 +380,8 @@ bitcoin_tarball_test()
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
     codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
   fi
-  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)" && readonly UNIT_TEST_RESPONSE
+  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
+  readonly UNIT_TEST_RESPONSE
   case "${UNIT_TEST_RESPONSE}" in
     *'No errors detected'*) ;;
     *)
@@ -393,7 +395,8 @@ bitcoin_tarball_validate()
 {
   bitcoin_tarball_validate_checksum
 
-  GPG_GOOD_SIGNATURE_COUNT="$(bitcoin_tarball_validate_count_signatures)" && readonly GPG_GOOD_SIGNATURE_COUNT
+  GPG_GOOD_SIGNATURE_COUNT="$(bitcoin_tarball_validate_count_signatures)"
+  readonly GPG_GOOD_SIGNATURE_COUNT
   if [ "${GPG_GOOD_SIGNATURE_COUNT}" -lt "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
     throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILE}."
   fi
@@ -681,8 +684,10 @@ get_operating_system()
       printf '%s\n' "${TARGET_KERNEL}"
       ;;
     *)
-      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID
-      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)" && readonly OS_RELEASE_ID_LIKE
+      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
+      readonly OS_RELEASE_ID
+      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+      readonly OS_RELEASE_ID_LIKE
       if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
         printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
       else
@@ -805,7 +810,8 @@ install_build_dependencies_darwin()
 install_build_dependencies_dnf()
 {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_dnf.txt"
-  OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)" && readonly OS_MAJOR_VERSION_ID
+  OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
+  readonly OS_MAJOR_VERSION_ID
 
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
     amzn)
@@ -1031,11 +1037,14 @@ install_runtime_dependencies_darwin()
     log_info 'Ensuring git dependency via the Xcode Command Line Tools.'
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
-    CLT_INSTALL_IN_PROGRESS='/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress' && readonly CLT_INSTALL_IN_PROGRESS
+    CLT_INSTALL_IN_PROGRESS='/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress'
+    readonly CLT_INSTALL_IN_PROGRESS
     sudo touch "${CLT_INSTALL_IN_PROGRESS}"
     CLT_LABEL_COMMAND="/usr/sbin/softwareupdate -l | grep -B 1 -E 'Command Line Tools' | awk -F'*' '/^ *\\*/ {print \$2}' | \
-      sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'" && readonly CLT_LABEL_COMMAND
-    CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")" && readonly CLT_LABEL
+      sed -e 's/^ *Label: //' -e 's/^ *//' | sort -V | tail -n1 | tr -d '\n'"
+    readonly CLT_LABEL_COMMAND
+    CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
+    readonly CLT_LABEL
     if [ -n "${CLT_LABEL}" ]; then
       sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" > /dev/null
     else
@@ -1558,18 +1567,20 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-case "$(uname -m)" in
+TARGET_ARCHITECTURE=$(uname -m)
+case "$TARGET_ARCHITECTURE" in
   ppc64le)
     TARGET_ARCHITECTURE='powerpc64'
     ;;
-  *)
-    TARGET_ARCHITECTURE="$(uname -m)"
-    ;;
-esac && readonly TARGET_ARCHITECTURE
-
-TARGET_KERNEL="$(uname -s)" && readonly TARGET_KERNEL
-TARGET_OPERATING_SYSTEM="$(get_operating_system)" && readonly TARGET_OPERATING_SYSTEM
-TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)" && readonly TARGET_OPERATING_SYSTEM_RELEASE
+  *) ;;
+esac
+readonly TARGET_ARCHITECTURE
+TARGET_KERNEL="$(uname -s)"
+readonly TARGET_KERNEL
+TARGET_OPERATING_SYSTEM="$(get_operating_system)"
+readonly TARGET_OPERATING_SYSTEM
+TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)"
+readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
@@ -1581,7 +1592,8 @@ if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
   TEMP_DIRECTORY="${HOME}/nodebuilder_temp"
 else
   TEMP_DIRECTORY="$(mktemp -d)"
-fi && readonly TEMP_DIRECTORY
+fi
+readonly TEMP_DIRECTORY
 
 case "${TARGET_KERNEL}" in
   Linux | FreeBSD)
@@ -1599,7 +1611,8 @@ case "${TARGET_KERNEL}" in
   *)
     throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
     ;;
-esac && readonly SYS_CORES_COUNT
+esac
+readonly SYS_CORES_COUNT
 readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 
 ensure_sudo_dependency
@@ -1728,7 +1741,8 @@ elif command -v bitcoind > /dev/null 2>&1; then
   LAUNCH_BITCOIN_CORE_COMMAND="bitcoind --daemonwait --datadir=${BITCOIN_DATA_DIRECTORY}"
 else
   throw_error "Failed to install Bitcoin Core ${target_bitcoin_version}."
-fi && readonly LAUNCH_BITCOIN_CORE_COMMAND
+fi
+readonly LAUNCH_BITCOIN_CORE_COMMAND
 
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
@@ -1808,14 +1822,19 @@ fi
 case "${TARGET_KERNEL}" in
   Darwin | FreeBSD | NetBSD | OpenBSD) ;;
   *)
-    PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')" && readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
-    PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')" && readonly PHYSICAL_MEMORY_FREE_IN_MIB
-    SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')" && readonly SWAP_MEMORY_TOTAL_IN_MIB
-    SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')" && readonly SWAP_MEMORY_FREE_IN_MIB
+    PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')"
+    readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
+    PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')"
+    readonly PHYSICAL_MEMORY_FREE_IN_MIB
+    SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')"
+    readonly SWAP_MEMORY_TOTAL_IN_MIB
+    SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')"
+    readonly SWAP_MEMORY_FREE_IN_MIB
     readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
     readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
     free_memory="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
-    TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')" && readonly TOTAL_MEMORY
+    TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')"
+    readonly TOTAL_MEMORY
     log_info "Checking system memory... ${free_memory} of ${TOTAL_MEMORY} GiB free."
 
     if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
