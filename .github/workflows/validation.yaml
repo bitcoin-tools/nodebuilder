@@ -212,8 +212,7 @@ jobs:
         job-purpose: [package, source]
         os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-latest, macos-15]
         exclude:
-          - job-purpose: source
-          - os: macos-13
+          - { job-purpose: source, os: macos-13 }
         include:
           - job-purpose: package
             additional-args: ''
