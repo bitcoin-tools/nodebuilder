@@ -1568,7 +1568,7 @@ readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
 TARGET_ARCHITECTURE=$(uname -m)
-case "$TARGET_ARCHITECTURE" in
+case "${TARGET_ARCHITECTURE}" in
   ppc64le)
     TARGET_ARCHITECTURE='powerpc64'
     ;;
