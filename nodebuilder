@@ -397,6 +397,7 @@ bitcoin_tarball_validate()
 
   GPG_GOOD_SIGNATURE_COUNT="$(bitcoin_tarball_validate_count_signatures)"
   readonly GPG_GOOD_SIGNATURE_COUNT
+  log_debug "GPG_GOOD_SIGNATURE_COUNT=${GPG_GOOD_SIGNATURE_COUNT}"
   if [ "${GPG_GOOD_SIGNATURE_COUNT}" -lt "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
     throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILE}."
   fi
@@ -1356,6 +1357,11 @@ log_success()
   printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
+}
+
+log_verbose()
+{
+  printf '[%s] DEBUG: %s\n' "$(get_log_timestamp)" "$*"
 }
 
 log_warning()
