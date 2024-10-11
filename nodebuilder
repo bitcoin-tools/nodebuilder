@@ -1596,7 +1596,7 @@ if is_running_in_ci ||
   sudo --validate --noninteractive > /dev/null 2>&1; then
   :
 else
-  printf '%s\n' 'Please enter your password to log in, if requested.'
+  log_info 'Please enter your password to log in, if requested.'
   sudo --validate
 fi
 
@@ -1617,9 +1617,11 @@ case "${TARGET_KERNEL}" in
     ;;
   Darwin)
     log_info 'Detected: running macOS.'
-    [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
     TARGET_BITCOIN_TARBALL_OS='apple-darwin'
     BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
+    if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && [ "${quiet_output}" = 'false' ]; then
+      display_macos_warning
+    fi
     ;;
   *)
     throw_error "Unknown target kernel type '${TARGET_KERNEL}'."
@@ -1632,10 +1634,12 @@ readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
 
 check_internet_status
+
 [ "${skip_system_update:-false}" = 'true' ] ||
   [ "${TARGET_KERNEL}" = 'Darwin' ] ||
   is_running_in_ci ||
   install_system_updates
+
 install_runtime_dependencies
 
 if command -v bitcoind > /dev/null 2>&1; then
