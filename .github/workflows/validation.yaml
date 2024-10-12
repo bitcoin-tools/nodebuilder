@@ -431,6 +431,7 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
+          dockerRunArgs: --volume "${PWD}/artifacts:/artifacts"
           githubToken: ${{ github.token }}
           setup: |
             echo "${TERM:-TERM is not found}"
@@ -440,7 +441,6 @@ jobs:
             tput colors
             date -u
             mkdir -p "${PWD}/artifacts"
-          dockerRunArgs: --volume "${PWD}/artifacts:/artifacts"
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             [ -f /root/.bitcoin/debug.log ] && cp /root/.bitcoin/debug.log /artifacts/
