@@ -400,7 +400,7 @@ jobs:
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
   
   run-nodebuilder-qemu:
-    name: Test on qemu
+    name: Test {matrix.job-purpose}
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
@@ -416,6 +416,11 @@ jobs:
       matrix:
         arch: [aarch64, riscv64]
         distro: [alpine_latest, ubuntu_latest]
+        include:
+          - distro: alpine_latest
+            job-purpose: source
+          - distro: ubuntu_latest
+            job-purpose: package
     steps:
       - uses: actions/checkout@v4
       - name: Test the console output
