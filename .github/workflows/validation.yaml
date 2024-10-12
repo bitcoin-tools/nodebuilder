@@ -456,7 +456,7 @@ jobs:
           path: /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
 
   run-nodebuilder-docker:
-    name: Build Dockerfile for ${{ matrix.container }}
+    name: Build docker image for ${{ matrix.container }}
     needs: [changes, dockerfile-lint, shell-lint, yaml-lint]
     if: >-
       github.event.action != 'prerelease' &&
