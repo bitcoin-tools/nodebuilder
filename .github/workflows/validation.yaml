@@ -400,7 +400,7 @@ jobs:
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
   
   run-nodebuilder-qemu:
-    name: Test {matrix.job-purpose}
+    name: Test ${{ matrix.job-purpose }}
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
