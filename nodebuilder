@@ -68,6 +68,7 @@ compile_bitcoin_from_source()
   cd "${COMPILE_DIRECTORY}"/
 
   log_info 'Analyzing hardware configuration.'
+  # shellcheck disable=SC2230
   command -v autoreconf > /dev/null 2>&1 ||
     hash autoreconf > /dev/null 2>&1 ||
     which autoreconf > /dev/null 2>&1 ||
