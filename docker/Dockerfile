@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Ubuntu is known for its popularity and user-friendly design.
 # This Dockerfile offers a balance between stability, security, and modernity.
-FROM ubuntu:latest@sha256:ab64a8382e935382638764d8719362bb50ee418d944c1f3d26e0c99fae49a345
+FROM ubuntu:latest@sha256:99c35190e22d294cdace2783ac55effc69d32896daaa265f0bbedbcde4fbe3e5
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
