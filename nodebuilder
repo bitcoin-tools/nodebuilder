@@ -4,6 +4,7 @@
 
 set -o errexit
 set -o nounset
+set -x
 
 check_dpkg_lock()
 {
@@ -68,10 +69,16 @@ compile_bitcoin_from_source()
   cd "${COMPILE_DIRECTORY}"/
 
   log_info 'Analyzing hardware configuration.'
+  log_info 'DEBUG searching for autoreconf without sudo'
+  find / -name autoreconf 2> /dev/null
+  log_info 'DEBUG searching for autoreconf with sudo'
+  sudo find / -name autoreconf 2> /dev/null
+  # shellcheck disable=SC2230
   command -v autoreconf > /dev/null 2>&1 ||
+    hash autoreconf > /dev/null 2>&1 ||
+    which autoreconf > /dev/null 2>&1 ||
     throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
-  ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-  grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
+  ./autogen.sh
 
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
