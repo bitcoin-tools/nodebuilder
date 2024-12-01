@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Debian is the foundation of countless other distributions, including Ubuntu and Linux Mint.
 # This Dockerfile is ideal for users who want a stable, secure, and lightweight environment.
-FROM kalilinux/kali-last-release@sha256:af469cf8213605914eb927ce86bc19a0079aaf1c228f88bcafce62eea65046ee
+FROM kalilinux/kali-last-release@sha256:dc3eb18c5a7b0ffcd110c23601fa192ac6b52d5ee0f16b7a14e9a43c3ea6545c
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
