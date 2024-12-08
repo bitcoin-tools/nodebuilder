@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Manjaro focuses on user-friendliness and accessibility.
 # This Dockerfile is ideal for users who want a balance of control and convenience.
-FROM manjarolinux/base:latest@sha256:bbe1b017244f251a60e412570e18ea537d5341f3e068c55b79fd33419e407770
+FROM manjarolinux/base:latest@sha256:0775087a6bfe53a2ca6c62ef326bb1937de8cae805fcc17e755eb3577a90c8ee
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
