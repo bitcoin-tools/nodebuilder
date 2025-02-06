@@ -425,6 +425,8 @@ jobs:
         include:
           - distro: ubuntu_latest
             job-purpose: package
+          - distro: ubuntu_latest
+            job-purpose: source
           - distro: alpine_latest
             job-purpose: source
     steps:
