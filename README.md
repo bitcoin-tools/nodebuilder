@@ -62,7 +62,7 @@ chmod u+x nodebuilder
 | `-c` | `--compile` | Build Bitcoin from source. | No arguments |
 | `-h` | `--help` | Display the help message. | No arguments<br>_Supercedes other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. | One argument<br>For example: `-p 50000` |
-| `-q` | `--quiet` | Suppress stdout unless unexpected behavior is detected. | No arguments |
+| `-q` | `--quiet` | Suppress output unless unexpected behavior is detected. | No arguments |
 | `-r` | `--skip-reboot` | Skip reboot after installing system update. | No arguments |
 | `-s` | `--skip-update` | Skip installation of system updates. | No arguments |
 | `-t` | `--test` | Run unit tests on functions. | No arguments |
