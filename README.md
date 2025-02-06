@@ -56,16 +56,17 @@ chmod u+x nodebuilder
 
 `nodebuilder` supports optional arguments to override the default semi-automated settings:
 
-| Short | Long Version | Description |
-|:-----:|:-------------|:------------|
-| `-b` | `--bitcoin-version` | Specify the Bitcoin version. Requires one argument, for example: `-b 28.0` |
-| `-c` | `--compile` | Build Bitcoin from source. Requires no arguments. |
-| `-h` | `--help` | Display the help message. _Overrides all other arguments._ |
-| `-p` | `--prune` | Set a prune value in MiB. Requires one argument, for example: `-p 50000` |
-| `-r` | `--skip-reboot` | Skip reboot after installing system update. Requires no arguments. |
-| `-s` | `--skip-update` | Skip installation of system updates. Requires no arguments. |
-| `-t` | `--test` | Run unit tests on functions. |
-| `-u` | `--unattended` | Run in non-interactive mode. Requires no arguments. |
+| Short | Long Version | Description | Arguments |
+|:-----:|:-------------|:------------|:----------|
+| `-b` | `--bitcoin-version` | Specify the Bitcoin version. | One argument<br>For example: `-b 28.0` |
+| `-c` | `--compile` | Build Bitcoin from source. | No arguments |
+| `-h` | `--help` | Display the help message. | No arguments<br>_Supercedes other arguments._ |
+| `-p` | `--prune` | Set a prune value in MiB. | One argument<br>For example: `-p 50000` |
+| `-q` | `--quiet` | Suppress stdout unless unexpected behavior is detected. | No arguments |
+| `-r` | `--skip-reboot` | Skip reboot after installing system update. | No arguments |
+| `-s` | `--skip-update` | Skip installation of system updates. | No arguments |
+| `-t` | `--test` | Run unit tests on functions. | No arguments |
+| `-u` | `--unattended` | Run in non-interactive mode. | No arguments |
 
 You can set multiple options. Here are two ways to compile Bitcoin 28.0 unattended with a 50000 MiB prune:
 
