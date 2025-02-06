@@ -901,6 +901,11 @@ install_build_dependencies_openbsd()
     export AUTOCONF_VERSION
   AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
     export AUTOMAKE_VERSION
+
+  [ -f /usr/local/bin/autoconf-2.72 ] &&
+    sudo ln -s /usr/local/bin/autoconf-2.72 /usr/local/bin/autoconf-2.72p0
+  [ -f /usr/local/bin/autoreconf-2.72 ] &&
+    sudo ln -s /usr/local/bin/autoreconf-2.72 /usr/local/bin/autoreconf-2.72p0
 }
 
 install_build_dependencies_pacman()
