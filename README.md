@@ -60,7 +60,7 @@ chmod u+x nodebuilder
 |:-----:|:-------------|:------------|:----------|
 | `-b` | `--bitcoin-version` | Specify the Bitcoin version. | One argument<br>For example: `-b 28.0` |
 | `-c` | `--compile` | Build Bitcoin from source. | No arguments |
-| `-h` | `--help` | Display the help message. | No arguments<br>_Supercedes other arguments._ |
+| `-h` | `--help` | Display the help message. | No arguments<br>_Supersedes other arguments._ |
 | `-p` | `--prune` | Set a prune value in MiB. | One argument<br>For example: `-p 50000` |
 | `-q` | `--quiet` | Suppress output unless unexpected behavior is detected. | No arguments |
 | `-r` | `--skip-reboot` | Skip reboot after installing system update. | No arguments |
