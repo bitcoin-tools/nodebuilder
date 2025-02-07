@@ -97,7 +97,8 @@ compile_bitcoin_from_source()
       gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
       ;;
     *)
-      make --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
+      log_info 'DEBUG compiling without output suppression'
+      make --jobs "${SYS_CORES_PLUS_ONE}"
       ;;
   esac
 
