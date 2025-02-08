@@ -195,7 +195,8 @@ if [ "${COMPILE_BITCOIN}" = 'true' ]; then
   if [ -z "${NUMBER_OF_COMPILE_JOBS}" ]; then
     nodebuilder_args="${nodebuilder_args} --compile"
   else
-    nodebuilder_args="${nodebuilder_args} --compile --jobs ${NUMBER_OF_COMPILE_JOBS}"    
+    nodebuilder_args="${nodebuilder_args} --compile --jobs ${NUMBER_OF_COMPILE_JOBS}"
+  fi
 fi
 
 if [ -n "${nodebuilder_args}" ]; then
