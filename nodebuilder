@@ -38,7 +38,7 @@ check_internet_to_address()
 
 clear_the_terminal()
 {
-  if is_running_in_ci || is_running_in_container; then
+  if [ "${quiet_output}" = 'true' ] || is_running_in_ci || is_running_in_container; then
     return
   elif [ ! -t 1 ]; then
     # stdout is not a terminal perhaps redirected or piped
@@ -402,9 +402,15 @@ bitcoin_tarball_validate()
   fi
   log_info "Found ${GPG_GOOD_SIGNATURE_COUNT} good signatures."
 
-  [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] || mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
+  [ -d "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")" ] ||
+    mkdir -p "$(dirname "${BITCOIN_TARBALL_DESTINATION_PATH}")"
   mv "${BITCOIN_TARBALL_TEMPORARY_PATH}" "${BITCOIN_TARBALL_DESTINATION_PATH}"
-  [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ] || mv "${GUIX_SIGS_TEMPORARY_DIRECTORY}" "${GUIX_SIGS_DESTINATION_DIRECTORY}"
+
+  if [ ! -d "${GUIX_SIGS_DESTINATION_DIRECTORY}/" ]; then
+    mkdir -p "${GUIX_SIGS_DESTINATION_DIRECTORY}"
+    mv "${GUIX_SIGS_TEMPORARY_DIRECTORY}" "${GUIX_SIGS_DESTINATION_DIRECTORY}"
+  fi
+
   [ -f "${BITCOIN_HASH_FILE}" ] && rm "${BITCOIN_HASH_FILE}"
   [ -f "${GPG_SIGNATURES_FILE}" ] && rm "${GPG_SIGNATURES_FILE}"
 }
@@ -412,13 +418,26 @@ bitcoin_tarball_validate()
 bitcoin_tarball_validate_checksum()
 {
   cd "${TEMP_DIRECTORY}"/
-  if command -v sha256sum > /dev/null && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
-    SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
-  elif command -v shasum > /dev/null; then
-    SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
-  else
-    throw_error "Either sha256sum or shasum must be installed. Please open an issue at ${NODEBUILDER_REPO}."
-  fi
+  case "${TARGET_KERNEL}" in
+    Darwin)
+      if command -v shasum > /dev/null; then
+        SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
+      elif command -v sha256sum > /dev/null; then
+        SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
+      else
+        throw_error "Either sha256sum or shasum must be installed. Please open an issue at ${NODEBUILDER_REPO}."
+      fi
+      ;;
+    *)
+      if command -v sha256sum > /dev/null; then
+        SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
+      elif command -v shasum > /dev/null; then
+        SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
+      else
+        throw_error "Either sha256sum or shasum must be installed. Please open an issue at ${NODEBUILDER_REPO}."
+      fi
+      ;;
+  esac
   readonly SHA256_CHECK
   cd - > /dev/null
 
@@ -1355,14 +1374,18 @@ log_error()
 
 log_info()
 {
-  printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
+  if [ "${quiet_output}" = 'false' ]; then
+    printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
+  fi
 }
 
 log_success()
 {
-  printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
-  reset_console_color
-  printf '\n'
+  if [ "${quiet_output}" = 'false' ]; then
+    printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
+    reset_console_color
+    printf '\n'
+  fi
 }
 
 log_warning()
@@ -1380,6 +1403,7 @@ print_usage()
   printf '%s\n' '-c, --compile           Build Bitcoin from source'
   printf '%s\n' '-h, --help              Display this help message'
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
+  printf '%s\n' '-q, --quiet             Suppress standard output'
   printf '%s\n' '-r, --skip-reboot       Skip reboot on system updates'
   printf '%s\n' '-s, --skip-update       Skip install of system updates'
   printf '%s\n' '-t, --test              Run unit tests on functions'
@@ -1480,12 +1504,13 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.11.0 0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 0.14.3 0.15.2 \
     0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
-    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 28.0'
+    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 27.2 28.0 28.1'
 
-target_bitcoin_version='28.0'
+target_bitcoin_version='28.1'
 
 compile_bitcoin_flag='false'
 prune_value='-1'
+quiet_output='false'
 skip_system_update='false'
 skip_system_update_reboot='false'
 unattended='false'
@@ -1526,6 +1551,9 @@ while [ $# -gt 0 ]; do
       fi
       prune_value="$2"
       shift
+      ;;
+    -q | --quiet)
+      quiet_output='true'
       ;;
     -r | --skip-reboot)
       skip_system_update_reboot='true'
@@ -1609,7 +1637,7 @@ if is_running_in_ci ||
   sudo --validate --noninteractive > /dev/null 2>&1; then
   :
 else
-  printf '%s\n' 'Please enter your password to log in, if requested.'
+  log_info 'Please enter your password to log in, if requested.'
   sudo --validate
 fi
 
@@ -1630,9 +1658,11 @@ case "${TARGET_KERNEL}" in
     ;;
   Darwin)
     log_info 'Detected: running macOS.'
-    [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && display_macos_warning
     TARGET_BITCOIN_TARBALL_OS='apple-darwin'
     BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
+    if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && [ "${quiet_output}" = 'false' ]; then
+      display_macos_warning
+    fi
     ;;
   *)
     throw_error "Unknown target kernel type '${TARGET_KERNEL}'."
@@ -1645,10 +1675,12 @@ readonly BITCOIN_CORE_CONFIG_FILE="${BITCOIN_DATA_DIRECTORY}/bitcoin.conf"
 readonly BITCOIN_CORE_DEBUG_LOG_FILE="${BITCOIN_DATA_DIRECTORY}/debug.log"
 
 check_internet_status
+
 [ "${skip_system_update:-false}" = 'true' ] ||
   [ "${TARGET_KERNEL}" = 'Darwin' ] ||
   is_running_in_ci ||
   install_system_updates
+
 install_runtime_dependencies
 
 if command -v bitcoind > /dev/null 2>&1; then
