@@ -424,6 +424,10 @@ jobs:
         arch: [aarch64, riscv64]
         distro: [alpine_latest, ubuntu_latest]
         job-purpose: [package, source]
+        include:
+          - distro: alpine_latest
+            job-purpose: compile
+            compile-jobs: 1
         exclude:
           - distro: alpine_latest
             job-purpose: package
@@ -446,13 +450,21 @@ jobs:
             date -u
             mkdir -p "${PWD}/artifacts"
           run: |
-            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" --jobs 1
+            if [ ${{ matrix.job-purpose }} = 'compile' ] && [ -n ${{ matrix.compile-num-jobs }} ]; then
+              sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" \
+                --compile --jobs ${{ matrix.compile-num-jobs }}
+            elif [ ${{ matrix.job-purpose }} = 'compile' ]; then
+              sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" \
+                --compile
+            else
+              sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            fi
             [ -f /root/.bitcoin/debug.log ] && cp /root/.bitcoin/debug.log /artifacts/
             chmod o+r /artifacts/debug.log
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.distro }}-${{ matrix.arch }}-bitcoin-debug.log
+          name: ${{ matrix.distro }}-${{ matrix.arch }}--${{ matrix.job-purpose }}-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/artifacts/debug.log
 
   run-nodebuilder-docker:
