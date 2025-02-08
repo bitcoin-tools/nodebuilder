@@ -419,16 +419,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      max-parallel: 5
       matrix:
-        distro: [ubuntu_latest, alpine_latest]
         arch: [aarch64, riscv64]
-        include:
-          - distro: ubuntu_latest
-            job-purpose: package
-          - distro: ubuntu_latest
-            job-purpose: source
+        distro: [alpine_latest, ubuntu_latest]
+        job-purpose: [package, source]
+        exclude:
           - distro: alpine_latest
-            job-purpose: source
+            job-purpose: package
     steps:
       - uses: actions/checkout@v4
       - name: Test the console output
@@ -448,7 +446,7 @@ jobs:
             date -u
             mkdir -p "${PWD}/artifacts"
           run: |
-            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" --jobs 1
             [ -f /root/.bitcoin/debug.log ] && cp /root/.bitcoin/debug.log /artifacts/
             chmod o+r /artifacts/debug.log
       - name: Save Bitcoin Core log as artifact
