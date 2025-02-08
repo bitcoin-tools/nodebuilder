@@ -1402,6 +1402,7 @@ print_usage()
   printf '%s\n' '-b, --bitcoin-version   Specify the Bitcoin version'
   printf '%s\n' '-c, --compile           Build Bitcoin from source'
   printf '%s\n' '-h, --help              Display this help message'
+  printf '%s\n' '-j, --jobs              Set the number of compile jobs'
   printf '%s\n' '-p, --prune             Set a prune value in MiB'
   printf '%s\n' '-q, --quiet             Suppress standard output'
   printf '%s\n' '-r, --skip-reboot       Skip reboot on system updates'
