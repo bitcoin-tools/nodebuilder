@@ -423,10 +423,10 @@ jobs:
       matrix:
         arch: [aarch64, riscv64]
         distro: [alpine_latest, ubuntu_latest]
-        job-purpose: [package, source]
+        job-purpose: [source, package]
         include:
           - distro: alpine_latest
-            job-purpose: compile
+            job-purpose: source
             compile-num-jobs: 1
         exclude:
           - distro: alpine_latest
