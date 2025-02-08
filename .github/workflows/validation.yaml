@@ -427,7 +427,7 @@ jobs:
         include:
           - distro: alpine_latest
             job-purpose: compile
-            compile-jobs: 1
+            compile-num-jobs: 1
         exclude:
           - distro: alpine_latest
             job-purpose: package
