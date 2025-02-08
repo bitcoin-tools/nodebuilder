@@ -1545,14 +1545,13 @@ while [ $# -gt 0 ]; do
         throw_error '-j/--jobs requires one argumenet'
       fi
 
-      # error if the value is not a positive integer
+      # ensure the argument is a positive integer
       case "$2" in
-        # check if not a number
-        '' | *[!0-9]*)
-          throw_error "$2 is not a number"
-          ;;
         0)
           throw_error 'Cannot compile with 0 jobs'
+          ;;
+        '' | *[!0-9]*)
+          throw_error "$2 is not a number"
           ;;
         *)
           compile_num_jobs="$2"
