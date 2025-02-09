@@ -1674,6 +1674,7 @@ if [ -z "${compile_num_jobs}" ]; then
       ;;
   esac
   readonly SYS_CORES_COUNT
+  #shellcheck disable=SC2034
   readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 fi
 
