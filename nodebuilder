@@ -2015,7 +2015,7 @@ while [ "${ibd_status}" = 'true' ]; do
 
   printf '%s\n\n' 'The chain sync can take several days or even weeks.'
   is_running_in_container || printf '%s\n' "Close this Terminal window by clicking on the 'X'."
-  printf '%s' "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
+  printf '%s' "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
   sleep "${SLEEP_TIME_SECONDS}"
 
   blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
