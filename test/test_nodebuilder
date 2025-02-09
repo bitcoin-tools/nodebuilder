@@ -192,7 +192,7 @@ bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 nodebuilder_args=''
 [ -n "${TARGET_BITCOIN_VERSION}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin-version ${TARGET_BITCOIN_VERSION}"
 if [ "${COMPILE_BITCOIN}" = 'true' ]; then
-  if [ -z "${NUMBER_OF_COMPILE_JOBS}" ]; then
+  if [ -z "${NUMBER_OF_COMPILE_JOBS:-}" ]; then
     nodebuilder_args="${nodebuilder_args} --compile"
   else
     nodebuilder_args="${nodebuilder_args} --compile --jobs ${NUMBER_OF_COMPILE_JOBS}"
