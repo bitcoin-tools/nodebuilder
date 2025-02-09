@@ -94,21 +94,21 @@ compile_bitcoin_from_source()
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
+      gmake --jobs "${compile_num_jobs:-SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
       ;;
     *)
       log_info 'DEBUG compiling without output suppression'
-      make --jobs "${SYS_CORES_PLUS_ONE}"
+      make --jobs "${compile_num_jobs:-SYS_CORES_PLUS_ONE}"
       ;;
   esac
 
   log_info 'Running compile checks. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+      gmake --jobs "${compile_num_jobs:-SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
       ;;
     *)
-      make --jobs "${SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+      make --jobs "${compile_num_jobs:-SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
       ;;
   esac
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
@@ -867,12 +867,12 @@ install_build_dependencies_emerge()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   if ! printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-    --jobs "${compile_num_jobs:-SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail; then
+    --jobs "${compile_num_jobs:-SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail; then
     etc-update --automode -5
-    emerge --update --jobs "${compile_num_jobs:-SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail --deep --newuse @world
+    emerge --update --jobs "${compile_num_jobs:-SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail --deep --newuse @world
     # Run the install command again
     printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-      --jobs "${compile_num_jobs:-SYS_CORES_COUNT}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
+      --jobs "${compile_num_jobs:-SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
   fi
 }
 
