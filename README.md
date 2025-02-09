@@ -58,10 +58,11 @@ chmod u+x nodebuilder
 
 | Short | Long Version | Description | Arguments |
 |:-----:|:-------------|:------------|:----------|
-| `-b` | `--bitcoin-version` | Specify the Bitcoin version. | One argument<br>For example: `-b 28.0` |
+| `-b` | `--bitcoin-version` | Specify the Bitcoin version. | One argument<br>E.g.: `-b 28.0` |
 | `-c` | `--compile` | Build Bitcoin from source. | No arguments |
 | `-h` | `--help` | Display the help message. | No arguments<br>_Supersedes other arguments._ |
-| `-p` | `--prune` | Set a prune value in MiB. | One argument<br>For example: `-p 50000` |
+| `-j` | `--jobs` | Set the number of compile jobs. | One argument<br>E.g.: `-j 1` |
+| `-p` | `--prune` | Set a prune value in MiB. | One argument<br>E.g.: `-p 50000` |
 | `-q` | `--quiet` | Suppress output unless unexpected behavior is detected. | No arguments |
 | `-r` | `--skip-reboot` | Skip reboot after installing system update. | No arguments |
 | `-s` | `--skip-update` | Skip installation of system updates. | No arguments |
