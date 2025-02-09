@@ -7,7 +7,7 @@ FROM redhat/ubi9:latest@sha256:be214e191bbe3f4d0f16a5a4f5642e1f32fccd6fae7d2b6c6
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.10.0
+ARG NODEBUILDER_VERSION=v1.11.0-beta
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
