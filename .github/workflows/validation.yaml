@@ -448,6 +448,7 @@ jobs:
           githubToken: ${{ github.token }}
           setup: |
             echo "${TERM:-TERM is not found}"
+            nproc
             uname -a
             id -u
             df -h
