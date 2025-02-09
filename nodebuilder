@@ -94,21 +94,21 @@ compile_bitcoin_from_source()
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" > /dev/null 2>&1
+      gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
       ;;
     *)
       log_info 'DEBUG compiling without output suppression'
-      make --jobs "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}"
+      make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}"
       ;;
   esac
 
   log_info 'Running compile checks. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+      gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
       ;;
     *)
-      make --jobs "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+      make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
       ;;
   esac
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
@@ -487,7 +487,7 @@ ensure_curl_dependency()
         sudo dnf install --allowerasing --assumeyes curl > /dev/null
         ;;
       gentoo)
-        emerge --jobs "${compile_num_jobs:-$SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail net-misc/curl
+        emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail net-misc/curl
         ;;
       arch | endeavouros | garuda | manjaro)
         sudo pacman -Syu --needed --noconfirm curl > /dev/null
@@ -558,7 +558,7 @@ ensure_sudo_dependency()
         ;;
       gentoo)
         emerge --sync --quiet
-        emerge --jobs "${compile_num_jobs:-$SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail app-admin/sudo
+        emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail app-admin/sudo
         ;;
       arch | endeavouros | garuda | manjaro)
         pacman -Syu --needed --noconfirm sudo > /dev/null
@@ -620,7 +620,7 @@ ensure_xargs_dependency()
         ;;
       gentoo)
         emerge --sync --quiet
-        emerge --jobs "${compile_num_jobs:-$SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail sys-apps/findutils
+        emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail sys-apps/findutils
         ;;
       arch | endeavouros | garuda | manjaro)
         pacman -Syu --needed --noconfirm findutils > /dev/null
@@ -867,12 +867,12 @@ install_build_dependencies_emerge()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   if ! printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-    --jobs "${compile_num_jobs:-$SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail; then
+    --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail; then
     etc-update --automode -5
-    emerge --update --jobs "${compile_num_jobs:-$SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail --deep --newuse @world
+    emerge --update --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail --deep --newuse @world
     # Run the install command again
     printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
-      --jobs "${compile_num_jobs:-$SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
+      --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
   fi
 }
 
@@ -1113,7 +1113,7 @@ install_runtime_dependencies_emerge()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "${compile_num_jobs:-$SYS_CORES_COUNT}" --load-average "${compile_num_jobs:-$SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
+  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
 }
 
 install_runtime_dependencies_freebsd()
@@ -1278,7 +1278,7 @@ install_system_updates_dnf()
 install_system_updates_emerge()
 {
   readonly GENTOO_EBUILD_REPOSITORY='/var/db/repos/gentoo'
-  readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs ${compile_num_jobs:-$SYS_CORES_COUNT} --load-average ${compile_num_jobs:-$SYS_CORES_PLUS_ONE} --quiet --quiet-build --quiet-fail --deep --newuse @world"
+  readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs ${compile_num_jobs:-${SYS_CORES_COUNT}} --load-average ${compile_num_jobs:-${SYS_CORES_PLUS_ONE}} --quiet --quiet-build --quiet-fail --deep --newuse @world"
   readonly EMERGE_MAX_RETRIES='3'
   printf '\n'
 
