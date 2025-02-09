@@ -425,15 +425,20 @@ jobs:
         distro: [alpine_latest, ubuntu_latest]
         job-purpose: [source, package]
         include:
-          - distro: alpine_latest
-            job-purpose: source
-            compile-num-jobs: 1
+          - job-purpose: package
+            additional-args: ''
+          - job-purpose: source
+            distro: alpine_latest
+            additional-args: '--compile --jobs 1'
+          - job-purpose: source
+            distro: ubuntu_latest
+            additional-args: '--compile'
         exclude:
           - distro: alpine_latest
             job-purpose: package
     steps:
       - uses: actions/checkout@v4
-      - name: Test the console output
+      - name: Test the console output ${{ matrix.additional-args }}
         uses: uraimo/run-on-arch-action@v2
         timeout-minutes: 330
         with:
@@ -450,15 +455,7 @@ jobs:
             date -u
             mkdir -p "${PWD}/artifacts"
           run: |
-            if [ ${{ matrix.job-purpose }} = 'compile' ] && [ -n ${{ matrix.compile-num-jobs }} ]; then
-              sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" \
-                --compile --jobs ${{ matrix.compile-num-jobs }}
-            elif [ ${{ matrix.job-purpose }} = 'compile' ]; then
-              sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" \
-                --compile
-            else
-              sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            fi
+            /bin/sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}" ${{ matrix.additional-args }}
             [ -f /root/.bitcoin/debug.log ] && cp /root/.bitcoin/debug.log /artifacts/
             chmod o+r /artifacts/debug.log
       - name: Save Bitcoin Core log as artifact
