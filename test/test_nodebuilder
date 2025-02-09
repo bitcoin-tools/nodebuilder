@@ -72,6 +72,7 @@ print_usage()
   printf '%s\n' 'Options:'
   printf '%s\n' '-b, --bitcoin-version   Specify the Bitcoin version'
   printf '%s\n' '-c, --compile           Build Bitcoin from source'
+  printf '%s\n' '-j, --jobs              Specify number of compile jobs'
   printf '%s\n' '-h, --help              Display this help message'
   printf '%s\n' '-r, --ref               Choose a git tef to test'
 }
@@ -128,6 +129,26 @@ while [ $# -gt 0 ]; do
       print_usage
       exit 0
       ;;
+    -j | --jobs)
+      # ensure at leaset one additional argument is passed
+      if [ $# -eq 1 ]; then
+        throw_error '-j/--jobs requires one argumenet'
+      fi
+
+      # ensure the argument is a positive integer
+      case "$2" in
+        0)
+          throw_error 'Cannot compile with 0 jobs'
+          ;;
+        '' | *[!0-9]*)
+          throw_error "--jobs requires a positive integer, but $2 is not one."
+          ;;
+        *)
+          readonly NUMBER_OF_COMPILE_JOBS="$2"
+          ;;
+      esac
+      shift
+      ;;
     -r | --ref)
       [ -z "$2" ] && throw_error 'No argument supplied for -r|--ref.' "${LINENO}"
       readonly GIT_REF_SHORT_NAME="$2"
@@ -176,15 +197,23 @@ bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 [ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
 [ -x nodebuilder ] || chmod u+x nodebuilder
 
-nodebuilder_args=""
+nodebuilder_args=''
 [ -n "${TARGET_BITCOIN_VERSION}" ] && nodebuilder_args="${nodebuilder_args} --bitcoin-version ${TARGET_BITCOIN_VERSION}"
-[ "${COMPILE_BITCOIN}" = 'true' ] && nodebuilder_args="${nodebuilder_args} --compile"
+if [ "${COMPILE_BITCOIN}" = 'true' ]; then
+  if [ -z "${NUMBER_OF_COMPILE_JOBS:-}" ]; then
+    nodebuilder_args="${nodebuilder_args} --compile"
+  else
+    nodebuilder_args="${nodebuilder_args} --compile --jobs ${NUMBER_OF_COMPILE_JOBS}"
+  fi
+fi
 
 if [ -n "${nodebuilder_args}" ]; then
+  # remove extra whitespace from arguments
   readonly NODEBUILDER_ARGS_TRIMMED="$(printf '%s' "${nodebuilder_args}" | sed -e 's/^[[:space:]]*//')"
   printf "Running nodebuilder with '%s' args\n" "${NODEBUILDER_ARGS_TRIMMED}"
   readonly RUN_NODEBUILDER_COMMAND="./nodebuilder ${NODEBUILDER_ARGS_TRIMMED:-}"
 else
+  printf 'Running nodebuilder with no args\n'
   readonly RUN_NODEBUILDER_COMMAND="./nodebuilder"
 fi
 
