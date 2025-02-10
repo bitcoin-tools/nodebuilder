@@ -1932,8 +1932,8 @@ if [ "${ibd_status}" = 'true' ]; then
       log_info 'Disabling system sleep, suspend, and hibernate.'
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
-    log_info "Close this Terminal window by clicking on the 'X'."
-    log_info "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
+    is_running_in_container || log_info "Close this Terminal window by clicking on the 'X'."
+    log_info "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
   fi
   sleep "${SLEEP_TIME_SECONDS}"
 else
@@ -2014,8 +2014,8 @@ while [ "${ibd_status}" = 'true' ]; do
   fi
 
   printf '%s\n\n' 'The chain sync can take several days or even weeks.'
-  printf '%s\n' "Close this Terminal window by clicking on the 'X'."
-  printf '%s' "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
+  is_running_in_container || printf '%s\n' "Close this Terminal window by clicking on the 'X'."
+  printf '%s' "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
   sleep "${SLEEP_TIME_SECONDS}"
 
   blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)

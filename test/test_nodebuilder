@@ -262,7 +262,7 @@ for message in \
   'INFO: Found free space available... [0-9]+ [GM]iB.$' \
   'INFO: Starting Bitcoin Core.$' \
   'INFO: Checking the RPC status.$' \
-  'INFO: This screen will refresh in 10 seconds.' \
+  'INFO: This info will refresh in 10 seconds.' \
   'INFO: Syncing the block headers \((first|second) pass\).$' \
   'INFO: Syncing the blockchain. Please be patient.$' \
   'Sync progress:              [0-9]+\.[0-9]{3} %$' \
