@@ -97,8 +97,10 @@ compile_bitcoin_from_source()
       gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
       ;;
     *)
+
       log_info 'DEBUG compiling without output suppression'
       make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}"
+      #make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
       ;;
   esac
 
@@ -478,7 +480,7 @@ ensure_curl_dependency()
     log_info 'Ensuring curl depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
       alpine)
-        sudo apk --quiet add curl
+        sudo apk --quiet add --no-cache curl
         ;;
       debian | ubuntu)
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl > /dev/null
@@ -514,7 +516,7 @@ ensure_curl_dependency()
         ;;
       *)
         if command -v apk > /dev/null; then
-          sudo apk --quiet add curl
+          sudo apk --quiet add --no-cache curl
         elif command -v apt-get > /dev/null; then
           sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y curl > /dev/null
         elif command -v dnf > /dev/null; then
@@ -544,7 +546,7 @@ ensure_sudo_dependency()
     log_info 'Ensuring sudo depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
       alpine)
-        apk --quiet add sudo
+        apk --quiet add --no-cache sudo
         ;;
       debian | ubuntu)
         readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
@@ -582,7 +584,7 @@ ensure_sudo_dependency()
         ;;
       *)
         if command -v apk > /dev/null; then
-          apk --quiet add sudo
+          apk --quiet add --no-cache sudo
         elif command -v apt-get > /dev/null; then
           apt-get -qq install -y sudo > /dev/null
         elif command -v dnf > /dev/null; then
@@ -610,7 +612,7 @@ ensure_xargs_dependency()
     log_info 'Ensuring xargs depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
       alpine)
-        sudo apk --quiet add findutils
+        sudo apk --quiet add --no-cache findutils
         ;;
       debian | ubuntu)
         apt-get install -y findutils > /dev/null
@@ -643,7 +645,7 @@ ensure_xargs_dependency()
         ;;
       *)
         if command -v apk > /dev/null; then
-          sudo apk --quiet add findutils
+          sudo apk --quiet add --no-cache findutils
         elif command -v apt-get > /dev/null; then
           apt-get -qq install -y findutils > /dev/null
         elif command -v dnf > /dev/null; then
@@ -798,7 +800,7 @@ install_build_dependencies_apk()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs apk --quiet add |
+  printf '%s\n' "${dependencies}" | xargs apk --quiet add --no-cache |
     grep -v 'ICU with non-English locales' -A2 -B1 || true
 }
 
@@ -872,6 +874,7 @@ install_build_dependencies_emerge()
     emerge --update --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail --deep --newuse @world
     # Run the install command again
     printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
+      --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
       --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
   fi
 }
@@ -1033,7 +1036,7 @@ install_runtime_dependencies_apk()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add
+  printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add --no-cache
 }
 
 install_runtime_dependencies_aptget()
@@ -1955,9 +1958,9 @@ if [ "${ibd_status}" = 'true' ]; then
       log_info 'Disabling system sleep, suspend, and hibernate.'
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
+    log_info "Close this Terminal window by clicking on the 'X'."
   fi
-  log_info "Close this Terminal window by clicking on the 'X'."
-  log_info "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
+  log_info "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
   sleep "${SLEEP_TIME_SECONDS}"
 else
   log_info 'Your node has already synced the blockchain.'
@@ -2037,8 +2040,8 @@ while [ "${ibd_status}" = 'true' ]; do
   fi
 
   printf '%s\n\n' 'The chain sync can take several days or even weeks.'
-  printf '%s\n' "Close this Terminal window by clicking on the 'X'."
-  printf '%s' "This screen will refresh in ${SLEEP_TIME_SECONDS} seconds."
+  is_running_in_container || printf '%s\n' "Close this Terminal window by clicking on the 'X'."
+  printf '%s' "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
   sleep "${SLEEP_TIME_SECONDS}"
 
   blockchain_info=$(bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait getblockchaininfo)
