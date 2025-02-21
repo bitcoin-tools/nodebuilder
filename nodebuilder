@@ -1262,7 +1262,7 @@ install_system_updates_dnf()
 install_system_updates_emerge()
 {
   readonly GENTOO_EBUILD_REPOSITORY='/var/db/repos/gentoo'
-  readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs ${compile_num_jobs:-SYS_CORES_COUNT} --load-average ${compile_num_jobs:-SYS_CORES_PLUS_ONE} --quiet --quiet-build --quiet-fail --deep --newuse @world"
+  readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs ${compile_num_jobs:-${SYS_CORES_COUNT}} --load-average ${compile_num_jobs:-${SYS_CORES_PLUS_ONE}} --quiet --quiet-build --quiet-fail --deep --newuse @world"
   readonly EMERGE_MAX_RETRIES='3'
   printf '\n'
 
