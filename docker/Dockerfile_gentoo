@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Gentoo is known for its customization, optimization at the expense of image build time.asdf
 # This Dockerfile offers a stable base image but takes extra time to compile all dependencies.
-FROM gentoo/stage3:latest@sha256:9bbe1d0c1b71d69c0b49b172738cde24035478700b18b9987ad1c059987a3428
+FROM gentoo/stage3:latest@sha256:ea976149584fbcf4bb571ccdc260cb513c61ed8bb069e62ce5dadf1936b35d6a
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
