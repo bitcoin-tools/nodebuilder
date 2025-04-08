@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # RHEL UBI is an enterprise-grade Linux distribution with long-term support.
 # This Dockerfile is ideal for enterprise applications requiring strong support and stability.
-FROM redhat/ubi9:latest@sha256:a1804302f6f53e04cc1c6b20bc2204d5c9ae6e5a664174b38fbeeb30f7983d4e
+FROM redhat/ubi9:latest@sha256:ea57285741f007e83f2ee20423c20b0cbcce0b59cc3da027c671692cc7efe4dd
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
