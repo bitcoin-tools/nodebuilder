@@ -28,9 +28,15 @@ get_operating_system()
 handle_exit()
 {
   kill_tail_process
-  [ -f nodebuilder ] && rm nodebuilder
-  [ -f "${STDOUT_TEST_FILENAME}" ] && rm "${STDOUT_TEST_FILENAME}"
-  [ -f "${STDERR_TEST_FILENAME}" ] && rm "${STDERR_TEST_FILENAME}"
+  if [ -f nodebuilder ]; then
+    rm nodebuilder
+  fi
+  if [ -f "${STDOUT_TEST_FILENAME}" ]; then
+    rm "${STDOUT_TEST_FILENAME}"
+  fi
+  if [ -f "${STDERR_TEST_FILENAME}" ]; then
+    rm "${STDERR_TEST_FILENAME}"
+  fi
 }
 
 handle_error()
@@ -92,12 +98,14 @@ validate_bitcoin_version()
 
 validate_git_ref_short_name()
 {
-  [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ] ||
-    throw_error 'Not inside a Git repository.' "${LINENO}"
-  [ "$(basename "$(git rev-parse --show-toplevel)")" = 'nodebuilder' ] ||
-    throw_error 'Not in the nodebuilder repository.' "${LINENO}"
-  git rev-parse --quiet --verify "$1" ||
-    throw_error "$1 is not a valid branch, tag, or commit." "${LINENO}"
+  if command -v git > /dev/null 2>&1; then
+    [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ] ||
+      throw_error 'Not inside a Git repository.' "${LINENO}"
+    [ "$(basename "$(git rev-parse --show-toplevel)")" = 'nodebuilder' ] ||
+      throw_error 'Not in the nodebuilder repository.' "${LINENO}"
+    git rev-parse --quiet --verify "$1" ||
+      throw_error "$1 is not a valid branch, tag, or commit." "${LINENO}"
+  fi
 }
 
 readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
@@ -212,8 +220,7 @@ fi
 # Execute the script with optional command line arguments
 printf 'Executing command: %s\n' "${RUN_NODEBUILDER_COMMAND}"
 if ! ${RUN_NODEBUILDER_COMMAND} \
-  > "${STDOUT_TEST_FILENAME}" \
-  2> "${STDERR_TEST_FILENAME}"; then
+  > "${STDOUT_TEST_FILENAME}"; then
   throw_error "Failed to execute nodebuilder command."
 fi
 
