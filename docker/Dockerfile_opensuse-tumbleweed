@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # openSUSE is a robust Linux distribution that offers a great balance of stability and modernity.
 # This Dockerfile is ideal for users seeking a reliable, versatile operating system.
-FROM opensuse/tumbleweed:latest@sha256:9c7fd1a32ea8f751f63c79ed7458ecc304f3aa227af31a4e045dbb41ad0f7d3b
+FROM opensuse/tumbleweed:latest@sha256:0b17eaebb2421cdeb3fd0f77aff346508705607d970eb3fc00bcfbd644e24eaa
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
