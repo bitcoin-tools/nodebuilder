@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM registry.suse.com/suse/sle15:latest@sha256:fdae08d8c4791d75081cce4e8eaf51beb63c9324628298a678a9b441a50e4369
+FROM registry.suse.com/suse/sle15:latest@sha256:8d6ab07de996bdc7e5ec4beb35109ca29d707a908c6e1a42d55e3e749df3fd84
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
