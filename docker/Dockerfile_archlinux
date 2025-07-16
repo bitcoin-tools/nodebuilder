@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Arch Linux is a minimalist, rolling-release distribution.
 # This Dockerfile is ideal for users who prefer a hands-on approach and a clean, streamlined environment.
-FROM archlinux:latest@sha256:122c41e04f907f4d962e0a2750d6b09c540a81dd45aace62a899d268e507b1f6
+FROM archlinux:latest@sha256:e5d672031f7479b0ce222486f1b5c8b07c931327d16050ad6078a8cd68cf870f
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
