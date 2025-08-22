@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Oracle Linux is known for its robustness and performance.
 # This Dockerfile is a good choice for modern and resource-rich environments.
-FROM oraclelinux:10@sha256:d5d12e8beeb3c14541a5399034c63f33529cbb6bf4375c9c23420e2b2e234f44
+FROM oraclelinux:10@sha256:355f4d9c11022c1035bfbe7c6cb2f3d9f933964c413e8321762d008288cec472
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
