@@ -28,16 +28,16 @@ Fill out the required fields in the template.
 
 PRIVACY NOTE - If you include screenshots, be sure to remove Exif metadata.
 
-### Commit Messages Styleguide
+### Commit Messages Style Guide
 
 Use [Conventional Commits](https://www.conventionalcommits.org/).
 
 For example, a commit message might look like this: `feat(ui): simplify the free space warning`.
 
-### Shell Styleguide
+### Shell Style Guide
 
 Shell scripts must be POSIX-compatible and pass `shellcheck` and `shfmt` linters.
 
-### Documentation Styleguide
+### Documentation Style Guide
 
-Use [Markdown](https://daringfireball.net/projects/markdown/basics).
+Use [Markdown](https://daringfireball.net/projects/markdown/basics). Documentation files must pass a markdown linter and spell check.

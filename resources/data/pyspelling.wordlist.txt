@@ -5,6 +5,7 @@ ArmanTheParman
 BTRFS
 DNF
 ECC
+Exif
 FreeBSD
 GPT
 LTS
@@ -19,6 +20,7 @@ ProArt
 POSIX
 Proxmox
 PySpelling
+README
 RHEL
 SATA
 ShellCheck
@@ -40,6 +42,8 @@ chainstate
 dockerfilelint
 gzip
 hostname
+linter
+linters
 macOS
 nodebuilder
 openSUSE

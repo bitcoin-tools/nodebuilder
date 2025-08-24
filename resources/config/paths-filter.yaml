@@ -6,8 +6,6 @@ dependencies:
   - 'resources/dependencies/**'
 docker:
   - 'docker/Dockerfile*'
-docker-gentoo:
-  - 'docker/Dockerfile_gentoo'
 helpers:
   - '.github/scripts/**'
 markdown:
