@@ -91,6 +91,10 @@ compile_bitcoin_from_source()
       ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
       ;;
   esac
+
+  keep_sudo_alive &
+  readonly KEEP_SUDO_ALIVE_PID="$!"
+
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
@@ -100,7 +104,6 @@ compile_bitcoin_from_source()
       make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
       ;;
   esac
-
   log_info 'Running compile checks. Please wait.'
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
@@ -112,7 +115,6 @@ compile_bitcoin_from_source()
   esac
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
-
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   case "${TARGET_KERNEL}" in
     FreeBSD | NetBSD | OpenBSD)
@@ -122,6 +124,9 @@ compile_bitcoin_from_source()
       make install > /dev/null 2>&1 || sudo make install > /dev/null
       ;;
   esac
+
+  [ -n "${KEEP-SUDO-ALIVE_PID:-}" ] && ps -p "${KEEP_SUDO_ALIVE_PID}" &&
+    kill "${KEEP_SUDO_ALIVE_PID}"
 
   cd - > /dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
@@ -715,7 +720,11 @@ get_operating_system()
 # shellcheck disable=SC2317
 handle_exit()
 {
-  [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
+  [ -n "${TEMP_DIRECTORY:-}" ] &&
+    rm -rf -- "${TEMP_DIRECTORY:?}"/
+  [ -n "${KEEP_SUDO_ALIVE_PID:-}" ] &&
+    ps -p "${KEEP_SUDO_ALIVE_PID}" &&
+    kill "${KEEP_SUDO_ALIVE_PID}"
 }
 
 # shellcheck disable=SC2317
@@ -1362,6 +1371,14 @@ is_valid_bitcoin_version()
     esac
   done
   return 1
+}
+
+keep_sudo_alive()
+{
+  while true; do
+    sudo -n true
+    sleep 60
+  done
 }
 
 log_error()
