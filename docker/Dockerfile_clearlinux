@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1
 # Clear Linux is known for its minimalistic approach and is optimized for performance and security.
-FROM clearlinux:latest@sha256:04a40b43f845e54ddcc155b84320fc9854c63c8a355d2db9793dcf9a15804a88
+FROM clearlinux:latest@sha256:ea82c1042e56f70b697844a9060d49c87bf4193c5cb9a2f34c45ee3e756019f7
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.10.0
+ARG NODEBUILDER_VERSION=v1.11.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
