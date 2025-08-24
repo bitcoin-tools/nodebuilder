@@ -18,7 +18,8 @@ jobs:
         container:
           - gentoo
           - alpine
-          - amazonlinux
+          # TODO: fix issue 2316
+          # - amazonlinux
           - archlinux
           - clearlinux
           - debian
@@ -27,9 +28,9 @@ jobs:
           - manjarolinux
           - opensuse-leap
           - opensuse-tumbleweed
-          - oraclelinux
-          - redhat-ubi9
-          - rockylinux
+          # - oraclelinux
+          # - redhat-ubi9
+          # - rockylinux
           - sles
     steps:
     - name: Checkout with history to get latest tag
