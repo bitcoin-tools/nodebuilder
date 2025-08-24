@@ -63,8 +63,8 @@ compile_bitcoin_from_source()
   # shellcheck disable=SC2015
   command -v torsocks > /dev/null 2>&1 &&
     [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-    torsocks git clone --branch "v${target_bitcoin_version}^{}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" ||
-    git clone --branch "v${target_bitcoin_version}^{}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}"
+    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null ||
+    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
   cd "${COMPILE_DIRECTORY}"/
 
   log_info 'Analyzing hardware configuration.'
