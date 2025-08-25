@@ -388,13 +388,12 @@ get_oldest_version()
 
 is_arm64_test_bitcoin_signed()
 {
-  BITCOIN_VERSION_TO_CHECK="$1"
-  readonly BITCOIN_VERSION_TO_CHECK
-  readonly ARM64_SIGNED_BINARY_VERSION='28.2'
+  BITCOIN_VERSION_TO_COMPARE="$1"
+  ARM64_SIGNED_BINARY_VERSION='28.2'
   [ "$#" -ne 1 ] &&
     throw_error "Invalid use of is_arm64_test_bitcoin_signed."
   # test_bitcoin binary is already signed on Bitcoin Core 28.2 and later
-  if [ "$(get_oldest_version "${BITCOIN_VERSION_TO_CHECK}" "${ARM64_SIGNED_BINARY_VERSION}")" \
+  if [ "$(get_oldest_version "${BITCOIN_VERSION_TO_COMPARE}" "${ARM64_SIGNED_BINARY_VERSION}")" \
     = "${ARM64_SIGNED_BINARY_VERSION}" ]; then
     return 0
   else
