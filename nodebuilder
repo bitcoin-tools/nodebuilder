@@ -388,7 +388,8 @@ get_oldest_version()
 
 is_arm64_test_bitcoin_signed()
 {
-  readonly BITCOIN_VERSION_TO_CHECK="$1"
+  BITCOIN_VERSION_TO_CHECK="$1"
+  readonly BITCOIN_VERSION_TO_CHECK
   readonly ARM64_SIGNED_BINARY_VERSION='28.2'
   [ "$#" -ne 1 ] &&
     throw_error "Invalid use of is_arm64_test_bitcoin_signed."
