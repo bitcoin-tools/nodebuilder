@@ -347,8 +347,10 @@ bitcoin_tarball_install()
     sudo mkdir "${BITCOIN_INSTALL_BIN_DESTINATION}" ||
     throw_error "Unable to create directory ${BITCOIN_INSTALL_BIN_DESTINATION}."
   for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet; do
-    [ "${TARGET_KERNEL}" = 'Darwin' ] && [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
+    if [ "${TARGET_KERNEL}" = 'Darwin' ] && [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
+      ! is_arm64_test_bitcoin_signed "${target_bitcoin_version}"; then
       codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}"
+    fi
     sudo install -c \
       "${BITCOIN_INSTALL_BIN_SOURCE}/${bitcoin_executable}" \
       "${BITCOIN_INSTALL_BIN_DESTINATION}/"
@@ -386,12 +388,12 @@ get_oldest_version()
 
 is_arm64_test_bitcoin_signed()
 {
-  readonly BITCOIN_VERSION_TO_CHECK="$1"
-  readonly ARM64_SIGNED_BINARY_VERSION='28.2'
+  BITCOIN_VERSION_TO_COMPARE="$1"
+  ARM64_SIGNED_BINARY_VERSION='28.2'
   [ "$#" -ne 1 ] &&
     throw_error "Invalid use of is_arm64_test_bitcoin_signed."
   # test_bitcoin binary is already signed on Bitcoin Core 28.2 and later
-  if [ "$(get_oldest_version "${BITCOIN_VERSION_TO_CHECK}" "${ARM64_SIGNED_BINARY_VERSION}")" \
+  if [ "$(get_oldest_version "${BITCOIN_VERSION_TO_COMPARE}" "${ARM64_SIGNED_BINARY_VERSION}")" \
     = "${ARM64_SIGNED_BINARY_VERSION}" ]; then
     return 0
   else
@@ -1532,10 +1534,11 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.11.0 0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 0.14.3 0.15.2 \
     0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
-    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 27.2 28.0 28.1'
+    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 27.2 28.0 28.1 \
+    28.2'
 
 # Bump this variable for new Bitcoin Core releases
-target_bitcoin_version='28.1'
+target_bitcoin_version='28.2'
 
 # Instantiate the parameter variables
 compile_bitcoin_flag='false'
