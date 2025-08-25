@@ -402,7 +402,6 @@ is_arm64_test_bitcoin_signed()
 bitcoin_tarball_test()
 {
   log_info 'Running the unit tests.'
-  log_warning "DEBUG target_bitcoin_version=${target_bitcoin_version}"
   # only sign test_bitcoin if on arm64 and target version is before 28.2
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
     ! is_arm64_test_bitcoin_signed "${target_bitcoin_version}"; then
