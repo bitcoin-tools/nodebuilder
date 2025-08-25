@@ -391,7 +391,7 @@ bitcoin_tarball_test()
   readonly ARM64_SIGNED_BINARY_VERSION="28.2"
   # only sign test_bitcoin if on arm64 and target version is before 28.2
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && [ "$(get_oldest_version \
-    "${target_bitcoin_version}" "${ARM64_SIGNED_BINARY_VERSION}")" -lt \
+    "${target_bitcoin_version}" "${ARM64_SIGNED_BINARY_VERSION}")" != \
     "${ARM64_SIGNED_BINARY_VERSION}" ]; then
     codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
   fi
