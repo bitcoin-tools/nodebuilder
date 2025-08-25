@@ -23,4 +23,6 @@ RUN uname -a \
 RUN [ -d /var/db/repos/gentoo/ ] || mkdir -p /var/db/repos/gentoo/
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN wget ${NODEBUILDER_URL} \
+  && chmod u+x nodebuilder \
+  && ./nodebuilder
