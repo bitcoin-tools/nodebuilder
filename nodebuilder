@@ -382,6 +382,7 @@ bitcoin_tarball_test()
   fi
   UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
   readonly UNIT_TEST_RESPONSE
+  log_verbose "${UNIT_TEST_RESPONSE}"
   case "${UNIT_TEST_RESPONSE}" in
     *'No errors detected'*) ;;
     *)
@@ -397,7 +398,7 @@ bitcoin_tarball_validate()
 
   GPG_GOOD_SIGNATURE_COUNT="$(bitcoin_tarball_validate_count_signatures)"
   readonly GPG_GOOD_SIGNATURE_COUNT
-  log_debug "GPG_GOOD_SIGNATURE_COUNT=${GPG_GOOD_SIGNATURE_COUNT}"
+  log_verbose "GPG_GOOD_SIGNATURE_COUNT=${GPG_GOOD_SIGNATURE_COUNT}"
   if [ "${GPG_GOOD_SIGNATURE_COUNT}" -lt "${GPG_GOOD_SIGNATURES_REQUIRED}" ]; then
     throw_error "INVALID SIGNATURES. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${GPG_SIGNATURES_FILE}."
   fi
