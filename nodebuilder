@@ -875,7 +875,6 @@ install_build_dependencies_emerge()
     # Run the install command again
     printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
       --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
-      --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
   fi
 }
 
