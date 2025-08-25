@@ -375,10 +375,36 @@ bitcoin_tarball_install()
   done
 }
 
+get_oldest_version()
+{
+  readonly FIRST_VERSION="$1"
+  readonly SECOND_VERSION="$2"
+  [ "$#" -ne 2 ] &&
+    throw_error "Invalid use of get_most_recent_version."
+  printf '%s\n%s' "${FIRST_VERSION}" "${SECOND_VERSION}" | sort -V | head -1
+}
+
+is_arm64_test_bitcoin_signed()
+{
+  readonly BITCOIN_VERSION_TO_CHECK="$1"
+  readonly ARM64_SIGNED_BINARY_VERSION='28.2'
+  [ "$#" -ne 1 ] &&
+    throw_error "Invalid use of is_arm64_test_bitcoin_signed."
+  # test_bitcoin binary is already signed on Bitcoin Core 28.2 and later
+  if [ "$(get_oldest_version "${BITCOIN_VERSION_TO_CHECK}" "${ARM64_SIGNED_BINARY_VERSION}")" \
+    = "${ARM64_SIGNED_BINARY_VERSION}" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 bitcoin_tarball_test()
 {
   log_info 'Running the unit tests.'
-  if [ "${TARGET_ARCHITECTURE}" = 'arm64' ]; then
+  # only sign test_bitcoin if on arm64 and target version is before 28.2
+  if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
+    ! is_arm64_test_bitcoin_signed "${target_bitcoin_version}"; then
     codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
   fi
   UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
