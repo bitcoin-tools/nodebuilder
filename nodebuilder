@@ -74,11 +74,13 @@ compile_bitcoin_from_source()
 
   log_info 'Running compile checks. Please wait.'
   ctest --test-dir build
-  
+
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   cmake --install build
 }
 
+# TODO: use make on old releases and cmake on >= 28.0 or 29.0
+# shellcheck disable=SC2317
 compile_bitcoin_from_source_make()
 {
   log_info 'Ensuring compile dependencies.'
