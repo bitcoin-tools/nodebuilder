@@ -165,7 +165,7 @@ jobs:
   markdown-links:
     name: Check hyperlinks
     runs-on: ubuntu-latest
-    # TODO: fix this step maybe with a different implementation not linkspector
+    # TODO: make this mandatory again with nodebuilder issue 2343
     continue-on-error: true
     steps:
       - uses: actions/checkout@v5
