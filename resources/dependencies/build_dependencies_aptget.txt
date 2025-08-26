@@ -1,0 +1,15 @@
+build-essential
+cmake
+pkgconf
+python3
+libevent-dev
+libboost-dev
+libgl-dev
+libqrencode-dev
+libsqlite3-dev
+libzmq3-dev
+qt6-base-dev
+qt6-tools-dev
+qt6-l10n-tools
+qt6-tools-dev-tools
+qt6-wayland
