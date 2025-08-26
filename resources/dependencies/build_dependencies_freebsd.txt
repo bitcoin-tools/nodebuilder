@@ -1,0 +1,13 @@
+boost-libs
+cmake
+git
+libevent
+pkgconf
+sqlite3
+qt6-base
+qt6-tools
+libqrencode
+libzmq4
+python3
+databases/py-sqlite3
+net/py-pyzmq
