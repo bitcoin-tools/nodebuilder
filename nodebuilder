@@ -68,7 +68,19 @@ compile_bitcoin_from_source()
   cd "${COMPILE_DIRECTORY}"/
 
   log_info 'Configuring the build environment.'
-  cmake -B build -DBUILD_GUI=ON
+  case "${TARGET_KERNEL}" in
+    NetBSD)
+      cmake -B build \
+        -DBUILD_GUI=ON \
+        -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
+        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++" \
+      ;;
+    *)
+      cmake -B build \
+        -DBUILD_GUI=ON
+      ;;
+  esac
+
 
   log_info 'Compiling source code. Please wait.'
   cmake --build build --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" # TODO suppress output > /dev/null 2>&1
