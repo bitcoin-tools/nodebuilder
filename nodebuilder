@@ -67,10 +67,11 @@ compile_bitcoin_from_source()
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
   cd "${COMPILE_DIRECTORY}"/
 
+  log_info 'Configuring the build environment.'
+  cmake -B build -DBUILD_GUI=ON
+
   log_info 'Compiling source code. Please wait.'
-  cmake --build build \
-    -DBUILD_GUI=ON \
-    --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" # TODO suppress output > /dev/null 2>&1
+  cmake --build build --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" # TODO suppress output > /dev/null 2>&1
 
   log_info 'Running compile checks. Please wait.'
   ctest --test-dir build
