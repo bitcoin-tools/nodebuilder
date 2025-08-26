@@ -1,0 +1,8 @@
+cmake
+boost
+libevent
+pkgconf
+python
+qrencode
+qt@6
+zeromq
