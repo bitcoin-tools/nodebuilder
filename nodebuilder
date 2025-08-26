@@ -67,6 +67,34 @@ compile_bitcoin_from_source()
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
   cd "${COMPILE_DIRECTORY}"/
 
+  log_info 'Compiling source code. Please wait.'
+  cmake --build build \
+    -DBUILD_GUI=ON \
+    --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" # TODO suppress output > /dev/null 2>&1
+
+  log_info 'Running compile checks. Please wait.'
+  log_warning 'No compile checks are set.'
+  # TODO what are cmake checks
+
+  log_info "Installing Bitcoin Core ${target_bitcoin_version}."
+  cmake --install build
+}
+
+compile_bitcoin_from_source_make()
+{
+  log_info 'Ensuring compile dependencies.'
+  readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
+  readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
+  install_build_dependencies
+
+  log_info 'Downloading Bitcoin source code.'
+  # shellcheck disable=SC2015
+  command -v torsocks > /dev/null 2>&1 &&
+    [ "${TARGET_KERNEL}" != 'Darwin' ] &&
+    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null ||
+    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
+  cd "${COMPILE_DIRECTORY}"/
+
   log_info 'Analyzing hardware configuration.'
   command -v autoreconf > /dev/null 2>&1 ||
     throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
