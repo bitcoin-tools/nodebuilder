@@ -1,0 +1,12 @@
+boost-devel
+cmake
+gcc-c++
+libevent-devel
+make
+python3
+qrencode-devel
+qt6-qtbase-devel
+qt6-qttools-devel
+qt6-qtwayland
+sqlite-devel
+zeromq-devel
