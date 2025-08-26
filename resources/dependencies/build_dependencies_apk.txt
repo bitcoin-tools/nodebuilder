@@ -1,1 +1,12 @@
-
+boost-dev
+build-base
+cmake
+libevent-dev
+libqrencode-dev
+linux-headers
+pkgconf
+python3
+qt6-qtbase-dev
+qt6-qttools-dev
+sqlite-dev
+zeromq-dev
