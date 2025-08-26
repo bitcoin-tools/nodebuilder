@@ -73,9 +73,8 @@ compile_bitcoin_from_source()
     --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" # TODO suppress output > /dev/null 2>&1
 
   log_info 'Running compile checks. Please wait.'
-  log_warning 'No compile checks are set.'
-  # TODO what are cmake checks
-
+  ctest --test-dir build
+  
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   cmake --install build
 }
