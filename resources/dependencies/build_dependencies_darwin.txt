@@ -4,5 +4,6 @@ libevent
 pkgconf
 python
 qrencode
-qt@6
+qt@5
 zeromq
+
