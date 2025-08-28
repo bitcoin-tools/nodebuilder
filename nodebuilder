@@ -73,7 +73,8 @@ compile_bitcoin_from_source()
       cmake -B build \
         -DBUILD_GUI=ON \
         -DCMAKE_VERBOSE_MAKEFILE=ON \
-        --trace-expand
+        --trace-expand \
+        2>&1
       ;;
     NetBSD)
       cmake -B build \
