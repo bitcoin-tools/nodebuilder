@@ -8,9 +8,8 @@ libzmq4
 net/py-pyzmq
 pkgconf
 python3
-qt5-buildtools	net/py-pyzmq
+qt5-buildtools
 qt5-gui	
 qt5-linguisttools	
 qt5-widgets	
 sqlite3
-
