@@ -8,9 +8,7 @@ libgl-dev
 libqrencode-dev
 libsqlite3-dev
 libzmq3-dev
-qt5-base-dev
-qt5-tools-dev
-qt5-l10n-tools
-qt5-tools-dev-tools
-qt5-wayland
-
+qtbase5-dev
+qttools5-dev
+qttools5-dev-tools
+qtwayland5
