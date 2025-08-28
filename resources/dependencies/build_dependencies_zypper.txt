@@ -1,0 +1,9 @@
+boost-devel
+cmake
+gcc13-c++
+libevent
+libqt5-qtbase-devel
+python3
+qrencode
+sqlite3
+zeromq
