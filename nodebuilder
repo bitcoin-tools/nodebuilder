@@ -72,7 +72,8 @@ compile_bitcoin_from_source()
     FreeBSD)
       cmake -B build \
         -DBUILD_GUI=ON \
-        -DCMAKE_VERBOSE_MAKEFILE=ON
+        -DCMAKE_VERBOSE_MAKEFILE=ON \
+        --trace-expand
       ;;
     NetBSD)
       cmake -B build \
