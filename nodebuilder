@@ -82,10 +82,10 @@ compile_bitcoin_from_source()
   esac
 
   log_info 'Compiling source code. Please wait.'
-  cmake --build build --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" # TODO suppress output > /dev/null 2>&1
+  cmake --build build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" # TODO suppress output > /dev/null 2>&1
 
   log_info 'Running compile checks. Please wait.'
-  ctest --test-dir build
+  ctest --test-dir build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}"
 
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   cmake --install build
