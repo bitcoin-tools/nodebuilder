@@ -4,10 +4,11 @@ gcc12
 git
 libevent
 pkg-config
+python312
+py312-zmq
 python310
 py310-zmq
 qrencode
-qt6-qtbase
-qt6-qttools
 sqlite3
 zeromq
+
