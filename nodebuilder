@@ -69,6 +69,11 @@ compile_bitcoin_from_source()
 
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
+    FreeBSD)
+      cmake -B build \
+        -DBUILD_GUI=ON \
+        -DCMAKE_VERBOSE_MAKEFILE=ON
+      ;;
     NetBSD)
       cmake -B build \
         -DBUILD_GUI=ON \
