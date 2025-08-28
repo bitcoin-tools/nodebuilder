@@ -1,0 +1,6 @@
+cmake
+devpkg-boost
+devpkg-libevent
+devpkg-qttools
+libzmq
+python3-basic
