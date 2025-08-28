@@ -69,13 +69,6 @@ compile_bitcoin_from_source()
 
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
-    FreeBSD)
-      cmake -B build \
-        -DBUILD_GUI=ON \
-        -DCMAKE_VERBOSE_MAKEFILE=ON \
-        --trace-expand \
-        2> /dev/stdout
-      ;;
     NetBSD)
       cmake -B build \
         -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
@@ -83,8 +76,7 @@ compile_bitcoin_from_source()
       ;;
     *)
       cmake -B build \
-        -DBUILD_GUI=ON \
-        2> /dev/stdout
+        -DBUILD_GUI=ON
       ;;
   esac
 
@@ -974,20 +966,25 @@ install_build_dependencies_openbsd()
 {
   set -x
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
+  echo "debug BUILD_DEPENDENCIES_URL=${BUILD_DEPENDENCIES_URL}"
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  echo "debug dependencies=${dependencies}"
   for package in ${dependencies}; do
+    echo "debug package=${package}"
     if [ "${package}" = 'sqlite3' ]; then
       sudo pkg_add "${package}" # TODO: add back stdout suppression > /dev/null
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
+      echo "debug package_latest_version=${package_latest_version}"
       [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
       [ "${package}" = 'automake' ] && automake_package_latest_version="${package_latest_version}"
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
+        echo "debug installing package_latest_version=${package_latest_version}"
         sudo pkg_add "${package_latest_version}" # TODO: add back stdout suppression > /dev/null
       fi
     fi
