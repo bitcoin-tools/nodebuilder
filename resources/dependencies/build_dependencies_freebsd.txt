@@ -1,13 +1,16 @@
 boost-libs
 cmake
+databases/py-sqlite3
 git
 libevent
-pkgconf
-sqlite3
-qt6-base
-qt6-tools
 libqrencode
 libzmq4
-python3
-databases/py-sqlite3
 net/py-pyzmq
+pkgconf
+python3
+qt5-buildtools	net/py-pyzmq
+qt5-gui	
+qt5-linguisttools	
+qt5-widgets	
+sqlite3
+
