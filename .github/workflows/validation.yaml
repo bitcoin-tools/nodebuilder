@@ -457,6 +457,8 @@ jobs:
           &&
           (
             matrix.container != 'Gentoo' ||
+            contains(needs.changes.outputs.dependencies, 'build_dependencies_emerge.txt') ||
+            contains(needs.changes.outputs.dependencies, 'runtime_dependencies_emerge.txt') ||
             contains(needs.changes.outputs.docker-files, 'Dockerfile_gentoo') ||
             (
               github.event.action == '' &&
