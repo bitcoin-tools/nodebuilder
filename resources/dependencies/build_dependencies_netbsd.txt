@@ -6,12 +6,11 @@ libevent
 pkg-config
 python312
 py312-zmq
-python310
-py310-zmq
 qrencode
 qt5-qtbase
 qt5-qttools
 sqlite3
 zeromq
+
 
 
