@@ -822,7 +822,7 @@ install_build_dependencies_apk()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs apk --quiet add --no-cache |
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs apk --quiet add --no-cache |
     grep -v 'ICU with non-English locales' -A2 -B1 || true
 }
 
@@ -834,7 +834,7 @@ install_build_dependencies_aptget()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   sudo apt-get -qq update
-  printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
   # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
   sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends gcc-12 > /dev/null 2>&1
 }
@@ -849,7 +849,7 @@ install_build_dependencies_darwin()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs brew install --quiet > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs brew install --quiet > /dev/null
 }
 
 install_build_dependencies_dnf()
@@ -879,7 +879,7 @@ install_build_dependencies_dnf()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
 
-  printf '%s\n' "${dependencies}" | xargs sudo dnf install --assumeyes > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes > /dev/null
 }
 
 install_build_dependencies_emerge()
@@ -890,12 +890,12 @@ install_build_dependencies_emerge()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  if ! printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
+  if ! printf '%s\n' "${dependencies}" | tr -d '\r' | xargs emerge --autounmask-write \
     --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail; then
     etc-update --automode -5
     emerge --update --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail --deep --newuse @world
     # Run the install command again
-    printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write \
+    printf '%s\n' "${dependencies}" | tr -d '\r' | xargs emerge --autounmask-write \
       --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
   fi
 }
@@ -907,7 +907,7 @@ install_build_dependencies_freebsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes > /dev/null
 }
 
 install_build_dependencies_netbsd()
@@ -917,7 +917,7 @@ install_build_dependencies_netbsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo pkgin -y install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install > /dev/null
   # TODO: Remove gcc-12 installation on next line when NetBSD updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
   sudo pkgin -y install gcc12 && export PATH="/usr/pkg/gcc12/bin:${PATH}"
 }
@@ -963,7 +963,7 @@ install_build_dependencies_pacman()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
   grep -v 'skipping' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
 }
 
@@ -974,7 +974,7 @@ install_build_dependencies_swupd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo swupd bundle-add --quiet > /dev/null
 }
 
 install_build_dependencies_zypper()
@@ -984,7 +984,7 @@ install_build_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   export CXX=g++-13
 }
 
@@ -1057,7 +1057,7 @@ install_runtime_dependencies_apk()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo apk --quiet add --no-cache
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo apk --quiet add --no-cache
 }
 
 install_runtime_dependencies_aptget()
@@ -1069,7 +1069,7 @@ install_runtime_dependencies_aptget()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   sudo apt-get -qq update
-  printf '%s\n' "${dependencies}" | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
 }
 
 install_runtime_dependencies_darwin()
@@ -1116,7 +1116,7 @@ install_runtime_dependencies_dnf()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo dnf --assumeyes --quiet install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf --assumeyes --quiet install > /dev/null
 }
 
 install_runtime_dependencies_emerge()
@@ -1127,7 +1127,7 @@ install_runtime_dependencies_emerge()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs emerge --autounmask-write --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs emerge --autounmask-write --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
 }
 
 install_runtime_dependencies_freebsd()
@@ -1137,7 +1137,7 @@ install_runtime_dependencies_freebsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo pkg install --yes > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes > /dev/null
 }
 
 install_runtime_dependencies_netbsd()
@@ -1147,7 +1147,7 @@ install_runtime_dependencies_netbsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo pkgin -y install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install > /dev/null
 }
 
 install_runtime_dependencies_openbsd()
@@ -1157,7 +1157,7 @@ install_runtime_dependencies_openbsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo pkg_add > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg_add > /dev/null
 }
 
 install_runtime_dependencies_pacman()
@@ -1168,7 +1168,7 @@ install_runtime_dependencies_pacman()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_DEPENDENCIES_LOG_FILE}"
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_DEPENDENCIES_LOG_FILE}"
   grep -v 'skipping' "${STDERR_DEPENDENCIES_LOG_FILE}" >&2 || true
   rm "${STDERR_DEPENDENCIES_LOG_FILE}"
 }
@@ -1180,7 +1180,7 @@ install_runtime_dependencies_swupd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo swupd bundle-add --quiet > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo swupd bundle-add --quiet > /dev/null
 }
 
 install_runtime_dependencies_zypper()
@@ -1190,7 +1190,7 @@ install_runtime_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | xargs sudo zypper --non-interactive --quiet install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install > /dev/null
 }
 
 install_system_updates()
