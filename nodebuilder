@@ -75,6 +75,9 @@ compile_bitcoin_from_source()
         -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
         -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++"
       ;;
+    clear-linux-os)
+      cmake -B build \
+        -DBUILD_GUI=ON
     *)
       cmake -B build \
         -DBUILD_GUI=ON \
