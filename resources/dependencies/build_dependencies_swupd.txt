@@ -4,4 +4,4 @@ devpkg-libevent
 devpkg-qttools
 libzmq
 python3-basic
-sqlite3
+sqlite
