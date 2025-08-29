@@ -966,7 +966,6 @@ install_build_dependencies_netbsd()
 
 install_build_dependencies_openbsd()
 {
-  set -x
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
   echo "debug BUILD_DEPENDENCIES_URL=${BUILD_DEPENDENCIES_URL}"
   command -v torsocks > /dev/null 2>&1 &&
