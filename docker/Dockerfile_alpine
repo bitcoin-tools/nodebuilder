@@ -12,6 +12,9 @@ ARG NODEBUILDER_VERSION=v1.12.0
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 
+# Set CI to false unless overridden with build-arg
+ARG CI=false
+
 # Check the current environment.
 RUN uname -a \
   && cat /etc/os-release \
@@ -23,4 +26,4 @@ RUN uname -a \
  RUN apk --no-cache add coreutils curl
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN CI=${CI} /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

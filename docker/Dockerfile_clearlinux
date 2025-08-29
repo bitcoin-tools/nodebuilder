@@ -7,6 +7,7 @@ ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
 ARG NODEBUILDER_VERSION=v1.12.0
+ARG CI=false
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
@@ -19,4 +20,4 @@ RUN uname -a \
   && date -u
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN CI=${CI} /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

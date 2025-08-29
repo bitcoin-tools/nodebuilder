@@ -71,7 +71,9 @@ jobs:
       with:
         context: .
         file: docker/Dockerfile_${{ matrix.container }}
-        build-args: NODEBUILDER_VERSION=${{ env.NODEBUILDER_VERSION }}
+        build-args: |
+          CI=true
+          NODEBUILDER_VERSION=${{ env.NODEBUILDER_VERSION }}
         # Push if the CI run isn't from a beta prerelease
         push: ${{ !github.event.release.prerelease }}
         tags: ${{ env.IMAGE_TAGS }}
@@ -99,7 +101,9 @@ jobs:
       with:
         context: .
         file: docker/Dockerfile
-        build-args: NODEBUILDER_VERSION=${{ needs.build-and-push.outputs.nodebuilder-version }}
+        build-args: |
+          CI=true
+          NODEBUILDER_VERSION=${{ needs.build-and-push.outputs.nodebuilder-version }}
         # Push if the CI run isn't from a beta prerelease
         push: ${{ !github.event.release.prerelease }}
         # Set the tags for the ubuntu-{version}, ubuntu, {version}, and latest

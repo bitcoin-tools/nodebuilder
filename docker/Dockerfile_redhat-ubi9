@@ -13,6 +13,8 @@ ARG NODEBUILDER_VERSION=v1.12.0
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
 ARG DEPENDENCIES_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/resources/dependencies/runtime_dependencies_dnf.txt
 
+ARG CI=false
+
 # Check the current environment.
 RUN uname -a \
   && cat /etc/os-release \
@@ -28,4 +30,4 @@ RUN dnf makecache \
 # Download and execute the script.
 RUN wget ${NODEBUILDER_URL} \
   && chmod u+x nodebuilder \
-  && ./nodebuilder
+  && CI=${CI} ./nodebuilder

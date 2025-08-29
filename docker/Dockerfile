@@ -11,6 +11,7 @@ ARG NODEBUILDER_VERSION=v1.12.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+ARG CI=false
 
 # Check the current environment.
 RUN uname -a \
@@ -27,4 +28,4 @@ RUN apt-get -qq update \
   && rm -rf /var/lib/apt/lists/*
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN CI=${CI} /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
