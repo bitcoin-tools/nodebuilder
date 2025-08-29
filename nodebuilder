@@ -1866,6 +1866,9 @@ elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     log_info 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
+  elif is_running_in_ci; then
+    log_info 'Your node in CI will run unpruned.'
+    set_bitcoin_core_option 'prune' '0'
   elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 80 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     throw_error 'You are too low on disk space to run Bitcoin Core.'
   else
