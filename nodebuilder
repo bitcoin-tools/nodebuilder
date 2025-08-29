@@ -864,15 +864,22 @@ install_build_dependencies_dnf()
       ;;
     rhel)
       sudo subscription-manager identity > /dev/null 2>&1 ||
-        throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
+        throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe' and re-run nodebuilder."
       sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms" ||
         throw_error "Failed to enable EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
       ;;
     *) ;;
   esac
 
-  dnf list installed epel-release > /dev/null 2>&1 ||
-    sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+  dnf list installed epel-release > /dev/null 2>&1 || {
+    echo 'DEBUG EPEL release not found'
+    echo "DEBUG OS_MAJOR_VERSION_ID=${OS_MAJOR_VERSION_ID}"
+    echo 'DEBUG showing contents of /etc/os-release'
+    cat /etc/os-release
+    readonly EPEL_RELEASE_RPM_URL="https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+    echo "DEBUG EPEL_RELEASE_RPM_URL=${EPEL_RELEASE_RPM_URL}"
+    sudo dnf --assumeyes install "${EPEL_RELEASE_RPM_URL}"
+  }
 
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
