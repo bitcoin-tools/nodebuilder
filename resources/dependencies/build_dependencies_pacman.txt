@@ -1,3 +1,4 @@
+base-devel
 boost
 boost-libs
 cmake
