@@ -75,7 +75,7 @@ compile_bitcoin_from_source()
         -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
         -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++"
       ;;
-    clear-linux-os|gentoo)
+    clear-linux-os | gentoo)
       cmake -B build \
         -DBUILD_GUI=ON
       ;;
@@ -918,7 +918,7 @@ install_build_dependencies_dnf()
   esac
 
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
-    fedora) 
+    fedora)
       echo 'DEBUG skipping epel release install on fedora'
       ;;
     *)
