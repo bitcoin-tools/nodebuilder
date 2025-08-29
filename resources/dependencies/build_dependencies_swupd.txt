@@ -2,6 +2,7 @@ cmake
 devpkg-boost
 devpkg-libevent
 devpkg-qttools
+devpkg-sqlite-autoconf
 libzmq
 python3-basic
 sqlite
