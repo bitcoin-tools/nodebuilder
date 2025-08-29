@@ -1686,7 +1686,8 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='2348-feat---add-support-for-290' #TODO change back to most recent tag 1.12.0
+# TODO: during next release v2.0.0, change NODEBUILDER_DEPENDENCIES_TAG from master to the release tag
+readonly NODEBUILDER_DEPENDENCIES_TAG='2348-feat---add-support-for-290' # TODO change to master before merging PR until next release
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
