@@ -1,6 +1,6 @@
 boost-devel
 cmake
-gcc13-c++
+gcc12-c++
 libevent
 libqt5-qtbase-devel
 python3
