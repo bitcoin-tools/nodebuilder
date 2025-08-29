@@ -78,6 +78,7 @@ compile_bitcoin_from_source()
     clear-linux-os)
       cmake -B build \
         -DBUILD_GUI=ON
+      ;;
     *)
       cmake -B build \
         -DBUILD_GUI=ON \
