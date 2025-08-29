@@ -20,6 +20,7 @@ jobs:
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
       dependencies: ${{ steps.filter.outputs.dependencies }}
+      dependencies-files: ${{ steps.filter.outputs.dependencies_files }}
       docker: ${{ steps.filter.outputs.docker }}
       docker-files: ${{ steps.filter.outputs.docker_files }}
       markdown: ${{ steps.filter.outputs.markdown }}
@@ -457,8 +458,8 @@ jobs:
           &&
           (
             matrix.container != 'Gentoo' ||
-            contains(needs.changes.outputs.dependencies, 'build_dependencies_emerge.txt') ||
-            contains(needs.changes.outputs.dependencies, 'runtime_dependencies_emerge.txt') ||
+            contains(needs.changes.outputs.dependencies-files, 'build_dependencies_emerge.txt') ||
+            contains(needs.changes.outputs.dependencies-files, 'runtime_dependencies_emerge.txt') ||
             contains(needs.changes.outputs.docker-files, 'Dockerfile_gentoo') ||
             (
               github.event.action == '' &&
