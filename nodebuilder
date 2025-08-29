@@ -871,21 +871,13 @@ install_build_dependencies_dnf()
     *) ;;
   esac
 
-  dnf list installed epel-release > /dev/null 2>&1 || {
-    echo 'DEBUG EPEL release not found'
-    echo "DEBUG OS_MAJOR_VERSION_ID=${OS_MAJOR_VERSION_ID}"
-    echo 'DEBUG -----------------------------------'
-    echo 'DEBUG showing contents of /etc/os-release'
-    echo 'DEBUG -----------------------------------'
-    cat /etc/os-release
-    echo 'DEBUG -----------------------------------'
-    echo 'DEBUG showing contents of /etc/fedora-release'
-    echo 'DEBUG -----------------------------------'
-    cat /etc/fedora-release
-    readonly EPEL_RELEASE_RPM_URL="https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
-    echo "DEBUG EPEL_RELEASE_RPM_URL=${EPEL_RELEASE_RPM_URL}"
-    sudo dnf --assumeyes install "${EPEL_RELEASE_RPM_URL}"
-  }
+  case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
+    fedora) ;;
+    *)
+      dnf list installed epel-release > /dev/null 2>&1 ||
+        sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+      ;;
+  esac
 
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
@@ -1857,8 +1849,9 @@ log_info "Found free space available... $((free_space_in_mib / MIB_TO_GIB)) GiB.
 ## The higher this number is, the more likely a node will be to prune.
 ## The sweet spot is about 50, 75, or 100 GB more than the size of blocks/ + chainstate/ using this:
 ## `echo $((($(du -md0 ~/.bitcoin/blocks/ | cut -f1) + $(du -md0 ~/.bitcoin/chainstate/ | cut -f1)) / 1024))`
-## which is 647 GiB, as of September 2024.
-readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB='722'
+## `echo $((($(du -md0 ~/Library/Application\ Support/Bitcoin/blocks/ | cut -f1) + $(du -md0 ~/Library/Application\ Support/Bitcoin/chainstate/ | cut -f1)) / 1024))`
+## which is 720 GiB, as of August 2025.
+readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB='820'
 readonly ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB=$((ARCHIVAL_NODE_REQUIRED_DISK_IN_GIB * MIB_TO_GIB))
 
 # check if the user wants to disable pruning
