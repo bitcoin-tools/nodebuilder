@@ -468,7 +468,7 @@ jobs:
         timeout-minutes: 300
         with:
           build-args: |
-            CI: true
+            CI=true
             NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .
           file: docker/${{ matrix.dockerfile }}
