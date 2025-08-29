@@ -917,8 +917,15 @@ install_build_dependencies_dnf()
     *) ;;
   esac
 
-  dnf list installed epel-release > /dev/null 2>&1 ||
-    sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+  case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
+    fedora) 
+      echo 'DEBUG skipping epel release install on fedora'
+      ;;
+    *)
+      dnf list installed epel-release > /dev/null 2>&1 ||
+        sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+      ;;
+  esac
 
   command -v torsocks > /dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
