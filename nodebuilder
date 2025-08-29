@@ -977,16 +977,13 @@ install_build_dependencies_openbsd()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r')
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
-    echo "debug package=${package}"
     if [ "${package}" = 'sqlite3' ]; then
       sudo pkg_add "${package}" > /dev/null
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
-      echo "debug package_latest_version=${package_latest_version}"
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
-        echo "debug installing package_latest_version=${package_latest_version}"
         sudo pkg_add "${package_latest_version}" > /dev/null
       fi
     fi
