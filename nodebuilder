@@ -871,6 +871,14 @@ install_build_dependencies_dnf()
     *) ;;
   esac
 
+  case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
+    fedora) ;;
+    *)
+      dnf list installed epel-release > /dev/null 2>&1 ||
+        sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+      ;;
+  esac
+
   dnf list installed epel-release > /dev/null 2>&1 ||
     sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
 
