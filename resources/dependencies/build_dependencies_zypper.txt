@@ -6,4 +6,4 @@ libqt5-qtbase-devel
 python3
 qrencode
 sqlite3
-zeromq
+zeromq-devel
