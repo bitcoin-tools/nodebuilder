@@ -976,35 +976,21 @@ install_build_dependencies_openbsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r') ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r')
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  echo "debug dependencies=${dependencies}"
   for package in ${dependencies}; do
     echo "debug package=${package}"
     if [ "${package}" = 'sqlite3' ]; then
-      sudo pkg_add "${package}" # TODO: add back stdout suppression > /dev/null
+      sudo pkg_add "${package}" > /dev/null
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
       echo "debug package_latest_version=${package_latest_version}"
-      [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
-      [ "${package}" = 'automake' ] && automake_package_latest_version="${package_latest_version}"
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
         echo "debug installing package_latest_version=${package_latest_version}"
-        sudo pkg_add "${package_latest_version}" # TODO: add back stdout suppression > /dev/null
+        sudo pkg_add "${package_latest_version}" > /dev/null
       fi
     fi
   done
-
-  # major-minor version only
-  AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
-    export AUTOCONF_VERSION
-  AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
-    export AUTOMAKE_VERSION
-
-  [ -f /usr/local/bin/autoconf-2.72 ] &&
-    sudo ln -s /usr/local/bin/autoconf-2.72 /usr/local/bin/autoconf-2.72p0
-  [ -f /usr/local/bin/autoreconf-2.72 ] &&
-    sudo ln -s /usr/local/bin/autoreconf-2.72 /usr/local/bin/autoreconf-2.72p0
 }
 
 install_build_dependencies_pacman()
