@@ -5,15 +5,13 @@
 set -o errexit
 set -o nounset
 
-check_dpkg_lock()
-{
-  if fuser /var/lib/dpkg/lock > /dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend > /dev/null 2>&1; then
+check_dpkg_lock() {
+  if fuser /var/lib/dpkg/lock >/dev/null 2>&1 || fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; then
     throw_error 'Debian package manager (dpkg) is locked by another process. Try running: ps aux | grep -i apt'
   fi
 }
 
-check_internet_status()
-{
+check_internet_status() {
   ensure_curl_dependency
   log_info 'Checking for internet.'
   ( (check_internet_to_address 1.1.1.1 ||
@@ -25,35 +23,32 @@ check_internet_status()
   log_info 'Internet checks passed.'
 }
 
-check_internet_to_address()
-{
+check_internet_to_address() {
   check_internet_address=$1
   readonly CHECK_INTERNET_PORT='443'
   readonly CHECK_INTERNET_TIMEOUT_SECONDS='10'
   # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 && [ "${TARGET_OPERATING_SYSTEM}" != 'Darwin' ] &&
-    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null ||
-    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" > /dev/null
+  command -v torsocks >/dev/null 2>&1 && [ "${TARGET_OPERATING_SYSTEM}" != 'Darwin' ] &&
+    torsocks curl --silent --output /dev/null --retry 2 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" >/dev/null ||
+    curl --silent --output /dev/null --retry 5 --connect-timeout "${CHECK_INTERNET_TIMEOUT_SECONDS}" "https://${check_internet_address}:${CHECK_INTERNET_PORT}" >/dev/null
 }
 
-clear_the_terminal()
-{
+clear_the_terminal() {
   if [ "${quiet_output}" = 'true' ] || is_running_in_ci || is_running_in_container; then
     return
   elif [ ! -t 1 ]; then
     # stdout is not a terminal perhaps redirected or piped
     return
-  elif command -v clear > /dev/null 2>&1; then
+  elif command -v clear >/dev/null 2>&1; then
     clear
-  elif command -v tput > /dev/null 2>&1; then
+  elif command -v tput >/dev/null 2>&1; then
     tput clear
   else
     printf '\033c'
   fi
 }
 
-compile_bitcoin_from_source()
-{
+compile_bitcoin_from_source() {
   log_info 'Ensuring compile dependencies.'
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
@@ -61,45 +56,49 @@ compile_bitcoin_from_source()
 
   log_info 'Downloading Bitcoin source code.'
   # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null ||
-    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
+    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2>/dev/null ||
+    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2>/dev/null
   cd "${COMPILE_DIRECTORY}"/
 
   log_info 'Configuring the build environment.'
   log_info "DEBUG TARGET_OPERATING_SYSTEM=${TARGET_OPERATING_SYSTEM}"
   case "${TARGET_OPERATING_SYSTEM}" in
-    NetBSD)
-      cmake -B build \
-        -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
-        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++"
-      ;;
-    gentoo | *opensuse*)
-      cmake -B build \
-        -DBUILD_GUI=ON
-      ;;
-    *)
-      cmake -B build \
-        -DBUILD_GUI=ON \
-        > /dev/null 2>&1
-      ;;
+  NetBSD)
+    cmake -B build \
+      -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
+      -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++" \
+      >/dev/null 2>&1
+    ;;
+  gentoo)
+    cmake -B build \
+      >/dev/null 2>&1
+    ;;
+  *opensuse*)
+    cmake -B build \
+      -DBUILD_GUI=ON
+    ;;
+  *)
+    cmake -B build \
+      -DBUILD_GUI=ON \
+      >/dev/null 2>&1
+    ;;
   esac
 
   log_info 'Compiling source code. Please wait.'
-  cmake --build build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
+  cmake --build build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" >/dev/null 2>&1
 
   log_info 'Running compile checks. Please wait.'
-  ctest --test-dir build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
+  ctest --test-dir build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" >/dev/null 2>&1
 
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
-  cmake --install build > /dev/null 2>&1 || sudo cmake --install build > /dev/null
+  cmake --install build >/dev/null 2>&1 || sudo cmake --install build >/dev/null
 }
 
 # TODO: use make on old releases and cmake on >= 29.0
 # shellcheck disable=SC2317
-compile_bitcoin_from_source_make()
-{
+compile_bitcoin_from_source_make() {
   log_info 'Ensuring compile dependencies.'
   readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
   readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
@@ -107,75 +106,74 @@ compile_bitcoin_from_source_make()
 
   log_info 'Downloading Bitcoin source code.'
   # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null ||
-    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
+    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2>/dev/null ||
+    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2>/dev/null
   cd "${COMPILE_DIRECTORY}"/
 
   log_info 'Analyzing hardware configuration.'
-  command -v autoreconf > /dev/null 2>&1 ||
+  command -v autoreconf >/dev/null 2>&1 ||
     throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
-  ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+  ./autogen.sh >/dev/null 2>"${STDERR_COMPILE_LOG_FILE}"
   grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
 
   log_info 'Configuring the build environment.'
   case "${TARGET_KERNEL}" in
-    Darwin)
-      ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
-      ;;
-    FreeBSD)
-      ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
-      ;;
-    NetBSD)
-      ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
-      ;;
-    OpenBSD)
-      ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
-      ;;
-    *)
-      ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
-      ;;
+  Darwin)
+    ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings >/dev/null
+    ;;
+  FreeBSD)
+    ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake >/dev/null
+    ;;
+  NetBSD)
+    ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake >/dev/null
+    ;;
+  OpenBSD)
+    ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake >/dev/null 2>&1
+    ;;
+  *)
+    ./configure --without-bdb --enable-suppress-external-warnings >/dev/null
+    ;;
   esac
   log_info 'Compiling source code. Please wait.'
   case "${TARGET_KERNEL}" in
-    FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
-      ;;
-    *)
-      make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
-      ;;
+  FreeBSD | NetBSD | OpenBSD)
+    gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" >/dev/null 2>&1
+    ;;
+  *)
+    make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" >/dev/null 2>&1
+    ;;
   esac
 
   log_info 'Running compile checks. Please wait.'
   case "${TARGET_KERNEL}" in
-    FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-      ;;
-    *)
-      make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-      ;;
+  FreeBSD | NetBSD | OpenBSD)
+    gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" check >/dev/null 2>"${STDERR_COMPILE_LOG_FILE}"
+    ;;
+  *)
+    make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" check >/dev/null 2>"${STDERR_COMPILE_LOG_FILE}"
+    ;;
   esac
   # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
   sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
 
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   case "${TARGET_KERNEL}" in
-    FreeBSD | NetBSD | OpenBSD)
-      gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
-      ;;
-    *)
-      make install > /dev/null 2>&1 || sudo make install > /dev/null
-      ;;
+  FreeBSD | NetBSD | OpenBSD)
+    gmake install >/dev/null 2>&1 || sudo gmake install >/dev/null
+    ;;
+  *)
+    make install >/dev/null 2>&1 || sudo make install >/dev/null
+    ;;
   esac
 
-  cd - > /dev/null
+  cd - >/dev/null
   rm "${STDERR_COMPILE_LOG_FILE}"
   rm -rf "${COMPILE_DIRECTORY:?}"/
 }
 
-create_application_shortcuts()
-{
+create_application_shortcuts() {
   log_info 'Creating application shortcuts.'
   readonly DESKTOP_DIRECTORY="${HOME}/Desktop"
   readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
@@ -188,10 +186,10 @@ create_application_shortcuts()
   [ -d "$(dirname "${SHORTCUT_IMAGE_FILE}")" ] || mkdir -p "$(dirname "${SHORTCUT_IMAGE_FILE}")"
   if [ ! -f "${SHORTCUT_IMAGE_FILE}" ]; then
     # shellcheck disable=SC2015
-    if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
+    if command -v torsocks >/dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
       torsocks curl --fail --silent --show-error --location --retry 2 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200' ||
       curl --fail --silent --show-error --location --retry 5 --head "${SHORTCUT_IMAGE_SOURCE}" | grep -q 'HTTP/[0-9.]* 200'; then
-      command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
+      command -v torsocks >/dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
         torsocks curl --fail --silent --show-error --location --retry 2 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}" ||
         curl --fail --silent --show-error --location --retry 5 --output "${SHORTCUT_IMAGE_FILE}" "${SHORTCUT_IMAGE_SOURCE}"
     else
@@ -205,7 +203,7 @@ create_application_shortcuts()
   done
 
   ## Create desktop entries on the user's Desktop and 'Show Applications' directories
-  cat << EOF | tee "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}" > "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
+  cat <<EOF | tee "${APPLICATIONS_DIRECTORY}/${SHORTCUT_FILENAME}" >"${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}"
 [Desktop Entry]
 Encoding=UTF-8
 Version=1.0
@@ -241,16 +239,15 @@ EOF
   ## Make the desktop shortcut trusted
   if is_running_in_ci || is_running_in_container; then
     :
-  elif command -v gio > /dev/null 2>&1 &&
-    gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true 2> /dev/null; then
+  elif command -v gio >/dev/null 2>&1 &&
+    gio set "${DESKTOP_DIRECTORY}/${SHORTCUT_FILENAME}" 'metadata::trusted' true 2>/dev/null; then
     :
   else
     log_warning "If the desktop shortcut is failing, please open an issue at ${NODEBUILDER_REPO}."
   fi
 }
 
-display_macos_warning()
-{
+display_macos_warning() {
   log_warning 'macOS has an unpatched security vulnerability called GoFetch.'
   log_warning 'Avoid security-critical actions, such as securing significant funds.'
   if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
@@ -259,10 +256,9 @@ display_macos_warning()
   fi
 }
 
-bitcoin_tarball_download()
-{
+bitcoin_tarball_download() {
   log_info 'Downloading Bitcoin Core.'
-  if command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
+  if command -v torsocks >/dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ]; then
     torsocks curl --fail --silent --show-error --location --retry 2 --output "${BITCOIN_HASH_FILE}" "${BITCOIN_HASH_FILE_SOURCE}" ||
       curl --fail --silent --show-error --location --retry 5 --output "${BITCOIN_HASH_FILE}" "${BITCOIN_HASH_FILE_SOURCE}"
     torsocks curl --fail --silent --show-error --location --retry 2 --output "${GPG_SIGNATURES_FILE}" "${GPG_SIGNATURES_FILE_SOURCE}" ||
@@ -276,17 +272,16 @@ bitcoin_tarball_download()
   fi
 }
 
-bitcoin_tarball_download_validate()
-{
+bitcoin_tarball_download_validate() {
   case "${target_bitcoin_version}" in
-    *rc*)
-      target_bitcoin_version_without_rc="${target_bitcoin_version%rc*}"
-      target_bitcoin_version_rc_number="${target_bitcoin_version##*rc}"
-      BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version_without_rc}/test.rc${target_bitcoin_version_rc_number}"
-      ;;
-    *)
-      BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
-      ;;
+  *rc*)
+    target_bitcoin_version_without_rc="${target_bitcoin_version%rc*}"
+    target_bitcoin_version_rc_number="${target_bitcoin_version##*rc}"
+    BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version_without_rc}/test.rc${target_bitcoin_version_rc_number}"
+    ;;
+  *)
+    BITCOIN_SOURCE="https://bitcoincore.org/bin/bitcoin-core-${target_bitcoin_version}"
+    ;;
   esac
   readonly BITCOIN_SOURCE
   readonly BITCOIN_TARBALL_FILE_SOURCE="${BITCOIN_SOURCE}/${BITCOIN_TARBALL_FILENAME}"
@@ -306,8 +301,7 @@ bitcoin_tarball_download_validate()
   bitcoin_tarball_validate
 }
 
-bitcoin_tarball_download_extract_test_install()
-{
+bitcoin_tarball_download_extract_test_install() {
   readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
   readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
   readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
@@ -333,63 +327,61 @@ bitcoin_tarball_download_extract_test_install()
   log_info 'Bitcoin Core installation complete.'
 }
 
-bitcoin_tarball_extract()
-{
+bitcoin_tarball_extract() {
   log_info 'Extracting Bitcoin Core.'
   [ -d "${BITCOIN_CORE_EXTRACT_DIR}"/ ] || mkdir "${BITCOIN_CORE_EXTRACT_DIR}"
   tar -xzf "${BITCOIN_TARBALL_DESTINATION_PATH}" -C "${BITCOIN_CORE_EXTRACT_DIR}"/ --strip-components=1
 }
 
-bitcoin_tarball_install()
-{
+bitcoin_tarball_install() {
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   # install the libraries
   if [ -d "${BITCOIN_INSTALL_LIB_SOURCE}" ]; then
     [ -d "${BITCOIN_INSTALL_LIB_DESTINATION}" ] ||
-      mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2> /dev/null ||
+      mkdir -p "${BITCOIN_INSTALL_LIB_DESTINATION}" 2>/dev/null ||
       sudo mkdir "${BITCOIN_INSTALL_LIB_DESTINATION}" ||
       throw_error "Unable to create directory ${BITCOIN_INSTALL_LIB_DESTINATION}."
     case "${TARGET_KERNEL}" in
-      Linux)
-        sudo cp \
-          "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.so.0.0.0" \
-          "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.so.0.0.0"
-        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-          sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
-            sudo rm -f libbitcoinconsensus.so.0
-            sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
-          }
-        })
-        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-          sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
-            sudo rm -f libbitcoinconsensus.so
-            sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
-          }
-        })
-        PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' \
-          ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
-        ;;
-      Darwin)
-        sudo cp \
-          "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.0.dylib" \
-          "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.0.dylib"
-        (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
-          sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
-            sudo rm -f libbitcoinconsensus.dylib
-            sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
-          }
-        })
-        sudo update_dyld_shared_cache
-        ;;
-      *)
-        throw_error "Unsupported OS. Please use the --compile option."
-        ;;
+    Linux)
+      sudo cp \
+        "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.so.0.0.0" \
+        "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.so.0.0.0"
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0 || {
+          sudo rm -f libbitcoinconsensus.so.0
+          sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so.0
+        }
+      })
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so || {
+          sudo rm -f libbitcoinconsensus.so
+          sudo ln -s libbitcoinconsensus.so.0.0.0 libbitcoinconsensus.so
+        }
+      })
+      PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/sbin' \
+        ldconfig -n "${BITCOIN_INSTALL_LIB_DESTINATION}"
+      ;;
+    Darwin)
+      sudo cp \
+        "${BITCOIN_INSTALL_LIB_SOURCE}/libbitcoinconsensus.0.dylib" \
+        "${BITCOIN_INSTALL_LIB_DESTINATION}/libbitcoinconsensus.0.dylib"
+      (cd "${BITCOIN_INSTALL_LIB_DESTINATION}"/ && {
+        sudo ln -s -f libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib || {
+          sudo rm -f libbitcoinconsensus.dylib
+          sudo ln -s libbitcoinconsensus.0.dylib libbitcoinconsensus.dylib
+        }
+      })
+      sudo update_dyld_shared_cache
+      ;;
+    *)
+      throw_error "Unsupported OS. Please use the --compile option."
+      ;;
     esac
   fi
 
   # install the binaries
   [ -d "${BITCOIN_INSTALL_BIN_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_BIN_DESTINATION}" 2> /dev/null ||
+    mkdir -p "${BITCOIN_INSTALL_BIN_DESTINATION}" 2>/dev/null ||
     sudo mkdir "${BITCOIN_INSTALL_BIN_DESTINATION}" ||
     throw_error "Unable to create directory ${BITCOIN_INSTALL_BIN_DESTINATION}."
   for bitcoin_executable in bitcoind bitcoin-qt bitcoin-cli bitcoin-tx bitcoin-util bitcoin-wallet; do
@@ -405,7 +397,7 @@ bitcoin_tarball_install()
   # install the header files
   if [ -d "${BITCOIN_INSTALL_INCLUDE_SOURCE}" ]; then
     [ -d "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ] ||
-      mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2> /dev/null ||
+      mkdir -p "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" 2>/dev/null ||
       sudo mkdir "${BITCOIN_INSTALL_INCLUDE_DESTINATION}" ||
       throw_error "Unable to create directory ${BITCOIN_INSTALL_INCLUDE_DESTINATION}."
     sudo install -c -m 644 \
@@ -415,7 +407,7 @@ bitcoin_tarball_install()
 
   # install the binary man pages
   [ -d "${BITCOIN_INSTALL_MAN_DESTINATION}" ] ||
-    mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" 2> /dev/null ||
+    mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" 2>/dev/null ||
     sudo mkdir -p "${BITCOIN_INSTALL_MAN_DESTINATION}" ||
     throw_error "Unable to create directory ${BITCOIN_INSTALL_MAN_DESTINATION}."
   for man_page in bitcoind.1 bitcoin-qt.1 bitcoin-cli.1 bitcoin-tx.1 bitcoin-util.1 bitcoin-wallet.1; do
@@ -423,8 +415,7 @@ bitcoin_tarball_install()
   done
 }
 
-get_oldest_version()
-{
+get_oldest_version() {
   readonly FIRST_VERSION="$1"
   readonly SECOND_VERSION="$2"
   [ "$#" -ne 2 ] &&
@@ -432,8 +423,7 @@ get_oldest_version()
   printf '%s\n%s' "${FIRST_VERSION}" "${SECOND_VERSION}" | sort -V | head -1
 }
 
-is_arm64_test_bitcoin_signed()
-{
+is_arm64_test_bitcoin_signed() {
   BITCOIN_VERSION_TO_COMPARE="$1"
   ARM64_SIGNED_BINARY_VERSION='28.2'
   [ "$#" -ne 1 ] &&
@@ -447,8 +437,7 @@ is_arm64_test_bitcoin_signed()
   fi
 }
 
-bitcoin_tarball_test()
-{
+bitcoin_tarball_test() {
   log_info 'Running the unit tests.'
   # only sign test_bitcoin if on arm64 and target version is before 28.2
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
@@ -458,16 +447,15 @@ bitcoin_tarball_test()
   UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
   readonly UNIT_TEST_RESPONSE
   case "${UNIT_TEST_RESPONSE}" in
-    *'No errors detected'*) ;;
-    *)
-      printf '\n%s\n' "${UNIT_TEST_RESPONSE}"
-      throw_error 'Unit tests failed.'
-      ;;
+  *'No errors detected'*) ;;
+  *)
+    printf '\n%s\n' "${UNIT_TEST_RESPONSE}"
+    throw_error 'Unit tests failed.'
+    ;;
   esac
 }
 
-bitcoin_tarball_validate()
-{
+bitcoin_tarball_validate() {
   bitcoin_tarball_validate_checksum
 
   GPG_GOOD_SIGNATURE_COUNT="$(bitcoin_tarball_validate_count_signatures)"
@@ -490,48 +478,46 @@ bitcoin_tarball_validate()
   [ -f "${GPG_SIGNATURES_FILE}" ] && rm "${GPG_SIGNATURES_FILE}"
 }
 
-bitcoin_tarball_validate_checksum()
-{
+bitcoin_tarball_validate_checksum() {
   cd "${TEMP_DIRECTORY}"/
   case "${TARGET_KERNEL}" in
-    Darwin)
-      if command -v shasum > /dev/null; then
-        SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
-      elif command -v sha256sum > /dev/null; then
-        SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
-      else
-        throw_error "Either sha256sum or shasum must be installed. Please open an issue at ${NODEBUILDER_REPO}."
-      fi
-      ;;
-    *)
-      if command -v sha256sum > /dev/null; then
-        SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2> /dev/null)"
-      elif command -v shasum > /dev/null; then
-        SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2> /dev/null)"
-      else
-        throw_error "Either sha256sum or shasum must be installed. Please open an issue at ${NODEBUILDER_REPO}."
-      fi
-      ;;
+  Darwin)
+    if command -v shasum >/dev/null; then
+      SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2>/dev/null)"
+    elif command -v sha256sum >/dev/null; then
+      SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2>/dev/null)"
+    else
+      throw_error "Either sha256sum or shasum must be installed. Please open an issue at ${NODEBUILDER_REPO}."
+    fi
+    ;;
+  *)
+    if command -v sha256sum >/dev/null; then
+      SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | sha256sum --check 2>/dev/null)"
+    elif command -v shasum >/dev/null; then
+      SHA256_CHECK="$(grep "${BITCOIN_TARBALL_FILENAME}" "${BITCOIN_HASH_FILENAME}" | shasum -a 256 --check 2>/dev/null)"
+    else
+      throw_error "Either sha256sum or shasum must be installed. Please open an issue at ${NODEBUILDER_REPO}."
+    fi
+    ;;
   esac
   readonly SHA256_CHECK
-  cd - > /dev/null
+  cd - >/dev/null
 
   case "${SHA256_CHECK}" in
-    *'OK'*) ;;
-    *)
-      throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${BITCOIN_HASH_FILE}."
-      ;;
+  *'OK'*) ;;
+  *)
+    throw_error "INVALID CHECKSUM. The download has failed. This script cannot continue due to security concerns. Please review the temporary file ${TEMP_DIRECTORY}/${BITCOIN_HASH_FILE}."
+    ;;
   esac
   log_info 'Validated the checksum.'
 }
 
-bitcoin_tarball_validate_count_signatures()
-{
+bitcoin_tarball_validate_count_signatures() {
   if [ -d "${GUIX_SIGS_DESTINATION_DIRECTORY}"/ ]; then
     gpg --quiet --import "${GUIX_SIGS_DESTINATION_DIRECTORY}"/builder-keys/*.gpg
   else
     # shellcheck disable=SC2015
-    command -v torsocks > /dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
+    command -v torsocks >/dev/null 2>&1 && [ "${TARGET_KERNEL}" != 'Darwin' ] &&
       torsocks git clone --depth 1 --quiet "${GUIX_SIGS_REPO}.git" "${GUIX_SIGS_TEMPORARY_DIRECTORY}" ||
       git clone --depth 1 --quiet "${GUIX_SIGS_REPO}.git" "${GUIX_SIGS_TEMPORARY_DIRECTORY}"
     gpg --quiet --import "${GUIX_SIGS_TEMPORARY_DIRECTORY}"/builder-keys/*.gpg
@@ -539,203 +525,198 @@ bitcoin_tarball_validate_count_signatures()
 
   SIGNATURE_COUNT="$(gpg --verify "${GPG_SIGNATURES_FILE}" 2>&1 | grep -c '^gpg: Good signature from ')" &&
     readonly SIGNATURE_COUNT
-  pgrep '^gpg-agent$' > /dev/null && gpgconf --kill gpg-agent
-  pgrep '^keyboxd$' > /dev/null && gpgconf --kill keyboxd
+  pgrep '^gpg-agent$' >/dev/null && gpgconf --kill gpg-agent
+  pgrep '^keyboxd$' >/dev/null && gpgconf --kill keyboxd
   printf '%s\n' "${SIGNATURE_COUNT}"
 }
 
-ensure_curl_dependency()
-{
-  if command -v dnf > /dev/null 2>&1; then
-    sudo dnf install --allowerasing --assumeyes curl > /dev/null
-  elif ! command -v curl > /dev/null 2>&1; then
+ensure_curl_dependency() {
+  if command -v dnf >/dev/null 2>&1; then
+    sudo dnf install --allowerasing --assumeyes curl >/dev/null
+  elif ! command -v curl >/dev/null 2>&1; then
     log_info 'Ensuring curl depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
-      alpine)
+    alpine)
+      sudo apk --quiet add --no-cache curl
+      ;;
+    debian | ubuntu)
+      sudo apt-get install -y curl >/dev/null
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
+      sudo dnf install --allowerasing --assumeyes curl >/dev/null
+      ;;
+    gentoo)
+      emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail net-misc/curl
+      ;;
+    arch | endeavouros | garuda | manjaro)
+      sudo pacman -Syu --needed --noconfirm curl >/dev/null
+      ;;
+    suse | sles | *opensuse*)
+      sudo zypper --non-interactive --quiet install curl >/dev/null
+      ;;
+    clear-linux-os)
+      sudo swupd bundle-add curl >/dev/null
+      ;;
+    Darwin)
+      throw_error "Please install the 'curl' dependency."
+      ;;
+    FreeBSD)
+      sudo pkg install -y curl >/dev/null
+      ;;
+    NetBSD)
+      ensure_netbsd_pkgin_dependency
+      sudo pkgin update >/dev/null
+      sudo pkgin -y install curl >/dev/null
+      ;;
+    OpenBSD)
+      sudo pkg_add curl >/dev/null
+      ;;
+    *)
+      if command -v apk >/dev/null; then
         sudo apk --quiet add --no-cache curl
-        ;;
-      debian | ubuntu)
-        sudo apt-get install -y curl > /dev/null
-        ;;
-      fedora* | rhel | centos* | rocky | ol)
-        sudo dnf install --allowerasing --assumeyes curl > /dev/null
-        ;;
-      gentoo)
-        emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail net-misc/curl
-        ;;
-      arch | endeavouros | garuda | manjaro)
-        sudo pacman -Syu --needed --noconfirm curl > /dev/null
-        ;;
-      suse | sles | *opensuse*)
-        sudo zypper --non-interactive --quiet install curl > /dev/null
-        ;;
-      clear-linux-os)
-        sudo swupd bundle-add curl > /dev/null
-        ;;
-      Darwin)
-        throw_error "Please install the 'curl' dependency."
-        ;;
-      FreeBSD)
-        sudo pkg install -y curl > /dev/null
-        ;;
-      NetBSD)
-        ensure_netbsd_pkgin_dependency
-        sudo pkgin update > /dev/null
-        sudo pkgin -y install curl > /dev/null
-        ;;
-      OpenBSD)
-        sudo pkg_add curl > /dev/null
-        ;;
-      *)
-        if command -v apk > /dev/null; then
-          sudo apk --quiet add --no-cache curl
-        elif command -v apt-get > /dev/null; then
-          sudo apt-get -qq install -y curl > /dev/null
-        elif command -v dnf > /dev/null; then
-          sudo dnf install --allowerasing --assumeyes curl > /dev/null
-        elif command -v pacman > /dev/null; then
-          sudo pacman -Syu --needed --noconfirm curl > /dev/null
-        elif command -v zypper > /dev/null; then
-          sudo zypper --non-interactive --quiet install curl > /dev/null
-        else
-          throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
-        fi
-        ;;
+      elif command -v apt-get >/dev/null; then
+        sudo apt-get -qq install -y curl >/dev/null
+      elif command -v dnf >/dev/null; then
+        sudo dnf install --allowerasing --assumeyes curl >/dev/null
+      elif command -v pacman >/dev/null; then
+        sudo pacman -Syu --needed --noconfirm curl >/dev/null
+      elif command -v zypper >/dev/null; then
+        sudo zypper --non-interactive --quiet install curl >/dev/null
+      else
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
+      fi
+      ;;
     esac
   fi
-  command -v curl > /dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error at ${NODEBUILDER_REPO}."
+  command -v curl >/dev/null 2>&1 || throw_error "Unable to install 'curl'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
-ensure_netbsd_pkgin_dependency()
-{
-  hash pkgin 2> /dev/null ||
-    pkg_add "https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${TARGET_ARCHITECTURE}/${TARGET_OPERATING_SYSTEM_RELEASE}/All/pkgin" > /dev/null
+ensure_netbsd_pkgin_dependency() {
+  hash pkgin 2>/dev/null ||
+    pkg_add "https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${TARGET_ARCHITECTURE}/${TARGET_OPERATING_SYSTEM_RELEASE}/All/pkgin" >/dev/null
 }
 
-ensure_sudo_dependency()
-{
-  if ! command -v sudo > /dev/null 2>&1; then
+ensure_sudo_dependency() {
+  if ! command -v sudo >/dev/null 2>&1; then
     log_info 'Ensuring sudo depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
-      alpine)
+    alpine)
+      apk --quiet add --no-cache sudo
+      ;;
+    debian | ubuntu)
+      apt-get install -y sudo >/dev/null
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
+      dnf install --allowerasing --assumeyes sudo >/dev/null
+      ;;
+    gentoo)
+      emerge --sync --quiet
+      emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail app-admin/sudo
+      ;;
+    arch | endeavouros | garuda | manjaro)
+      pacman -Syu --needed --noconfirm sudo >/dev/null
+      ;;
+    suse | sles | *opensuse*)
+      zypper --non-interactive --quiet install sudo >/dev/null
+      ;;
+    clear-linux-os)
+      swupd bundle-add sudo >/dev/null
+      ;;
+    FreeBSD)
+      pkg install -y sudo >/dev/null
+      ;;
+    NetBSD)
+      ensure_netbsd_pkgin_dependency
+      pkgin update >/dev/null
+      pkgin -y install sudo >/dev/null
+      ;;
+    OpenBSD)
+      pkg_add sudo-- >/dev/null
+      ;;
+    *)
+      if command -v apk >/dev/null; then
         apk --quiet add --no-cache sudo
-        ;;
-      debian | ubuntu)
-        apt-get install -y sudo > /dev/null
-        ;;
-      fedora* | rhel | centos* | rocky | ol)
-        dnf install --allowerasing --assumeyes sudo > /dev/null
-        ;;
-      gentoo)
-        emerge --sync --quiet
-        emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail app-admin/sudo
-        ;;
-      arch | endeavouros | garuda | manjaro)
-        pacman -Syu --needed --noconfirm sudo > /dev/null
-        ;;
-      suse | sles | *opensuse*)
-        zypper --non-interactive --quiet install sudo > /dev/null
-        ;;
-      clear-linux-os)
-        swupd bundle-add sudo > /dev/null
-        ;;
-      FreeBSD)
-        pkg install -y sudo > /dev/null
-        ;;
-      NetBSD)
-        ensure_netbsd_pkgin_dependency
-        pkgin update > /dev/null
-        pkgin -y install sudo > /dev/null
-        ;;
-      OpenBSD)
-        pkg_add sudo-- > /dev/null
-        ;;
-      *)
-        if command -v apk > /dev/null; then
-          apk --quiet add --no-cache sudo
-        elif command -v apt-get > /dev/null; then
-          apt-get -qq install -y sudo > /dev/null
-        elif command -v dnf > /dev/null; then
-          dnf install sudo > /dev/null
-        elif command -v pacman > /dev/null; then
-          pacman -Syu --needed --noconfirm sudo > /dev/null
-        elif command -v zypper > /dev/null; then
-          zypper --non-interactive --quiet install sudo > /dev/null
-        else
-          throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
-        fi
-        ;;
+      elif command -v apt-get >/dev/null; then
+        apt-get -qq install -y sudo >/dev/null
+      elif command -v dnf >/dev/null; then
+        dnf install sudo >/dev/null
+      elif command -v pacman >/dev/null; then
+        pacman -Syu --needed --noconfirm sudo >/dev/null
+      elif command -v zypper >/dev/null; then
+        zypper --non-interactive --quiet install sudo >/dev/null
+      else
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
+      fi
+      ;;
     esac
   fi
   # shellcheck disable=SC2230
-  command -v sudo > /dev/null 2>&1 ||
-    hash sudo 2> /dev/null ||
-    which sudo > /dev/null ||
+  command -v sudo >/dev/null 2>&1 ||
+    hash sudo 2>/dev/null ||
+    which sudo >/dev/null ||
     throw_error "Unable to install 'sudo'. Please report this error at ${NODEBUILDER_REPO}."
 }
 
-ensure_xargs_dependency()
-{
-  if ! command -v xargs > /dev/null 2>&1; then
+ensure_xargs_dependency() {
+  if ! command -v xargs >/dev/null 2>&1; then
     log_info 'Ensuring xargs depencency.'
     case "${TARGET_OPERATING_SYSTEM}" in
-      alpine)
+    alpine)
+      sudo apk --quiet add --no-cache findutils
+      ;;
+    debian | ubuntu)
+      apt-get install -y findutils >/dev/null
+      ;;
+    fedora* | rhel | centos* | rocky | ol)
+      dnf install --allowerasing --assumeyes findutils >/dev/null
+      ;;
+    gentoo)
+      emerge --sync --quiet
+      emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail sys-apps/findutils
+      ;;
+    arch | endeavouros | garuda | manjaro)
+      pacman -Syu --needed --noconfirm findutils >/dev/null
+      ;;
+    suse | sles | *opensuse*)
+      zypper --non-interactive --quiet install findutils >/dev/null
+      ;;
+    clear-linux-os)
+      swupd bundle-add findutils >/dev/null
+      ;;
+    FreeBSD)
+      sudo pkg install -y findutils >/dev/null
+      ;;
+    NetBSD)
+      sudo pkgin update >/dev/null
+      sudo pkgin install findutils
+      ;;
+    OpenBSD)
+      sudo pkg_add findutils >/dev/null
+      ;;
+    *)
+      if command -v apk >/dev/null; then
         sudo apk --quiet add --no-cache findutils
-        ;;
-      debian | ubuntu)
-        apt-get install -y findutils > /dev/null
-        ;;
-      fedora* | rhel | centos* | rocky | ol)
-        dnf install --allowerasing --assumeyes findutils > /dev/null
-        ;;
-      gentoo)
-        emerge --sync --quiet
-        emerge --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail sys-apps/findutils
-        ;;
-      arch | endeavouros | garuda | manjaro)
-        pacman -Syu --needed --noconfirm findutils > /dev/null
-        ;;
-      suse | sles | *opensuse*)
-        zypper --non-interactive --quiet install findutils > /dev/null
-        ;;
-      clear-linux-os)
-        swupd bundle-add findutils > /dev/null
-        ;;
-      FreeBSD)
-        sudo pkg install -y findutils > /dev/null
-        ;;
-      NetBSD)
-        sudo pkgin update > /dev/null
-        sudo pkgin install findutils
-        ;;
-      OpenBSD)
-        sudo pkg_add findutils > /dev/null
-        ;;
-      *)
-        if command -v apk > /dev/null; then
-          sudo apk --quiet add --no-cache findutils
-        elif command -v apt-get > /dev/null; then
-          apt-get -qq install -y findutils > /dev/null
-        elif command -v dnf > /dev/null; then
-          dnf install findutils > /dev/null
-        elif command -v pacman > /dev/null; then
-          pacman -Syu --needed --noconfirm findutils > /dev/null
-        elif command -v zypper > /dev/null; then
-          zypper --non-interactive --quiet install findutils > /dev/null
-        else
-          [ -f /etc/os-release ] && cat /etc/os-release
-          [ -f /etc/lsb-release ] && cat /etc/lsb-release
-          throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
-        fi
-        ;;
+      elif command -v apt-get >/dev/null; then
+        apt-get -qq install -y findutils >/dev/null
+      elif command -v dnf >/dev/null; then
+        dnf install findutils >/dev/null
+      elif command -v pacman >/dev/null; then
+        pacman -Syu --needed --noconfirm findutils >/dev/null
+      elif command -v zypper >/dev/null; then
+        zypper --non-interactive --quiet install findutils >/dev/null
+      else
+        [ -f /etc/os-release ] && cat /etc/os-release
+        [ -f /etc/lsb-release ] && cat /etc/lsb-release
+        throw_error "Package manager was not found. Please report an issue at ${NODEBUILDER_REPO}."
+      fi
+      ;;
     esac
-    command -v xargs > /dev/null 2>&1 ||
+    command -v xargs >/dev/null 2>&1 ||
       throw_error "Unable to install 'xargs'. Report this error at ${NODEBUILDER_REPO}."
   fi
 }
 
-get_directory_size_in_mib()
-{
+get_directory_size_in_mib() {
   if [ $# -ne 1 ]; then
     throw_error 'get_directory_size_in_mib() requires 1 argument.'
   fi
@@ -749,122 +730,114 @@ get_directory_size_in_mib()
   fi
 }
 
-get_free_space_in_mib()
-{
+get_free_space_in_mib() {
   BLOCKSIZE=1M df "${BITCOIN_DATA_DIRECTORY}" | awk 'NR==2 {print $4}'
 }
 
-get_log_timestamp()
-{
+get_log_timestamp() {
   date +'%Y-%m-%dT%H:%M:%S'
 }
 
-get_memory_metric_in_mib()
-{
+get_memory_metric_in_mib() {
   metric_to_query="$1"
   awk -v metric="${metric_to_query}" \
     -v kib_mib_factor="${KIB_TO_MIB}" \
     '$0 ~ metric { printf "%d \n", $2 / kib_mib_factor }' /proc/meminfo
 }
 
-get_operating_system()
-{
+get_operating_system() {
   case "${TARGET_KERNEL}" in
-    Darwin | FreeBSD | NetBSD | OpenBSD)
-      printf '%s\n' "${TARGET_KERNEL}"
-      ;;
-    *)
-      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
-      readonly OS_RELEASE_ID
-      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
-      readonly OS_RELEASE_ID_LIKE
-      if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
-        printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
-      else
-        throw_error 'Failed to determine OS release type'
-      fi
-      ;;
+  Darwin | FreeBSD | NetBSD | OpenBSD)
+    printf '%s\n' "${TARGET_KERNEL}"
+    ;;
+  *)
+    OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
+    readonly OS_RELEASE_ID
+    OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+    readonly OS_RELEASE_ID_LIKE
+    if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
+      printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
+    else
+      throw_error 'Failed to determine OS release type'
+    fi
+    ;;
   esac
 }
 
 # shellcheck disable=SC2317
-handle_exit()
-{
+handle_exit() {
   [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
 }
 
 # shellcheck disable=SC2317
-handle_sigint()
-{
+handle_sigint() {
   log_warning 'Detected Ctrl+C. Exiting.'
   handle_exit
   exit 0
 }
 
-install_build_dependencies()
-{
+install_build_dependencies() {
   case "${TARGET_OPERATING_SYSTEM}" in
-    alpine)
-      install_build_dependencies_apk
-      ;;
-    debian | ubuntu)
-      install_build_dependencies_aptget
-      ;;
-    fedora* | rhel | centos* | rocky | ol)
-      install_build_dependencies_dnf
-      ;;
-    gentoo)
-      install_build_dependencies_emerge
-      ;;
-    arch | endeavouros | garuda | manjaro)
-      install_build_dependencies_pacman
-      ;;
-    suse | sles | *opensuse*)
-      install_build_dependencies_zypper
-      ;;
-    clear-linux-os)
-      install_build_dependencies_swupd
-      ;;
-    Darwin)
-      install_build_dependencies_darwin
-      ;;
-    FreeBSD)
-      install_build_dependencies_freebsd
-      ;;
-    NetBSD)
-      install_build_dependencies_netbsd
-      ;;
-    OpenBSD)
-      install_build_dependencies_openbsd
-      ;;
-    *)
-      install_build_command_function=''
-      for package_manager in \
-        apk \
-        apt-get \
-        dnf \
-        emerge \
-        pacman \
-        swupd \
-        zypper; do
-        if command -v "${package_manager}" > /dev/null; then
-          install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
-          break
-        fi
-      done
-      if [ -n "${install_build_command_function}" ]; then
-        "${install_build_command_function}"
-      else
-        log_warning 'Unable to determine build dependencies. Attempting to compile but might see errors.'
+  alpine)
+    install_build_dependencies_apk
+    ;;
+  debian | ubuntu)
+    install_build_dependencies_aptget
+    ;;
+  fedora* | rhel | centos* | rocky | ol)
+    install_build_dependencies_dnf
+    ;;
+  gentoo)
+    install_build_dependencies_emerge
+    ;;
+  arch | endeavouros | garuda | manjaro)
+    install_build_dependencies_pacman
+    ;;
+  suse | sles | *opensuse*)
+    install_build_dependencies_zypper
+    ;;
+  clear-linux-os)
+    install_build_dependencies_swupd
+    ;;
+  Darwin)
+    install_build_dependencies_darwin
+    ;;
+  FreeBSD)
+    install_build_dependencies_freebsd
+    ;;
+  NetBSD)
+    install_build_dependencies_netbsd
+    ;;
+  OpenBSD)
+    install_build_dependencies_openbsd
+    ;;
+  *)
+    install_build_command_function=''
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      emerge \
+      pacman \
+      swupd \
+      zypper; do
+      if command -v "${package_manager}" >/dev/null; then
+        install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
       fi
-      ;;
+    done
+    if [ -n "${install_build_command_function}" ]; then
+      "${install_build_command_function}"
+    else
+      log_warning 'Unable to determine build dependencies. Attempting to compile but might see errors.'
+    fi
+    ;;
   esac
 }
 
-install_build_dependencies_apk()
-{
+install_build_dependencies_apk() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_apk.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
@@ -872,72 +845,68 @@ install_build_dependencies_apk()
     grep -v 'ICU with non-English locales' -A2 -B1 || true
 }
 
-install_build_dependencies_aptget()
-{
+install_build_dependencies_aptget() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_aptget.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   sudo apt-get -qq update
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends >/dev/null 2>&1
   # TODO: Remove gcc-12 installation on next line when Ubuntu updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends gcc-12 > /dev/null 2>&1
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends gcc-12 >/dev/null 2>&1
 }
 
-install_build_dependencies_darwin()
-{
+install_build_dependencies_darwin() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_darwin.txt"
   #TODO: wrap this command with torsocks-curl with curl fallback
   sudo printf '' && NONINTERACTIVE=1 /bin/bash -c "$(curl --fail --silent --show-error --location --retry 5 \
-    https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1
-  command -v torsocks > /dev/null 2>&1 &&
+    https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" >/dev/null 2>&1
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs brew install --quiet > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs brew install --quiet >/dev/null
 }
 
-install_build_dependencies_dnf()
-{
+install_build_dependencies_dnf() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_dnf.txt"
   OS_MAJOR_VERSION_ID="$(grep "^VERSION_ID=" /etc/os-release | cut -d= -f2 | tr -d '"' | cut -d. -f1)"
   readonly OS_MAJOR_VERSION_ID
 
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
-    amzn)
-      throw_error "Building from source on Amazon Linux is unsupported."
-      ;;
-    rhel)
-      sudo subscription-manager identity > /dev/null 2>&1 ||
-        throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
-      sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms" ||
-        throw_error "Failed to enable EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
-      ;;
-    *) ;;
+  amzn)
+    throw_error "Building from source on Amazon Linux is unsupported."
+    ;;
+  rhel)
+    sudo subscription-manager identity >/dev/null 2>&1 ||
+      throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
+    sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms" ||
+      throw_error "Failed to enable EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
+    ;;
+  *) ;;
   esac
 
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
-    fedora) ;;
-    *)
-      dnf list installed epel-release > /dev/null 2>&1 ||
-        sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
-      ;;
+  fedora) ;;
+  *)
+    dnf list installed epel-release >/dev/null 2>&1 ||
+      sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+    ;;
   esac
 
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
 
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes >/dev/null
 }
 
-install_build_dependencies_emerge()
-{
+install_build_dependencies_emerge() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_emerge.txt"
   printf '\n'
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
@@ -951,74 +920,68 @@ install_build_dependencies_emerge()
   fi
 }
 
-install_build_dependencies_freebsd()
-{
+install_build_dependencies_freebsd() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_freebsd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes >/dev/null
 }
 
-install_build_dependencies_netbsd()
-{
+install_build_dependencies_netbsd() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_netbsd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install >/dev/null
   # TODO: Remove gcc-12 installation on next line when NetBSD updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
   sudo pkgin -y install gcc12 && export PATH="/usr/pkg/gcc12/bin:${PATH}"
 }
 
-install_build_dependencies_openbsd()
-{
+install_build_dependencies_openbsd() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r') ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r')
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
     if [ "${package}" = 'sqlite3' ]; then
-      sudo pkg_add "${package}" > /dev/null
+      sudo pkg_add "${package}" >/dev/null
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
-        sudo pkg_add "${package_latest_version}" > /dev/null
+        sudo pkg_add "${package_latest_version}" >/dev/null
       fi
     fi
   done
 }
 
-install_build_dependencies_pacman()
-{
+install_build_dependencies_pacman() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_pacman.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pacman -Syu --needed --noconfirm --quiet >/dev/null 2>"${STDERR_COMPILE_LOG_FILE}"
   grep -v 'skipping' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
 }
 
-install_build_dependencies_swupd()
-{
+install_build_dependencies_swupd() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_swupd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo swupd bundle-add --quiet > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo swupd bundle-add --quiet >/dev/null
 }
 
-install_build_dependencies_zypper()
-{
+install_build_dependencies_zypper() {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_zypper.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
@@ -1026,93 +989,89 @@ install_build_dependencies_zypper()
   export CXX=g++-13
 }
 
-install_runtime_dependencies()
-{
+install_runtime_dependencies() {
   log_info 'Ensuring base dependencies.'
   case "${TARGET_OPERATING_SYSTEM}" in
-    alpine)
-      install_runtime_dependencies_apk
-      ;;
-    debian | ubuntu)
-      install_runtime_dependencies_aptget
-      ;;
-    fedora* | rhel | centos* | rocky | ol)
-      install_runtime_dependencies_dnf
-      ;;
-    gentoo)
-      install_runtime_dependencies_emerge
-      ;;
-    arch | endeavouros | garuda | manjaro)
-      install_runtime_dependencies_pacman
-      ;;
-    suse | sles | *opensuse*)
-      install_runtime_dependencies_zypper
-      ;;
-    clear-linux-os)
-      install_runtime_dependencies_swupd
-      ;;
-    Darwin)
-      install_runtime_dependencies_darwin
-      ;;
-    FreeBSD)
-      install_runtime_dependencies_freebsd
-      ;;
-    NetBSD)
-      install_runtime_dependencies_netbsd
-      ;;
-    OpenBSD)
-      install_runtime_dependencies_openbsd
-      ;;
-    *)
-      install_runtime_command_function=''
-      for package_manager in \
-        apk \
-        apt-get \
-        dnf \
-        emerge \
-        pacman \
-        swupd \
-        zypper; do
-        if command -v "${package_manager}" > /dev/null; then
-          install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
-          break
-        fi
-      done
-
-      if [ -n "${install_runtime_command_function}" ]; then
-        "${install_runtime_command_function}"
-      else
-        throw_error 'Unknown package manager. This version of Linux is not supported.'
+  alpine)
+    install_runtime_dependencies_apk
+    ;;
+  debian | ubuntu)
+    install_runtime_dependencies_aptget
+    ;;
+  fedora* | rhel | centos* | rocky | ol)
+    install_runtime_dependencies_dnf
+    ;;
+  gentoo)
+    install_runtime_dependencies_emerge
+    ;;
+  arch | endeavouros | garuda | manjaro)
+    install_runtime_dependencies_pacman
+    ;;
+  suse | sles | *opensuse*)
+    install_runtime_dependencies_zypper
+    ;;
+  clear-linux-os)
+    install_runtime_dependencies_swupd
+    ;;
+  Darwin)
+    install_runtime_dependencies_darwin
+    ;;
+  FreeBSD)
+    install_runtime_dependencies_freebsd
+    ;;
+  NetBSD)
+    install_runtime_dependencies_netbsd
+    ;;
+  OpenBSD)
+    install_runtime_dependencies_openbsd
+    ;;
+  *)
+    install_runtime_command_function=''
+    for package_manager in \
+      apk \
+      apt-get \
+      dnf \
+      emerge \
+      pacman \
+      swupd \
+      zypper; do
+      if command -v "${package_manager}" >/dev/null; then
+        install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
+        break
       fi
-      ;;
+    done
+
+    if [ -n "${install_runtime_command_function}" ]; then
+      "${install_runtime_command_function}"
+    else
+      throw_error 'Unknown package manager. This version of Linux is not supported.'
+    fi
+    ;;
   esac
 }
 
-install_runtime_dependencies_apk()
-{
+install_runtime_dependencies_apk() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_apk.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo apk --quiet add --no-cache
 }
 
-install_runtime_dependencies_aptget()
-{
+install_runtime_dependencies_aptget() {
   check_dpkg_lock
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_aptget.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   sudo apt-get -qq update
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends >/dev/null 2>&1
 }
 
-install_runtime_dependencies_darwin()
-{
-  if ! command -v git > /dev/null 2>&1; then
+install_runtime_dependencies_darwin() {
+  if ! command -v git >/dev/null 2>&1; then
     log_info 'Ensuring git dependency via the Xcode Command Line Tools.'
     # These steps were taken from: https github com/Homebrew/install/blob/aceed88a4a062e2b41dc40a7428c71309fce14c9/install.sh#L831
     # TODO: find a way to install only the git binary, not all the Xcode tools. Unattended git installation shouldn't take 20+ lines of code.
@@ -1125,13 +1084,13 @@ install_runtime_dependencies_darwin()
     CLT_LABEL="$(/bin/sh -c "${CLT_LABEL_COMMAND}")"
     readonly CLT_LABEL
     if [ -n "${CLT_LABEL}" ]; then
-      sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" > /dev/null
+      sudo /usr/sbin/softwareupdate -i "${CLT_LABEL}" >/dev/null
     else
       throw_error 'Failed to install git. Cannot find a compatible Xcode Command Line Tools package.'
     fi
     sudo rm "${CLT_INSTALL_IN_PROGRESS}"
 
-    if command -v git > /dev/null 2>&1; then
+    if command -v git >/dev/null 2>&1; then
       :
     elif [ "${unattended}" = 'true' ]; then
       throw_error 'Failed to install Xcode Command Line Tools. Try re-running without -u/--unattended or manually installing git.'
@@ -1140,150 +1099,141 @@ install_runtime_dependencies_darwin()
       /usr/bin/xcode-select --install
       printf '%s\n' "PRESS ENTER after you've completed the installation via the popup window."
       read -r _
-      if ! command -v git > /dev/null 2>&1; then
+      if ! command -v git >/dev/null 2>&1; then
         throw_error 'Failed to install git via the Xcode Command Line Tools. Try manually installing git'
       fi
     fi
   fi
 }
 
-install_runtime_dependencies_dnf()
-{
+install_runtime_dependencies_dnf() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_dnf.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf --assumeyes --quiet install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf --assumeyes --quiet install >/dev/null
 }
 
-install_runtime_dependencies_emerge()
-{
+install_runtime_dependencies_emerge() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_emerge.txt"
   printf '\n'
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs emerge --autounmask-write --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
 }
 
-install_runtime_dependencies_freebsd()
-{
+install_runtime_dependencies_freebsd() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_freebsd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes >/dev/null
 }
 
-install_runtime_dependencies_netbsd()
-{
+install_runtime_dependencies_netbsd() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_netbsd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install >/dev/null
 }
 
-install_runtime_dependencies_openbsd()
-{
+install_runtime_dependencies_openbsd() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_openbsd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg_add > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg_add >/dev/null
 }
 
-install_runtime_dependencies_pacman()
-{
+install_runtime_dependencies_pacman() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_pacman.txt"
   readonly STDERR_DEPENDENCIES_LOG_FILE="${TEMP_DIRECTORY}/stderr_runtime_dependencies_log"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_DEPENDENCIES_LOG_FILE}"
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pacman -Syu --needed --noconfirm --quiet >/dev/null 2>"${STDERR_DEPENDENCIES_LOG_FILE}"
   grep -v 'skipping' "${STDERR_DEPENDENCIES_LOG_FILE}" >&2 || true
   rm "${STDERR_DEPENDENCIES_LOG_FILE}"
 }
 
-install_runtime_dependencies_swupd()
-{
+install_runtime_dependencies_swupd() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_swupd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo swupd bundle-add --quiet > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo swupd bundle-add --quiet >/dev/null
 }
 
-install_runtime_dependencies_zypper()
-{
+install_runtime_dependencies_zypper() {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_zypper.txt"
-  command -v torsocks > /dev/null 2>&1 &&
+  command -v torsocks >/dev/null 2>&1 &&
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install >/dev/null
 }
 
-install_system_updates()
-{
+install_system_updates() {
   log_info 'Performing a system upgrade.'
   case "${TARGET_OPERATING_SYSTEM}" in
-    alpine)
+  alpine)
+    install_system_updates_apk
+    ;;
+  debian | ubuntu)
+    install_system_updates_aptget
+    ;;
+  fedora* | rhel | centos* | rocky | ol)
+    install_system_updates_dnf
+    ;;
+  gentoo)
+    install_system_updates_emerge
+    ;;
+  arch | endeavouros | garuda | manjaro)
+    install_system_updates_pacman
+    ;;
+  suse | sles | *opensuse*)
+    install_system_updates_zypper
+    ;;
+  clear-linux-os)
+    install_system_updates_swupd
+    ;;
+  FreeBSD)
+    install_system_updates_freebsd
+    ;;
+  NetBSD)
+    install_system_updates_netbsd
+    ;;
+  OpenBSD)
+    install_system_updates_openbsd
+    ;;
+  *)
+    if command -v apk >/dev/null; then
       install_system_updates_apk
-      ;;
-    debian | ubuntu)
+    elif command -v apt-get >/dev/null; then
       install_system_updates_aptget
-      ;;
-    fedora* | rhel | centos* | rocky | ol)
+    elif command -v dnf >/dev/null; then
       install_system_updates_dnf
-      ;;
-    gentoo)
+    elif command -v emerge >/dev/null; then
       install_system_updates_emerge
-      ;;
-    arch | endeavouros | garuda | manjaro)
+    elif command -v pacman >/dev/null; then
       install_system_updates_pacman
-      ;;
-    suse | sles | *opensuse*)
-      install_system_updates_zypper
-      ;;
-    clear-linux-os)
+    elif command -v swupd >/dev/null; then
       install_system_updates_swupd
-      ;;
-    FreeBSD)
-      install_system_updates_freebsd
-      ;;
-    NetBSD)
-      install_system_updates_netbsd
-      ;;
-    OpenBSD)
-      install_system_updates_openbsd
-      ;;
-    *)
-      if command -v apk > /dev/null; then
-        install_system_updates_apk
-      elif command -v apt-get > /dev/null; then
-        install_system_updates_aptget
-      elif command -v dnf > /dev/null; then
-        install_system_updates_dnf
-      elif command -v emerge > /dev/null; then
-        install_system_updates_emerge
-      elif command -v pacman > /dev/null; then
-        install_system_updates_pacman
-      elif command -v swupd > /dev/null; then
-        install_system_updates_swupd
-      elif command -v zypper > /dev/null; then
-        install_system_updates_zypper
-      else
-        throw_error 'This version of Linux is not supported.'
-      fi
-      ;;
+    elif command -v zypper >/dev/null; then
+      install_system_updates_zypper
+    else
+      throw_error 'This version of Linux is not supported.'
+    fi
+    ;;
   esac
 
   if [ "${skip_system_update_reboot:-false}" = 'true' ]; then
@@ -1306,28 +1256,24 @@ install_system_updates()
   fi
 }
 
-install_system_updates_apk()
-{
+install_system_updates_apk() {
   sudo apk update --quiet
   sudo apk upgrade --quiet
 }
 
-install_system_updates_aptget()
-{
+install_system_updates_aptget() {
   check_dpkg_lock
   readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
-  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
+  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes >/dev/null 2>"${STDERR_INSTALL_LOG_FILE}"
   grep -v 'apt-utils' "${STDERR_INSTALL_LOG_FILE}" >&2 || true
   rm "${STDERR_INSTALL_LOG_FILE}"
 }
 
-install_system_updates_dnf()
-{
-  sudo dnf clean all && sudo dnf --assumeyes --quiet upgrade > /dev/null
+install_system_updates_dnf() {
+  sudo dnf clean all && sudo dnf --assumeyes --quiet upgrade >/dev/null
 }
 
-install_system_updates_emerge()
-{
+install_system_updates_emerge() {
   readonly GENTOO_EBUILD_REPOSITORY='/var/db/repos/gentoo'
   readonly EMERGE_UPDATE_COMMAND="emerge --update --jobs ${compile_num_jobs:-${SYS_CORES_COUNT}} --load-average ${compile_num_jobs:-${SYS_CORES_PLUS_ONE}} --quiet --quiet-build --quiet-fail --deep --newuse @world"
   readonly EMERGE_MAX_RETRIES='3'
@@ -1353,42 +1299,35 @@ install_system_updates_emerge()
   emerge --depclean --quiet || throw_error "Failed to clean up obsolete packages"
 }
 
-install_system_updates_freebsd()
-{
-  sudo pkg update > /dev/null
-  sudo pkg upgrade --yes > /dev/null
+install_system_updates_freebsd() {
+  sudo pkg update >/dev/null
+  sudo pkg upgrade --yes >/dev/null
 }
 
-install_system_updates_netbsd()
-{
-  hash pkgin 2> /dev/null ||
-    pkg_add pkgin > /dev/null
-  sudo pkgin update > /dev/null
+install_system_updates_netbsd() {
+  hash pkgin 2>/dev/null ||
+    pkg_add pkgin >/dev/null
+  sudo pkgin update >/dev/null
   sudo pkgin upgrade
 }
 
-install_system_updates_openbsd()
-{
-  sudo pkg_add -uu > /dev/null
+install_system_updates_openbsd() {
+  sudo pkg_add -uu >/dev/null
 }
 
-install_system_updates_pacman()
-{
-  sudo pacman -Syu --noconfirm --quiet > /dev/null
+install_system_updates_pacman() {
+  sudo pacman -Syu --noconfirm --quiet >/dev/null
 }
 
-install_system_updates_swupd()
-{
-  sudo swupd update --quiet > /dev/null
+install_system_updates_swupd() {
+  sudo swupd update --quiet >/dev/null
 }
 
-install_system_updates_zypper()
-{
-  sudo zypper --non-interactive --quiet dist-upgrade > /dev/null
+install_system_updates_zypper() {
+  sudo zypper --non-interactive --quiet dist-upgrade >/dev/null
 }
 
-is_running_as_root()
-{
+is_running_as_root() {
   if [ "$(id -u)" -eq 0 ]; then
     return 0
   else
@@ -1396,8 +1335,7 @@ is_running_as_root()
   fi
 }
 
-is_running_in_ci()
-{
+is_running_in_ci() {
   if [ "${CI:-false}" = 'true' ]; then
     return 0
   else
@@ -1405,8 +1343,7 @@ is_running_in_ci()
   fi
 }
 
-is_running_in_container()
-{
+is_running_in_container() {
   if [ -f /proc/1/cgroup ] && grep -q 'docker\|lxc\|actions_job' /proc/1/cgroup; then
     return 0
   elif [ -f /proc/1/mountinfo ] && grep -q 'docker\|lxc\|actions_job' /proc/1/mountinfo; then
@@ -1416,38 +1353,34 @@ is_running_in_container()
   fi
 }
 
-is_valid_bitcoin_version()
-{
+is_valid_bitcoin_version() {
   [ -z "$1" ] && throw_error 'No argument passed into is_valid_bitcoin_version().'
   bitcoin_version_to_check="$1"
   for version in ${VALID_BITCOIN_VERSION_LIST}; do
     case "${bitcoin_version_to_check}" in
-      "${version}" | "${version}rc[1-9]")
-        return 0
-        ;;
-      *) ;;
+    "${version}" | "${version}rc[1-9]")
+      return 0
+      ;;
+    *) ;;
     esac
   done
   return 1
 }
 
-log_error()
-{
+log_error() {
   printf "[%s] ERROR: ${CONSOLE_COLOR_RED:-}%s" "$(get_log_timestamp)" "$*" \
     >&2
   reset_console_color
   printf '\n' >&2
 }
 
-log_info()
-{
+log_info() {
   if [ "${quiet_output}" = 'false' ]; then
     printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
   fi
 }
 
-log_success()
-{
+log_success() {
   if [ "${quiet_output}" = 'false' ]; then
     printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
     reset_console_color
@@ -1455,15 +1388,13 @@ log_success()
   fi
 }
 
-log_warning()
-{
+log_warning() {
   printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW:-}%s" "$(get_log_timestamp)" "$*"
   reset_console_color
   printf '\n'
 }
 
-print_usage()
-{
+print_usage() {
   printf '%s\n\n' "Usage: $0 [options]"
   printf '%s\n' 'Options:'
   printf '%s\n' '-b, --bitcoin-version   Specify the Bitcoin version'
@@ -1479,28 +1410,24 @@ print_usage()
   printf '%s\n' '-V, --version           Print the nodebuilder version'
 }
 
-print_version()
-{
+print_version() {
   printf '%s\n' 'nodebuilder 1.12.0'
   printf '%s\n' 'Copyright (C) 2025 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT-0'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
 }
 
-reset_console_color()
-{
+reset_console_color() {
   # shellcheck disable=SC2059
   printf "${CONSOLE_COLOR_NORMAL:-}"
 }
 
-run_unit_tests()
-{
+run_unit_tests() {
   log_info 'TODO: Run unit tests on functions.'
   return 0
 }
 
-set_bitcoin_core_option()
-{
+set_bitcoin_core_option() {
   option="$1"
   value="$2"
   if [ -f "${BITCOIN_CORE_CONFIG_FILE:?}" ]; then
@@ -1509,12 +1436,11 @@ set_bitcoin_core_option()
   else
     install -m 600 /dev/null "${BITCOIN_CORE_CONFIG_FILE:?}"
   fi
-  printf '%s\n' "${option}=${value}" >> "${BITCOIN_CORE_CONFIG_FILE:?}"
+  printf '%s\n' "${option}=${value}" >>"${BITCOIN_CORE_CONFIG_FILE:?}"
 }
 
 # This function sets a Bitcoin Core option in the configuration file if it's not already set.
-set_if_unset_bitcoin_core_option()
-{
+set_if_unset_bitcoin_core_option() {
   option="$1"
   value="$2"
   # create a blank config file if it doesn't exist
@@ -1523,11 +1449,10 @@ set_if_unset_bitcoin_core_option()
   fi
   # add the new option if not already set
   grep -q -i "^${option}=" "${BITCOIN_CORE_CONFIG_FILE:?}" ||
-    printf '%s\n' "${option}=${value}" >> "${BITCOIN_CORE_CONFIG_FILE:?}"
+    printf '%s\n' "${option}=${value}" >>"${BITCOIN_CORE_CONFIG_FILE:?}"
 }
 
-throw_error()
-{
+throw_error() {
   if [ $# -eq 1 ]; then
     log_error "$1"
   elif [ $# -gt 1 ]; then
@@ -1543,23 +1468,23 @@ CONSOLE_COLOR_RED=''
 CONSOLE_COLOR_GREEN=''
 CONSOLE_COLOR_YELLOW=''
 CONSOLE_COLOR_NORMAL=''
-if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
+if command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null)" -ge 8 ]; then
   CONSOLE_COLOR_RED="$(tput setaf 1)"
   CONSOLE_COLOR_GREEN="$(tput setaf 2)"
   CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
   CONSOLE_COLOR_NORMAL="$(tput sgr0)"
 else
   case "${TERM:-}" in
-    '' | xterm* | screen* | tmux* | linux | gnome-terminal | konsole | rxvt* | \
-      putty | mintty | alacritty | st | su | vt220)
-      CONSOLE_COLOR_RED='\033[31m'
-      CONSOLE_COLOR_GREEN='\033[32m'
-      CONSOLE_COLOR_YELLOW='\033[33m'
-      CONSOLE_COLOR_NORMAL='\033[0m'
-      ;;
-    *)
-      log_warning "TERM variable '${TERM}' is not recognized. Disabling color."
-      ;;
+  '' | xterm* | screen* | tmux* | linux | gnome-terminal | konsole | rxvt* | \
+    putty | mintty | alacritty | st | su | vt220)
+    CONSOLE_COLOR_RED='\033[31m'
+    CONSOLE_COLOR_GREEN='\033[32m'
+    CONSOLE_COLOR_YELLOW='\033[33m'
+    CONSOLE_COLOR_NORMAL='\033[0m'
+    ;;
+  *)
+    log_warning "TERM variable '${TERM}' is not recognized. Disabling color."
+    ;;
   esac
 fi
 readonly CONSOLE_COLOR_RED
@@ -1590,82 +1515,82 @@ unit_tests='false'
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    -b | --bitcoin-version)
-      if [ $# -eq 1 ]; then
-        throw_error '-b/--bitcoin-version requires an argument.'
-      fi
-      if is_valid_bitcoin_version "$2"; then
-        target_bitcoin_version="$2"
-      else
-        throw_error "The Bitcoin version '$2' is not valid. Please use a value such as '27.0' from https://bitcoincore.org/bin/."
-      fi
-      shift
-      ;;
-    -c | --compile)
-      compile_bitcoin_flag='true'
-      ;;
-    -h | --help)
-      print_usage
-      exit 0
-      ;;
-    -j | --jobs)
-      # ensure at leaset one additional argument is passed
-      if [ $# -eq 1 ]; then
-        throw_error '-j/--jobs requires one argumenet'
-      fi
+  -b | --bitcoin-version)
+    if [ $# -eq 1 ]; then
+      throw_error '-b/--bitcoin-version requires an argument.'
+    fi
+    if is_valid_bitcoin_version "$2"; then
+      target_bitcoin_version="$2"
+    else
+      throw_error "The Bitcoin version '$2' is not valid. Please use a value such as '27.0' from https://bitcoincore.org/bin/."
+    fi
+    shift
+    ;;
+  -c | --compile)
+    compile_bitcoin_flag='true'
+    ;;
+  -h | --help)
+    print_usage
+    exit 0
+    ;;
+  -j | --jobs)
+    # ensure at leaset one additional argument is passed
+    if [ $# -eq 1 ]; then
+      throw_error '-j/--jobs requires one argumenet'
+    fi
 
-      # ensure the argument is a positive integer
-      case "$2" in
-        0)
-          throw_error 'Cannot compile with 0 jobs'
-          ;;
-        '' | *[!0-9]*)
-          throw_error "$2 is not a number"
-          ;;
-        *)
-          compile_num_jobs="$2"
-          ;;
-      esac
-      shift
+    # ensure the argument is a positive integer
+    case "$2" in
+    0)
+      throw_error 'Cannot compile with 0 jobs'
       ;;
-    -p | --prune)
-      if [ $# -eq 1 ]; then
-        throw_error '-p/--prune requires an argument'
-      fi
-      case "$2" in
-        *[!0-9]*) # if $2 contains any non-numeric characters
-          throw_error "The prune value '$2' must be a positive integer or zero to disable pruning"
-          ;;
-        *) ;;
-      esac
-      if [ "$2" -gt 0 ] && [ "$2" -lt 550 ]; then
-        throw_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning"
-      fi
-      prune_value="$2"
-      shift
-      ;;
-    -q | --quiet)
-      quiet_output='true'
-      ;;
-    -r | --skip-reboot)
-      skip_system_update_reboot='true'
-      ;;
-    -s | --skip-update)
-      skip_system_update='true'
-      ;;
-    -t | --test)
-      unit_tests='true'
-      ;;
-    -u | --unattended)
-      unattended='true'
-      ;;
-    -V | --version)
-      print_version
+    '' | *[!0-9]*)
+      throw_error "$2 is not a number"
       ;;
     *)
-      printf '%s\n%s\n' "Error: '$1' is invalid." 'Use -h or --help for available options.'
-      exit 1
+      compile_num_jobs="$2"
       ;;
+    esac
+    shift
+    ;;
+  -p | --prune)
+    if [ $# -eq 1 ]; then
+      throw_error '-p/--prune requires an argument'
+    fi
+    case "$2" in
+    *[!0-9]*) # if $2 contains any non-numeric characters
+      throw_error "The prune value '$2' must be a positive integer or zero to disable pruning"
+      ;;
+    *) ;;
+    esac
+    if [ "$2" -gt 0 ] && [ "$2" -lt 550 ]; then
+      throw_error "The prune value '$2' must be at least 550 (MiB) or zero to disable pruning"
+    fi
+    prune_value="$2"
+    shift
+    ;;
+  -q | --quiet)
+    quiet_output='true'
+    ;;
+  -r | --skip-reboot)
+    skip_system_update_reboot='true'
+    ;;
+  -s | --skip-update)
+    skip_system_update='true'
+    ;;
+  -t | --test)
+    unit_tests='true'
+    ;;
+  -u | --unattended)
+    unattended='true'
+    ;;
+  -V | --version)
+    print_version
+    ;;
+  *)
+    printf '%s\n%s\n' "Error: '$1' is invalid." 'Use -h or --help for available options.'
+    exit 1
+    ;;
   esac
   shift
 done
@@ -1704,21 +1629,21 @@ readonly TEMP_DIRECTORY
 
 if [ -z "${compile_num_jobs}" ]; then
   case "${TARGET_KERNEL}" in
-    Linux | FreeBSD)
-      SYS_CORES_COUNT="$(nproc)"
-      ;;
-    Darwin)
-      SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
-      ;;
-    NetBSD | OpenBSD)
-      SYS_CORES_COUNT="$(sysctl -n hw.ncpu)"
-      ;;
-    MINGW* | Cygwin)
-      throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
-      ;;
-    *)
-      throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
-      ;;
+  Linux | FreeBSD)
+    SYS_CORES_COUNT="$(nproc)"
+    ;;
+  Darwin)
+    SYS_CORES_COUNT="$(sysctl -n hw.physicalcpu)"
+    ;;
+  NetBSD | OpenBSD)
+    SYS_CORES_COUNT="$(sysctl -n hw.ncpu)"
+    ;;
+  MINGW* | Cygwin)
+    throw_error 'Windows is not supported. Use Linux, macOS, or Windows Subsystem for Linux instead.'
+    ;;
+  *)
+    throw_error "${TARGET_KERNEL} is not supported. Please run on Linux or macOS."
+    ;;
   esac
   readonly SYS_CORES_COUNT
   readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
@@ -1729,7 +1654,7 @@ ensure_xargs_dependency
 
 if is_running_in_ci ||
   is_running_in_container ||
-  sudo --validate --noninteractive > /dev/null 2>&1; then
+  sudo --validate --noninteractive >/dev/null 2>&1; then
   :
 else
   log_info 'Please enter your password to log in, if requested.'
@@ -1738,30 +1663,30 @@ fi
 
 clear_the_terminal
 case "${TARGET_KERNEL}" in
-  Linux | FreeBSD | NetBSD | OpenBSD)
-    log_info "Detected: running ${TARGET_KERNEL}."
-    TARGET_BITCOIN_TARBALL_OS='linux-gnu'
-    if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
-      is_running_in_ci && is_running_as_root; then
-      # To satisfy disk space in OpenBSD CI runner
-      BITCOIN_DATA_DIRECTORY='/home/bitcoin/.bitcoin'
-      mkdir -p "${BITCOIN_DATA_DIRECTORY}"
-    else
-      BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
-    fi
-    is_running_in_container && log_info 'Detected: running in Docker.'
-    ;;
-  Darwin)
-    log_info 'Detected: running macOS.'
-    TARGET_BITCOIN_TARBALL_OS='apple-darwin'
-    BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
-    if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && [ "${quiet_output}" = 'false' ]; then
-      display_macos_warning
-    fi
-    ;;
-  *)
-    throw_error "Unknown target kernel type '${TARGET_KERNEL}'."
-    ;;
+Linux | FreeBSD | NetBSD | OpenBSD)
+  log_info "Detected: running ${TARGET_KERNEL}."
+  TARGET_BITCOIN_TARBALL_OS='linux-gnu'
+  if [ "${TARGET_KERNEL}" = 'OpenBSD' ] &&
+    is_running_in_ci && is_running_as_root; then
+    # To satisfy disk space in OpenBSD CI runner
+    BITCOIN_DATA_DIRECTORY='/home/bitcoin/.bitcoin'
+    mkdir -p "${BITCOIN_DATA_DIRECTORY}"
+  else
+    BITCOIN_DATA_DIRECTORY="${HOME}/.bitcoin"
+  fi
+  is_running_in_container && log_info 'Detected: running in Docker.'
+  ;;
+Darwin)
+  log_info 'Detected: running macOS.'
+  TARGET_BITCOIN_TARBALL_OS='apple-darwin'
+  BITCOIN_DATA_DIRECTORY="${HOME}/Library/Application Support/Bitcoin"
+  if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] && [ "${quiet_output}" = 'false' ]; then
+    display_macos_warning
+  fi
+  ;;
+*)
+  throw_error "Unknown target kernel type '${TARGET_KERNEL}'."
+  ;;
 esac
 
 readonly TARGET_BITCOIN_TARBALL_OS
@@ -1778,46 +1703,46 @@ check_internet_status
 
 install_runtime_dependencies
 
-if command -v bitcoind > /dev/null 2>&1; then
-  current_bitcoin_version="$(bitcoind --version 2> /dev/null | head -1 | cut -c23-)"
+if command -v bitcoind >/dev/null 2>&1; then
+  current_bitcoin_version="$(bitcoind --version 2>/dev/null | head -1 | cut -c23-)"
 else
   current_bitcoin_version=''
 fi
 
 # If version is like 'xx.yy.zz' or 'xx.yy' or 'xx', pad it as 'xx.yy.zz.0'
 case "${current_bitcoin_version}" in
-  '' | *[.]*[.]*[.]*)
-    CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}"
-    ;;
-  *[.]*[.]*)
-    CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0"
-    ;;
-  *[.]*)
-    CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0"
-    ;;
-  *)
-    CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0.0"
-    ;;
+'' | *[.]*[.]*[.]*)
+  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}"
+  ;;
+*[.]*[.]*)
+  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0"
+  ;;
+*[.]*)
+  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0"
+  ;;
+*)
+  CURRENT_BITCOIN_VERSION_PADDED="${current_bitcoin_version}.0.0.0"
+  ;;
 esac
 readonly CURRENT_BITCOIN_VERSION_PADDED
 
 if [ -n "${CURRENT_BITCOIN_VERSION_PADDED}" ]; then
   case "${target_bitcoin_version}" in
-    '')
-      throw_error 'Bitcoin Core target version is not set.'
-      ;;
-    *[.]*[.]*[.]*)
-      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
-      ;;
-    *[.]*[.]*)
-      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
-      ;;
-    *[.]*)
-      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
-      ;;
-    *)
-      TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
-      ;;
+  '')
+    throw_error 'Bitcoin Core target version is not set.'
+    ;;
+  *[.]*[.]*[.]*)
+    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}"
+    ;;
+  *[.]*[.]*)
+    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0"
+    ;;
+  *[.]*)
+    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0"
+    ;;
+  *)
+    TARGET_BITCOIN_VERSION_PADDED="${target_bitcoin_version}.0.0.0"
+    ;;
   esac
 else
   TARGET_BITCOIN_VERSION_PADDED='0.0.0.0'
@@ -1843,7 +1768,7 @@ else
 fi
 
 if
-  command -v bitcoin-qt > /dev/null 2>&1 &&
+  command -v bitcoin-qt >/dev/null 2>&1 &&
     ! is_running_in_ci
   ! is_running_in_container &&
     {
@@ -1851,7 +1776,7 @@ if
     }
 then
   LAUNCH_BITCOIN_CORE_COMMAND="bitcoin-qt --datadir=${BITCOIN_DATA_DIRECTORY}"
-elif command -v bitcoind > /dev/null 2>&1; then
+elif command -v bitcoind >/dev/null 2>&1; then
   LAUNCH_BITCOIN_CORE_COMMAND="bitcoind --daemonwait --datadir=${BITCOIN_DATA_DIRECTORY}"
 else
   throw_error "Failed to install Bitcoin Core ${target_bitcoin_version}."
@@ -1938,58 +1863,58 @@ fi
 
 # Memory checks
 case "${TARGET_KERNEL}" in
-  Darwin | FreeBSD | NetBSD | OpenBSD) ;;
-  *)
-    PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')"
-    readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
-    PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')"
-    readonly PHYSICAL_MEMORY_FREE_IN_MIB
-    SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')"
-    readonly SWAP_MEMORY_TOTAL_IN_MIB
-    SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')"
-    readonly SWAP_MEMORY_FREE_IN_MIB
-    readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
-    readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
-    free_memory="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
-    TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')"
-    readonly TOTAL_MEMORY
-    log_info "Checking system memory... ${free_memory} of ${TOTAL_MEMORY} GiB free."
+Darwin | FreeBSD | NetBSD | OpenBSD) ;;
+*)
+  PHYSICAL_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'MemTotal')"
+  readonly PHYSICAL_MEMORY_TOTAL_IN_MIB
+  PHYSICAL_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'MemAvailable')"
+  readonly PHYSICAL_MEMORY_FREE_IN_MIB
+  SWAP_MEMORY_TOTAL_IN_MIB="$(get_memory_metric_in_mib 'SwapTotal')"
+  readonly SWAP_MEMORY_TOTAL_IN_MIB
+  SWAP_MEMORY_FREE_IN_MIB="$(get_memory_metric_in_mib 'SwapFree')"
+  readonly SWAP_MEMORY_FREE_IN_MIB
+  readonly MEMORY_TOTAL_IN_MIB=$((PHYSICAL_MEMORY_TOTAL_IN_MIB + SWAP_MEMORY_TOTAL_IN_MIB))
+  readonly MEMORY_FREE_IN_MIB=$((PHYSICAL_MEMORY_FREE_IN_MIB + SWAP_MEMORY_FREE_IN_MIB))
+  free_memory="$(awk -v mem_free_mib="${MEMORY_FREE_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_free_mib / mib_gib_factor}')"
+  TOTAL_MEMORY="$(awk -v mem_total_mib="${MEMORY_TOTAL_IN_MIB}" -v mib_gib_factor="${MIB_TO_GIB}" 'BEGIN{printf "%.1f", mem_total_mib / mib_gib_factor}')"
+  readonly TOTAL_MEMORY
+  log_info "Checking system memory... ${free_memory} of ${TOTAL_MEMORY} GiB free."
 
-    if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
-      log_warning 'Configuring for minimal memory usage.'
-      set_if_unset_bitcoin_core_option 'dbcache' '4'
-      set_if_unset_bitcoin_core_option 'maxmempool' '5'
-      set_if_unset_bitcoin_core_option 'maxconnections' '4'
-      [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
-    elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
-      log_warning 'Configuring for reduced memory usage.'
-      set_if_unset_bitcoin_core_option 'dbcache' '100'
-      set_if_unset_bitcoin_core_option 'maxmempool' '50'
-      set_if_unset_bitcoin_core_option 'maxconnections' '10'
-      [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
-    elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
-      log_warning 'Configuring for conservative memory usage.'
-      set_if_unset_bitcoin_core_option 'dbcache' '225'
-      set_if_unset_bitcoin_core_option 'maxmempool' '150'
-    fi
-    ;;
+  if [ "${MEMORY_TOTAL_IN_MIB}" -le $((1 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '32' ]; then
+    log_warning 'Configuring for minimal memory usage.'
+    set_if_unset_bitcoin_core_option 'dbcache' '4'
+    set_if_unset_bitcoin_core_option 'maxmempool' '5'
+    set_if_unset_bitcoin_core_option 'maxconnections' '4'
+    [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
+  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((2 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '64' ]; then
+    log_warning 'Configuring for reduced memory usage.'
+    set_if_unset_bitcoin_core_option 'dbcache' '100'
+    set_if_unset_bitcoin_core_option 'maxmempool' '50'
+    set_if_unset_bitcoin_core_option 'maxconnections' '10'
+    [ "${TARGET_KERNEL}" = 'Linux' ] && export MALLOC_ARENA_MAX=1
+  elif [ "${MEMORY_TOTAL_IN_MIB}" -le $((4 * MIB_TO_GIB)) ] || [ "${MEMORY_FREE_IN_MIB}" -le '128' ]; then
+    log_warning 'Configuring for conservative memory usage.'
+    set_if_unset_bitcoin_core_option 'dbcache' '225'
+    set_if_unset_bitcoin_core_option 'maxmempool' '150'
+  fi
+  ;;
 esac
 
 log_info 'Starting Bitcoin Core.'
 if is_running_in_ci ||
   is_running_in_container ||
   [ -z "${DISPLAY:-}" ] ||
-  ! command -v bitcoin-qt > /dev/null 2>&1; then
-  bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null
+  ! command -v bitcoin-qt >/dev/null 2>&1; then
+  bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}" >/dev/null
 elif [ "${TARGET_KERNEL}" = 'Darwin' ]; then
-  nohup bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
+  nohup bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" >/dev/null 2>&1 </dev/null &
 else
-  setsid bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
+  setsid bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" >/dev/null 2>&1 </dev/null &
 fi
 
 log_info 'Checking the RPC status.'
 readonly BITCOIN_RPC_TIMEOUT_SECONDS=300
-if ! bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT_SECONDS}" getrpcinfo > /dev/null; then
+if ! bitcoin-cli --datadir="${BITCOIN_DATA_DIRECTORY}" --rpcwait --rpcwaittimeout="${BITCOIN_RPC_TIMEOUT_SECONDS}" getrpcinfo >/dev/null; then
   throw_error "RPC communication failed after ${BITCOIN_RPC_TIMEOUT_SECONDS} seconds."
 fi
 
@@ -2004,7 +1929,7 @@ if [ "${ibd_status}" = 'true' ]; then
       caffeinate -sw "$(cat "${BITCOIN_DATA_DIRECTORY}/bitcoind.pid")" &
     elif [ "${TARGET_KERNEL}" = 'Linux' ]; then
       log_info 'Disabling system sleep, suspend, and hibernate.'
-      sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
+      sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target >/dev/null 2>&1
     fi
     is_running_in_container || log_info "Close this Terminal window by clicking on the 'X'."
     log_info "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
@@ -2023,8 +1948,8 @@ while [ "${ibd_status}" = 'true' ]; do
 
   # Handle case of early sync (e^-8 or e^-9) by replacing scientific notation with decimal percent
   case "${sync_progress}" in
-    *e*) sync_progress_percent='0.0000001' ;;
-    *) sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')" ;;
+  *e*) sync_progress_percent='0.0000001' ;;
+  *) sync_progress_percent="$(awk -v prog="${sync_progress}" 'BEGIN{printf "%f\n", prog * 100}')" ;;
   esac
 
   free_space_in_mib="$(get_free_space_in_mib)"
@@ -2058,12 +1983,12 @@ while [ "${ibd_status}" = 'true' ]; do
     printf 'Blocks remaining:           %d\n' "$((headers - blocks))"
 
     case "${TARGET_KERNEL}" in
-      Darwin | FreeBSD | NetBSD | OpenBSD)
-        current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
-        ;;
-      *)
-        current_chain_tip_timestamp="$(date -d @"${last_block_time}" | cut -c 5-)"
-        ;;
+    Darwin | FreeBSD | NetBSD | OpenBSD)
+      current_chain_tip_timestamp="$(/bin/date -r "${last_block_time}" | cut -c 5-)"
+      ;;
+    *)
+      current_chain_tip_timestamp="$(date -d @"${last_block_time}" | cut -c 5-)"
+      ;;
     esac
     printf 'Current chain tip:          %s\n' "${current_chain_tip_timestamp}"
 
