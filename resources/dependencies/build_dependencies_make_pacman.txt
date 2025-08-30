@@ -1,0 +1,7 @@
+base-devel
+boost
+boost-libs
+db
+qrencode
+qt5
+zeromq

@@ -1,0 +1,17 @@
+automake
+autotools-dev
+bsdmainutils
+build-essential
+gettext
+libboost-dev
+libevent-dev
+libqrencode-dev
+libsqlite3-dev
+libtool
+libzmq5-dev
+pkg-config
+python3
+qtbase5-dev
+qttools5-dev
+qttools5-dev-tools
+qtwayland5

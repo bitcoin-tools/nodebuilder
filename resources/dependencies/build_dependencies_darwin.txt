@@ -1,9 +1,7 @@
-automake
 boost
-gettext
 libevent
-libtool
-pkg-config
+pkgconf
+python
 qrencode
 qt@5
 zeromq
