@@ -878,6 +878,12 @@ install_build_dependencies_dnf() {
   amzn)
     throw_error "Building from source on Amazon Linux is unsupported."
     ;;
+  ol)
+    echo 'DEBUG enabling crb on ol'
+    sudo dnf config-manager --set-enabled crb ||
+      throw_error 'Failed to enable crb on Oracle Linux'
+    echo 'DEBUG enabled crb on ol'
+    ;;
   rhel)
     sudo subscription-manager identity >/dev/null 2>&1 ||
       throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
