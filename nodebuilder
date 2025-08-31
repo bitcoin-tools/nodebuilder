@@ -914,10 +914,7 @@ install_build_dependencies_dnf()
       throw_error "Building from source on Amazon Linux is unsupported."
       ;;
     ol)
-      echo 'DEBUG enabling crb on ol'
-      sudo dnf config-manager --set-enabled crb ||
-        throw_error 'Failed to enable crb on Oracle Linux'
-      echo 'DEBUG enabled crb on ol'
+      echo 'DEBUG do custom ol stuff here'
       ;;
     rhel)
       sudo subscription-manager identity > /dev/null 2>&1 ||
@@ -941,7 +938,7 @@ install_build_dependencies_dnf()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
 
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes
 }
 
 install_build_dependencies_emerge()
