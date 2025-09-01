@@ -4,6 +4,6 @@ gcc13-c++
 libevent
 libqt5-qtbase-devel
 python3
-qrencode
+qrencode-devel
 sqlite3
 zeromq-devel
