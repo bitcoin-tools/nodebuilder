@@ -5,5 +5,7 @@ libevent
 libqt5-qtbase-devel
 python3
 qrencode-devel
+sqlite
+sqlite3
 sqlite3-devel
 zeromq-devel
