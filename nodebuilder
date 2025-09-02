@@ -1037,8 +1037,8 @@ install_build_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  #log_warning 'DEBUG searching for boost packages'
-  #sudo zypper search '*boost*'
+  log_warning 'DEBUG searching for libboost_headers packages'
+  sudo zypper search 'libboost_headers*'
   #log_warning 'DEBUG searching for qttools packages'
   #sudo zypper search '*qttools*'
   log_warning 'DEBUG searching for libevent packages'
