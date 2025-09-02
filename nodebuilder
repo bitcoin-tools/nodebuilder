@@ -1042,16 +1042,13 @@ install_build_dependencies_zypper()
   sudo zypper search '*qttools*'
   log_warning 'DEBUG searching for libevent packages'
   #sudo zypper search '*libevent*'
-  log_warning 'DEBUG searching for python312 packages'
-  sudo zypper search 'python312' || true
-  log_warning 'DEBUG get info on python3 package'
-  sudo zypper info python3 || true
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
     sles)
       log_warning 'DEBUG searching for gcc-c++'
       sudo zypper search 'gcc*-c++'
       log_warning 'DEBUG replacing python312 with python3'
       dependencies="$(echo "${dependencies}" | sed 's/python312/python3/')"
+      log_warning 'DEBUG replacing libboost_headers1_75_0-devel with libboost_headers1_66_0-devel'
       dependencies="$(echo "${dependencies}" | sed 's/libboost_headers1_75_0-devel/libboost_headers1_66_0-devel/')"
       ;;
     *) ;;
