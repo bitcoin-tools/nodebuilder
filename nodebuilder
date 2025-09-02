@@ -1038,6 +1038,10 @@ install_build_dependencies_zypper()
   #sudo zypper search '*qttools*'
   log_warning 'DEBUG searching for libevent packages'
   sudo zypper search '*libevent*'
+  log_warning 'DEBUG searching for python packages'
+  sudo zypper search '*python*'
+  command -v python3
+  python3 --version
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   export CXX=g++-13
