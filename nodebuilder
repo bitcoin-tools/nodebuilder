@@ -1033,9 +1033,8 @@ install_build_dependencies_zypper()
   log_warning 'DEBUG searching for boost packages'
   sudo zypper search '*boost*'
   log_warning 'DEBUG showing details of boost-devel'
-  sudo zypper info boost-devel
   log_warning 'DEBUG searching for versions of boost-devel'
-  sudo zypper search --details boost-devel
+  sudo zypper search --details boost-headers* || true
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   export CXX=g++-13
