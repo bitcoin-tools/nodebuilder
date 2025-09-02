@@ -1032,13 +1032,10 @@ install_build_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  log_warning 'DEBUG searching for boost packages'
-  sudo zypper search '*boost*'
-  log_warning 'DEBUG showing details of boost-devel'
-  log_warning 'DEBUG searching for versions of boost-devel'
-  sudo zypper search --details boost-headers* || true
-  #log_warning 'DEBUG removing libboost_headers-devel'
-  #sudo zypper remove libboost_headers-devel
+  #log_warning 'DEBUG searching for boost packages'
+  #sudo zypper search '*boost*'
+  log_warning 'DEBUG searching for qttools packages'
+  sudo zypper search '*qttools*'
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   export CXX=g++-13
