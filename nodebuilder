@@ -1034,8 +1034,10 @@ install_build_dependencies_zypper()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   #log_warning 'DEBUG searching for boost packages'
   #sudo zypper search '*boost*'
-  log_warning 'DEBUG searching for qttools packages'
-  sudo zypper search '*qttools*'
+  #log_warning 'DEBUG searching for qttools packages'
+  #sudo zypper search '*qttools*'
+  log_warning 'DEBUG searching for libevent packages'
+  sudo zypper search '*libevent*'
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   export CXX=g++-13
