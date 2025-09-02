@@ -1050,6 +1050,7 @@ install_build_dependencies_zypper()
     sles)
       log_warning 'DEBUG replacing python312 with python3'
       dependencies="$(echo "${dependencies}" | sed 's/python312/python3/')"
+      dependencies="$(echo "${dependencies}" | sed 's/libboost_headers1_75_0-devel/libboost_headers1_66_0-devel/')"
       ;;
     *) ;;
   esac
