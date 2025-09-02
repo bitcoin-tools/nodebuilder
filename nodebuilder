@@ -915,8 +915,13 @@ install_build_dependencies_dnf()
       ;;
     ol)
       echo 'DEBUG do custom ol stuff here'
-      dnf config-manager –-set-enabled crb
+      #dnf config-manager –-set-enabled crb
+      log_warning 'DEBUG serach for codeready_builder'
+      cat /etc/yum.repos.d/oracle-linux.repo | grep codeready_builder || true
+      log_warning 'DEBUG enable ol10'
+      sudo dnf config-manager --set-enabled ol10_codeready_builder
       dnf update
+
       ;;
     rhel)
       sudo subscription-manager identity > /dev/null 2>&1 ||
