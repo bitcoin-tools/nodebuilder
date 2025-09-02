@@ -1037,9 +1037,9 @@ install_build_dependencies_zypper()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   log_warning 'DEBUG searching for libboost_headers packages'
-  sudo zypper search 'libboost_headers*'
-  #log_warning 'DEBUG searching for qttools packages'
-  #sudo zypper search '*qttools*'
+  sudo zypper search 'libboost*1_*'
+  log_warning 'DEBUG searching for qttools packages'
+  sudo zypper search '*qttools*'
   log_warning 'DEBUG searching for libevent packages'
   #sudo zypper search '*libevent*'
   log_warning 'DEBUG searching for python312 packages'
@@ -1048,6 +1048,8 @@ install_build_dependencies_zypper()
   sudo zypper info python3 || true
   case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
     sles)
+      log_warning 'DEBUG searching for gcc-c++'
+      sudo zypper search 'gcc*-c++'
       log_warning 'DEBUG replacing python312 with python3'
       dependencies="$(echo "${dependencies}" | sed 's/python312/python3/')"
       dependencies="$(echo "${dependencies}" | sed 's/libboost_headers1_75_0-devel/libboost_headers1_66_0-devel/')"
