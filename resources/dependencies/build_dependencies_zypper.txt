@@ -1,4 +1,3 @@
-boost-devel
 cmake
 gcc13-c++
 libboost_headers1_75_0-devel
