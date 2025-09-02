@@ -918,7 +918,9 @@ install_build_dependencies_dnf()
       log_warning 'DEBUG enable ol10 codeready builder'
       sudo dnf config-manager --set-enabled ol10_codeready_builder
       dnf update
-      log_warming 'DEBUG enabled crb and update complete'
+      log_warning 'DEBUG enabled crb and update complete'
+      log_warning 'DEBUG searching for libclang.so options'
+      dnf provides libclang.so*
       ;;
     rhel)
       sudo subscription-manager identity > /dev/null 2>&1 ||
