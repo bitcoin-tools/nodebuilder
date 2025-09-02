@@ -1,4 +1,4 @@
-boost-devel
+boost1_88_0-devel
 cmake
 gcc13-c++
 libevent
@@ -9,3 +9,4 @@ sqlite
 sqlite3
 sqlite3-devel
 zeromq-devel
+
