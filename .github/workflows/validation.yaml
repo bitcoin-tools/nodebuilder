@@ -427,6 +427,8 @@ jobs:
       max-parallel: 10
       matrix:
         include:
+          - { container: openSUSE Leap, dockerfile: Dockerfile_opensuse-leap }
+          - { container: openSUSE Tumbleweed, dockerfile: Dockerfile_opensuse-tumbleweed }
           - { container: Gentoo, dockerfile: Dockerfile_gentoo }
           - { container: Alpine, dockerfile: Dockerfile_alpine }
           - { container: Amazon Linux, dockerfile: Dockerfile_amazonlinux }
@@ -441,8 +443,6 @@ jobs:
           - { container: Rocky Linux, dockerfile: Dockerfile_rockylinux }
           - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Ubuntu, dockerfile: Dockerfile }
-          - { container: openSUSE Leap, dockerfile: Dockerfile_opensuse-leap }
-          - { container: openSUSE Tumbleweed, dockerfile: Dockerfile_opensuse-tumbleweed }
     steps:
       - uses: actions/checkout@v5
       - name: Check the current OS version
