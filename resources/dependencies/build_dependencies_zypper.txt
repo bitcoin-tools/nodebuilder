@@ -1,11 +1,10 @@
 cmake
-devel_python3
 gcc13-c++
 libboost_headers1_75_0-devel
 libevent-devel
 libqt5-qtbase-devel
 libqt5-qttools-devel
-python3
+python313
 qrencode-devel
 sqlite
 sqlite3
