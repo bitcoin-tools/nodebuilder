@@ -427,8 +427,7 @@ jobs:
       max-parallel: 10
       matrix:
         include:
-          - { container: openSUSE Leap, dockerfile: Dockerfile_opensuse-leap }
-          - { container: openSUSE Tumbleweed, dockerfile: Dockerfile_opensuse-tumbleweed }
+          - { container: openSUSE, dockerfile: Dockerfile_opensuse-leap }
           - { container: Gentoo, dockerfile: Dockerfile_gentoo }
           - { container: Alpine, dockerfile: Dockerfile_alpine }
           - { container: Amazon Linux, dockerfile: Dockerfile_amazonlinux }

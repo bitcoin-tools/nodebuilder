@@ -27,7 +27,6 @@ jobs:
           - kali
           - manjarolinux
           - opensuse-leap
-          - opensuse-tumbleweed
           # - oraclelinux
           # - redhat-ubi9
           # - rockylinux
