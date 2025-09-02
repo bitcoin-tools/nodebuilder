@@ -1045,8 +1045,9 @@ install_build_dependencies_zypper()
   sudo zypper search '*libevent*'
   log_warning 'DEBUG searching for python packages'
   sudo zypper search '*python*'
-  command -v python3
-  python3 --version
+  command -v python3 || log_warning 'DEBUG cant find python3 in PATH'
+  command -v python || log_warning 'DEBUG cant find python in PATH'
+  python3 --version || log_warning 'DEBUG cant report python3 version'
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   export CXX=g++-13
