@@ -1,4 +1,4 @@
-boost-devel
+boost-devel=1.88.0
 cmake
 gcc13-c++
 libevent
