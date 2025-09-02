@@ -1,4 +1,5 @@
 cmake
+devel_python3
 gcc13-c++
 libboost_headers1_75_0-devel
 libevent-devel
