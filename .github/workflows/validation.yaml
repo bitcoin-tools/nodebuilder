@@ -428,6 +428,7 @@ jobs:
       matrix:
         include:
           - { container: openSUSE, dockerfile: Dockerfile_opensuse-leap }
+          - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
           - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Gentoo, dockerfile: Dockerfile_gentoo }
           - { container: Alpine, dockerfile: Dockerfile_alpine }
@@ -438,7 +439,6 @@ jobs:
           - { container: Fedora, dockerfile: Dockerfile_fedora }
           - { container: Kali, dockerfile: Dockerfile_kali }
           - { container: Manjaro, dockerfile: Dockerfile_manjarolinux }
-          - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
           - { container: Red Hat Enterprise, dockerfile: Dockerfile_redhat-ubi9 }
           - { container: Rocky Linux, dockerfile: Dockerfile_rockylinux }
           - { container: Ubuntu, dockerfile: Dockerfile }
