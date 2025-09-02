@@ -1,4 +1,4 @@
-#!/bin/sh
+ #!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
 
@@ -1039,13 +1039,6 @@ install_build_dependencies_zypper()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   log_warning 'DEBUG searching for libboost_headers packages'
   sudo zypper search 'libboost_headers*'
-  if ! zypper search 'libboost_headers1_88_0-devel'; then
-    log_warning 'libboost_headers 1.88 not found. Adding repo'
-    sudo zypper addrepo https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE:Leap:15.6/ devel-libraries-c_c++-leap
-    sudo zypper refresh
-    sudo zypper search libboost_headers1_88_0-devel
-  fi
-
   #log_warning 'DEBUG searching for qttools packages'
   #sudo zypper search '*qttools*'
   log_warning 'DEBUG searching for libevent packages'
