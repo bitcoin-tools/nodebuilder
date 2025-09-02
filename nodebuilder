@@ -915,7 +915,7 @@ install_build_dependencies_dnf()
       ;;
     ol)
       echo 'DEBUG do custom ol stuff here'
-      dnf config-manager –set-enabled crb
+      dnf config-manager –-set-enabled crb
       dnf update
       ;;
     rhel)
