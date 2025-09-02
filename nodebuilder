@@ -1052,6 +1052,7 @@ install_build_dependencies_zypper()
       dependencies="$(echo "${dependencies}" | sed 's/python312/python3/')"
       ;;
     *) ;;
+  esac
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   if ! python3 --version; then
