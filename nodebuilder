@@ -1,4 +1,4 @@
- #!/bin/sh
+#!/bin/sh
 #
 # A minimally-interactive script for launching a Bitcoin Core node
 
