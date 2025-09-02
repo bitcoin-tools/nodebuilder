@@ -1042,14 +1042,14 @@ install_build_dependencies_zypper()
   #log_warning 'DEBUG searching for qttools packages'
   #sudo zypper search '*qttools*'
   log_warning 'DEBUG searching for libevent packages'
-  sudo zypper search '*libevent*'
-  log_warning 'DEBUG searching for python packages'
-  sudo zypper search 'python313*'
-  command -v python3 || log_warning 'DEBUG cant find python3 in PATH'
-  command -v python || log_warning 'DEBUG cant find python in PATH'
-  python3 --version || log_warning 'DEBUG cant report python3 version'
+  #sudo zypper search '*libevent*'
+  #log_warning 'DEBUG searching for python packages'
+  #sudo zypper search 'python313*'
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
+  if ! python3 --version; then
+    log_warning 'DEBUG cant report python3 version'
+  fi
   export CXX=g++-13
 }
 
