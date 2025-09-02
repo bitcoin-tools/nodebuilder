@@ -1045,6 +1045,8 @@ install_build_dependencies_zypper()
   #sudo zypper search '*libevent*'
   log_warning 'DEBUG searching for python31x packages'
   sudo zypper search 'python31*' || true
+  log_warning 'DEBUG get info on python3 package'
+  sudo zypper info python3 || true
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   if ! python3 --version; then
