@@ -1046,8 +1046,12 @@ install_build_dependencies_zypper()
   sudo zypper search 'python312' || true
   log_warning 'DEBUG get info on python3 package'
   sudo zypper info python3 || true
-  log_warning 'DEBUG get info on python312 package'
-  sudo zypper info python312 || true
+  case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
+    sles)
+      log_warning 'DEBUG replacing python312 with python3'
+      dependencies="$(echo "${dependencies}" | sed 's/python312/python3/')"
+      ;;
+    *) ;;
   log_warning 'DEBUG installing other packages'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   if ! python3 --version; then
