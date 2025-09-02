@@ -1037,7 +1037,7 @@ install_build_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  log_warning 'DEBUG enabling sle module
+  log_warning 'DEBUG enabling sle module'
   sudo SUSEConnect -p sle-module-development-tools/15/x86_64
   log_warning 'DEBUG searching for libboost_headers packages'
   sudo zypper search 'libboost_headers*'
