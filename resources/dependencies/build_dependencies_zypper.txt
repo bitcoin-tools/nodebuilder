@@ -1,5 +1,5 @@
 cmake
-gcc13-c++
+gcc14-c++
 libboost_headers1_75_0-devel
 libevent-devel
 libqt5-qtbase-devel
