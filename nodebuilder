@@ -909,15 +909,6 @@ install_build_dependencies_dnf()
     amzn)
       throw_error "Building from source on Amazon Linux is unsupported."
       ;;
-    ol)
-      echo 'DEBUG do custom ol stuff here'
-      log_warning 'DEBUG enable ol10 codeready builder'
-      sudo dnf config-manager --set-enabled ol10_codeready_builder
-      dnf update
-      log_warning 'DEBUG enabled crb and update complete'
-      log_warning 'DEBUG searching for libclang.so options'
-      dnf provides libclang.so*
-      ;;
     rhel)
       sudo subscription-manager identity > /dev/null 2>&1 ||
         throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
