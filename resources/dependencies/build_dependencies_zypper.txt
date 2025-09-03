@@ -3,11 +3,12 @@ gcc14-c++
 libboost_headers1_75_0-devel
 libevent-devel
 libqt5-qtbase-devel
-libqt5-qttools
+libqt5-qttools-devel
 python312
 qrencode-devel
 sqlite
 sqlite3
 sqlite3-devel
 zeromq-devel
+
 
