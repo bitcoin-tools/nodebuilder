@@ -931,7 +931,7 @@ install_build_dependencies_dnf()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
 
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes > /dev/null
 }
 
 install_build_dependencies_emerge()
