@@ -1576,7 +1576,7 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     28.2 29.0 29.1'
 
 # Bump this variable for new Bitcoin Core releases
-target_bitcoin_version='29.1rc1'
+target_bitcoin_version='29.1rc2'
 
 # Instantiate the parameter variables
 compile_bitcoin_flag='false'
