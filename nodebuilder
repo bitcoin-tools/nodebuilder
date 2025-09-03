@@ -1024,9 +1024,6 @@ install_build_dependencies_zypper()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
-  if ! python3 --version; then
-    log_warning 'DEBUG cant report python3 version'
-  fi
   export CXX='g++-14'
 }
 
