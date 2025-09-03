@@ -1,4 +1,4 @@
-boost
+boost-headers
 cmake
 gcc12
 git
@@ -9,3 +9,4 @@ py312-zmq
 qrencode
 sqlite3
 zeromq
+
