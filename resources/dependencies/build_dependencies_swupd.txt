@@ -1,6 +1,10 @@
+cmake
 devpkg-boost
 devpkg-libevent
+devpkg-qrencode
 devpkg-qttools
+devpkg-sqlite-autoconf
 libzmq
-make
 python3-basic
+qrencode
+sqlite

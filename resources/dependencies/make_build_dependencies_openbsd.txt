@@ -1,0 +1,12 @@
+autoconf
+automake
+boost
+gettext-tools
+gmake
+libevent
+libqrencode
+libtool
+python
+sqlite3
+qttools
+zeromq

@@ -20,6 +20,7 @@ jobs:
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
       dependencies: ${{ steps.filter.outputs.dependencies }}
+      dependencies-files: ${{ steps.filter.outputs.dependencies_files }}
       docker: ${{ steps.filter.outputs.docker }}
       docker-files: ${{ steps.filter.outputs.docker_files }}
       markdown: ${{ steps.filter.outputs.markdown }}
@@ -426,6 +427,9 @@ jobs:
       max-parallel: 8
       matrix:
         include:
+          - { container: openSUSE, dockerfile: Dockerfile_opensuse-leap }
+          - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
+          - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Gentoo, dockerfile: Dockerfile_gentoo }
           - { container: Alpine, dockerfile: Dockerfile_alpine }
           - { container: Amazon Linux, dockerfile: Dockerfile_amazonlinux }
@@ -435,12 +439,9 @@ jobs:
           - { container: Fedora, dockerfile: Dockerfile_fedora }
           - { container: Kali, dockerfile: Dockerfile_kali }
           - { container: Manjaro, dockerfile: Dockerfile_manjarolinux }
-          - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
           - { container: Red Hat Enterprise, dockerfile: Dockerfile_redhat-ubi9 }
           - { container: Rocky Linux, dockerfile: Dockerfile_rockylinux }
-          - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Ubuntu, dockerfile: Dockerfile }
-          - { container: openSUSE Leap, dockerfile: Dockerfile_opensuse-leap }
     steps:
       - uses: actions/checkout@v5
       - name: Check the current OS version
@@ -456,6 +457,8 @@ jobs:
           &&
           (
             matrix.container != 'Gentoo' ||
+            contains(needs.changes.outputs.dependencies-files, 'build_dependencies_emerge.txt') ||
+            contains(needs.changes.outputs.dependencies-files, 'runtime_dependencies_emerge.txt') ||
             contains(needs.changes.outputs.docker-files, 'Dockerfile_gentoo') ||
             (
               github.event.action == '' &&
