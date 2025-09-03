@@ -1058,7 +1058,7 @@ install_build_dependencies_zypper()
   if ! python3 --version; then
     log_warning 'DEBUG cant report python3 version'
   fi
-  export CXX=g++-13
+  export CXX=g++-14'
 }
 
 install_runtime_dependencies()
