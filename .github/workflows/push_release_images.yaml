@@ -18,19 +18,18 @@ jobs:
         container:
           - gentoo
           - alpine
-          # TODO: fix issue 2316
-          # - amazonlinux
           - archlinux
-          - clearlinux
           - debian
           - fedora
           - kali
           - manjarolinux
           - opensuse-leap
+          - sles
+          # TODO: fix issue 2316
+          # - amazonlinux
           # - oraclelinux
           # - redhat-ubi9
           # - rockylinux
-          - sles
     steps:
     - name: Checkout with history to get latest tag
       if: ${{ github.event_name != 'release' }}
