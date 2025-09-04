@@ -1,7 +1,0 @@
-devpkg-boost
-devpkg-libevent
-devpkg-qrencode
-devpkg-qttools
-libzmq
-make
-python3-basic
