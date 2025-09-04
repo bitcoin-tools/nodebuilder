@@ -306,7 +306,8 @@ jobs:
         github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -344,7 +345,8 @@ jobs:
         github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -380,7 +382,8 @@ jobs:
         github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
