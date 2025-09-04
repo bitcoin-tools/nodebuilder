@@ -7,7 +7,7 @@ FROM kalilinux/kali-last-release@sha256:0f63c52cb55f3c3edd00494874439367c19e299f
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.12.0
+ARG NODEBUILDER_VERSION=v2.0.0-beta
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
