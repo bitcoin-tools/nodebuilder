@@ -1,16 +1,17 @@
 # syntax=docker/dockerfile:1
 # Ubuntu is known for its popularity and user-friendly design.
 # This Dockerfile offers a balance between stability, security, and modernity.
-FROM ubuntu:latest@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
+FROM ubuntu:latest@sha256:9cbed754112939e914291337b5e554b07ad7c392491dba6daf25eef1332a22e8
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.11.0
+ARG NODEBUILDER_VERSION=v1.12.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+ARG CI=false
 
 # Check the current environment.
 RUN uname -a \
@@ -27,4 +28,4 @@ RUN apt-get -qq update \
   && rm -rf /var/lib/apt/lists/*
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN CI=${CI} /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"

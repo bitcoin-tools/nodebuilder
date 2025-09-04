@@ -7,10 +7,12 @@ FROM rockylinux:9@sha256:d7be1c094cc5845ee815d4632fe377514ee6ebcf8efaed689288965
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.11.0
+ARG NODEBUILDER_VERSION=v1.12.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
+ARG CI=false
 
 # Check the current environment.
 RUN uname -a \
@@ -27,4 +29,4 @@ RUN dnf makecache \
 # Download and execute the script.
 RUN wget ${NODEBUILDER_URL} \
   && chmod u+x nodebuilder \
-  && ./nodebuilder
+  && CI=${CI} ./nodebuilder

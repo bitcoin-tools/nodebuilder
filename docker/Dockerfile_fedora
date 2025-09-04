@@ -1,16 +1,18 @@
 # syntax=docker/dockerfile:1
 # Fedora is known for its proactive security and commitment to open-source software.
 # This Dockerfile is a good choice for modern and resource-rich environments.
-FROM fedora:latest@sha256:3da64cb89971a1cdbc6046e307eeebcb54f7281c0a606ee48d9995473f6b88d5
+FROM fedora:latest@sha256:6c53109bbf345c2612ada5bd06e8e352b45d85c0a2d770167b61c8d1d047e124
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.11.0
+ARG NODEBUILDER_VERSION=v1.12.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
+
+ARG CI=false
 
 # Check the current environment.
 RUN uname -a \
@@ -20,4 +22,4 @@ RUN uname -a \
   && date -u
 
 # Download and execute the script.
-RUN /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
+RUN CI=${CI} /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
