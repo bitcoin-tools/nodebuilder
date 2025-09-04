@@ -67,6 +67,52 @@ compile_bitcoin_from_source()
     git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
   cd "${COMPILE_DIRECTORY}"/
 
+  log_info 'Configuring the build environment.'
+  case "${TARGET_OPERATING_SYSTEM}" in
+    NetBSD)
+      cmake -B build \
+        -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
+        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++" \
+        > /dev/null 2>&1
+      ;;
+    gentoo)
+      cmake -B build \
+        > /dev/null 2>&1
+      ;;
+    *)
+      cmake -B build \
+        -DBUILD_GUI=ON \
+        > /dev/null 2>&1
+      ;;
+  esac
+
+  log_info 'Compiling source code. Please wait.'
+  cmake --build build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
+
+  log_info 'Running compile checks. Please wait.'
+  ctest --test-dir build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
+
+  log_info "Installing Bitcoin Core ${target_bitcoin_version}."
+  cmake --install build > /dev/null 2>&1 || sudo cmake --install build > /dev/null
+}
+
+# TODO: use make on old releases and cmake on >= 29.0
+# shellcheck disable=SC2317
+compile_bitcoin_from_source_make()
+{
+  log_info 'Ensuring compile dependencies.'
+  readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
+  readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
+  install_build_dependencies
+
+  log_info 'Downloading Bitcoin source code.'
+  # shellcheck disable=SC2015
+  command -v torsocks > /dev/null 2>&1 &&
+    [ "${TARGET_KERNEL}" != 'Darwin' ] &&
+    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null ||
+    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
+  cd "${COMPILE_DIRECTORY}"/
+
   log_info 'Analyzing hardware configuration.'
   command -v autoreconf > /dev/null 2>&1 ||
     throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
@@ -523,9 +569,6 @@ ensure_curl_dependency()
       suse | sles | *opensuse*)
         sudo zypper --non-interactive --quiet install curl > /dev/null
         ;;
-      clear-linux-os)
-        sudo swupd bundle-add curl > /dev/null
-        ;;
       Darwin)
         throw_error "Please install the 'curl' dependency."
         ;;
@@ -590,9 +633,6 @@ ensure_sudo_dependency()
       suse | sles | *opensuse*)
         zypper --non-interactive --quiet install sudo > /dev/null
         ;;
-      clear-linux-os)
-        swupd bundle-add sudo > /dev/null
-        ;;
       FreeBSD)
         pkg install -y sudo > /dev/null
         ;;
@@ -651,9 +691,6 @@ ensure_xargs_dependency()
         ;;
       suse | sles | *opensuse*)
         zypper --non-interactive --quiet install findutils > /dev/null
-        ;;
-      clear-linux-os)
-        swupd bundle-add findutils > /dev/null
         ;;
       FreeBSD)
         sudo pkg install -y findutils > /dev/null
@@ -776,9 +813,6 @@ install_build_dependencies()
     suse | sles | *opensuse*)
       install_build_dependencies_zypper
       ;;
-    clear-linux-os)
-      install_build_dependencies_swupd
-      ;;
     Darwin)
       install_build_dependencies_darwin
       ;;
@@ -799,7 +833,6 @@ install_build_dependencies()
         dnf \
         emerge \
         pacman \
-        swupd \
         zypper; do
         if command -v "${package_manager}" > /dev/null; then
           install_build_command_function="install_build_dependencies_$(echo "${package_manager}" | tr -d '-')"
@@ -931,16 +964,14 @@ install_build_dependencies_openbsd()
 {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_openbsd.txt"
   command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
+    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r') ||
+    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r')
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
     if [ "${package}" = 'sqlite3' ]; then
       sudo pkg_add "${package}" > /dev/null
     else
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
-      [ "${package}" = 'autoconf' ] && autoconf_package_latest_version="${package_latest_version}"
-      [ "${package}" = 'automake' ] && automake_package_latest_version="${package_latest_version}"
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
@@ -948,17 +979,6 @@ install_build_dependencies_openbsd()
       fi
     fi
   done
-
-  # major-minor version only
-  AUTOCONF_VERSION="$(echo "${autoconf_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
-    export AUTOCONF_VERSION
-  AUTOMAKE_VERSION="$(echo "${automake_package_latest_version}" | cut -d' ' -f1 | cut -d- -f2 | cut -d. -f1,2)" &&
-    export AUTOMAKE_VERSION
-
-  [ -f /usr/local/bin/autoconf-2.72 ] &&
-    sudo ln -s /usr/local/bin/autoconf-2.72 /usr/local/bin/autoconf-2.72p0
-  [ -f /usr/local/bin/autoreconf-2.72 ] &&
-    sudo ln -s /usr/local/bin/autoreconf-2.72 /usr/local/bin/autoreconf-2.72p0
 }
 
 install_build_dependencies_pacman()
@@ -972,16 +992,6 @@ install_build_dependencies_pacman()
   grep -v 'skipping' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
 }
 
-install_build_dependencies_swupd()
-{
-  readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_swupd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
-  [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo swupd bundle-add --quiet > /dev/null
-}
-
 install_build_dependencies_zypper()
 {
   readonly BUILD_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/build_dependencies_zypper.txt"
@@ -990,7 +1000,7 @@ install_build_dependencies_zypper()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
-  export CXX=g++-13
+  export CXX='g++-14'
 }
 
 install_runtime_dependencies()
@@ -1015,9 +1025,6 @@ install_runtime_dependencies()
     suse | sles | *opensuse*)
       install_runtime_dependencies_zypper
       ;;
-    clear-linux-os)
-      install_runtime_dependencies_swupd
-      ;;
     Darwin)
       install_runtime_dependencies_darwin
       ;;
@@ -1038,7 +1045,6 @@ install_runtime_dependencies()
         dnf \
         emerge \
         pacman \
-        swupd \
         zypper; do
         if command -v "${package_manager}" > /dev/null; then
           install_runtime_command_function="install_runtime_dependencies_$(echo "${package_manager}" | tr -d '-')"
@@ -1178,16 +1184,6 @@ install_runtime_dependencies_pacman()
   rm "${STDERR_DEPENDENCIES_LOG_FILE}"
 }
 
-install_runtime_dependencies_swupd()
-{
-  readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_swupd.txt"
-  command -v torsocks > /dev/null 2>&1 &&
-    dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${RUNTIME_DEPENDENCIES_URL}") ||
-    dependencies=$(curl --fail --silent --show-error --location --retry 5 "${RUNTIME_DEPENDENCIES_URL}")
-  [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo swupd bundle-add --quiet > /dev/null
-}
-
 install_runtime_dependencies_zypper()
 {
   readonly RUNTIME_DEPENDENCIES_URL="${DEPENDENCIES_BASE_URL}/runtime_dependencies_zypper.txt"
@@ -1220,9 +1216,6 @@ install_system_updates()
     suse | sles | *opensuse*)
       install_system_updates_zypper
       ;;
-    clear-linux-os)
-      install_system_updates_swupd
-      ;;
     FreeBSD)
       install_system_updates_freebsd
       ;;
@@ -1243,8 +1236,6 @@ install_system_updates()
         install_system_updates_emerge
       elif command -v pacman > /dev/null; then
         install_system_updates_pacman
-      elif command -v swupd > /dev/null; then
-        install_system_updates_swupd
       elif command -v zypper > /dev/null; then
         install_system_updates_zypper
       else
@@ -1342,11 +1333,6 @@ install_system_updates_openbsd()
 install_system_updates_pacman()
 {
   sudo pacman -Syu --noconfirm --quiet > /dev/null
-}
-
-install_system_updates_swupd()
-{
-  sudo swupd update --quiet > /dev/null
 }
 
 install_system_updates_zypper()
@@ -1540,10 +1526,10 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 27.2 28.0 28.1 \
-    28.2'
+    28.2 29.0'
 
 # Bump this variable for new Bitcoin Core releases
-target_bitcoin_version='28.2'
+target_bitcoin_version='29.0'
 
 # Instantiate the parameter variables
 compile_bitcoin_flag='false'
@@ -1657,7 +1643,8 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v1.12.0'
+# TODO: during next release v2.0.0, change NODEBUILDER_DEPENDENCIES_TAG from master to the release tag
+readonly NODEBUILDER_DEPENDENCIES_TAG='master'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
@@ -1873,6 +1860,9 @@ elif ! grep -q -i '^prune=' "${BITCOIN_CORE_CONFIG_FILE}"; then
   if [ "${free_space_in_mib}" -ge $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     log_info 'Your node will run as an unpruned full node.'
     set_bitcoin_core_option 'prune' '0'
+  elif is_running_in_ci; then
+    log_info 'Your CI node will run with the max prune.'
+    set_bitcoin_core_option 'prune' '550'
   elif [ "${free_space_in_mib}" -lt $((ARCHIVAL_NODE_REQUIRED_DISK_IN_MIB / 80 - INITIAL_DATA_ALREADY_SYNCED_IN_MIB)) ]; then
     throw_error 'You are too low on disk space to run Bitcoin Core.'
   else

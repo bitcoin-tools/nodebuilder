@@ -20,6 +20,7 @@ jobs:
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
       dependencies: ${{ steps.filter.outputs.dependencies }}
+      dependencies-files: ${{ steps.filter.outputs.dependencies_files }}
       docker: ${{ steps.filter.outputs.docker }}
       docker-files: ${{ steps.filter.outputs.docker_files }}
       markdown: ${{ steps.filter.outputs.markdown }}
@@ -44,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Renovate
-        uses: renovatebot/github-action@v43.0.8
+        uses: renovatebot/github-action@v43.0.9
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -423,25 +424,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 8
       matrix:
         include:
           - { container: Gentoo, dockerfile: Dockerfile_gentoo }
           - { container: Alpine, dockerfile: Dockerfile_alpine }
           - { container: Amazon Linux, dockerfile: Dockerfile_amazonlinux }
           - { container: Arch, dockerfile: Dockerfile_archlinux }
-          - { container: Clear Linux, dockerfile: Dockerfile_clearlinux }
           - { container: Debian, dockerfile: Dockerfile_debian }
           - { container: Fedora, dockerfile: Dockerfile_fedora }
           - { container: Kali, dockerfile: Dockerfile_kali }
           - { container: Manjaro, dockerfile: Dockerfile_manjarolinux }
+          - { container: openSUSE, dockerfile: Dockerfile_opensuse-leap }
           - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
           - { container: Red Hat Enterprise, dockerfile: Dockerfile_redhat-ubi9 }
           - { container: Rocky Linux, dockerfile: Dockerfile_rockylinux }
           - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Ubuntu, dockerfile: Dockerfile }
-          - { container: openSUSE Leap, dockerfile: Dockerfile_opensuse-leap }
-          - { container: openSUSE Tumbleweed, dockerfile: Dockerfile_opensuse-tumbleweed }
     steps:
       - uses: actions/checkout@v5
       - name: Check the current OS version
@@ -457,6 +456,8 @@ jobs:
           &&
           (
             matrix.container != 'Gentoo' ||
+            contains(needs.changes.outputs.dependencies-files, 'build_dependencies_emerge.txt') ||
+            contains(needs.changes.outputs.dependencies-files, 'runtime_dependencies_emerge.txt') ||
             contains(needs.changes.outputs.docker-files, 'Dockerfile_gentoo') ||
             (
               github.event.action == '' &&
@@ -467,6 +468,8 @@ jobs:
         uses: docker/build-push-action@v6
         timeout-minutes: 300
         with:
-          build-args: NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
+          build-args: |
+            CI=true
+            NODEBUILDER_VERSION=${{ github.sha || github.head_ref || 'master' }}
           context: .
           file: docker/${{ matrix.dockerfile }}

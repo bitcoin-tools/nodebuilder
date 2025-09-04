@@ -1,8 +1,11 @@
-autoconf
-automake
 boost-headers
-gmake
+cmake
+gcc12
+git
 libevent
-libtool
 pkg-config
 python312
+py312-zmq
+qrencode
+sqlite3
+zeromq

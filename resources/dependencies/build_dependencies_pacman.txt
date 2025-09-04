@@ -1,6 +1,7 @@
 base-devel
 boost
 boost-libs
+cmake
 db
 qrencode
 qt5

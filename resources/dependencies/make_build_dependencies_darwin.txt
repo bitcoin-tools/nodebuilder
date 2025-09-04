@@ -1,0 +1,9 @@
+automake
+boost
+gettext
+libevent
+libtool
+pkg-config
+qrencode
+qt@5
+zeromq
