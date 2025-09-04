@@ -432,7 +432,7 @@ jobs:
             additional-args: ''
           - job-purpose: source
             distro: alpine_latest
-            additional-args: '--compile --jobs 1'
+            additional-args: '--compile --jobs 2'
           - job-purpose: source
             distro: ubuntu_latest
             additional-args: '--compile'
