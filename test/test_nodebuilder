@@ -270,7 +270,7 @@ for message in \
   'INFO: Starting Bitcoin Core.$' \
   'INFO: Checking the RPC status.$' \
   'INFO: This info will refresh in 10 seconds.' \
-  'INFO: Syncing the block headers \((first|second) pass\).$' \
+  'INFO: (Pre|Re)-syncing the headers.$' \
   'INFO: Syncing the blockchain. Please be patient.$' \
   'Sync progress:              [0-9]+\.[0-9]{3} %$' \
   'Blocks remaining:           [0-9]*$' \
