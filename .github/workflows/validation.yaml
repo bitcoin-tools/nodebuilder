@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Renovate
-        uses: renovatebot/github-action@v43.0.9
+        uses: renovatebot/github-action@v43.0.10
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -306,7 +306,8 @@ jobs:
         github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -344,7 +345,8 @@ jobs:
         github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -380,7 +382,8 @@ jobs:
         github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
