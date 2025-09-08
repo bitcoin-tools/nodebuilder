@@ -1434,7 +1434,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.12.0'
+  printf '%s\n' 'nodebuilder 2.0.0'
   printf '%s\n' 'Copyright (C) 2025 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT-0'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1643,8 +1643,7 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-# TODO: during next release v2.0.0, change NODEBUILDER_DEPENDENCIES_TAG from master to the release tag
-readonly NODEBUILDER_DEPENDENCIES_TAG='master'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v2.0.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
