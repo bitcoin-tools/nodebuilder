@@ -6,8 +6,8 @@ libqrencode-dev
 linux-headers
 pkgconf
 python3
-qt5-qtbase
-qt5-qtbase-x11
-qt5-qttools-dev
+qt6-qtbase
+qt6-qtbase-x11
+qt6-qttools-dev
 sqlite-dev
 zeromq-dev
