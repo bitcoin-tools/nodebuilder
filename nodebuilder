@@ -72,12 +72,10 @@ compile_bitcoin_from_source()
     NetBSD)
       cmake -B build \
         -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
-        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++" \
-        > /dev/null 2>&1
+        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++"
       ;;
     gentoo)
-      cmake -B build \
-        > /dev/null 2>&1
+      cmake -B build
       ;;
     *)
       cmake -B build \
