@@ -4,5 +4,5 @@ boost-libs
 cmake
 db
 qrencode
-qt5
+qt6
 zeromq
