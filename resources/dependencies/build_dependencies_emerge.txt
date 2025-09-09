@@ -5,4 +5,3 @@ dev-libs/boost
 dev-libs/libevent
 media-gfx/qrencode
 net-libs/zeromq
-
