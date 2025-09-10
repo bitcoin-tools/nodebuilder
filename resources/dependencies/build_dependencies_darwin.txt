@@ -1,4 +1,5 @@
 boost
+capnp
 libevent
 pkgconf
 python
