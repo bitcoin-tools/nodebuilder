@@ -1,4 +1,6 @@
 boost-devel
+capnproto
+capnproto-devel
 cmake
 gcc-c++
 libevent-devel
@@ -10,4 +12,3 @@ qt6-qttools-devel
 qt6-qtwayland
 sqlite-devel
 zeromq-devel
-
