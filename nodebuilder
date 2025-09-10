@@ -83,7 +83,7 @@ compile_bitcoin_from_source()
     gentoo)
       cmake -B build
       ;;
-    Darwin | debian | ubuntu | kali | gentoo | alpine | arch | manjaro)
+    Darwin | debian | ubuntu | kali | alpine | arch | manjaro)
       cmake -B build \
         -DBUILD_GUI=ON \
         > /dev/null 2>&1
