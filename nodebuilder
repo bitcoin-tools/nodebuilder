@@ -78,7 +78,7 @@ compile_bitcoin_from_source()
       ;;
     gentoo)
       cmake -B build \
-      -DWITH_ZMQ=ON \
+        -DWITH_ZMQ=ON \
         > /dev/null 2>&1
       ;;
     *)
