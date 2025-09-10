@@ -213,7 +213,7 @@ jobs:
       fail-fast: false
       max-parallel: 5
       matrix:
-        os: [ubuntu-24.04, macos-15, ubuntu-22.04, macos-13, macos-14]
+        os: [ubuntu-24.04, macos-15, macos-13, macos-14]
         job-purpose: [package, source]
         exclude:
           - { job-purpose: source, os: macos-13 }
@@ -222,18 +222,6 @@ jobs:
             additional-args: ''
           - job-purpose: source
             additional-args: '--compile'
-          - os: ubuntu-22.04
-            os-friendly-name: Ubuntu 22
-            check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
-            remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            cache-path: |
-              /var/cache/apt/archives/*.deb
-              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
-              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
-              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
-              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
-              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
-            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: ubuntu-24.04
             os-friendly-name: Ubuntu 24
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
@@ -259,16 +247,6 @@ jobs:
           ${{ matrix.check-environment-command }}
           df -h
           date -u
-      - name: Change owner of apt archives
-        if: contains(matrix.os, 'ubuntu')
-        run: sudo chown -R "$(whoami)" /var/cache/apt/archives
-      - name: Cache system archives
-        if: matrix.cache-path != null
-        uses: actions/cache@v4
-        with:
-          path: ${{ matrix.cache-path }}
-          key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
-          restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
         if: matrix.remove-firefox-command != null
         run: ${{ matrix.remove-firefox-command }}
