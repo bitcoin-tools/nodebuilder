@@ -217,7 +217,8 @@ jobs:
         job-purpose: [source]
         #job-purpose: [package, source]
         exclude:
-          - { job-purpose: source, os: macos-13 }
+          - { os: macos-13 }
+          #- { job-purpose: source, os: macos-13 }
         include:
         #  - job-purpose: package
         #    additional-args: ''
