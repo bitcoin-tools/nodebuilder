@@ -2,6 +2,6 @@ dev-build/cmake
 dev-db/sqlite
 dev-lang/python
 dev-libs/boost
+dev-libs/capnproto
 dev-libs/libevent
-media-gfx/qrencode
 net-libs/zeromq
