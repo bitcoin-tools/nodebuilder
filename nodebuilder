@@ -76,7 +76,9 @@ compile_bitcoin_from_source()
       ;;
     OpenBSD)
       cmake -B build \
+        -DBUILD_GUI=ON \
         -DENABLE_IPC=OFF
+      ;;
     gentoo)
       cmake -B build
       ;;
