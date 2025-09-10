@@ -1,4 +1,5 @@
 boost-headers
+capnproto
 cmake
 gcc12
 git
