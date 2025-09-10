@@ -249,16 +249,6 @@ jobs:
           ${{ matrix.check-environment-command }}
           df -h
           date -u
-      - name: Change owner of apt archives
-        if: contains(matrix.os, 'ubuntu')
-        run: sudo chown -R "$(whoami)" /var/cache/apt/archives
-      - name: Cache system archives
-        if: matrix.cache-path != null
-        uses: actions/cache@v4
-        with:
-          path: ${{ matrix.cache-path }}
-          key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
-          restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
         if: matrix.remove-firefox-command != null
         run: ${{ matrix.remove-firefox-command }}
