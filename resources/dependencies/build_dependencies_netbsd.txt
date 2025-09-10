@@ -1,4 +1,5 @@
 boost-headers
+capnproto
 cmake
 gcc12
 git
@@ -6,6 +7,5 @@ libevent
 pkg-config
 python312
 py312-zmq
-qrencode
 sqlite3
 zeromq
