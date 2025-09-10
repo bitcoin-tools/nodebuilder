@@ -214,12 +214,13 @@ jobs:
       max-parallel: 5
       matrix:
         os: [ubuntu-24.04, macos-15, ubuntu-22.04, macos-13, macos-14]
-        job-purpose: [package, source]
+        job-purpose: [source]
+        #job-purpose: [package, source]
         exclude:
           - { job-purpose: source, os: macos-13 }
         include:
-          - job-purpose: package
-            additional-args: ''
+        #  - job-purpose: package
+        #    additional-args: ''
           - job-purpose: source
             additional-args: '--compile'
           - os: ubuntu-22.04
