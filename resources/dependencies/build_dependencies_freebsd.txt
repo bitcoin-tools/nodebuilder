@@ -1,4 +1,5 @@
 boost-libs
+capnproto
 cmake
 databases/py-sqlite3
 git
@@ -15,4 +16,3 @@ qt6-qmake
 qt6-testlib
 qt6-widgets
 sqlite3
-
