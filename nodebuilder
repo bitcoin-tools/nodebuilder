@@ -1010,6 +1010,8 @@ install_build_dependencies_zypper()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   sudo zypper search '*qtbase*'
   sudo zypper search '*qttools*'
+  [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'sles' ] &&
+      dependencies="$(echo "${dependencies}" | sed 's/python312/python3/')"	
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   export CXX='g++-14'
 }
