@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Fedora is known for its proactive security and commitment to open-source software.
 # This Dockerfile is a good choice for modern and resource-rich environments.
-FROM fedora:latest@sha256:6af051ad0a294182c3a957961df6203d91f643880aa41c2ffe3d1302e7505890
+FROM fedora:latest@sha256:cf907e6a54b0ffd3275e03745b4914e748e69c352810918493ca91789188106c
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
