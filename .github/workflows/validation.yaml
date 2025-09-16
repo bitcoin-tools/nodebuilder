@@ -322,7 +322,7 @@ jobs:
               rm /usr/local/bin/*bitcoin*
             wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}" &&
               chmod u+x "${CI_NODEBUILDER_SCRIPT}"
-            sh -x "./${CI_NODEBUILDER_SCRIPT}" ${{ matrix.additional-args }}
+            sh -x "./${CI_NODEBUILDER_SCRIPT}"
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -376,7 +376,7 @@ jobs:
               rm /usr/local/bin/*bitcoin*
             wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}" &&
               chmod u+x "${CI_NODEBUILDER_SCRIPT}"
-            sh -x "./${CI_NODEBUILDER_SCRIPT}" ${{ matrix.additional-args }}
+            sh -x "./${CI_NODEBUILDER_SCRIPT}"
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -432,7 +432,7 @@ jobs:
               rm /usr/local/bin/*bitcoin*
             wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}" &&
               chmod u+x "${CI_NODEBUILDER_SCRIPT}"
-            sh -x "./${CI_NODEBUILDER_SCRIPT}" ${{ matrix.additional-args }}      
+            sh -x "./${CI_NODEBUILDER_SCRIPT}"     
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
