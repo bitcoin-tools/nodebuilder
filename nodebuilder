@@ -84,6 +84,7 @@ compile_bitcoin_from_source()
       ;;
     gentoo)
       cmake -B build \
+        -DWITH_ZMQ=ON
       ;;
     Darwin | kali | alpine | arch | manjaro)
       cmake -B build \
