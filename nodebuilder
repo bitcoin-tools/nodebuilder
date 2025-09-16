@@ -467,9 +467,9 @@ bitcoin_tarball_test()
   # only sign test_bitcoin if on arm64 and target version is before 28.2
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
     ! is_arm64_test_bitcoin_signed "${target_bitcoin_version}"; then
-    codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
+    codesign -s - "${BITCOIN_INSTALL_LIBEXEC_SOURCE}"/test_bitcoin
   fi
-  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
+  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_LIBEXEC_SOURCE}"/test_bitcoin 2>&1)"
   readonly UNIT_TEST_RESPONSE
   case "${UNIT_TEST_RESPONSE}" in
     *'No errors detected'*) ;;
