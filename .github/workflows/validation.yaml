@@ -402,7 +402,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Test the console output
-        if: steps.test-nodebuilder.outcome == 'failure'
+        id: test-nodebuilder
         uses: vmactions/openbsd-vm@v1
         timeout-minutes: 180
         with:
