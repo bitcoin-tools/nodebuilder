@@ -351,7 +351,7 @@ bitcoin_tarball_extract()
   log_info 'Extracting Bitcoin Core.'
   [ -d "${BITCOIN_CORE_EXTRACT_DIR}"/ ] || mkdir "${BITCOIN_CORE_EXTRACT_DIR}"
   tar -xzf "${BITCOIN_TARBALL_DESTINATION_PATH}" -C "${BITCOIN_CORE_EXTRACT_DIR}"/ --strip-components=1
-  ls -l "${BITCOIN_CORE_EXTRACT_DIR}"
+  ls -R "${BITCOIN_CORE_EXTRACT_DIR}"
 }
 
 bitcoin_tarball_install()
