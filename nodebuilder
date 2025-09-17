@@ -1647,7 +1647,7 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 # TODO switch this back to v2.0.0 after testing
-readonly NODEBUILDER_DEPENDENCIES_TAG='2426-feat---if-bsd-build-tests-fail-run-nodebuilder-with-set--x'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v2.0.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
