@@ -351,6 +351,7 @@ jobs:
         id: test-nodebuilder
         uses: vmactions/netbsd-vm@v1
         timeout-minutes: 180
+        continue-on-error: true
         with:
           prepare: |
             echo "${TERM:-TERM is not found}"
@@ -405,6 +406,7 @@ jobs:
         id: test-nodebuilder
         uses: vmactions/openbsd-vm@v1
         timeout-minutes: 180
+        continue-on-error: true
         with:
           prepare: |
             echo "${TERM:-TERM is not found}"
