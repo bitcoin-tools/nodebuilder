@@ -187,12 +187,11 @@ esac
 bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 
 DOWNLOADED_NODEBUILDER='false'
-if ! [ -f nodebuilder ]; then
+[ -f nodebuilder ] || {
   DOWNLOADED_NODEBUILDER='true'
   wget --no-verbose "${NODEBUILDER_BINARY_URL}"
-fi
+}
 readonly DOWNLOADED_NODEBUILDER
-echo "DEBUG DOWNLOADED_NODEBUILDER=${DOWNLOADED_NODEBUILDER}"
 [ -x nodebuilder ] || chmod u+x nodebuilder
 
 nodebuilder_args=''
