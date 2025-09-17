@@ -15,4 +15,3 @@ qt5-qmake
 qt5-testlib
 qt5-widgets
 sqlite3
-debugnotarealdep
