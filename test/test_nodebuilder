@@ -192,6 +192,7 @@ if ! [ -f nodebuilder ]; then
   wget --no-verbose "${NODEBUILDER_BINARY_URL}"
 fi
 readonly DOWNLOADED_NODEBUILDER
+echo "DEBUG DOWNLOAD_NODEBUILDER=${DOWNLOAD_NODEBUILDER}"
 [ -x nodebuilder ] || chmod u+x nodebuilder
 
 nodebuilder_args=''
