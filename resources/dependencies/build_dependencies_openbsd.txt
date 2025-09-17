@@ -8,4 +8,3 @@ py3-zmq
 qttools
 sqlite3
 zeromq
-debugnotarealdep
