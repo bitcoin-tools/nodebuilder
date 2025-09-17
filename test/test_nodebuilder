@@ -28,7 +28,7 @@ get_operating_system()
 handle_exit()
 {
   kill_tail_process
-  [ -f nodebuilder ] && rm nodebuilder
+  [ "${DOWNLOADED_NODEBUILDER:-false}" = 'true' ] && [ -f nodebuilder ] && rm nodebuilder
   [ -f "${STDOUT_TEST_FILENAME}" ] && rm "${STDOUT_TEST_FILENAME}"
   [ -f "${STDERR_TEST_FILENAME}" ] && rm "${STDERR_TEST_FILENAME}"
 }
@@ -186,7 +186,12 @@ case "${TARGET_KERNEL}" in
 esac
 bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 
-[ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
+DOWNLOADED_NODEBUILDER='false'
+[ -f nodebuilder ] || {
+  DOWNLOADED_NODEBUILDER='true'
+  wget --no-verbose "${NODEBUILDER_BINARY_URL}"
+}
+readonly DOWNLOADED_NODEBUILDER
 [ -x nodebuilder ] || chmod u+x nodebuilder
 
 nodebuilder_args=''
@@ -218,7 +223,7 @@ if ! ${RUN_NODEBUILDER_COMMAND} \
 fi
 
 # After the script runs successfully
-rm nodebuilder
+[ "${DOWNLOADED_NODEBUILDER:-false}" = 'true' ] && rm nodebuilder
 kill_tail_process
 
 # Stop Bitcoin Core
