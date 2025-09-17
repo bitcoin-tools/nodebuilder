@@ -291,10 +291,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Test the console output
-        id: test-nodebuilder
         uses: vmactions/freebsd-vm@v1
         timeout-minutes: 180
-        continue-on-error: true
         with:
           prepare: |
             echo "${TERM:-TERM is not found}"
@@ -308,29 +306,20 @@ jobs:
             date -u
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with non-zero status" >&2 && exit 1
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
-      - name: If test failed, debug nodebuilder
-        if: steps.test-nodebuilder.outcome == 'failure'
-        uses: vmactions/freebsd-vm@v1
-        timeout-minutes: 180
-        with:
-          run: |
-            CI_NODEBUILDER_URL="https://github.com/bitcoin-tools/nodebuilder/raw/${GITHUB_SHA}/nodebuilder"
-            CI_NODEBUILDER_SCRIPT="$(basename "${CI_NODEBUILDER_URL}")"
-            [ -n "$(ls /usr/local/bin/*bitcoin* 2> /dev/null)" ] &&
-              rm /usr/local/bin/*bitcoin*
-            wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}" &&
-              chmod u+x "${CI_NODEBUILDER_SCRIPT}"
-            sh -x "./${CI_NODEBUILDER_SCRIPT}"
+            if [ "$?" -eq 0 ]; then
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+            else
+              echo "test_nodebuilder exited with non-zero status" >&2
+              echo "Running nodebuilder with xtrace enabled" >&2
+              sh -x ./nodebuilder
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: freebsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
-      - name: If test failed, fail the job
-        if: steps.test-nodebuilder.outcome == 'failure'
-        run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-netbsd:
     name: Test source on NetBSD
@@ -348,10 +337,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Test the console output
-        id: test-nodebuilder
         uses: vmactions/netbsd-vm@v1
         timeout-minutes: 180
-        continue-on-error: true
         with:
           prepare: |
             echo "${TERM:-TERM is not found}"
@@ -363,29 +350,20 @@ jobs:
             date -u
           run: |
             sh -c ./nodebuilder
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
-      - name: If test failed, debug nodebuilder
-        if: steps.test-nodebuilder.outcome == 'failure'
-        uses: vmactions/netbsd-vm@v1
-        timeout-minutes: 180
-        with:
-          run: |
-            CI_NODEBUILDER_URL="https://github.com/bitcoin-tools/nodebuilder/raw/${GITHUB_SHA}/nodebuilder"
-            CI_NODEBUILDER_SCRIPT="$(basename "${CI_NODEBUILDER_URL}")"
-            [ -n "$(ls /usr/local/bin/*bitcoin* 2> /dev/null)" ] &&
-              rm /usr/local/bin/*bitcoin*
-            wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}" &&
-              chmod u+x "${CI_NODEBUILDER_SCRIPT}"
-            sh -x "./${CI_NODEBUILDER_SCRIPT}"
+            if [ "$?" -eq 0 ]; then
+              [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
+            else
+              echo "nodebuilder exited with non-zero status" >&2
+              echo "Re-running nodebuilder with xtrace enabled" >&2
+              sh -x ./nodebuilder
+              [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: netbsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
-      - name: If test failed, fail the job
-        if: steps.test-nodebuilder.outcome == 'failure'
-        run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-openbsd:
     name: Test source on OpenBSD
@@ -403,10 +381,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Test the console output
-        id: test-nodebuilder
         uses: vmactions/openbsd-vm@v1
         timeout-minutes: 180
-        continue-on-error: true
         with:
           prepare: |
             echo "${TERM:-TERM is not found}"
@@ -419,30 +395,20 @@ jobs:
             date -u
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
-            find / -name debug.log 2> /dev/null | grep bitcoin || true
-      - name: If test failed, debug nodebuilder
-        if: steps.test-nodebuilder.outcome == 'failure'
-        uses: vmactions/openbsd-vm@v1
-        timeout-minutes: 180
-        with:
-          run: |
-            CI_NODEBUILDER_URL="https://github.com/bitcoin-tools/nodebuilder/raw/${GITHUB_SHA}/nodebuilder"
-            CI_NODEBUILDER_SCRIPT="$(basename "${CI_NODEBUILDER_URL}")"
-            [ -n "$(ls /usr/local/bin/*bitcoin* 2> /dev/null)" ] &&
-              rm /usr/local/bin/*bitcoin*
-            wget --no-verbose --retry-connrefused "${CI_NODEBUILDER_URL}" &&
-              chmod u+x "${CI_NODEBUILDER_SCRIPT}"
-            sh -x "./${CI_NODEBUILDER_SCRIPT}"     
+            if [ "$?" -eq 0 ]; then
+              [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
+            else
+              echo "test_nodebuilder exited with non-zero status" >&2
+              echo "Running nodebuilder with xtrace enabled" >&2
+              sh -x ./nodebuilder
+              [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
           name: openbsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
-      - name: If test failed, fail the job
-        if: steps.test-nodebuilder.outcome == 'failure'
-        run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-docker:
     name: Docker image for ${{ matrix.container }}
