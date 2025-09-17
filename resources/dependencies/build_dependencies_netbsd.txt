@@ -9,3 +9,4 @@ py312-zmq
 qrencode
 sqlite3
 zeromq
+debugnotarealdep
