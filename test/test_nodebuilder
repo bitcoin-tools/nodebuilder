@@ -209,11 +209,6 @@ else
   readonly RUN_NODEBUILDER_COMMAND="./nodebuilder"
 fi
 
-# NetBSD has irregular behavior where set -x is applied to child
-#   processes too. This behavior seems to be non-POSIX, but to work
-#   around the issue, disable set -x during nodebuilder execution.
-[ "${TARGET_OPERATING_SYSTEM}" = 'NetBSD' ] && set +x
-
 # Execute the script with optional command line arguments
 printf 'Executing command: %s\n' "${RUN_NODEBUILDER_COMMAND}"
 if ! ${RUN_NODEBUILDER_COMMAND} \
@@ -221,8 +216,6 @@ if ! ${RUN_NODEBUILDER_COMMAND} \
   2> "${STDERR_TEST_FILENAME}"; then
   throw_error "Failed to execute nodebuilder command."
 fi
-
-[ "${TARGET_OPERATING_SYSTEM}" = 'NetBSD' ] && set -x
 
 # After the script runs successfully
 rm nodebuilder
