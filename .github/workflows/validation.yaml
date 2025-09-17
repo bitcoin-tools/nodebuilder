@@ -342,7 +342,7 @@ jobs:
             df -h
             date -u
           run: |
-            sh -x ./nodebuilder
+            sh -c ./nodebuilder
             [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
             [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
       - name: Save Bitcoin Core log as artifact
