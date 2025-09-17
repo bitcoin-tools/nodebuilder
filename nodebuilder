@@ -73,19 +73,29 @@ compile_bitcoin_from_source()
       cmake -B build \
         -DWITH_ZMQ=ON \
         -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
-        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++" \
+        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++"
+      ;;
+    OpenBSD)
+      cmake -B build \
+        -DBUILD_GUI=ON \
+        -DWITH_ZMQ=ON \
+        -DENABLE_IPC=OFF \
         > /dev/null 2>&1
       ;;
     gentoo)
       cmake -B build \
+        -DWITH_ZMQ=ON
+      ;;
+    Darwin | kali | alpine | debian | arch | manjaro)
+      cmake -B build \
+        -DBUILD_GUI=ON \
         -DWITH_ZMQ=ON \
         > /dev/null 2>&1
       ;;
     *)
       cmake -B build \
         -DBUILD_GUI=ON \
-        -DWITH_ZMQ=ON \
-        > /dev/null 2>&1
+        -DWITH_ZMQ=ON
       ;;
   esac
 
@@ -314,6 +324,7 @@ bitcoin_tarball_download_extract_test_install()
   readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
   readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
   readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
+  readonly BITCOIN_INSTALL_LIBEXEC_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/libexec"
   readonly BITCOIN_INSTALL_INCLUDE_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/include"
   readonly BITCOIN_INSTALL_MAN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/share/man/man1"
   readonly BITCOIN_INSTALL_DESTINATION='/usr/local'
@@ -456,9 +467,9 @@ bitcoin_tarball_test()
   # only sign test_bitcoin if on arm64 and target version is before 28.2
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
     ! is_arm64_test_bitcoin_signed "${target_bitcoin_version}"; then
-    codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
+    codesign -s - "${BITCOIN_INSTALL_LIBEXEC_SOURCE}"/test_bitcoin
   fi
-  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
+  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_LIBEXEC_SOURCE}"/test_bitcoin 2>&1)"
   readonly UNIT_TEST_RESPONSE
   case "${UNIT_TEST_RESPONSE}" in
     *'No errors detected'*) ;;
@@ -948,7 +959,12 @@ install_build_dependencies_freebsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes > /dev/null
+  #printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes
+  for package in ${dependencies}; do
+    echo "DEBUG loop with package=${package}"
+    package="$(echo "${package}" | tr -d '\r')"
+    sudo pkg install --yes "${package}"
+  done
 }
 
 install_build_dependencies_netbsd()
@@ -958,7 +974,7 @@ install_build_dependencies_netbsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install
   # TODO: Remove gcc-12 installation on next line when NetBSD updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
   sudo pkgin -y install gcc12 && export PATH="/usr/pkg/gcc12/bin:${PATH}"
 }
@@ -971,6 +987,7 @@ install_build_dependencies_openbsd()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r')
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   for package in ${dependencies}; do
+    echo "DEBUG loop with package=${package}"
     if [ "${package}" = 'sqlite3' ]; then
       sudo pkg_add "${package}" > /dev/null
     else
@@ -978,7 +995,7 @@ install_build_dependencies_openbsd()
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
-        sudo pkg_add "${package_latest_version}" > /dev/null
+        sudo pkg_add "${package_latest_version}"
       fi
     fi
   done
@@ -1002,6 +1019,12 @@ install_build_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  sudo zypper search '*qtbase*'
+  sudo zypper search '*qttools*'
+  sudo zypper search '*libboost_headers*'
+  sudo zypper search '*qrencode*'
+  [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'sles' ] &&
+    dependencies="$(echo "${dependencies}" | sed 's/python3[0-9]+/python3/')"
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
   export CXX='g++-14'
 }
@@ -1529,10 +1552,10 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 27.2 28.0 28.1 \
-    28.2 29.0 29.1'
+    28.2 29.0 29.1 30.0'
 
 # Bump this variable for new Bitcoin Core releases
-target_bitcoin_version='29.1'
+target_bitcoin_version='30.0rc1'
 
 # Instantiate the parameter variables
 compile_bitcoin_flag='false'
@@ -1646,7 +1669,7 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='v2.0.0'
+readonly NODEBUILDER_DEPENDENCIES_TAG='2407-feat---add-support-for-bitcoin-core-300'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
@@ -1782,6 +1805,7 @@ readonly TARGET_BITCOIN_VERSION_PADDED
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
+  is_running_in_container ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ] ||
