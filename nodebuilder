@@ -146,7 +146,10 @@ compile_bitcoin_from_source_make()
       gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
       ;;
     *)
-      make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
+
+      log_info 'DEBUG compiling without output suppression'
+      make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}"
+      #make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
       ;;
   esac
 
@@ -558,7 +561,7 @@ ensure_curl_dependency()
         sudo apk --quiet add --no-cache curl
         ;;
       debian | ubuntu)
-        sudo apt-get install -y curl > /dev/null
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl > /dev/null
         ;;
       fedora* | rhel | centos* | rocky | ol)
         sudo dnf install --allowerasing --assumeyes curl > /dev/null
@@ -590,7 +593,7 @@ ensure_curl_dependency()
         if command -v apk > /dev/null; then
           sudo apk --quiet add --no-cache curl
         elif command -v apt-get > /dev/null; then
-          sudo apt-get -qq install -y curl > /dev/null
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install -y curl > /dev/null
         elif command -v dnf > /dev/null; then
           sudo dnf install --allowerasing --assumeyes curl > /dev/null
         elif command -v pacman > /dev/null; then
@@ -621,7 +624,11 @@ ensure_sudo_dependency()
         apk --quiet add --no-cache sudo
         ;;
       debian | ubuntu)
-        apt-get install -y sudo > /dev/null
+        readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
+        apt-get update > /dev/null
+        DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes --quiet sudo > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
+        grep -v 'apt-utils' "${STDERR_INSTALL_LOG_FILE}" >&2 || true
+        rm "${STDERR_INSTALL_LOG_FILE}"
         ;;
       fedora* | rhel | centos* | rocky | ol)
         dnf install --allowerasing --assumeyes sudo > /dev/null
@@ -937,7 +944,7 @@ install_build_dependencies_emerge()
     emerge --update --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail --deep --newuse @world
     # Run the install command again
     printf '%s\n' "${dependencies}" | tr -d '\r' | xargs emerge --autounmask-write \
-      --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${SYS_CORES_PLUS_ONE}" --quiet --quiet-build --quiet-fail
+      --jobs "${compile_num_jobs:-${SYS_CORES_COUNT}}" --load-average "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" --quiet --quiet-build --quiet-fail
   fi
 }
 
@@ -1084,6 +1091,16 @@ install_runtime_dependencies_aptget()
   [ -z "${dependencies:-}" ] && throw_error 'The list of dependencies is empty.'
   sudo apt-get -qq update
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends > /dev/null 2>&1
+  case "${TARGET_ARCHITECTURE}" in
+    powerpc64)
+      # TODO: make this a CI step not in the script
+      sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends libc6:ppc64el > /dev/null 2>&1
+      ;;
+    riscv64)
+      sudo DEBIAN_FRONTEND=noninteractive apt-get -qq install --assume-yes --no-install-recommends libatomic1 > /dev/null 2>&1
+      ;;
+    *) ;;
+  esac
 }
 
 install_runtime_dependencies_darwin()
@@ -1277,7 +1294,8 @@ install_system_updates_aptget()
 {
   check_dpkg_lock
   readonly STDERR_INSTALL_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
-  sudo apt-get -qq update && sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
+  sudo apt-get -qq update &&
+    sudo NEEDRESTART_MODE=a apt-get -qq dist-upgrade --assume-yes > /dev/null 2> "${STDERR_INSTALL_LOG_FILE}"
   grep -v 'apt-utils' "${STDERR_INSTALL_LOG_FILE}" >&2 || true
   rm "${STDERR_INSTALL_LOG_FILE}"
 }
@@ -1635,7 +1653,13 @@ readonly BYTES_TO_KIB=1024
 readonly KIB_TO_MIB="${BYTES_TO_KIB}"
 readonly MIB_TO_GIB="${BYTES_TO_KIB}"
 
-TARGET_ARCHITECTURE="$(uname -m)"
+TARGET_ARCHITECTURE=$(uname -m)
+case "${TARGET_ARCHITECTURE}" in
+  ppc64le)
+    TARGET_ARCHITECTURE='powerpc64'
+    ;;
+  *) ;;
+esac
 readonly TARGET_ARCHITECTURE
 TARGET_KERNEL="$(uname -s)"
 readonly TARGET_KERNEL
@@ -1676,6 +1700,7 @@ if [ -z "${compile_num_jobs}" ]; then
       ;;
   esac
   readonly SYS_CORES_COUNT
+  #shellcheck disable=SC2034
   readonly SYS_CORES_PLUS_ONE="$((SYS_CORES_COUNT + 1))"
 fi
 
@@ -1960,9 +1985,9 @@ if [ "${ibd_status}" = 'true' ]; then
       log_info 'Disabling system sleep, suspend, and hibernate.'
       sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target > /dev/null 2>&1
     fi
-    is_running_in_container || log_info "Close this Terminal window by clicking on the 'X'."
-    log_info "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
+    log_info "Close this Terminal window by clicking on the 'X'."
   fi
+  log_info "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
   sleep "${SLEEP_TIME_SECONDS}"
 else
   log_info 'Your node has already synced the blockchain.'
