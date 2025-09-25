@@ -1026,7 +1026,7 @@ install_build_dependencies_zypper()
   echo 'DEBUG ADDING QT6 REPO'
   sudo zypper --non-interactive --gpg-auto-import-keys ar -f https://download.opensuse.org/repositories/KDE:/Qt6/openSUSE_Leap_15.6/ KDE:Qt6
   echo 'DEBUG REFRESHING REPOS'
-  sudo zypper --non-interactive refresh
+  sudo zypper --non-interactive --gpg-auto-import-keys refresh
   echo 'DEBUG SEARCHING AGAIN'
   sudo zypper search '*qtbase*'
   sudo zypper search '*qttools*'
