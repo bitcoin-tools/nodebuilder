@@ -1,14 +1,15 @@
 cmake
-gcc14-c++
-libboost_headers1_75_0-devel
+gcc15-c++
+libboost_headers1_86_0-devel
 libcapnp-devel
 libevent-devel
-python312
-qrencode-devel
-qt6-base-devel
+python313
+qrencode-develqt6-base-devel
 qt6-tools-devel
 sqlite
 sqlite3
 sqlite3-devel
 zeromq-devel
+
+
 

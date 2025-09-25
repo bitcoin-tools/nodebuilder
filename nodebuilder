@@ -1019,13 +1019,14 @@ install_build_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+
   sudo zypper --gpg-auto-import-keys --non-interactive --quiet addrepo \
     -f https://download.opensuse.org/repositories/KDE:/Qt6/openSUSE_Leap_15.6/ KDE:Qt6
   sudo zypper --gpg-auto-import-keys --non-interactive --quiet refresh
   [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'sles' ] &&
     dependencies="$(echo "${dependencies}" | sed 's/python3[0-9]+/python3/')"
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install > /dev/null
-  export CXX='g++-14'
+  export CXX='g++-15'
 }
 
 install_runtime_dependencies()
@@ -1668,7 +1669,10 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
+
 readonly NODEBUILDER_DEPENDENCIES_TAG='2407-feat---add-support-for-bitcoin-core-300'
+
+
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
@@ -2008,27 +2012,23 @@ while [ "${ibd_status}" = 'true' ]; do
 
   clear_the_terminal
   if [ "${headers}" -eq 0 ]; then
-    log_info 'Syncing the block headers (first pass).'
+    log_info 'Pre-syncing the headers.'
     headers_presync_last_log_line="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
     if [ -n "${headers_presync_last_log_line}" ]; then
-      headers_presync_height=$(echo "${headers_presync_last_log_line}" | cut -d, -f2 | cut -d: -f2 | cut -d'(' -f1 | cut -d' ' -f2)
-      headers_presync_progress_percent=$(echo "${headers_presync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)
-      printf 'Headers presynced:          %d\n' "${headers_presync_height}"
-      printf 'Headers presync progress:   %.1f %%\n' "${headers_presync_progress_percent}"
+      headers_presync_progress_percent="$(echo "${headers_presync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)"
     else
-      printf 'Headers presynced:          %d\n' '0'
-      printf 'Headers presync progress:   %.1f %%\n' '0.0'
+      headers_presync_progress_percent='0.0'
     fi
+    printf 'Headers presync progress:   %.1f %%\n' "${headers_presync_progress_percent}"
   elif [ "${blocks}" -eq 0 ]; then
-    log_info 'Syncing the block headers (second pass).'
-    printf 'Headers synced:             %d\n' "${headers}"
+    log_info 'Re-syncing the headers.'
     headers_sync_last_log_line="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
     if [ -n "${headers_sync_last_log_line}" ]; then
       headers_sync_progress_percent="$(echo "${headers_sync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)"
-      printf 'Headers sync progress:      %.1f %%\n' "${headers_sync_progress_percent}"
     else
-      printf 'Headers sync progress:      %.1f %%\n' '0.0'
+      headers_sync_progress_percent='0.0'
     fi
+    printf 'Headers sync progress:      %.1f %%\n' "${headers_sync_progress_percent}"
   else
     log_info 'Syncing the blockchain. Please be patient.'
     printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
@@ -2064,8 +2064,6 @@ while [ "${ibd_status}" = 'true' ]; do
     exit 0
   fi
 
-  printf '%s\n\n' 'The chain sync can take several days or even weeks.'
-  is_running_in_container || printf '%s\n' "Close this Terminal window by clicking on the 'X'."
   printf '%s' "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
   sleep "${SLEEP_TIME_SECONDS}"
 
