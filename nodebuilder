@@ -1646,7 +1646,7 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='2442-feat---bump-opensuse-to-160'
+readonly NODEBUILDER_DEPENDENCIES_TAG='master'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
@@ -1782,7 +1782,6 @@ readonly TARGET_BITCOIN_VERSION_PADDED
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
-  is_running_in_container ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ] ||
