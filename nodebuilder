@@ -1019,14 +1019,12 @@ install_build_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  sudo zypper --non-interactive --gpg-auto-import-keys addrepo \
-    -f https://download.opensuse.org/repositories/KDE:/Qt6/openSUSE_Leap_15.6/ KDE:Qt6 \
-    > /dev/null
-  sudo zypper --non-interactive --gpg-auto-import-keys refresh > /dev/null
-  sudo zypper search '*capnp*'
+  sudo zypper --gpg-auto-import-keys --non-interactive --quiet addrepo \
+    -f https://download.opensuse.org/repositories/KDE:/Qt6/openSUSE_Leap_15.6/ KDE:Qt6
+  sudo zypper --gpg-auto-import-keys --non-interactive --quiet refresh
   [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'sles' ] &&
     dependencies="$(echo "${dependencies}" | sed 's/python3[0-9]+/python3/')"
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install > /dev/null
   export CXX='g++-14'
 }
 
