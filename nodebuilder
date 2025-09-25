@@ -1021,8 +1021,15 @@ install_build_dependencies_zypper()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   sudo zypper search '*qtbase*'
   sudo zypper search '*qttools*'
-  sudo zypper search '*libboost_headers*'
-  sudo zypper search '*qrencode*'
+  #sudo zypper search '*libboost_headers*'
+  #sudo zypper search '*qrencode*'
+  echo 'DEBUG ADDING QT6 REPO'
+  sudo zypper ar -f https://download.opensuse.org/repositories/KDE:/Qt6/openSUSE_Leap_15.6/ KDE:Qt6
+  echo 'DEBUG REFRESHING REPOS'
+  sudo zypper refresh
+  echo 'DEBUG SEARCHING AGAIN'
+  sudo zypper search '*qtbase*'
+  sudo zypper search '*qttools*'
   [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'sles' ] &&
     dependencies="$(echo "${dependencies}" | sed 's/python3[0-9]+/python3/')"
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
