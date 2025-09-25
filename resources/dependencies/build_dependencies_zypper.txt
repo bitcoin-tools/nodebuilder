@@ -1,4 +1,4 @@
-cmakr
+cmake
 gcc15-c++
 libboost_headers1_86_0-devel
 libevent-devel
