@@ -4,6 +4,8 @@ libboost_headers1_75_0-devel
 libevent-devel
 python312
 qrencode-devel
+qt6-base
+qt6-tools
 sqlite
 sqlite3
 sqlite3-devel
