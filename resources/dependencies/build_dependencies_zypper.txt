@@ -1,7 +1,7 @@
-capnproto
 cmake
 gcc14-c++
 libboost_headers1_75_0-devel
+libcapnp-devel
 libevent-devel
 python312
 qrencode-devel
@@ -11,3 +11,4 @@ sqlite
 sqlite3
 sqlite3-devel
 zeromq-devel
+
