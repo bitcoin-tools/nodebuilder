@@ -9,10 +9,6 @@ libzmq4
 net/py-pyzmq
 pkgconf
 python3
-qt6-buildtools
-qt6-gui
-qt6-linguisttools
-qt6-qmake
-qt6-testlib
-qt6-widgets
+qt6-base
+qt6-tools
 sqlite3
