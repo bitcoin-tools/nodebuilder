@@ -28,7 +28,7 @@ get_operating_system()
 handle_exit()
 {
   kill_tail_process
-  [ -f nodebuilder ] && rm nodebuilder
+  [ "${DOWNLOADED_NODEBUILDER:-false}" = 'true' ] && [ -f nodebuilder ] && rm nodebuilder
   [ -f "${STDOUT_TEST_FILENAME}" ] && rm "${STDOUT_TEST_FILENAME}"
   [ -f "${STDERR_TEST_FILENAME}" ] && rm "${STDERR_TEST_FILENAME}"
 }
@@ -186,7 +186,12 @@ case "${TARGET_KERNEL}" in
 esac
 bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 
-[ -f nodebuilder ] || wget --no-verbose "${NODEBUILDER_BINARY_URL}"
+DOWNLOADED_NODEBUILDER='false'
+[ -f nodebuilder ] || {
+  DOWNLOADED_NODEBUILDER='true'
+  wget --no-verbose "${NODEBUILDER_BINARY_URL}"
+}
+readonly DOWNLOADED_NODEBUILDER
 [ -x nodebuilder ] || chmod u+x nodebuilder
 
 nodebuilder_args=''
@@ -209,11 +214,6 @@ else
   readonly RUN_NODEBUILDER_COMMAND="./nodebuilder"
 fi
 
-# NetBSD has irregular behavior where set -x is applied to child
-#   processes too. This behavior seems to be non-POSIX, but to work
-#   around the issue, disable set -x during nodebuilder execution.
-[ "${TARGET_OPERATING_SYSTEM}" = 'NetBSD' ] && set +x
-
 # Execute the script with optional command line arguments
 printf 'Executing command: %s\n' "${RUN_NODEBUILDER_COMMAND}"
 if ! ${RUN_NODEBUILDER_COMMAND} \
@@ -222,10 +222,8 @@ if ! ${RUN_NODEBUILDER_COMMAND} \
   throw_error "Failed to execute nodebuilder command."
 fi
 
-[ "${TARGET_OPERATING_SYSTEM}" = 'NetBSD' ] && set -x
-
 # After the script runs successfully
-rm nodebuilder
+[ "${DOWNLOADED_NODEBUILDER:-false}" = 'true' ] && rm nodebuilder
 kill_tail_process
 
 # Stop Bitcoin Core
@@ -270,7 +268,7 @@ for message in \
   'INFO: Starting Bitcoin Core.$' \
   'INFO: Checking the RPC status.$' \
   'INFO: This info will refresh in 10 seconds.' \
-  'INFO: Syncing the block headers \((first|second) pass\).$' \
+  'INFO: (Pre|Re)-syncing the headers.$' \
   'INFO: Syncing the blockchain. Please be patient.$' \
   'Sync progress:              [0-9]+\.[0-9]{3} %$' \
   'Blocks remaining:           [0-9]*$' \

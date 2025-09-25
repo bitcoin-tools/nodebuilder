@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Renovate
-        uses: renovatebot/github-action@v43.0.10
+        uses: renovatebot/github-action@v43.0.12
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
@@ -213,7 +213,7 @@ jobs:
       fail-fast: false
       max-parallel: 5
       matrix:
-        os: [ubuntu-24.04, macos-15, ubuntu-22.04, macos-13, macos-14]
+        os: [ubuntu-24.04, macos-15, macos-13, macos-14]
         job-purpose: [package, source]
         exclude:
           - { job-purpose: source, os: macos-13 }
@@ -222,18 +222,6 @@ jobs:
             additional-args: ''
           - job-purpose: source
             additional-args: '--compile'
-          - os: ubuntu-22.04
-            os-friendly-name: Ubuntu 22
-            check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
-            remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            cache-path: |
-              /var/cache/apt/archives/*.deb
-              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
-              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
-              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
-              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
-              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
-            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: ubuntu-24.04
             os-friendly-name: Ubuntu 24
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
@@ -259,16 +247,6 @@ jobs:
           ${{ matrix.check-environment-command }}
           df -h
           date -u
-      - name: Change owner of apt archives
-        if: contains(matrix.os, 'ubuntu')
-        run: sudo chown -R "$(whoami)" /var/cache/apt/archives
-      - name: Cache system archives
-        if: matrix.cache-path != null
-        uses: actions/cache@v4
-        with:
-          path: ${{ matrix.cache-path }}
-          key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
-          restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
         if: matrix.remove-firefox-command != null
         run: ${{ matrix.remove-firefox-command }}
@@ -328,8 +306,15 @@ jobs:
             date -u
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with non-zero status" >&2 && exit 1
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+            if [ "$?" -eq 0 ]; then
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+            else
+              echo "test_nodebuilder exited with non-zero status" >&2
+              echo "Running nodebuilder with xtrace enabled" >&2
+              sh -x ./nodebuilder
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -364,9 +349,16 @@ jobs:
             df -h
             date -u
           run: |
-            sh -x ./nodebuilder
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
+            sh -c ./nodebuilder
+            if [ "$?" -eq 0 ]; then
+              [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
+            else
+              echo "nodebuilder exited with non-zero status" >&2
+              echo "Re-running nodebuilder with xtrace enabled" >&2
+              sh -x ./nodebuilder
+              [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -403,9 +395,15 @@ jobs:
             date -u
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
-            find / -name debug.log 2> /dev/null | grep bitcoin || true
+            if [ "$?" -eq 0 ]; then
+              [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
+            else
+              echo "test_nodebuilder exited with non-zero status" >&2
+              echo "Running nodebuilder with xtrace enabled" >&2
+              sh -x ./nodebuilder
+              [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -438,7 +436,7 @@ jobs:
           - { container: Fedora, dockerfile: Dockerfile_fedora }
           - { container: Kali, dockerfile: Dockerfile_kali }
           - { container: Manjaro, dockerfile: Dockerfile_manjarolinux }
-          - { container: openSUSE, dockerfile: Dockerfile_opensuse-leap }
+          - { container: openSUSE, dockerfile: Dockerfile_opensuse }
           - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
           - { container: Red Hat Enterprise, dockerfile: Dockerfile_redhat-ubi9 }
           - { container: Rocky Linux, dockerfile: Dockerfile_rockylinux }
