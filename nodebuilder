@@ -1006,7 +1006,7 @@ install_build_dependencies_zypper()
   sudo zypper search "python*"
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
-  export CXX='g++-14'
+  export CXX='g++-15'
 }
 
 install_runtime_dependencies()
