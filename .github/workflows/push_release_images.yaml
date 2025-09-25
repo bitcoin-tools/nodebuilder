@@ -23,7 +23,7 @@ jobs:
           - fedora
           - kali
           - manjarolinux
-          - opensuse-leap
+          - opensuse
           - sles
           # TODO: fix issue 2316
           # - amazonlinux
