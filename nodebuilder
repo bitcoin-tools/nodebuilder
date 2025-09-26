@@ -928,7 +928,7 @@ install_build_dependencies_dnf()
       ;;
     *)
       dnf list installed epel-release > /dev/null 2>&1 ||
-        sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+        sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm" > /dev/null 2>&1
       ;;
   esac
 
