@@ -100,7 +100,7 @@ compile_bitcoin_from_source()
   esac
 
   log_info 'Compiling source code. Please wait.'
-  cmake --build build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
+  cmake --build build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" # > /dev/null 2>&1
 
   log_info 'Running compile checks. Please wait.'
   ctest --test-dir build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
