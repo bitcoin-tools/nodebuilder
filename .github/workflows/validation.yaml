@@ -430,6 +430,7 @@ jobs:
         include:
           - { container: openSUSE, dockerfile: Dockerfile_opensuse }
           - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
+          - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Gentoo, dockerfile: Dockerfile_gentoo }
           - { container: Alpine, dockerfile: Dockerfile_alpine }
           - { container: Amazon Linux, dockerfile: Dockerfile_amazonlinux }
@@ -440,7 +441,6 @@ jobs:
           - { container: Manjaro, dockerfile: Dockerfile_manjarolinux }
           - { container: Red Hat Enterprise, dockerfile: Dockerfile_redhat-ubi9 }
           - { container: Rocky Linux, dockerfile: Dockerfile_rockylinux }
-          - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Ubuntu, dockerfile: Dockerfile }
     steps:
       - uses: actions/checkout@v5
