@@ -84,8 +84,7 @@ compile_bitcoin_from_source()
     *)
       cmake -B build \
         -DBUILD_GUI=ON \
-        -DWITH_ZMQ=ON \
-        > /dev/null 2>&1
+        -DWITH_ZMQ=ON
       ;;
   esac
 
@@ -900,7 +899,7 @@ install_build_dependencies_dnf()
       ;;
     rhel)
       sudo subscription-manager identity > /dev/null 2>&1 ||
-        throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
+        throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe' and re-run nodebuilder."
       sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms" ||
         throw_error "Failed to enable EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
       ;;
@@ -1782,6 +1781,7 @@ readonly TARGET_BITCOIN_VERSION_PADDED
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
+  is_running_in_container ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ] ||
