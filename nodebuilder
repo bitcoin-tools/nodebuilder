@@ -926,7 +926,7 @@ install_build_dependencies_dnf()
         sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
         #sudo dnf config-manager --set-enabled epel
         sudo /usr/bin/crb enable
-        sudo dnf refresh
+        sudo dnf update
       }
       ;;
   esac
