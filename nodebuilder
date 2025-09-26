@@ -1437,7 +1437,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 2.0.0'
+  printf '%s\n' 'nodebuilder 2.1.0'
   printf '%s\n' 'Copyright (C) 2025 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT-0'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
