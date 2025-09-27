@@ -68,7 +68,6 @@ compile_bitcoin_from_source()
   cd "${COMPILE_DIRECTORY}"/
 
   log_info 'Configuring the build environment.'
-  echo "DEBUG TARGET_OPERATING_SYSTEM=${TARGET_OPERATING_SYSTEM}"
   case "${TARGET_OPERATING_SYSTEM}" in
     NetBSD)
       cmake -B build \
