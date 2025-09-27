@@ -305,7 +305,7 @@ jobs:
             tput colors
             date -u
           run: |
-            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            sh -c ./nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
               [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
             else
