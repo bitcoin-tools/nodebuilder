@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 # Debian is the foundation of countless other distributions, including Ubuntu and Linux Mint.
 # This Dockerfile is ideal for users who want a stable, secure, and lightweight environment.
-FROM kalilinux/kali-last-release@sha256:99ce6c34374cf5a3ead73dd63b0ced9629f7e31a63f353bc429e695a2fdb2ae4
+FROM kalilinux/kali-last-release@sha256:d755e0b2e74924d2c1ef76a05e9aaae72eaa3a375f584b8b8dbb688e4a0db392
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v2.0.0
+ARG NODEBUILDER_VERSION=v2.1.0
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder
