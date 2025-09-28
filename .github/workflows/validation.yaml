@@ -196,7 +196,7 @@ jobs:
             exit 1
           fi
 
-  run-nodebuilder-baremetal:
+  test-nodebuilder-baremetal:
     name: Test ${{ matrix.job-purpose }} on ${{ matrix.os-friendly-name }}
     needs: [changes, shell-lint, yaml-lint]
     if: >-
@@ -275,8 +275,8 @@ jobs:
         if: steps.test-nodebuilder.outcome == 'failure'
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
-  run-nodebuilder-freebsd:
-    name: Test source on FreeBSD
+  run-nodebuilder-bsd-vm:
+    name: Test source on ${{ matrix.friendly-name }} [${{ matrix-arch }}]
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
@@ -288,29 +288,54 @@ jobs:
         needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        os: [freebsd, netbsd, openbsd]
+        arch: [x86_64, arm64]
+        include:
+          - os: freebsd
+            friendly-name: FreeBSD
+            test-script: './test/test-nodebuilder'
+          - os: netbsd
+            test-script: './nodebuilder'
+          - os: openbsd
+            test-script: './test/test-nodebuilder'
     steps:
       - uses: actions/checkout@v5
       - name: Test the console output
-        uses: vmactions/freebsd-vm@v1
+        uses: vmactions/${{ matrix.os }}-vm@v1
         timeout-minutes: 180
         with:
+          arch: ${{ matrix.arch }}
           prepare: |
             echo "${TERM:-TERM is not found}"
-            uname -a
-            cat /etc/os-release
-            nproc
-            sysctl -a | grep ' memory' | head -2
-            df -h
-            commmand -v tput
-            tput colors
             date -u
+            uname -a
+            [ -f /etc/os-release ] && cat /etc/os-release
+            if [ '${{ matrix.os }}' = 'openbsd' ]; then
+              sysctl -n hw.ncpu
+              sysctl -n hw.physmem64
+              swapctl -l
+            else
+              nproc
+              sysctl -a | grep ' memory' | head -2
+            fi
+            df -h
+            command -v tput > /dev/null 2>&1 && tput colors
           run: |
-            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            if [ "${{ matrix.os }}" = 'netbsd' ]; then
+              sh -c ./nodebuilder
+            else
+              sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            fi
+            
             if [ "$?" -eq 0 ]; then
               [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
             else
-              echo "test_nodebuilder exited with non-zero status" >&2
-              echo "Running nodebuilder with xtrace enabled" >&2
+              echo "${{ matrix.os }} test failed with non-zero exit status." >&2
+              echo "Running nodebuilder with xtrace enabled"
               sh -x ./nodebuilder
               [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
               exit 1
@@ -318,96 +343,7 @@ jobs:
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: freebsd-source-bitcoin-debug.log
-          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
-
-  run-nodebuilder-netbsd:
-    name: Test source on NetBSD
-    needs: [changes, shell-lint, yaml-lint]
-    if: >-
-      ${{
-        github.event.action == 'prerelease' ||
-        github.event.action == 'published' ||
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true' ||
-        needs.changes.outputs.test == 'true'
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Test the console output
-        uses: vmactions/netbsd-vm@v1
-        timeout-minutes: 180
-        with:
-          prepare: |
-            echo "${TERM:-TERM is not found}"
-            uname -a
-            sysctl -n hw.ncpu
-            sysctl -n hw.physmem64
-            swapctl -l
-            df -h
-            date -u
-          run: |
-            sh -c ./nodebuilder
-            if [ "$?" -eq 0 ]; then
-              [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
-            else
-              echo "nodebuilder exited with non-zero status" >&2
-              echo "Re-running nodebuilder with xtrace enabled" >&2
-              sh -x ./nodebuilder
-              [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
-              exit 1
-            fi
-      - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: netbsd-source-bitcoin-debug.log
-          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
-
-  run-nodebuilder-openbsd:
-    name: Test source on OpenBSD
-    needs: [changes, shell-lint, yaml-lint]
-    if: >-
-      ${{
-        github.event.action == 'prerelease' ||
-        github.event.action == 'published' ||
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true' ||
-        needs.changes.outputs.test == 'true'
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Test the console output
-        uses: vmactions/openbsd-vm@v1
-        timeout-minutes: 180
-        with:
-          prepare: |
-            echo "${TERM:-TERM is not found}"
-            uname -a
-            sysctl hw.ncpu
-            sysctl -a | grep 'hw.physmem\|hw.usermem'
-            df -h
-            commmand -v tput
-            tput colors
-            date -u
-          run: |
-            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            if [ "$?" -eq 0 ]; then
-              [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
-            else
-              echo "test_nodebuilder exited with non-zero status" >&2
-              echo "Running nodebuilder with xtrace enabled" >&2
-              sh -x ./nodebuilder
-              [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
-              exit 1
-            fi
-      - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: openbsd-source-bitcoin-debug.log
+          name: ${{ matrix.os }}-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
 
   run-nodebuilder-docker:
