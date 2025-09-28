@@ -73,7 +73,8 @@ compile_bitcoin_from_source()
       cmake -B build \
         -DWITH_ZMQ=ON \
         -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
-        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++"
+        -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++" \
+        > /dev/null 2>&1
       ;;
     OpenBSD)
       cmake -B build \
