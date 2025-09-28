@@ -293,7 +293,7 @@ jobs:
       max-parallel: 3
       matrix:
         os: [freebsd, netbsd, openbsd]
-        arch: [x86_64, arm64]
+        vm-arch: [x86_64, arm64]
         include:
           - os: freebsd
             friendly-name: FreeBSD
@@ -307,7 +307,7 @@ jobs:
         uses: vmactions/${{ matrix.os }}-vm@v1
         timeout-minutes: 180
         with:
-          arch: ${{ matrix.arch }}
+          arch: ${{ matrix.vm-arch }}
           prepare: |
             echo "${TERM:-TERM is not found}"
             date -u
