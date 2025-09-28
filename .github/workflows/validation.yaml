@@ -297,11 +297,10 @@ jobs:
         include:
           - os: freebsd
             friendly-name: FreeBSD
-            test-script: './test/test-nodebuilder'
           - os: netbsd
-            test-script: './nodebuilder'
+            friendly-name: NetBSD
           - os: openbsd
-            test-script: './test/test-nodebuilder'
+            friendly-name: OpenBSD
     steps:
       - uses: actions/checkout@v5
       - name: Test the console output
