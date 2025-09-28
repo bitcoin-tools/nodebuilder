@@ -977,7 +977,7 @@ install_build_dependencies_netbsd()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   sudo pkgin update
   echo 'DEBUG SEARCHING FOR BOOST'
-  sudo pkggin search boost.*
+  sudo pkgin search boost.*
   echo 'DEBUG INSTALLING DEPS'
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkgin -y install
   # TODO: Remove gcc-12 installation on next line when NetBSD updates the default version of gcc to support C++ 20 features. Bitcoin Core requires gcc with support for C++ 20 features.
