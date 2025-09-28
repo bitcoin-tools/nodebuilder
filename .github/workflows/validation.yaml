@@ -296,15 +296,18 @@ jobs:
         vm-arch: [x86_64, arm64]
         include:
           - os: freebsd
+            vm-action: vmactions/freebsd-vm@v1
             friendly-name: FreeBSD
           - os: netbsd
+            vm-action: vmactions/netbsd-vm@v1
             friendly-name: NetBSD
           - os: openbsd
+            vm-action: vmactions/openbsd-vm@v1
             friendly-name: OpenBSD
     steps:
       - uses: actions/checkout@v5
       - name: Test the console output
-        uses: vmactions/${{ matrix.os }}-vm@v1
+        uses: ${{ matrix.vm-action }}
         timeout-minutes: 180
         with:
           arch: ${{ matrix.vm-arch }}
