@@ -1659,8 +1659,6 @@ else
 fi
 readonly TEMP_DIRECTORY
 
-false
-
 if [ -z "${compile_num_jobs}" ]; then
   case "${TARGET_KERNEL}" in
     Linux | FreeBSD)
