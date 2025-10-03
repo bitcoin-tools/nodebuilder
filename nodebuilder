@@ -1389,7 +1389,7 @@ is_valid_bitcoin_version()
 
 log_error()
 {
-  printf "[%s] ERROR: ${CONSOLE_COLOR_RED:-}%s" "$(get_log_timestamp)" "$*" \
+  printf "[%s] ERROR: ${CONSOLE_COLOR_RED:-}%s" "'$(get_log_timestamp)'" "$*" \
     >&2
   reset_console_color
   printf '\n' >&2
@@ -1398,14 +1398,14 @@ log_error()
 log_info()
 {
   if [ "${quiet_output}" = 'false' ]; then
-    printf '[%s]  INFO: %s\n' "$(get_log_timestamp)" "$*"
+    printf '[%s]  INFO: %s\n' "'$(get_log_timestamp)'" "$*"
   fi
 }
 
 log_success()
 {
   if [ "${quiet_output}" = 'false' ]; then
-    printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "$(get_log_timestamp)" "$*"
+    printf "[%s]  DONE: ${CONSOLE_COLOR_GREEN:-}%s" "'$(get_log_timestamp)'" "$*"
     reset_console_color
     printf '\n'
   fi
@@ -1413,7 +1413,7 @@ log_success()
 
 log_warning()
 {
-  printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW:-}%s" "$(get_log_timestamp)" "$*"
+  printf "[%s]  WARN: ${CONSOLE_COLOR_YELLOW:-}%s" "'$(get_log_timestamp)'" "$*"
   reset_console_color
   printf '\n'
 }
@@ -1643,6 +1643,8 @@ TARGET_OPERATING_SYSTEM="$(get_operating_system)"
 readonly TARGET_OPERATING_SYSTEM
 TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)"
 readonly TARGET_OPERATING_SYSTEM_RELEASE
+
+false
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
