@@ -784,7 +784,7 @@ get_operating_system()
 # shellcheck disable=SC2317
 handle_exit()
 {
-  [ -n "${TEMP_DIRECTORY:-}" ] && 
+  [ -n "${TEMP_DIRECTORY:-}" ] &&
     [ -d "${TEMP_DIRECTORY}" &&
     rm -rf -- "${TEMP_DIRECTORY:?}"/
 }
@@ -1659,6 +1659,8 @@ else
   TEMP_DIRECTORY="$(mktemp -d)"
 fi
 readonly TEMP_DIRECTORY
+
+false
 
 if [ -z "${compile_num_jobs}" ]; then
   case "${TARGET_KERNEL}" in
