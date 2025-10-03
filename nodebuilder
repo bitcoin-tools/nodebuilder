@@ -784,7 +784,9 @@ get_operating_system()
 # shellcheck disable=SC2317
 handle_exit()
 {
-  [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
+  if [ -n "${TEMP_DIRECTORY:-}" ] && [ -d "${TEMP_DIRECTORY}" ]; then
+    rm -rf -- "${TEMP_DIRECTORY:?}"/
+  fi
 }
 
 # shellcheck disable=SC2317
@@ -1628,7 +1630,7 @@ done
 
 [ "${unit_tests}" = 'true' ] && run_unit_tests
 
-trap 'if [ $? -eq 0 ]; then handle_exit; else throw_error "Unhandled error at line ${LINENO:-}."; fi' EXIT
+trap 'if [ $? -eq 0 ]; then handle_exit; else throw_error "Unhandled error during nodebuilder execution."; fi' EXIT
 trap handle_sigint INT
 
 readonly BYTES_TO_KIB=1024
