@@ -785,7 +785,7 @@ get_operating_system()
 handle_exit()
 {
   [ -n "${TEMP_DIRECTORY:-}" ] &&
-    [ -d "${TEMP_DIRECTORY}" &&
+    [ -d "${TEMP_DIRECTORY}" ] &&
     rm -rf -- "${TEMP_DIRECTORY:?}"/
 }
 
