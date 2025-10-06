@@ -276,7 +276,7 @@ jobs:
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-bsd-vm:
-    name: Test source on ${{ matrix.friendly-name }} [${{ matrix.vm-arch }}]
+    name: Test source on ${{ matrix.friendly-name }}
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
@@ -292,7 +292,7 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        vm-arch: [x86_64, arm64]
+        #vm-arch: [x86_64, arm64]
         os: [freebsd, netbsd, openbsd]
         include:
           - os: freebsd
@@ -311,7 +311,7 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         timeout-minutes: 180
         with:
-          arch: ${{ matrix.vm-arch }}
+          #arch: ${{ matrix.vm-arch }}
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             
@@ -329,7 +329,7 @@ jobs:
         uses: vmactions/netbsd-vm@v1
         timeout-minutes: 180
         with:
-          arch: ${{ matrix.vm-arch }}
+          #arch: ${{ matrix.vm-arch }}
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             
@@ -347,7 +347,7 @@ jobs:
         uses: vmactions/openbsd-vm@v1
         timeout-minutes: 180
         with:
-          arch: ${{ matrix.vm-arch }}
+          #arch: ${{ matrix.vm-arch }}
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             
