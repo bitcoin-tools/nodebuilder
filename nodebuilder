@@ -1930,6 +1930,7 @@ case "${TARGET_KERNEL}" in
 esac
 
 log_info 'Starting Bitcoin Core.'
+# shellcheck disable=SC3045
 echo "DEBUG ulimit -n is $(ulimit -n)"
 if is_running_in_ci ||
   is_running_in_container ||
