@@ -1020,7 +1020,7 @@ install_build_dependencies_zypper()
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'sles' ] &&
-    dependencies="$(echo "${dependencies}" | sed 's/python3[0-9]+/python3/')"
+    throw_error 'Building on SUSE Enterprise is not supported' #dependencies="$(echo "${dependencies}" | sed 's/python3[0-9]+/python3/')"
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install > /dev/null
   export CXX='g++-15'
 }
