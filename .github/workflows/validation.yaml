@@ -276,7 +276,7 @@ jobs:
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-bsd-vm:
-    name: Test source on ${{ matrix.friendly-name }} [${{ matrix.arch }}]
+    name: Test source on ${{ matrix.friendly-name }} [${{ matrix.vm-arch }}]
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
