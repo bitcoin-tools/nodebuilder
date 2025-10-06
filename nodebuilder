@@ -934,9 +934,8 @@ install_build_dependencies_dnf()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
 
   # TODO: install capnp on Oracle Linux
-  if [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'ol' ]; then
+  [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'ol' ] &&
     dependencies="$(echo "${dependencies}" | sed '/capnp/d')"
-  fi
 
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes > /dev/null
 }
