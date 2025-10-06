@@ -310,50 +310,56 @@ jobs:
         if: ${{ matrix.os == 'freebsd' }}
         uses: vmactions/freebsd-vm@v1
         timeout-minutes: 180
-        run: |
-          sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-          
-          if [ "$?" -eq 0 ]; then
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
-          else
-            echo "${{ matrix.os }} test failed with non-zero exit status." >&2
-            echo "Running nodebuilder with xtrace enabled"
-            sh -x ./nodebuilder
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
-            exit 1
-          fi
+        with:
+          arch: ${{ matrix.vm-arch }}
+          run: |
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            
+            if [ "$?" -eq 0 ]; then
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+            else
+              echo "${{ matrix.os }} test failed with non-zero exit status." >&2
+              echo "Running nodebuilder with xtrace enabled"
+              sh -x ./nodebuilder
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Test the NetBSD console output
         if: ${{ matrix.os == 'netbsd' }}
         uses: vmactions/netbsd-vm@v1
         timeout-minutes: 180
-        run: |
-          sh -c ./nodebuilder
-          
-          if [ "$?" -eq 0 ]; then
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
-          else
-            echo "${{ matrix.os }} test failed with non-zero exit status." >&2
-            echo "Running nodebuilder with xtrace enabled"
-            sh -x ./nodebuilder
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
-            exit 1
-          fi
+        with:
+          arch: ${{ matrix.vm-arch }}
+          run: |
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            
+            if [ "$?" -eq 0 ]; then
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+            else
+              echo "${{ matrix.os }} test failed with non-zero exit status." >&2
+              echo "Running nodebuilder with xtrace enabled"
+              sh -x ./nodebuilder
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Test the OpenBSD console output
         if: ${{ matrix.os == 'openbsd' }}
         uses: vmactions/openbsd-vm@v1
         timeout-minutes: 180
-        run: |
-          sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-          
-          if [ "$?" -eq 0 ]; then
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
-          else
-            echo "${{ matrix.os }} test failed with non-zero exit status." >&2
-            echo "Running nodebuilder with xtrace enabled"
-            sh -x ./nodebuilder
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
-            exit 1
-          fi
+        with:
+          arch: ${{ matrix.vm-arch }}
+          run: |
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            
+            if [ "$?" -eq 0 ]; then
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+            else
+              echo "${{ matrix.os }} test failed with non-zero exit status." >&2
+              echo "Running nodebuilder with xtrace enabled"
+              sh -x ./nodebuilder
+              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+              exit 1
+            fi
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
