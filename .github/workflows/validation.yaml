@@ -292,8 +292,8 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        os: [freebsd, netbsd, openbsd]
         vm-arch: [x86_64, arm64]
+        os: [freebsd, netbsd, openbsd]
         include:
           - os: freebsd
             vm-action: vmactions/freebsd-vm@v1
