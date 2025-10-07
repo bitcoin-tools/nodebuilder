@@ -1941,7 +1941,7 @@ if is_running_in_ci ||
   bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null
 elif [ "${TARGET_KERNEL}" = 'Darwin' ]; then
   nohup bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
-elif is_running_in_ci && [ "TARGET_KERNEL}" = 'NetBSD' ]; then
+elif is_running_in_ci && [ "${TARGET_KERNEL}" = 'NetBSD' ]; then
   setsid bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" -maxconnections=96 > /dev/null 2>&1 < /dev/null &
 else
   setsid bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
