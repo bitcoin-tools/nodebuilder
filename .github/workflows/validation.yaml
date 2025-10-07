@@ -306,6 +306,7 @@ jobs:
         timeout-minutes: 180
         with:
           arch: ${{ matrix.vm-arch }}
+          envs: 'CI'
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
@@ -323,6 +324,7 @@ jobs:
         timeout-minutes: 180
         with:
           arch: ${{ matrix.vm-arch }}
+          envs: 'CI'
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
@@ -340,6 +342,7 @@ jobs:
         timeout-minutes: 180
         with:
           arch: ${{ matrix.vm-arch }}
+          envs: 'CI'
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
