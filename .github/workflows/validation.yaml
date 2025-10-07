@@ -357,7 +357,7 @@ jobs:
       - name: Save Bitcoin Core log as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-source-bitcoin-debug.log
+          name: ${{ matrix.vm-os }}-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
 
   run-nodebuilder-docker:
