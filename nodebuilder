@@ -1932,8 +1932,13 @@ esac
 log_info 'Starting Bitcoin Core.'
 # shellcheck disable=SC3045
 echo "DEBUG ulimit -n is $(ulimit -n)"
+echo "DEBUG CI is ${CI:-ciisemptyorunset}"
 echo "DEBUG TARGET_KERNEL is ${TARGET_KERNEL}"
-echo "DEBUG is_running_in_ci is $(is_running_in_ci)"
+if is_running_in_ci; then
+  echo "IS RUNNING IN A CI"
+else
+  echo "IS NOT RUNNING IN A CI"
+fi
 if is_running_in_ci ||
   is_running_in_container ||
   [ -z "${DISPLAY:-}" ] ||
