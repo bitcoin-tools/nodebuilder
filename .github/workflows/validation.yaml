@@ -276,7 +276,7 @@ jobs:
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
   run-nodebuilder-bsd-vm:
-    name: Test source on ${{ matrix.vm-os-friendly-name }}
+    name: Test source on ${{ matrix.vm-os-friendly-name }} [${{ matrix.vm-arch }}]
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
@@ -310,6 +310,7 @@ jobs:
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
+              echo "DEBUG HOME IS ${HOME}"
               [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
