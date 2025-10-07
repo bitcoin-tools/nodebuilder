@@ -311,6 +311,7 @@ jobs:
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
               echo "DEBUG HOME IS ${HOME}"
+              echo "DEBUG working directory IS $(pwd)"
               [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
