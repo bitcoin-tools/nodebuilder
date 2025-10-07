@@ -292,18 +292,12 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        #vm-arch: [x86_64, arm64]
+        vm-arch: [x86_64]
         os: [freebsd, netbsd, openbsd]
         include:
-          - os: freebsd
-            vm-action: vmactions/freebsd-vm@v1
-            friendly-name: FreeBSD
-          - os: netbsd
-            vm-action: vmactions/netbsd-vm@v1
-            friendly-name: NetBSD
-          - os: openbsd
-            vm-action: vmactions/openbsd-vm@v1
-            friendly-name: OpenBSD
+          - { os: freebsd, os-friendly-name: FreeBSD }
+          - { os: netbsd, os-friendly-name: NetBSD }
+          - { os: openbsd, os-friendly-name: OpenBSD }
     steps:
       - uses: actions/checkout@v5
       - name: Test the FreeBSD console output
@@ -311,10 +305,9 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         timeout-minutes: 180
         with:
-          #arch: ${{ matrix.vm-arch }}
+          arch: ${{ matrix.vm-arch }}
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            
             if [ "$?" -eq 0 ]; then
               [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
             else
@@ -332,7 +325,6 @@ jobs:
           #arch: ${{ matrix.vm-arch }}
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            
             if [ "$?" -eq 0 ]; then
               [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
             else
@@ -350,7 +342,6 @@ jobs:
           #arch: ${{ matrix.vm-arch }}
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            
             if [ "$?" -eq 0 ]; then
               [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
             else
