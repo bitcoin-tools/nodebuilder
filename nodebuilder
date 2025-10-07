@@ -1520,7 +1520,9 @@ CONSOLE_COLOR_RED=''
 CONSOLE_COLOR_GREEN=''
 CONSOLE_COLOR_YELLOW=''
 CONSOLE_COLOR_NORMAL=''
-if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
+if command -v tput > /dev/null 2>&1 &&
+  [ -n "$(tput colors 2> /dev/null)" ] &&
+  [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
   CONSOLE_COLOR_RED="$(tput setaf 1)"
   CONSOLE_COLOR_GREEN="$(tput setaf 2)"
   CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
@@ -1528,7 +1530,7 @@ if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; 
 else
   case "${TERM:-}" in
     '' | xterm* | screen* | tmux* | linux | gnome-terminal | konsole | rxvt* | \
-      putty | mintty | alacritty | st | su | vt220)
+      putty | mintty | alacritty | st | su | vt220 | vt100 | ansi | hyper | iterm2)
       CONSOLE_COLOR_RED='\033[31m'
       CONSOLE_COLOR_GREEN='\033[32m'
       CONSOLE_COLOR_YELLOW='\033[33m'
