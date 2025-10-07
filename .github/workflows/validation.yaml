@@ -346,12 +346,12 @@ jobs:
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
-              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+              [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
               echo "Running nodebuilder with xtrace enabled"
               sh -x ./nodebuilder
-              [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
+              [ -f "/home/bitcoin/.bitcoin/debug.log" ] && cp "/home/bitcoin/.bitcoin/debug.log" .
               exit 1
             fi
       - name: Save Bitcoin Core log as artifact
