@@ -293,7 +293,7 @@ jobs:
       max-parallel: 3
       matrix:
         vm-arch: [x86_64]
-        os: [freebsd, netbsd, openbsd]
+        vm-os: [freebsd, netbsd, openbsd]
         include:
           - { vm-os: freebsd, vm-os-friendly-name: FreeBSD }
           - { vm-os: netbsd, vm-os-friendly-name: NetBSD }
