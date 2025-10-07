@@ -1815,11 +1815,15 @@ readonly LAUNCH_BITCOIN_CORE_COMMAND
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
 # If bitcoin.conf doesn't already exist, use default settings
-[ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
 if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
+  [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
   log_info 'Setting the default node behavior.'
   set_bitcoin_core_option 'datadir' "${BITCOIN_DATA_DIRECTORY}"
-  is_running_in_ci && set_bitcoin_core_option 'debug' 'net'
+  is_running_in_ci &&
+    set_bitcoin_core_option 'debug' 'net'
+  is_running_in_ci &&
+    [ "${TARGET_KERNEL}" = 'NetBSD' ] &&
+    set_bitcoin_core_option 'maxconnections' '96'
   set_bitcoin_core_option 'mempoolfullrbf' '1'
   set_bitcoin_core_option 'server' '1'
 fi
@@ -1930,15 +1934,6 @@ case "${TARGET_KERNEL}" in
 esac
 
 log_info 'Starting Bitcoin Core.'
-# shellcheck disable=SC3045
-echo "DEBUG ulimit -n is $(ulimit -n)"
-echo "DEBUG CI is ${CI:-ciisemptyorunset}"
-echo "DEBUG TARGET_KERNEL is ${TARGET_KERNEL}"
-if is_running_in_ci; then
-  echo "IS RUNNING IN A CI"
-else
-  echo "IS NOT RUNNING IN A CI"
-fi
 if is_running_in_ci ||
   is_running_in_container ||
   [ -z "${DISPLAY:-}" ] ||
@@ -1946,8 +1941,6 @@ if is_running_in_ci ||
   bitcoind --daemonwait --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null
 elif [ "${TARGET_KERNEL}" = 'Darwin' ]; then
   nohup bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
-elif is_running_in_ci && [ "${TARGET_KERNEL}" = 'NetBSD' ]; then
-  setsid bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" -maxconnections=96 > /dev/null 2>&1 < /dev/null &
 else
   setsid bitcoin-qt --datadir="${BITCOIN_DATA_DIRECTORY}" > /dev/null 2>&1 < /dev/null &
 fi
