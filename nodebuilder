@@ -1932,7 +1932,7 @@ esac
 log_info 'Starting Bitcoin Core.'
 # shellcheck disable=SC3045
 echo "DEBUG ulimit -n is $(ulimit -n)"
-echo "DEBUG TARGET_KERNEL is "${TARGET_KERNEL}"
+echo "DEBUG TARGET_KERNEL is ${TARGET_KERNEL}"
 echo "DEBUG is_running_in_ci is $(is_running_in_ci)"
 if is_running_in_ci ||
   is_running_in_container ||
