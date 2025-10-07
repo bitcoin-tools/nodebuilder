@@ -1502,7 +1502,7 @@ CONSOLE_COLOR_GREEN=''
 CONSOLE_COLOR_YELLOW=''
 CONSOLE_COLOR_NORMAL=''
 if command -v tput > /dev/null 2>&1 &&
-  [ -n "$(tput colors 2> /dev/null)"] &&
+  [ -n "$(tput colors 2> /dev/null)" ] &&
   [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
   CONSOLE_COLOR_RED="$(tput setaf 1)"
   CONSOLE_COLOR_GREEN="$(tput setaf 2)"
