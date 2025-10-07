@@ -784,7 +784,7 @@ get_operating_system()
 # shellcheck disable=SC2317
 handle_exit()
 {
-  if [ -n "${TEMP_DIRECTORY:-}" ] && [ -d "${TEMP_DIRECTORY}"/ ]; then
+  if [ -n "${TEMP_DIRECTORY:-}" ] && [ -d "${TEMP_DIRECTORY}" ]; then
     rm -rf -- "${TEMP_DIRECTORY:?}"/
   fi
 }
