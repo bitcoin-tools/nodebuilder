@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Amazon Linux is a Linux server operating system from AWS, optimized for EC2.
 # This Dockerfile is ideal for applications that are deployed on AWS and require seamless integration.
-FROM amazonlinux:latest@sha256:af4a72d28abd774f6065373f40d820598b9d9021663d985233a1f34dc634448e
+FROM amazonlinux:latest@sha256:eb5359d566df2b34cb58be63c2d0fa1476e7654833d4d3af307b930a8fac6446
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
