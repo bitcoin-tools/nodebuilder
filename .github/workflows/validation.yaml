@@ -288,6 +288,10 @@ jobs:
         needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
+    env:
+      FREEBSD_BITCOIN_LOG_PATH: /home/runner/.bitcoin/debug.log
+      NETBSD_BITCOIN_LOG_PATH: /home/runner/.bitcoin/debug.log
+      OPENBSD_BITCOIN_LOG_PATH: /home/bitcoin/.bitcoin/debug.log
     strategy:
       fail-fast: false
       max-parallel: 3
@@ -303,17 +307,16 @@ jobs:
       - name: Test the FreeBSD console output
         if: ${{ matrix.vm-os == 'freebsd' }}
         uses: vmactions/freebsd-vm@v1
-        env:
-          FREEBSD_BITCOIN_LOG_PATH: /home/runner/.bitcoin/debug.log
         timeout-minutes: 180
         with:
           arch: ${{ matrix.vm-arch }}
           envs: 'CI FREEBSD_BITCOIN_LOG_PATH'
+          usesh: true
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
-              echo "DEBUG HOME IS ${HOME}"
-              echo "DEBUG working directory IS $(pwd)"
+              echo "DEBUG HOME is ${HOME}"
+              echo "DEBUG working directory is $(pwd)"
               [ -f "${FREEBSD_BITCOIN_LOG_PATH}" ] && cp "${FREEBSD_BITCOIN_LOG_PATH}" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
@@ -325,8 +328,6 @@ jobs:
       - name: Test the NetBSD console output
         if: ${{ matrix.vm-os == 'netbsd' }}
         uses: vmactions/netbsd-vm@v1
-        env:
-          NETBSD_BITCOIN_LOG_PATH: /home/runner/.bitcoin/debug.log
         timeout-minutes: 180
         with:
           arch: ${{ matrix.vm-arch }}
@@ -334,6 +335,8 @@ jobs:
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
+              echo "DEBUG HOME is ${HOME}"
+              echo "DEBUG working directory is $(pwd)"
               [ -f "${NETBSD_BITCOIN_LOG_PATH}" ] && cp "${NETBSD_BITCOIN_LOG_PATH}" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
@@ -345,8 +348,6 @@ jobs:
       - name: Test the OpenBSD console output
         if: ${{ matrix.vm-os == 'openbsd' }}
         uses: vmactions/openbsd-vm@v1
-        env:
-          OPENBSD_BITCOIN_LOG_PATH: /home/bitcoin/.bitcoin/debug.log
         timeout-minutes: 180
         with:
           arch: ${{ matrix.vm-arch }}
