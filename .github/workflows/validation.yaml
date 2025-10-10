@@ -338,7 +338,6 @@ jobs:
         with:
           arch: ${{ matrix.vm-arch }}
           envs: 'CI NETBSD_BITCOIN_LOG_PATH'
-          usesh: true
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
