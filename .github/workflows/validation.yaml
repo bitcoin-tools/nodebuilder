@@ -317,6 +317,12 @@ jobs:
             if [ "$?" -eq 0 ]; then
               echo "DEBUG HOME is ${HOME}"
               echo "DEBUG working directory is $(pwd)"
+              echo "DEBUG listing /root/.bitcoin/debug.log"
+              ls -l /root/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/runner/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/bitcoin/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
               [ -f "${FREEBSD_BITCOIN_LOG_PATH}" ] && cp "${FREEBSD_BITCOIN_LOG_PATH}" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
@@ -332,11 +338,18 @@ jobs:
         with:
           arch: ${{ matrix.vm-arch }}
           envs: 'CI NETBSD_BITCOIN_LOG_PATH'
+          usesh: true
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
               echo "DEBUG HOME is ${HOME}"
               echo "DEBUG working directory is $(pwd)"
+              echo "DEBUG listing /root/.bitcoin/debug.log"
+              ls -l /root/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/runner/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/bitcoin/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
               [ -f "${NETBSD_BITCOIN_LOG_PATH}" ] && cp "${NETBSD_BITCOIN_LOG_PATH}" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
@@ -352,9 +365,18 @@ jobs:
         with:
           arch: ${{ matrix.vm-arch }}
           envs: 'CI OPENBSD_BITCOIN_LOG_PATH'
+          usesh: true
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
             if [ "$?" -eq 0 ]; then
+              echo "DEBUG HOME is ${HOME}"
+              echo "DEBUG working directory is $(pwd)"
+              echo "DEBUG listing /root/.bitcoin/debug.log"
+              ls -l /root/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/runner/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/bitcoin/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
               [ -f "${OPENBSD_BITCOIN_LOG_PATH}" ] && cp "${OPENBSD_BITCOIN_LOG_PATH}" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
