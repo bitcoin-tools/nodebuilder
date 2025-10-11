@@ -363,3 +363,6 @@ if [ "${TARGET_KERNEL}" = 'Linux' ]; then
 fi
 
 printf '%s\n' 'PASS: All console output tests passed.'
+echo 'DEBUG KILLING TAIL PROCESS AGAIN'
+kill_tail_process
+echo 'END OF SCRIPT'
