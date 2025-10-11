@@ -375,7 +375,7 @@ jobs:
               echo "DEBUG listing /home/runner/.bitcoin/debug.log"
               ls -l /home/runner/.bitcoin/debug.log || true
               echo "DEBUG listing /home/bitcoin/.bitcoin/debug.log"
-              ls -l /home/runner/.bitcoin/debug.log || true
+              ls -l /home/bitcoin/.bitcoin/debug.log || true
               [ -f "${OPENBSD_BITCOIN_LOG_PATH}" ] && cp "${OPENBSD_BITCOIN_LOG_PATH}" .
             else
               echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
