@@ -1010,8 +1010,8 @@ install_build_dependencies_pacman()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pacman -Syu --needed --noconfirm --quiet #> /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-  #grep -v 'skipping' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pacman -Syu --needed --noconfirm --quiet > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
+  grep -v 'skipping' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
 }
 
 install_build_dependencies_zypper()
@@ -1805,7 +1805,6 @@ readonly TARGET_BITCOIN_VERSION_PADDED
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
-  is_running_in_container ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'FreeBSD' ] ||
