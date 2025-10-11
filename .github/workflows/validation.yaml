@@ -290,7 +290,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FREEBSD_BITCOIN_LOG_PATH: /root/.bitcoin/debug.log
-      NETBSD_BITCOIN_LOG_PATH: /home/runner/.bitcoin/debug.log
+      NETBSD_BITCOIN_LOG_PATH: /root/.bitcoin/debug.log
       OPENBSD_BITCOIN_LOG_PATH: /home/bitcoin/.bitcoin/debug.log
     strategy:
       fail-fast: false
