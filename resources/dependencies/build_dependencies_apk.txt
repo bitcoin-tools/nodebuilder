@@ -1,13 +1,14 @@
 boost-dev
 build-base
+capnproto
+capnproto-dev
 cmake
 libevent-dev
 libqrencode-dev
 linux-headers
 pkgconf
 python3
-qt5-qtbase
-qt5-qtbase-x11
-qt5-qttools-dev
+qt6-qtbase
+qt6-qttools-dev
 sqlite-dev
 zeromq-dev

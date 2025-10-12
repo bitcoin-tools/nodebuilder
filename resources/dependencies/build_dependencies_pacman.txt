@@ -1,8 +1,10 @@
 base-devel
 boost
 boost-libs
+capnproto
 cmake
 db
+libevent
 qrencode
-qt5
+qt6
 zeromq
