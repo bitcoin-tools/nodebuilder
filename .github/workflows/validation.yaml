@@ -29,7 +29,7 @@ jobs:
       spelling: ${{ steps.filter.outputs.spelling }}
       test: ${{ steps.filter.outputs.test }}
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - uses: dorny/paths-filter@v3
       id: filter
       with:
@@ -43,7 +43,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Renovate
         uses: renovatebot/github-action@v44.0.3
         with:
@@ -72,7 +72,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Lint with shellcheck and shfmt
         uses: luizm/action-sh-checker@v0.9.0
         env:
@@ -104,7 +104,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Lint workflow files
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
@@ -125,7 +125,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.1.1
         with:
@@ -145,7 +145,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Lint the markdown
         uses: avto-dev/markdown-lint@v1
         with:
@@ -169,7 +169,7 @@ jobs:
     # TODO: make this mandatory again with nodebuilder issue 2343
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Run linkspector on markdown
         uses: umbrelladocs/action-linkspector@v1
         with:
@@ -182,7 +182,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Validate pull request title as a conventional commit
         run: |
           PR_TITLE="$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")"
@@ -240,7 +240,7 @@ jobs:
             check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
             path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Check the current environment
         run: |
           uname -a
@@ -289,7 +289,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Test the console output
         uses: vmactions/freebsd-vm@v1
         timeout-minutes: 180
@@ -335,7 +335,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Test the console output
         uses: vmactions/netbsd-vm@v1
         timeout-minutes: 180
@@ -379,7 +379,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Test the console output
         uses: vmactions/openbsd-vm@v1
         timeout-minutes: 180
@@ -443,7 +443,7 @@ jobs:
           - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Ubuntu, dockerfile: Dockerfile }
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image

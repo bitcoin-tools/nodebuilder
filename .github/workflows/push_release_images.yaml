@@ -33,7 +33,7 @@ jobs:
     steps:
     - name: Checkout with history to get latest tag
       if: ${{ github.event_name != 'release' }}
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
     - name: Find nodebuilder version tag
@@ -46,7 +46,7 @@ jobs:
           echo "NODEBUILDER_VERSION=$(git describe --tags --abbrev=0)" >> "${GITHUB_ENV}"
         fi
     - name: Checkout the latest release tag
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         ref: ${{ env.NODEBUILDER_VERSION }}
     - name: Set up Docker Buildx
@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout the latest release tag
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         ref: ${{ needs.build-and-push.outputs.nodebuilder-version }}
     - name: Set up Docker Buildx
