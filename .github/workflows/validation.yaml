@@ -157,7 +157,7 @@ jobs:
         with:
           config_path: 'resources/config/spellcheck.yaml'
           output_file: 'spellcheck-output.txt'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: '!cancelled()'
         with:
           name: Spellcheck Output
@@ -267,7 +267,7 @@ jobs:
           sh -x "./${CI_NODEBUILDER_SCRIPT}" ${{ matrix.additional-args }}
         timeout-minutes: 120
       - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.os }}-${{ matrix.job-purpose }}-bitcoin-debug.log
           path: ${{ matrix.path-to-bitcoin-log }}
@@ -316,7 +316,7 @@ jobs:
               exit 1
             fi
       - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: freebsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
@@ -360,7 +360,7 @@ jobs:
               exit 1
             fi
       - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: netbsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
@@ -405,7 +405,7 @@ jobs:
               exit 1
             fi
       - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: openbsd-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
