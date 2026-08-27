@@ -995,7 +995,7 @@ install_build_dependencies_openbsd()
   pkg_info -Q git | grep '^git-'
   pkg_info -Q git | grep "^git\-"
   pkg_info -Q git | grep '^git-' | grep -v 'git-[A-Za-z0-9]*-'
-  pkg_info -Q git | grep "^git\-" | grep -v "git\-[A-Za-z0-9]*\-|
+  pkg_info -Q git | grep "^git\-" | grep -v "git\-[A-Za-z0-9]*\-|"
   set +x
   log_info 'DEBUG FINDING GIT STUFF'
   for package in ${dependencies}; do
