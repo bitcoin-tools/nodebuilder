@@ -21,5 +21,8 @@ RUN uname -a \
   && grep Mem /proc/meminfo \
   && date -u
 
+# Update the archlinux-keyring.
+RUN pacman -Sy --noconfirm archlinux-keyring
+
 # Download and execute the script.
 RUN CI=${CI} /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
