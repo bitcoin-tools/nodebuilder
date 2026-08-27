@@ -387,11 +387,10 @@ jobs:
           prepare: |
             echo "${TERM:-TERM is not found}"
             uname -a
-            sysctl hw.ncpu
-            sysctl -a | grep 'hw.physmem\|hw.usermem'
+            sysctl hw.ncpu hw.physmem hw.usermem
             df -h
             command -v tput
-            tput colors
+            TERM=xterm tput colors
             date -u
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
