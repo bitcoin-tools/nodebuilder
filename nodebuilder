@@ -116,7 +116,7 @@ compile_bitcoin_from_source()
 }
 
 # TODO: use make on old releases and cmake on >= 29.0
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 compile_bitcoin_from_source_make()
 {
   log_info 'Ensuring compile dependencies.'
@@ -806,7 +806,7 @@ handle_exit()
   fi
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 handle_sigint()
 {
   log_warning 'Detected Ctrl+C. Exiting.'
