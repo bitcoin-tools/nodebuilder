@@ -989,6 +989,15 @@ install_build_dependencies_openbsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r') ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}" | tr -d '\r')
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+  log_info 'DEBUG FINDING GIT STUFF'
+  set -x
+  pkg_info -Q git
+  pkg_info -Q git | grep '^git-'
+  pkg_info -Q git | grep "^git\-"
+  pkg_info -Q git | grep '^git-' | grep -v 'git-[A-Za-z0-9]*-'
+  pkg_info -Q git | grep "^git\-" | grep -v "git\-[A-Za-z0-9]*\-|
+  set +x
+  log_info 'DEBUG FINDING GIT STUFF'
   for package in ${dependencies}; do
     log_info "DEBUG - installing package ${package}."
     if [ "${package}" = 'sqlite3' ]; then
