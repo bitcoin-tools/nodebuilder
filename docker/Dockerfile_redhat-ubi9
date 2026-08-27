@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 # RHEL UBI is an enterprise-grade Linux distribution with long-term support.
 # This Dockerfile is ideal for enterprise applications requiring strong support and stability.
-FROM redhat/ubi9:latest@sha256:dbc1e98d14a022542e45b5f22e0206d3f86b5bdf237b58ee7170c9ddd1b3a283
+FROM redhat/ubi9:latest@sha256:5ff7f5e56f4826ca8413765e57f8a5bad4bf42b73f958f3d0c2668a0f870316c
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v2.1.0
+ARG NODEBUILDER_VERSION=2536-feat---bump-bitcoin-core-to-311
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder

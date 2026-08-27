@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 # Gentoo is known for its customization, optimization at the expense of image build time.asdf
 # This Dockerfile offers a stable base image but takes extra time to compile all dependencies.
-FROM gentoo/stage3:latest@sha256:de7fd18f0c25916f446326d8797abccad2209a1fd29830719a31e7cabab335fd
+FROM gentoo/stage3:latest@sha256:4e9f9abb123542925353417fb7116ec981989cdfc5b9871f5a40969482e05ec3
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v2.1.0
+ARG NODEBUILDER_VERSION=2536-feat---bump-bitcoin-core-to-311
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder

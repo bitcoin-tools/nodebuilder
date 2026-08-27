@@ -1,4 +1,5 @@
 boost-libs
+capnproto
 cmake
 databases/py-sqlite3
 git
@@ -8,10 +9,6 @@ libzmq4
 net/py-pyzmq
 pkgconf
 python3
-qt5-buildtools
-qt5-gui
-qt5-linguisttools
-qt5-qmake
-qt5-testlib
-qt5-widgets
+qt6-base
+qt6-tools
 sqlite3
