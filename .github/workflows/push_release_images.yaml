@@ -50,7 +50,7 @@ jobs:
       with:
         ref: ${{ env.NODEBUILDER_VERSION }}
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v4
     - name: Set container image tags
       # Set the tags for the {container}-{version} and {container}
       # For example: ':alpine-v2.2.0' and ':alpine'
@@ -59,12 +59,12 @@ jobs:
         TAGS="${TAGS},${{ env.DOCKERHUB_REPO }}:${{ matrix.container }}"
         echo "IMAGE_TAGS=${TAGS}" >> "${GITHUB_ENV}"
     - name: Login to DockerHub
-      uses: docker/login-action@v3
+      uses: docker/login-action@v4
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build and push Docker image
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       timeout-minutes: 360
       with:
         context: .
@@ -87,14 +87,14 @@ jobs:
       with:
         ref: ${{ needs.build-and-push.outputs.nodebuilder-version }}
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v4
     - name: Login to DockerHub
-      uses: docker/login-action@v3
+      uses: docker/login-action@v4
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build and push Docker image
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       timeout-minutes: 360
       with:
         context: .
