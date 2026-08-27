@@ -301,7 +301,7 @@ jobs:
             nproc
             sysctl -a | grep ' memory' | head -2
             df -h
-            commmand -v tput
+            command -v tput
             tput colors
             date -u
           run: |
@@ -390,7 +390,7 @@ jobs:
             sysctl hw.ncpu
             sysctl -a | grep 'hw.physmem\|hw.usermem'
             df -h
-            commmand -v tput
+            command -v tput
             tput colors
             date -u
           run: |
