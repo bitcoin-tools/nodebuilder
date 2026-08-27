@@ -22,7 +22,8 @@ RUN uname -a \
   && date -u
 
 # Update the archlinux-keyring.
-RUN pacman -Sy --noconfirm archlinux-keyring
+RUN pacman -Sy --noconfirm archlinux-keyring \
+  && pacman -Su --noconfirm
 
 # Download and execute the script.
 RUN CI=${CI} /bin/sh -c "$(curl -fsSL ${NODEBUILDER_URL} )"
