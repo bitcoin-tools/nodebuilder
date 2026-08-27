@@ -991,6 +991,7 @@ install_build_dependencies_openbsd()
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
   log_info 'DEBUG FINDING GIT STUFF'
   set -x
+  command -v git
   pkg_info -Q git
   pkg_info -Q git | grep '^git-'
   pkg_info -Q git | grep "^git\-"
