@@ -995,8 +995,11 @@ install_build_dependencies_openbsd()
     if [ "${package}" = 'sqlite3' ]; then
       sudo pkg_add "${package}" > /dev/null
     else
-      log_info "DEBUG - package_latest_version=${package_latest_version}."
+      pkg_info -Q "${package}" || true
+      pkg_info -Q "${package}" | grep "^${package}\-" || true
+      pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" || true
       package_latest_version="$(pkg_info -Q "${package}" | grep "^${package}\-" | grep -v "${package}\-[A-Za-z0-9]*\-" | sort -V | tail -1)"
+      log_info "DEBUG - package_latest_version=${package_latest_version}."
       if [ -z "${package_latest_version}" ]; then
         throw_error "Package '${package}' was not found in pkg_info."
       elif [ "$(echo "${package_latest_version}" | cut -d' ' -f2)" != '(installed)' ]; then
