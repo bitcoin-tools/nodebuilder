@@ -1,6 +1,5 @@
 boost
 cmake
-git
 libevent
 libqrencode
 python
