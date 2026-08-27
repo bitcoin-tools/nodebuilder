@@ -465,7 +465,7 @@ jobs:
               github.event.inputs == null
             )
           )
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         timeout-minutes: 300
         with:
           build-args: |
