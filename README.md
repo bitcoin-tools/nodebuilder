@@ -101,9 +101,8 @@ docker build -f Dockerfile_alpine .
 3. A supported operating system
    - Any system that can run [Docker](./docker/)
    - Linux distributions
-     - [Alpine](https://wiki.alpinelinux.org/wiki/Installation)
-     - [Arch](https://github.com/archlinux/archinstall) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php/Installation_Guides)
-     - [Clear Linux](https://www.clearlinux.org/downloads.html)
+     - [Alpine](https://alpinelinux.org/about/)
+     - [Arch](https://github.com/archlinux/archinstall) or any derivative like [Manjaro](https://wiki.manjaro.org/index.php?title=Installation_Guides/en)
      - [Debian](https://en.wikipedia.org/wiki/Debian) or any derivative like [Kali](https://www.kali.org/get-kali) or [Ubuntu](https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview)
      - [Gentoo](https://www.gentoo.org/get-started)
      - [Fedora](https://fedoraproject.org/workstation/download), [Red Hat](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux), [Amazon Linux](https://docs.aws.amazon.com/linux), [Oracle Linux](https://www.oracle.com/linux), [Rocky Linux](https://rockylinux.org/download), etc.
@@ -188,8 +187,7 @@ Inspiration for this project came from these Open Source projects:
 - [Bitcoin Core](https://github.com/bitcoin/bitcoin/graphs/contributors)
 - [Yeti Wallet](https://github.com/JWWeatherman/yeticold/graphs/contributors)
 - [Bails](https://github.com/BenWestgate/Bails) and [yeti.Bash](https://github.com/BenWestgate/yeti.Bash) by [Ben Westgate](https://github.com/BenWestgate)
-- [install-full-node.sh](https://bitnodes.io/install-full-node.sh) by [Addy Yeow](https://github.com/ayeowch/)
-- [Parmanode](https://github.com/armantheparman/parmanode) by [ArmanTheParman](https://github.com/armantheparman)
+- Scripts by [Addy Yeow](https://github.com/ayeowch/)
 - And from countless online guides, such as [this one](https://bitcoin.org/en/full-node)
 
 ## Contributing
