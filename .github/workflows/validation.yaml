@@ -390,7 +390,7 @@ jobs:
             sysctl hw.ncpu hw.physmem hw.usermem
             df -h
             command -v tput
-            tput colors
+            TERM=xterm tput colors
             date -u
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
