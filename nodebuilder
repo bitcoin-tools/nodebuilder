@@ -1001,7 +1001,6 @@ install_build_dependencies_openbsd()
       fi
     fi
   done
-  set +x
 }
 
 install_build_dependencies_pacman()
