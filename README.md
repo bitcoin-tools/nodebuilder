@@ -5,7 +5,7 @@ Run a secure Bitcoin Core node with ease.
 Copy-paste the following command into Terminal:
 
 ```sh
-sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/2536-feat---bump-bitcoin-core-to-311/nodebuilder)"
+sh -c "$(curl -fsSL https://github.com/bitcoin-tools/nodebuilder/raw/v2.2.0/nodebuilder)"
 ```
 
 [![Supports: Docker](https://img.shields.io/badge/supports-Docker-blue.svg?logo=docker)](https://docs.docker.com)
