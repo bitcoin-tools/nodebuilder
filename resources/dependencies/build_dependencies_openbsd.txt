@@ -1,12 +1,11 @@
-autoconf
-automake
 boost
-gettext-tools
-gmake
+cmake
+git
 libevent
 libqrencode
-libtool
 python
+py3-zmq
+qt6-qtbase
+qt6-qttools
 sqlite3
-qttools
 zeromq

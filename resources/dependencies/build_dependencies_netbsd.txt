@@ -1,8 +1,12 @@
-autoconf
-automake
 boost-headers
-gmake
+boost-libs
+capnproto
+cmake
+gcc12
+git
 libevent
-libtool
 pkg-config
 python312
+py312-zmq
+sqlite3
+zeromq
