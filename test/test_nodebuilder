@@ -250,7 +250,8 @@ while [ "${bitcoin_pname}" = 'bitcoind' ] || [ "${bitcoin_pname}" = 'bitcoin-qt'
   sleep "${BITCOIN_STOP_SLEEP_SECONDS}"
   bitcoin_stop_sleep_elapsed="$((bitcoin_stop_sleep_elapsed + BITCOIN_STOP_SLEEP_SECONDS))"
   # TODO: debug intermittent stalled stop issue
-  # ps aux shouldnt be used for scripting (SC2009), but it's fine here since we're just printing to stdout
+  # ps aux shouldnt be used for scripting, per SC2009),
+  # but it's fine here since we're just printing to stdout for debug purposes
   # shellcheck disable=SC2009
   ps aux | grep "${bitcoind_pid}"
   [ "${bitcoin_stop_sleep_elapsed}" -ge "${BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS}" ] &&
