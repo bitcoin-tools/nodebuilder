@@ -230,34 +230,33 @@ readonly BITCOIN_PID_PATH
 
 [ -f "${BITCOIN_PID_PATH}" ] ||
   throw_error "Unable to find $(basename "${BITCOIN_PID_PATH}") in data directory."
-# TODO Remove the conditional below since we just checked for the file.
 
 # Stop Bitcoin Core
-if [ -f "${BITCOIN_PID_PATH}" ]; then
-  command -v bitcoin-cli > /dev/null 2>&1 ||
-    throw_error 'Unable to find bitcoin-cli in PATH.'
-  read -r bitcoind_pid < "${BITCOIN_PID_PATH}"
-  BITCOIN_STOP_SLEEP_SECONDS=2
-  readonly BITCOIN_STOP_SLEEP_SECONDS
-  BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS=3600
-  readonly BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS
+command -v bitcoin-cli > /dev/null 2>&1 ||
+  throw_error 'Unable to find bitcoin-cli in PATH.'
+read -r bitcoind_pid < "${BITCOIN_PID_PATH}"
+readonly bitcoin_pid
+bitcoin_pname="$(ps -p "${bitcoind_pid}" -o comm=)"
 
-  bitcoin_stop_sleep_elapsed=0
+BITCOIN_STOP_SLEEP_SECONDS=2
+readonly BITCOIN_STOP_SLEEP_SECONDS
+BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS=3600
+readonly BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS
+bitcoin_stop_sleep_elapsed=0
+
+bitcoin-cli stop
+
+while [ "${bitcoin_pname}" = 'bitcoind' ] || [ "${bitcoin_pname}" = 'bitcoin-qt' ]; do
+  sleep "${BITCOIN_STOP_SLEEP_SECONDS}"
+  bitcoin_stop_sleep_elapsed="$((bitcoin_stop_sleep_elapsed + BITCOIN_STOP_SLEEP_SECONDS))"
+  # TODO: debug intermittent stalled stop issue
+  # ps aux shouldnt be used for scripting (SC2009), but it's fine here since we're just printing to stdout
+  # shellcheck disable=SC2009
+  ps aux | grep "${bitcoind_pid}"
+  [ "${bitcoin_stop_sleep_elapsed}" -ge "${BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS}" ] &&
+    throw_error 'Stopping Bitcoin Core took over an hour.'
   bitcoin_pname="$(ps -p "${bitcoind_pid}" -o comm=)"
-  bitcoin-cli stop
-
-  while [ "${bitcoin_pname}" = 'bitcoind' ] || [ "${bitcoin_pname}" = 'bitcoin-qt' ]; do
-    sleep "${BITCOIN_STOP_SLEEP_SECONDS}"
-    bitcoin_stop_sleep_elapsed="$((bitcoin_stop_sleep_elapsed + BITCOIN_STOP_SLEEP_SECONDS))"
-    # TODO: debug intermittent stalled stop issue
-    # ps aux shouldnt be used for scripting (SC2009), but it's fine here since we're just printing to stdout
-    # shellcheck disable=SC2009
-    ps aux | grep "${bitcoind_pid}"
-    [ "${bitcoin_stop_sleep_elapsed}" -ge "${BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS}" ] &&
-      throw_error 'Stopping Bitcoin Core took over an hour.'
-    bitcoin_pname="$(ps -p "${bitcoind_pid}" -o comm=)"
-  done
-fi
+done
 
 if [ -s "${STDERR_TEST_FILENAME}" ]; then
   printf '%s\n' 'Printing the contents of stderr:'
