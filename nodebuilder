@@ -1800,6 +1800,9 @@ readonly TARGET_BITCOIN_VERSION_PADDED
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
+elif [ "${target_bitcoin_version%%.*}" -lt 29 ]; then
+  log_info 'Downloading target version less than than 29.0.'
+  bitcoin_tarball_download_extract_test_install
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
@@ -1808,11 +1811,9 @@ elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'OpenBSD' ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   compile_bitcoin_from_source
-  current_bitcoin_version="${target_bitcoin_version}"
 else
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   bitcoin_tarball_download_extract_test_install
-  current_bitcoin_version="${target_bitcoin_version}"
 fi
 
 if command -v bitcoin-qt > /dev/null 2>&1 &&
