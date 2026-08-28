@@ -235,7 +235,8 @@ if [ -f "${bitcoind_pid_path}" ]; then
   readonly BITCOIN_STOP_SLEEP_SECONDS
   BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS=3600
   readonly BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS
-  
+
+
   bitcoin_stop_sleep_elapsed=0
   bitcoin_pname="$(ps -p "$(< "${BITCOIN_CORE_PID_FILE}")" -o comm=)"
   bitcoin-cli stop
