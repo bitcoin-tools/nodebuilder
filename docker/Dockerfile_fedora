@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1
 # Fedora is known for its proactive security and commitment to open-source software.
 # This Dockerfile is a good choice for modern and resource-rich environments.
-FROM fedora:latest@sha256:6c53109bbf345c2612ada5bd06e8e352b45d85c0a2d770167b61c8d1d047e124
+FROM fedora:latest@sha256:43b29f65a41eb9c35e1cd5323e3bdf3b655c2357a9f4f1ff2f9c2798e5045d80
 
 # Set the terminal type to Xterm.
 ENV TERM=xterm
 
 # Define the default version of nodebuilder or pass in a different version (eg master) as an argument.
-ARG NODEBUILDER_VERSION=v1.12.0
+ARG NODEBUILDER_VERSION=master
 
 # Define the nodebuilder URL.
 ARG NODEBUILDER_URL=https://github.com/bitcoin-tools/nodebuilder/raw/${NODEBUILDER_VERSION}/nodebuilder

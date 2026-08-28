@@ -29,8 +29,8 @@ jobs:
       spelling: ${{ steps.filter.outputs.spelling }}
       test: ${{ steps.filter.outputs.test }}
     steps:
-    - uses: actions/checkout@v5
-    - uses: dorny/paths-filter@v3
+    - uses: actions/checkout@v7
+    - uses: dorny/paths-filter@v4
       id: filter
       with:
         filters: resources/config/paths-filter.yaml
@@ -43,14 +43,14 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Renovate
-        uses: renovatebot/github-action@v43.0.9
+        uses: renovatebot/github-action@v46.2.2
         with:
           configurationFile: 'resources/config/renovate-config.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
       - name: Dependency Review
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5.0.0
         with:
           config-file: 'resources/config/dependency-review.yaml'
           base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
@@ -72,9 +72,9 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Lint with shellcheck and shfmt
-        uses: luizm/action-sh-checker@v0.9.0
+        uses: luizm/action-sh-checker@v0.10.0
         env:
           SHELLCHECK_OPTS: >-
             --enable add-default-case
@@ -104,7 +104,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Lint workflow files
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
@@ -125,7 +125,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Lint Dockerfiles
         uses: luke142367/Docker-Lint-Action@v1.1.1
         with:
@@ -145,7 +145,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Lint the markdown
         uses: avto-dev/markdown-lint@v1
         with:
@@ -157,7 +157,7 @@ jobs:
         with:
           config_path: 'resources/config/spellcheck.yaml'
           output_file: 'spellcheck-output.txt'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: '!cancelled()'
         with:
           name: Spellcheck Output
@@ -169,7 +169,7 @@ jobs:
     # TODO: make this mandatory again with nodebuilder issue 2343
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Run linkspector on markdown
         uses: umbrelladocs/action-linkspector@v1
         with:
@@ -182,7 +182,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Validate pull request title as a conventional commit
         run: |
           PR_TITLE="$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")"
@@ -211,64 +211,42 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 4
       matrix:
-        os: [ubuntu-24.04, macos-15, ubuntu-22.04, macos-13, macos-14]
+        # os: [ubuntu-latest, macos-latest, ubuntu-26.04, macos-15]
+        os: [ubuntu-latest, macos-latest, macos-15]
         job-purpose: [package, source]
-        exclude:
-          - { job-purpose: source, os: macos-13 }
         include:
           - job-purpose: package
             additional-args: ''
           - job-purpose: source
             additional-args: '--compile'
-          - os: ubuntu-22.04
-            os-friendly-name: Ubuntu 22
-            check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
-            remove-firefox-command: sudo apt-get remove --assume-yes firefox
-            cache-path: |
-              /var/cache/apt/archives/*.deb
-              /var/lib/apt/lists/*.ubuntu.com_ubuntu_dists_*
-              /var/lib/apt/lists/download.docker.com_linux_ubuntu_dists_*
-              /var/lib/apt/lists/dl.google.com_linux_chrome_deb_dists_*
-              /var/lib/apt/lists/packages.microsoft.com_repos_code_dists_*
-              /var/lib/apt/lists/pkg.cloudflareclient.com_dists_*
-            path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
-          - os: ubuntu-24.04
-            os-friendly-name: Ubuntu 24
+          - os: ubuntu-latest
+            os-friendly-name: Ubuntu 24 [x86_64]
             check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
             remove-firefox-command: sudo apt-get remove --assume-yes firefox
             path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
-          - os: macos-13
-            os-friendly-name: macOS 13
+          - os: macos-latest
+            os-friendly-name: macOS 26 [arm64]
             check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
             path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
-          - os: macos-14
-            os-friendly-name: macOS 14
-            check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
-            path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
+          # - os: ubuntu-26.04
+          #   os-friendly-name: Ubuntu 26 [x86_64]
+          #   check-environment-command: cat /etc/os-release && lscpu && grep Mem /proc/meminfo
+          #   remove-firefox-command: sudo apt-get remove --assume-yes firefox
+          #   path-to-bitcoin-log: '/home/runner/.bitcoin/debug.log'
           - os: macos-15
-            os-friendly-name: macOS 15
+            os-friendly-name: macOS 15 [arm64]
             check-environment-command: sw_vers && sysctl machdep.cpu.core_count machdep.cpu.thread_count machdep.cpu.brand_string && memory_pressure -Q
             path-to-bitcoin-log: '/Users/runner/Library/Application Support/Bitcoin/debug.log'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Check the current environment
         run: |
           uname -a
           ${{ matrix.check-environment-command }}
           df -h
           date -u
-      - name: Change owner of apt archives
-        if: contains(matrix.os, 'ubuntu')
-        run: sudo chown -R "$(whoami)" /var/cache/apt/archives
-      - name: Cache system archives
-        if: matrix.cache-path != null
-        uses: actions/cache@v4
-        with:
-          path: ${{ matrix.cache-path }}
-          key: cache-updates-${{ matrix.os }}-${{ github.run_id }}
-          restore-keys: cache-updates-${{ matrix.os }}
       - name: Remove the snap package
         if: matrix.remove-firefox-command != null
         run: ${{ matrix.remove-firefox-command }}
@@ -289,7 +267,7 @@ jobs:
           sh -x "./${CI_NODEBUILDER_SCRIPT}" ${{ matrix.additional-args }}
         timeout-minutes: 120
       - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.os }}-${{ matrix.job-purpose }}-bitcoin-debug.log
           path: ${{ matrix.path-to-bitcoin-log }}
@@ -297,8 +275,8 @@ jobs:
         if: steps.test-nodebuilder.outcome == 'failure'
         run: printf '%s\n' "Review the step 'Test the console output' above." && exit 1
 
-  run-nodebuilder-freebsd:
-    name: Test source on FreeBSD
+  run-nodebuilder-bsd-vm:
+    name: Test source on ${{ matrix.vm-os-friendly-name }} [${{ matrix.vm-arch }}]
     needs: [changes, shell-lint, yaml-lint]
     if: >-
       ${{
@@ -306,106 +284,110 @@ jobs:
         github.event.action == 'published' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.test == 'true'
       }}
     runs-on: ubuntu-latest
+    env:
+      FREEBSD_BITCOIN_LOG_PATH: /root/.bitcoin/debug.log
+      NETBSD_BITCOIN_LOG_PATH: /root/.bitcoin/debug.log
+      OPENBSD_BITCOIN_LOG_PATH: /home/bitcoin/.bitcoin/debug.log
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        vm-arch: [x86_64]
+        vm-os: [freebsd, netbsd, openbsd]
+        include:
+          - { vm-os: freebsd, vm-os-friendly-name: FreeBSD }
+          - { vm-os: netbsd, vm-os-friendly-name: NetBSD }
+          - { vm-os: openbsd, vm-os-friendly-name: OpenBSD }
     steps:
-      - uses: actions/checkout@v5
-      - name: Test the console output
+      - uses: actions/checkout@v7
+      - name: Test the FreeBSD console output
+        if: ${{ matrix.vm-os == 'freebsd' }}
         uses: vmactions/freebsd-vm@v1
         timeout-minutes: 180
         with:
-          prepare: |
-            echo "${TERM:-TERM is not found}"
-            uname -a
-            cat /etc/os-release
-            nproc
-            sysctl -a | grep ' memory' | head -2
-            df -h
-            commmand -v tput
-            tput colors
-            date -u
+          arch: ${{ matrix.vm-arch }}
+          envs: 'CI FREEBSD_BITCOIN_LOG_PATH'
+          usesh: true
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with non-zero status" >&2 && exit 1
-            [ -f "${HOME}/.bitcoin/debug.log" ] && cp "${HOME}/.bitcoin/debug.log" .
-      - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: freebsd-source-bitcoin-debug.log
-          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
-
-  run-nodebuilder-netbsd:
-    name: Test source on NetBSD
-    needs: [changes, shell-lint, yaml-lint]
-    if: >-
-      ${{
-        github.event.action == 'prerelease' ||
-        github.event.action == 'published' ||
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Test the console output
+            if [ "$?" -eq 0 ]; then
+              echo "DEBUG HOME is ${HOME}"
+              echo "DEBUG working directory is $(pwd)"
+              echo "DEBUG listing /root/.bitcoin/debug.log"
+              ls -l /root/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/runner/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/bitcoin/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
+              [ -f "${FREEBSD_BITCOIN_LOG_PATH}" ] && cp "${FREEBSD_BITCOIN_LOG_PATH}" .
+            else
+              echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
+              echo "Running nodebuilder with xtrace enabled"
+              sh -x ./nodebuilder
+              [ -f "${FREEBSD_BITCOIN_LOG_PATH}" ] && cp "${FREEBSD_BITCOIN_LOG_PATH}" .
+              exit 1
+            fi
+      - name: Test the NetBSD console output
+        if: ${{ matrix.vm-os == 'netbsd' }}
         uses: vmactions/netbsd-vm@v1
         timeout-minutes: 180
         with:
-          prepare: |
-            echo "${TERM:-TERM is not found}"
-            uname -a
-            sysctl -n hw.ncpu
-            sysctl -n hw.physmem64
-            swapctl -l
-            df -h
-            date -u
+          arch: ${{ matrix.vm-arch }}
+          envs: 'CI NETBSD_BITCOIN_LOG_PATH'
           run: |
-            sh -x ./nodebuilder
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f "/root/.bitcoin/debug.log" ] && cp "/root/.bitcoin/debug.log" .
-      - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: netbsd-source-bitcoin-debug.log
-          path: /home/runner/work/nodebuilder/nodebuilder/debug.log
-
-  run-nodebuilder-openbsd:
-    name: Test source on OpenBSD
-    needs: [changes, shell-lint, yaml-lint]
-    if: >-
-      ${{
-        github.event.action == 'prerelease' ||
-        github.event.action == 'published' ||
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.dependencies == 'true' ||
-        needs.changes.outputs.shell == 'true'
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Test the console output
+            sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
+            if [ "$?" -eq 0 ]; then
+              echo "DEBUG HOME is ${HOME}"
+              echo "DEBUG working directory is $(pwd)"
+              echo "DEBUG listing /root/.bitcoin/debug.log"
+              ls -l /root/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/runner/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/bitcoin/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
+              [ -f "${NETBSD_BITCOIN_LOG_PATH}" ] && cp "${NETBSD_BITCOIN_LOG_PATH}" .
+            else
+              echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
+              echo "Running nodebuilder with xtrace enabled"
+              sh -x ./nodebuilder
+              [ -f "${NETBSD_BITCOIN_LOG_PATH}" ] && cp "${NETBSD_BITCOIN_LOG_PATH}" .
+              exit 1
+            fi
+      - name: Test the OpenBSD console output
+        if: ${{ matrix.vm-os == 'openbsd' }}
         uses: vmactions/openbsd-vm@v1
         timeout-minutes: 180
         with:
-          prepare: |
-            echo "${TERM:-TERM is not found}"
-            uname -a
-            sysctl hw.ncpu
-            sysctl -a | grep 'hw.physmem\|hw.usermem'
-            df -h
-            commmand -v tput
-            tput colors
-            date -u
+          arch: ${{ matrix.vm-arch }}
+          envs: 'CI OPENBSD_BITCOIN_LOG_PATH'
+          usesh: true
           run: |
             sh -x ./test/test_nodebuilder --ref "${GITHUB_SHA}"
-            [ "$?" -gt 0 ] && echo "test_nodebuilder exited with status $?" >&2 && exit 1
-            [ -f '/home/bitcoin/.bitcoin/debug.log' ] && cp '/home/bitcoin/.bitcoin/debug.log' .
+            if [ "$?" -eq 0 ]; then
+              echo "DEBUG HOME is ${HOME}"
+              echo "DEBUG working directory is $(pwd)"
+              echo "DEBUG listing /root/.bitcoin/debug.log"
+              ls -l /root/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/runner/.bitcoin/debug.log"
+              ls -l /home/runner/.bitcoin/debug.log || true
+              echo "DEBUG listing /home/bitcoin/.bitcoin/debug.log"
+              ls -l /home/bitcoin/.bitcoin/debug.log || true
+              [ -f "${OPENBSD_BITCOIN_LOG_PATH}" ] && cp "${OPENBSD_BITCOIN_LOG_PATH}" .
+            else
+              echo "${{ matrix.vm-os }} test failed with non-zero exit status." >&2
+              echo "Running nodebuilder with xtrace enabled"
+              sh -x ./nodebuilder
+              [ -f "${OPENBSD_BITCOIN_LOG_PATH}" ] && cp "${OPENBSD_BITCOIN_LOG_PATH}" .
+              exit 1
+            fi
       - name: Save Bitcoin Core log as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: openbsd-source-bitcoin-debug.log
+          name: ${{ matrix.vm-os }}-${{ matrix.vm-arch }}-source-bitcoin-debug.log
           path: /home/runner/work/nodebuilder/nodebuilder/debug.log
   
   run-nodebuilder-qemu:
@@ -494,14 +476,14 @@ jobs:
           - { container: Fedora, dockerfile: Dockerfile_fedora }
           - { container: Kali, dockerfile: Dockerfile_kali }
           - { container: Manjaro, dockerfile: Dockerfile_manjarolinux }
-          - { container: openSUSE, dockerfile: Dockerfile_opensuse-leap }
+          - { container: openSUSE, dockerfile: Dockerfile_opensuse }
           - { container: Oracle Linux, dockerfile: Dockerfile_oraclelinux }
           - { container: Red Hat Enterprise, dockerfile: Dockerfile_redhat-ubi9 }
           - { container: Rocky Linux, dockerfile: Dockerfile_rockylinux }
           - { container: SUSE Enterprise, dockerfile: Dockerfile_sles }
           - { container: Ubuntu, dockerfile: Dockerfile }
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Check the current OS version
         run: grep 'VERSION\|ID' /etc/os-release && uname -a
       - name: Build the ${{ matrix.container }} docker image
@@ -524,7 +506,7 @@ jobs:
               github.event.inputs == null
             )
           )
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         timeout-minutes: 300
         with:
           build-args: |

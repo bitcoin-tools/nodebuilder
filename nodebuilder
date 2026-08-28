@@ -71,18 +71,37 @@ compile_bitcoin_from_source()
   case "${TARGET_OPERATING_SYSTEM}" in
     NetBSD)
       cmake -B build \
+        -DWITH_ZMQ=ON \
         -DCMAKE_C_COMPILER="/usr/pkg/gcc12/bin/gcc" \
         -DCMAKE_CXX_COMPILER="/usr/pkg/gcc12/bin/g++" \
         > /dev/null 2>&1
       ;;
+    OpenBSD)
+      cmake -B build \
+        -DBUILD_GUI=ON \
+        -DWITH_ZMQ=ON \
+        -DENABLE_IPC=OFF \
+        > /dev/null 2>&1
+      ;;
     gentoo)
       cmake -B build \
+        -DWITH_ZMQ=ON \
         > /dev/null 2>&1
       ;;
     *)
-      cmake -B build \
-        -DBUILD_GUI=ON \
-        > /dev/null 2>&1
+      if [ -f /etc/os-release ] &&
+        [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'ol' ]; then
+        cmake -B build \
+          -DBUILD_GUI=ON \
+          -DWITH_ZMQ=ON \
+          -DENABLE_IPC=OFF \
+          > /dev/null 2>&1
+      else
+        cmake -B build \
+          -DBUILD_GUI=ON \
+          -DWITH_ZMQ=ON \
+          > /dev/null 2>&1
+      fi
       ;;
   esac
 
@@ -97,7 +116,7 @@ compile_bitcoin_from_source()
 }
 
 # TODO: use make on old releases and cmake on >= 29.0
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 compile_bitcoin_from_source_make()
 {
   log_info 'Ensuring compile dependencies.'
@@ -314,6 +333,7 @@ bitcoin_tarball_download_extract_test_install()
   readonly BITCOIN_CORE_EXTRACT_DIR="${TEMP_DIRECTORY}/bitcoin-core"
   readonly BITCOIN_INSTALL_BIN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/bin"
   readonly BITCOIN_INSTALL_LIB_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/lib"
+  readonly BITCOIN_INSTALL_LIBEXEC_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/libexec"
   readonly BITCOIN_INSTALL_INCLUDE_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/include"
   readonly BITCOIN_INSTALL_MAN_SOURCE="${BITCOIN_CORE_EXTRACT_DIR}/share/man/man1"
   readonly BITCOIN_INSTALL_DESTINATION='/usr/local'
@@ -456,9 +476,9 @@ bitcoin_tarball_test()
   # only sign test_bitcoin if on arm64 and target version is before 28.2
   if [ "${TARGET_ARCHITECTURE}" = 'arm64' ] &&
     ! is_arm64_test_bitcoin_signed "${target_bitcoin_version}"; then
-    codesign -s - "${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin
+    codesign -s - "${BITCOIN_INSTALL_LIBEXEC_SOURCE}"/test_bitcoin
   fi
-  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_BIN_SOURCE}"/test_bitcoin 2>&1)"
+  UNIT_TEST_RESPONSE="$("${BITCOIN_INSTALL_LIBEXEC_SOURCE}"/test_bitcoin 2>&1)"
   readonly UNIT_TEST_RESPONSE
   case "${UNIT_TEST_RESPONSE}" in
     *'No errors detected'*) ;;
@@ -788,10 +808,12 @@ get_operating_system()
 # shellcheck disable=SC2317
 handle_exit()
 {
-  [ -n "${TEMP_DIRECTORY:-}" ] && rm -rf -- "${TEMP_DIRECTORY:?}"/
+  if [ -n "${TEMP_DIRECTORY:-}" ] && [ -d "${TEMP_DIRECTORY}" ]; then
+    rm -rf -- "${TEMP_DIRECTORY:?}"/
+  fi
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 handle_sigint()
 {
   log_warning 'Detected Ctrl+C. Exiting.'
@@ -889,7 +911,7 @@ install_build_dependencies_darwin()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs brew install --quiet > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs brew install --quiet > /dev/null 2>&1
 }
 
 install_build_dependencies_dnf()
@@ -902,20 +924,16 @@ install_build_dependencies_dnf()
     amzn)
       throw_error "Building from source on Amazon Linux is unsupported."
       ;;
+    fedora) ;;
     rhel)
       sudo subscription-manager identity > /dev/null 2>&1 ||
         throw_error "Register your RHEL subscription with 'sudo subscription-manager subscribe'."
       sudo dnf config-manager --enable "rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms" ||
         throw_error "Failed to enable EPEL release rhel-${OS_MAJOR_VERSION_ID}-for-${TARGET_ARCHITECTURE}-appstream-rpms."
       ;;
-    *) ;;
-  esac
-
-  case "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" in
-    fedora) ;;
     *)
       dnf list installed epel-release > /dev/null 2>&1 ||
-        sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm"
+        sudo dnf --assumeyes install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR_VERSION_ID}.noarch.rpm" > /dev/null 2>&1
       ;;
   esac
 
@@ -923,6 +941,10 @@ install_build_dependencies_dnf()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
+
+  # TODO: install capnp on Oracle Linux
+  [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'ol' ] &&
+    dependencies="$(echo "${dependencies}" | sed '/capnp/d')"
 
   printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo dnf install --assumeyes > /dev/null
 }
@@ -952,7 +974,7 @@ install_build_dependencies_freebsd()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes > /dev/null
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo pkg install --yes > /dev/null 2>&1
 }
 
 install_build_dependencies_netbsd()
@@ -1006,8 +1028,10 @@ install_build_dependencies_zypper()
     dependencies=$(torsocks curl --fail --silent --show-error --location --retry 2 "${BUILD_DEPENDENCIES_URL}") ||
     dependencies=$(curl --fail --silent --show-error --location --retry 5 "${BUILD_DEPENDENCIES_URL}")
   [ -z "${dependencies:-}" ] && throw_error "The list of dependencies is empty."
-  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install
-  export CXX='g++-14'
+  [ "$(grep "^ID=" /etc/os-release | cut -d= -f2 | tr -d '"')" = 'sles' ] &&
+    throw_error 'Building on SUSE Enterprise is not supported' #dependencies="$(echo "${dependencies}" | sed 's/python3[0-9]+/python3/')"
+  printf '%s\n' "${dependencies}" | tr -d '\r' | xargs sudo zypper --non-interactive --quiet install > /dev/null
+  export CXX='g++-15'
 }
 
 install_runtime_dependencies()
@@ -1452,7 +1476,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 1.12.0'
+  printf '%s\n' 'nodebuilder 2.2.0'
   printf '%s\n' 'Copyright (C) 2025 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT-0'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1514,7 +1538,9 @@ CONSOLE_COLOR_RED=''
 CONSOLE_COLOR_GREEN=''
 CONSOLE_COLOR_YELLOW=''
 CONSOLE_COLOR_NORMAL=''
-if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
+if command -v tput > /dev/null 2>&1 &&
+  [ -n "$(tput colors 2> /dev/null)" ] &&
+  [ "$(tput colors 2> /dev/null)" -ge 8 ]; then
   CONSOLE_COLOR_RED="$(tput setaf 1)"
   CONSOLE_COLOR_GREEN="$(tput setaf 2)"
   CONSOLE_COLOR_YELLOW="$(tput setaf 3)"
@@ -1522,7 +1548,7 @@ if command -v tput > /dev/null 2>&1 && [ "$(tput colors 2> /dev/null)" -ge 8 ]; 
 else
   case "${TERM:-}" in
     '' | xterm* | screen* | tmux* | linux | gnome-terminal | konsole | rxvt* | \
-      putty | mintty | alacritty | st | su | vt220)
+      putty | mintty | alacritty | st | su | vt220 | vt100 | ansi | hyper | iterm2)
       CONSOLE_COLOR_RED='\033[31m'
       CONSOLE_COLOR_GREEN='\033[32m'
       CONSOLE_COLOR_YELLOW='\033[33m'
@@ -1544,10 +1570,10 @@ readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
     0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
     0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
     24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 27.2 28.0 28.1 \
-    28.2 29.0'
+    28.2 28.3 28.4 29.0 29.1 29.2 29.3 29.4 30.2 30.3 31.0 31.1'
 
 # Bump this variable for new Bitcoin Core releases
-target_bitcoin_version='29.0'
+target_bitcoin_version='31.1'
 
 # Instantiate the parameter variables
 compile_bitcoin_flag='false'
@@ -1643,7 +1669,7 @@ done
 
 [ "${unit_tests}" = 'true' ] && run_unit_tests
 
-trap 'if [ $? -eq 0 ]; then handle_exit; else throw_error "Unhandled error at line ${LINENO:-}."; fi' EXIT
+trap 'if [ $? -eq 0 ]; then handle_exit; else throw_error "Unhandled error during nodebuilder execution."; fi' EXIT
 trap handle_sigint INT
 
 readonly BYTES_TO_KIB=1024
@@ -1667,7 +1693,6 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-# TODO: during next release v2.0.0, change NODEBUILDER_DEPENDENCIES_TAG from master to the release tag
 readonly NODEBUILDER_DEPENDENCIES_TAG='master'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
@@ -1819,14 +1844,12 @@ else
   current_bitcoin_version="${target_bitcoin_version}"
 fi
 
-if
-  command -v bitcoin-qt > /dev/null 2>&1 &&
-    ! is_running_in_ci
+if command -v bitcoin-qt > /dev/null 2>&1 &&
+  ! is_running_in_ci &&
   ! is_running_in_container &&
-    {
-      [ -n "${DISPLAY:-}" ] || [ "${TARGET_KERNEL}" = 'Darwin' ]
-    }
-then
+  {
+    [ -n "${DISPLAY:-}" ] || [ "${TARGET_KERNEL}" = 'Darwin' ]
+  }; then
   LAUNCH_BITCOIN_CORE_COMMAND="bitcoin-qt --datadir=${BITCOIN_DATA_DIRECTORY}"
 elif command -v bitcoind > /dev/null 2>&1; then
   LAUNCH_BITCOIN_CORE_COMMAND="bitcoind --daemonwait --datadir=${BITCOIN_DATA_DIRECTORY}"
@@ -1838,11 +1861,15 @@ readonly LAUNCH_BITCOIN_CORE_COMMAND
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
 # If bitcoin.conf doesn't already exist, use default settings
-[ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
 if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
+  [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
   log_info 'Setting the default node behavior.'
   set_bitcoin_core_option 'datadir' "${BITCOIN_DATA_DIRECTORY}"
-  is_running_in_ci && set_bitcoin_core_option 'debug' 'net'
+  is_running_in_ci &&
+    set_bitcoin_core_option 'debug' 'net'
+  is_running_in_ci &&
+    [ "${TARGET_KERNEL}" = 'NetBSD' ] &&
+    set_bitcoin_core_option 'maxconnections' '96'
   set_bitcoin_core_option 'mempoolfullrbf' '1'
   set_bitcoin_core_option 'server' '1'
 fi
@@ -2008,27 +2035,23 @@ while [ "${ibd_status}" = 'true' ]; do
 
   clear_the_terminal
   if [ "${headers}" -eq 0 ]; then
-    log_info 'Syncing the block headers (first pass).'
+    log_info 'Pre-syncing the headers.'
     headers_presync_last_log_line="$(grep 'Pre-synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
     if [ -n "${headers_presync_last_log_line}" ]; then
-      headers_presync_height=$(echo "${headers_presync_last_log_line}" | cut -d, -f2 | cut -d: -f2 | cut -d'(' -f1 | cut -d' ' -f2)
-      headers_presync_progress_percent=$(echo "${headers_presync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)
-      printf 'Headers presynced:          %d\n' "${headers_presync_height}"
-      printf 'Headers presync progress:   %.1f %%\n' "${headers_presync_progress_percent}"
+      headers_presync_progress_percent="$(echo "${headers_presync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)"
     else
-      printf 'Headers presynced:          %d\n' '0'
-      printf 'Headers presync progress:   %.1f %%\n' '0.0'
+      headers_presync_progress_percent='0.0'
     fi
+    printf 'Headers presync progress:   %.1f %%\n' "${headers_presync_progress_percent}"
   elif [ "${blocks}" -eq 0 ]; then
-    log_info 'Syncing the block headers (second pass).'
-    printf 'Headers synced:             %d\n' "${headers}"
+    log_info 'Re-syncing the headers.'
     headers_sync_last_log_line="$(grep 'Synchronizing blockheaders' "${BITCOIN_CORE_DEBUG_LOG_FILE}" | tail -1 || true)"
     if [ -n "${headers_sync_last_log_line}" ]; then
       headers_sync_progress_percent="$(echo "${headers_sync_last_log_line}" | cut -d~ -f2 | cut -d% -f1)"
-      printf 'Headers sync progress:      %.1f %%\n' "${headers_sync_progress_percent}"
     else
-      printf 'Headers sync progress:      %.1f %%\n' '0.0'
+      headers_sync_progress_percent='0.0'
     fi
+    printf 'Headers sync progress:      %.1f %%\n' "${headers_sync_progress_percent}"
   else
     log_info 'Syncing the blockchain. Please be patient.'
     printf 'Sync progress:              %.3f %%\n' "${sync_progress_percent}"
@@ -2064,8 +2087,6 @@ while [ "${ibd_status}" = 'true' ]; do
     exit 0
   fi
 
-  printf '%s\n\n' 'The chain sync can take several days or even weeks.'
-  is_running_in_container || printf '%s\n' "Close this Terminal window by clicking on the 'X'."
   printf '%s' "This info will refresh in ${SLEEP_TIME_SECONDS} seconds."
   sleep "${SLEEP_TIME_SECONDS}"
 

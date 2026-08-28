@@ -1,10 +1,10 @@
 boost
 cmake
-git
 libevent
 libqrencode
 python
 py3-zmq
-qttools
+qt6-qtbase
+qt6-qttools
 sqlite3
 zeromq
