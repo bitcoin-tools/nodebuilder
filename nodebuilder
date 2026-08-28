@@ -1668,6 +1668,19 @@ log_info "DEBUG - TARGET_OPERATING_SYSTEM=${TARGET_OPERATING_SYSTEM}"
 TARGET_OPERATING_SYSTEM_RELEASE="$(uname -r)"
 readonly TARGET_OPERATING_SYSTEM_RELEASE
 
+printf 'DEBUG: OS=[%s]\n' "$TARGET_OPERATING_SYSTEM"
+case "$TARGET_OPERATING_SYSTEM" in
+  gentoo)
+    printf 'DEBUG: *** GENTOO CASE ***\n'
+    ;;
+  \'gentoo\')
+    printf 'DEBUG: *** QUOTE GENTOO CASE ***\n'
+    ;;
+  *)
+    printf 'DEBUG: *** DEFAULT CASE ***\n'
+    ;;
+esac
+
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
 readonly NODEBUILDER_DEPENDENCIES_TAG='master'
