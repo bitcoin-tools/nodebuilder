@@ -785,9 +785,9 @@ get_operating_system()
       printf '%s\n' "${TARGET_KERNEL}"
       ;;
     *)
-      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
+      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d "'\"")"
       readonly OS_RELEASE_ID
-      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2 | tr -d "'\"")"
       readonly OS_RELEASE_ID_LIKE
       if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
         printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
