@@ -184,7 +184,6 @@ case "${TARGET_KERNEL}" in
   MINGW*) throw_error 'Windows is not supported.' ;;
   *) throw_error 'Your operating system is not supported.' ;;
 esac
-bitcoind_pid_path="${bitcoin_data_directory}/bitcoind.pid"
 
 DOWNLOADED_NODEBUILDER='false'
 [ -f nodebuilder ] || {
@@ -226,11 +225,18 @@ fi
 [ "${DOWNLOADED_NODEBUILDER:-false}" = 'true' ] && rm nodebuilder
 kill_tail_process
 
+BITCOIN_PID_PATH="${bitcoin_data_directory}/bitcoind.pid"
+readonly BITCOIN_PID_PATH
+
+[ -f "${BITCOIN_PID_PATH}" ] ||
+  throw_error "Unable to find $(basename "${BITCOIN_PID_PATH}") in data directory."
+# TODO Remove the conditional below since we just checked for the file.
+
 # Stop Bitcoin Core
-if [ -f "${bitcoind_pid_path}" ]; then
+if [ -f "${BITCOIN_PID_PATH}" ]; then
   command -v bitcoin-cli > /dev/null 2>&1 ||
     throw_error 'Unable to find bitcoin-cli in PATH.'
-  read -r bitcoind_pid < "${bitcoind_pid_path}"
+  read -r bitcoind_pid < "${BITCOIN_PID_PATH}"
   BITCOIN_STOP_SLEEP_SECONDS=2
   readonly BITCOIN_STOP_SLEEP_SECONDS
   BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS=3600
