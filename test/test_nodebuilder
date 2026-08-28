@@ -226,7 +226,7 @@ fi
 kill_tail_process
 
 BITCOIN_PID_PATH="${bitcoin_data_directory}/bitcoind.pid"
-readonly BITCOIN_PID_PATH
+readonly BITCOIND_PID_PATH
 
 [ -f "${BITCOIN_PID_PATH}" ] ||
   throw_error "Unable to find $(basename "${BITCOIN_PID_PATH}") in data directory."
