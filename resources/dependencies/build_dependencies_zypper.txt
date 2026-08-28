@@ -1,11 +1,14 @@
+capnproto
 cmake
 gcc15-c++
 libboost_headers1_86_0-devel
+libcapnp-devel
 libevent-devel
-libqt5-qtbase-devel
-libqt5-qttools-devel
 python313
 qrencode-devel
+qt6-base-devel
+qt6-linguist-devel
+qt6-tools-devel
 sqlite
 sqlite3
 sqlite3-devel

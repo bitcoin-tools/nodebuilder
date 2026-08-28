@@ -11,8 +11,10 @@
   "onboarding": false,
   "packageRules": [
     {
-      "matchPackagePatterns": ["docker"],
-      "groupName": "docker"
+      "groupName": "docker",
+      "matchPackageNames": [
+        "/docker/"
+      ]
     }
   ],
   "platform": "github",
