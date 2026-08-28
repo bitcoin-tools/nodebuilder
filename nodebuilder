@@ -1469,12 +1469,8 @@ readonly CONSOLE_COLOR_YELLOW
 readonly CONSOLE_COLOR_NORMAL
 
 # This list excludes vulnerable versions, e.g. CVE-2015-6031 and CVE-2018-17144
-readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
-    0.11.0 0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 0.14.3 0.15.2 \
-    0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
-    0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
-    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 27.2 28.0 28.1 \
-    28.2 28.3 28.4 29.0 29.1 29.2 29.3 29.4 30.2 30.3 31.0 31.1'
+readonly VALID_BITCOIN_VERSION_LIST='27.0 27.1 27.2 28.0 28.1 28.2 28.3 28.4 \
+  29.0 29.1 29.2 29.3 29.4 30.2 30.3 31.0 31.1'
 
 # Bump this variable for new Bitcoin Core releases
 target_bitcoin_version='31.1'
@@ -1726,6 +1722,9 @@ readonly TARGET_BITCOIN_VERSION_PADDED
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
+elif [ "${target_bitcoin_version%%.*}" -lt 29 ]; then
+  log_info 'Downloading target version less than than 29.0.'
+  bitcoin_tarball_download_extract_test_install
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
@@ -1734,11 +1733,9 @@ elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'OpenBSD' ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   compile_bitcoin_from_source
-  current_bitcoin_version="${target_bitcoin_version}"
 else
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   bitcoin_tarball_download_extract_test_install
-  current_bitcoin_version="${target_bitcoin_version}"
 fi
 
 if command -v bitcoin-qt > /dev/null 2>&1 &&
