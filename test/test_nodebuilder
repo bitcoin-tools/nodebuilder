@@ -242,9 +242,8 @@ if [ -f "${BITCOIN_PID_PATH}" ]; then
   BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS=3600
   readonly BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS
 
-
   bitcoin_stop_sleep_elapsed=0
-  bitcoin_pname="$(ps -p "$(< "${BITCOIN_CORE_PID_FILE}")" -o comm=)"
+  bitcoin_pname="$(ps -p "${bitcoind_pid}" -o comm=)"
   bitcoin-cli stop
 
   while [ "${bitcoin_pname}" = 'bitcoind' ] || [ "${bitcoin_pname}" = 'bitcoin-qt' ]; do
@@ -254,10 +253,9 @@ if [ -f "${BITCOIN_PID_PATH}" ]; then
     # ps aux shouldnt be used for scripting (SC2009), but it's fine here since we're just printing to stdout
     # shellcheck disable=SC2009
     ps aux | grep "${bitcoind_pid}"
-    bitcoind_stop_sleep_counter=$((bitcoind_stop_sleep_counter + 1))
-    [ "${bitcoind_stop_sleep_elapsed}" -ge 3600 ] &&
+    [ "${bitcoin_stop_sleep_elapsed}" -ge "${BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS}" ] &&
       throw_error 'Stopping Bitcoin Core took over an hour.'
-    bitcoin_pname="$(ps -p "$(< "${BITCOIN_CORE_PID_FILE}")" -o comm=)"
+    bitcoin_pname="$(ps -p "${bitcoind_pid}" -o comm=)"
   done
 fi
 
