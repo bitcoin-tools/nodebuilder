@@ -1819,14 +1819,12 @@ else
   current_bitcoin_version="${target_bitcoin_version}"
 fi
 
-if
-  command -v bitcoin-qt > /dev/null 2>&1 &&
-    ! is_running_in_ci
+if command -v bitcoin-qt > /dev/null 2>&1 &&
+  ! is_running_in_ci &&
   ! is_running_in_container &&
-    {
-      [ -n "${DISPLAY:-}" ] || [ "${TARGET_KERNEL}" = 'Darwin' ]
-    }
-then
+  {
+    [ -n "${DISPLAY:-}" ] || [ "${TARGET_KERNEL}" = 'Darwin' ]
+  }; then
   LAUNCH_BITCOIN_CORE_COMMAND="bitcoin-qt --datadir=${BITCOIN_DATA_DIRECTORY}"
 elif command -v bitcoind > /dev/null 2>&1; then
   LAUNCH_BITCOIN_CORE_COMMAND="bitcoind --daemonwait --datadir=${BITCOIN_DATA_DIRECTORY}"
@@ -1838,11 +1836,15 @@ readonly LAUNCH_BITCOIN_CORE_COMMAND
 [ "${TARGET_KERNEL}" != 'Darwin' ] && create_application_shortcuts
 
 # If bitcoin.conf doesn't already exist, use default settings
-[ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
 if [ ! -f "${BITCOIN_CORE_CONFIG_FILE}" ]; then
+  [ -d "${BITCOIN_DATA_DIRECTORY}"/ ] || mkdir "${BITCOIN_DATA_DIRECTORY}"/
   log_info 'Setting the default node behavior.'
   set_bitcoin_core_option 'datadir' "${BITCOIN_DATA_DIRECTORY}"
-  is_running_in_ci && set_bitcoin_core_option 'debug' 'net'
+  is_running_in_ci &&
+    set_bitcoin_core_option 'debug' 'net'
+  is_running_in_ci &&
+    [ "${TARGET_KERNEL}" = 'NetBSD' ] &&
+    set_bitcoin_core_option 'maxconnections' '96'
   set_bitcoin_core_option 'mempoolfullrbf' '1'
   set_bitcoin_core_option 'server' '1'
 fi
