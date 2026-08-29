@@ -1,8 +1,0 @@
-autoconf
-automake
-boost-headers
-gmake
-libevent
-libtool
-pkg-config
-python312

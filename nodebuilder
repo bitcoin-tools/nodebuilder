@@ -115,87 +115,6 @@ compile_bitcoin_from_source()
   cmake --install build > /dev/null 2>&1 || sudo cmake --install build > /dev/null
 }
 
-# TODO: use make on old releases and cmake on >= 29.0
-# shellcheck disable=SC2317,SC2329
-compile_bitcoin_from_source_make()
-{
-  log_info 'Ensuring compile dependencies.'
-  readonly COMPILE_DIRECTORY="${TEMP_DIRECTORY}/compile_bitcoin"
-  readonly STDERR_COMPILE_LOG_FILE="${TEMP_DIRECTORY}/stderr_install.log"
-  install_build_dependencies
-
-  log_info 'Downloading Bitcoin source code.'
-  # shellcheck disable=SC2015
-  command -v torsocks > /dev/null 2>&1 &&
-    [ "${TARGET_KERNEL}" != 'Darwin' ] &&
-    torsocks git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null ||
-    git clone --branch "v${target_bitcoin_version}" --depth 1 --quiet -c advice.detachedHead=false "${BITCOIN_CORE_REPO}.git" "${COMPILE_DIRECTORY}" 2> /dev/null
-  cd "${COMPILE_DIRECTORY}"/
-
-  log_info 'Analyzing hardware configuration.'
-  command -v autoreconf > /dev/null 2>&1 ||
-    throw_error "Build dependencies failed to install. Manually install 'autoconf' and try again."
-  ./autogen.sh > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-  grep -v 'build-aux' "${STDERR_COMPILE_LOG_FILE}" >&2 || true
-
-  log_info 'Configuring the build environment.'
-  case "${TARGET_KERNEL}" in
-    Darwin)
-      ./configure CC=clang CXX=clang++ --without-bdb --enable-suppress-external-warnings > /dev/null
-      ;;
-    FreeBSD)
-      ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
-      ;;
-    NetBSD)
-      ./configure --with-gui=no --with-boost=/usr/pkg --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null
-      ;;
-    OpenBSD)
-      ./configure --without-bdb --enable-suppress-external-warnings MAKE=gmake > /dev/null 2>&1
-      ;;
-    *)
-      ./configure --without-bdb --enable-suppress-external-warnings > /dev/null
-      ;;
-  esac
-  log_info 'Compiling source code. Please wait.'
-  case "${TARGET_KERNEL}" in
-    FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
-      ;;
-    *)
-
-      log_info 'DEBUG compiling without output suppression'
-      make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}"
-      #make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
-      ;;
-  esac
-
-  log_info 'Running compile checks. Please wait.'
-  case "${TARGET_KERNEL}" in
-    FreeBSD | NetBSD | OpenBSD)
-      gmake --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-      ;;
-    *)
-      make --jobs "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" check > /dev/null 2> "${STDERR_COMPILE_LOG_FILE}"
-      ;;
-  esac
-  # exclude the two lines before and after 'Ran 3 tests in ' in make check's stdout
-  sed -n '1N;2N;/Ran 3 tests in /{N;N;d;};P;N;D' "${STDERR_COMPILE_LOG_FILE}" >&2
-
-  log_info "Installing Bitcoin Core ${target_bitcoin_version}."
-  case "${TARGET_KERNEL}" in
-    FreeBSD | NetBSD | OpenBSD)
-      gmake install > /dev/null 2>&1 || sudo gmake install > /dev/null
-      ;;
-    *)
-      make install > /dev/null 2>&1 || sudo make install > /dev/null
-      ;;
-  esac
-
-  cd - > /dev/null
-  rm "${STDERR_COMPILE_LOG_FILE}"
-  rm -rf "${COMPILE_DIRECTORY:?}"/
-}
-
 create_application_shortcuts()
 {
   log_info 'Creating application shortcuts.'
@@ -792,9 +711,9 @@ get_operating_system()
       printf '%s\n' "${TARGET_KERNEL}"
       ;;
     *)
-      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2)"
+      OS_RELEASE_ID="$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d "'\"")"
       readonly OS_RELEASE_ID
-      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2)"
+      OS_RELEASE_ID_LIKE="$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2 | tr -d "'\"")"
       readonly OS_RELEASE_ID_LIKE
       if [ -n "${OS_RELEASE_ID}" ] || [ -n "${OS_RELEASE_ID_LIKE}" ]; then
         printf '%s\n' "${OS_RELEASE_ID_LIKE:-${OS_RELEASE_ID}}"
@@ -1476,7 +1395,7 @@ print_usage()
 
 print_version()
 {
-  printf '%s\n' 'nodebuilder 2.2.0'
+  printf '%s\n' 'nodebuilder 2.3.0'
   printf '%s\n' 'Copyright (C) 2025 bitcoin-tools/nodebuilder developers'
   printf '%s\n' 'License: MIT-0. Details at: https://opensource.org/licenses/MIT-0'
   printf '%s\n' 'For support, visit: https://github.com/bitcoin-tools/nodebuilder'
@@ -1565,12 +1484,8 @@ readonly CONSOLE_COLOR_YELLOW
 readonly CONSOLE_COLOR_NORMAL
 
 # This list excludes vulnerable versions, e.g. CVE-2015-6031 and CVE-2018-17144
-readonly VALID_BITCOIN_VERSION_LIST='0.9.5 0.10.0 0.10.1 0.10.2 0.10.3 0.10.4 \
-    0.11.0 0.11.1 0.11.2 0.12.0 0.12.1 0.13.0 0.13.1 0.13.2 0.14.3 0.15.2 \
-    0.16.3 0.17.0 0.17.0.1 0.17.1 0.17.2 0.18.0 0.18.1 0.19.0 0.19.0.1 0.19.1 \
-    0.20.0 0.20.1 0.20.2 0.21.0 0.21.1 0.21.2 22.0 22.1 23.0 23.1 23.2 24.0 \
-    24.0.1 24.1 24.2 25.0 25.1 25.2 26.0 26.1 26.2 27.0 27.1 27.2 28.0 28.1 \
-    28.2 28.3 28.4 29.0 29.1 29.2 29.3 29.4 30.2 30.3 31.0 31.1'
+readonly VALID_BITCOIN_VERSION_LIST='27.0 27.1 27.2 28.0 28.1 28.2 28.3 28.4 \
+  29.0 29.1 29.2 29.3 29.4 30.2 30.3 31.0 31.1'
 
 # Bump this variable for new Bitcoin Core releases
 target_bitcoin_version='31.1'
@@ -1693,7 +1608,7 @@ readonly TARGET_OPERATING_SYSTEM_RELEASE
 
 readonly BITCOIN_CORE_REPO='https://github.com/bitcoin/bitcoin'
 readonly NODEBUILDER_REPO='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_DEPENDENCIES_TAG='master'
+readonly NODEBUILDER_DEPENDENCIES_TAG='v2.3.0'
 readonly DEPENDENCIES_BASE_URL="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/dependencies"
 
 if [ "${TARGET_KERNEL}" = 'NetBSD' ] && is_running_in_ci; then
@@ -1829,6 +1744,9 @@ readonly TARGET_BITCOIN_VERSION_PADDED
 
 if [ "${CURRENT_BITCOIN_VERSION_PADDED}" = "${TARGET_BITCOIN_VERSION_PADDED}" ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} was found."
+elif [ "${target_bitcoin_version%%.*}" -lt 29 ]; then
+  log_info 'Downloading target version less than than 29.0.'
+  bitcoin_tarball_download_extract_test_install
 elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'alpine' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'gentoo' ] ||
@@ -1837,11 +1755,9 @@ elif [ "${compile_bitcoin_flag:-false}" = 'true' ] ||
   [ "${TARGET_OPERATING_SYSTEM}" = 'OpenBSD' ]; then
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   compile_bitcoin_from_source
-  current_bitcoin_version="${target_bitcoin_version}"
 else
   log_info "Bitcoin Core ${target_bitcoin_version} not found."
   bitcoin_tarball_download_extract_test_install
-  current_bitcoin_version="${target_bitcoin_version}"
 fi
 
 if command -v bitcoin-qt > /dev/null 2>&1 &&
