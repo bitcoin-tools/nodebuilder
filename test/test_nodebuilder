@@ -241,7 +241,7 @@ bitcoin_stop_sleep_elapsed=0
 
 command -v bitcoin-cli > /dev/null 2>&1 ||
   throw_error 'Unable to find bitcoin-cli in PATH.'
-bitcoin_pname="$(ps -p "${bitcoin_pid}" -o comm=)"
+bitcoin_pname="$(ps -p "${bitcoin_pid}" -o comm=)" || bitcoin_pname=''
 bitcoin-cli stop
 
 while [ "${bitcoin_pname}" = 'bitcoind' ] || [ "${bitcoin_pname}" = 'bitcoin-qt' ]; do
@@ -254,7 +254,7 @@ while [ "${bitcoin_pname}" = 'bitcoind' ] || [ "${bitcoin_pname}" = 'bitcoin-qt'
   ps aux | grep "${bitcoin_pid}"
   [ "${bitcoin_stop_sleep_elapsed}" -ge "${BITCOIN_STOP_SLEEP_MAXIMUM_SECONDS}" ] &&
     throw_error 'Stopping Bitcoin Core took over an hour.'
-  bitcoin_pname="$(ps -p "${bitcoin_pid}" -o comm=)"
+  bitcoin_pname="$(ps -p "${bitcoin_pid}" -o comm=)" || bitcoin_pname=''
 done
 
 if [ -s "${STDERR_TEST_FILENAME}" ]; then
