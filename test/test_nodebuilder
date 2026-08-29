@@ -176,7 +176,7 @@ tail_pid=$!
 trap 'if [ $? -eq 0 ]; then handle_exit; else handle_error; fi' EXIT
 
 readonly NODEBUILDER_REPO_URL='https://github.com/bitcoin-tools/nodebuilder'
-readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-master}/nodebuilder"
+readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAME:-v2.3.0}/nodebuilder"
 
 case "${TARGET_KERNEL}" in
   Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
