@@ -244,7 +244,7 @@ bitcoin_stop_sleep_elapsed=0
 command -v bitcoin-cli > /dev/null 2>&1 ||
   throw_error 'Unable to find bitcoin-cli in PATH.'
 bitcoin_pname="$(ps -p "${bitcoin_pid}" -o comm=)" ||
-  throw_error 'Found bitcoind.pid but cannot find running process with PID ${bitcoin_pid}.'
+  throw_error "Found bitcoind.pid but cannot find running process with PID ${bitcoin_pid}."
 bitcoin-cli stop
 
 while [ "${bitcoin_pname}" = 'bitcoind' ] || [ "${bitcoin_pname}" = 'bitcoin-qt' ]; do
