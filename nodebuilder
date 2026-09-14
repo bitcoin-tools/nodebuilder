@@ -109,7 +109,11 @@ compile_bitcoin_from_source()
   cmake --build build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
 
   log_info 'Running compile checks. Please wait.'
-  ctest --test-dir build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1
+  ctest --test-dir build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}" > /dev/null 2>&1 || {
+    log_error 'Compile checks failed. Re-running compile checks for debugging.'
+    ctest --test-dir build --parallel "${compile_num_jobs:-${SYS_CORES_PLUS_ONE}}"
+    throw_error 'Compile checks failed. Re-running compile checks for debugging.'
+  }
 
   log_info "Installing Bitcoin Core ${target_bitcoin_version}."
   cmake --install build > /dev/null 2>&1 || sudo cmake --install build > /dev/null
