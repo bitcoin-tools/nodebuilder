@@ -180,7 +180,8 @@ readonly NODEBUILDER_BINARY_URL="${NODEBUILDER_REPO_URL}/raw/${GIT_REF_SHORT_NAM
 
 case "${TARGET_KERNEL}" in
   Darwin) bitcoin_data_directory="${HOME}/Library/Application Support/Bitcoin" ;;
-  Linux | FreeBSD | NetBSD | OpenBSD) bitcoin_data_directory="${HOME}/.bitcoin" ;;
+  Linux | FreeBSD | NetBSD) bitcoin_data_directory="${HOME}/.bitcoin" ;;
+  OpenBSD) bitcoin_data_directory="/home/bitcoin/.bitcoin" ;;
   MINGW*) throw_error 'Windows is not supported.' ;;
   *) throw_error 'Your operating system is not supported.' ;;
 esac
