@@ -3,6 +3,7 @@ build-base
 capnproto
 capnproto-dev
 cmake
+icu-data-full
 libevent-dev
 libqrencode-dev
 linux-headers
