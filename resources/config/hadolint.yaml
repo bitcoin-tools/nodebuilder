@@ -1,0 +1,16 @@
+# Hadolint configuration
+# https://github.com/hadolint/hadolint
+
+failure-threshold: warning
+
+ignored:
+  # Package version pinning
+  - DL3008 # apt-get install
+  - DL3018 # apk add
+  - DL3041 # dnf install
+  - DL3037 # zypper install
+
+trustedRegistries:
+  - docker.io
+  - ghcr.io
+  - registry.suse.com
