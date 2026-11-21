@@ -27,6 +27,6 @@ RUN dnf makecache \
   && dnf clean all
 
 # Download and execute the script.
-RUN wget ${NODEBUILDER_URL} \
+RUN wget --progress=dot:giga ${NODEBUILDER_URL} \
   && chmod u+x nodebuilder \
   && CI=${CI} ./nodebuilder
