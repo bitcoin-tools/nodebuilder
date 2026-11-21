@@ -125,8 +125,8 @@ create_application_shortcuts()
   readonly DESKTOP_DIRECTORY="${HOME}/Desktop"
   readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
   readonly APPLICATIONS_DIRECTORY="${USER_DATA_DIRECTORY}/applications"
-  readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/images/bitcoin128.png"
-  readonly SHORTCUT_IMAGE_SOURCE="${BITCOIN_CORE_REPO}/raw/v${target_bitcoin_version}/share/pixmaps/bitcoin128.png"
+  readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/icons/hicolor/scalable/apps/bitcoin-core.svg"
+  readonly SHORTCUT_IMAGE_SOURCE="${NODEBUILDER_REPO}/raw/v${NODEBUILDER_DEPENDENCIES_TAG}/resources/data/bitcoin-symbol.svg"
   readonly SHORTCUT_FILENAME='bitcoin-qt.desktop'
   readonly OLD_SHORTCUT_FILENAME='bitcoin_core.desktop'
 
@@ -174,7 +174,7 @@ Comment[hi]=बिटकॉइन पीयर-टू-पीयर नेटव�
 Exec=${LAUNCH_BITCOIN_CORE_COMMAND}
 Terminal=false
 Type=Application
-Icon=${SHORTCUT_IMAGE_FILE}
+Icon=bitcoin-core
 MimeType=x-scheme-handler/bitcoin;
 Categories=Office;Finance;P2P;Network;Qt;
 SingleMainWindow=true
