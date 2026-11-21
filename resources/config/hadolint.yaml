@@ -1,0 +1,10 @@
+# Hadolint configuration
+# https://github.com/hadolint/hadolint
+
+failure-threshold: warning
+
+ignored: []
+
+trustedRegistries:
+  - docker.io
+  - ghcr.io
