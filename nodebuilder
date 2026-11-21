@@ -126,7 +126,7 @@ create_application_shortcuts()
   readonly USER_DATA_DIRECTORY="${XDG_DATA_HOME:-${HOME}/.local/share}"
   readonly APPLICATIONS_DIRECTORY="${USER_DATA_DIRECTORY}/applications"
   readonly SHORTCUT_IMAGE_FILE="${USER_DATA_DIRECTORY}/icons/hicolor/scalable/apps/bitcoin-core.svg"
-  readonly SHORTCUT_IMAGE_SOURCE="${NODEBUILDER_REPO}/raw/v${NODEBUILDER_DEPENDENCIES_TAG}/resources/data/bitcoin-symbol.svg"
+  readonly SHORTCUT_IMAGE_SOURCE="${NODEBUILDER_REPO}/raw/${NODEBUILDER_DEPENDENCIES_TAG}/resources/data/bitcoin-symbol.svg"
   readonly SHORTCUT_FILENAME='bitcoin-qt.desktop'
   readonly OLD_SHORTCUT_FILENAME='bitcoin_core.desktop'
 
