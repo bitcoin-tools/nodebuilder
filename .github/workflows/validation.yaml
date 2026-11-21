@@ -127,11 +127,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Lint Dockerfiles
-        uses: luke142367/Docker-Lint-Action@v1.1.1
+        uses: hadolint/hadolint-action@v3.4.0
         with:
-          target: docker/Dockerfile*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: docker/Dockerfile*
+          config: resources/config/hadolint.yaml
 
   markdown-checks:
     name: Check the documentation
