@@ -197,8 +197,8 @@ EOF
 display_macos_warning()
 {
   log_warning 'Apple Silicon may be affected by the GoFetch hardware vulnerability.'
-  log_warning 'Confirmed vulnerable behavior on M1/M2/M3; newer generations remain unverified.'
-  log_warning 'Avoid security-critical operations involving valuable funds or cryptographic keys.'
+  log_warning 'Confirmed vulnerable behavior on M1/M2/M3. Newer generations are unverified.'
+  log_warning 'Avoid security-critical operations involving valuable funds or crypto keys.'
   if [ "${unattended:-false}" = 'false' ] && ! is_running_in_ci; then
     log_info 'PRESS ENTER to continue or press Ctrl+C to exit.'
     read -r _
