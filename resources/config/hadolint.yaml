@@ -13,3 +13,4 @@ ignored:
 trustedRegistries:
   - docker.io
   - ghcr.io
+  - registry.suse.com
