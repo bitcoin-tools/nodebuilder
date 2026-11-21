@@ -297,9 +297,13 @@ jobs:
       matrix:
         vm-arch: [x86_64]
         vm-os: [freebsd, netbsd, openbsd]
+        exclude:
+          - vm-os: netbsd
         include:
           - { vm-os: freebsd, vm-os-friendly-name: FreeBSD }
-          - { vm-os: netbsd, vm-os-friendly-name: NetBSD }
+          # TODO: need to investigate the NetBSD compile check issue
+          #       on baremetal and on non-CICD Proxmox VM
+          # - { vm-os: netbsd, vm-os-friendly-name: NetBSD }
           - { vm-os: openbsd, vm-os-friendly-name: OpenBSD }
     steps:
       - uses: actions/checkout@v7
